@@ -1,36 +1,40 @@
 # Project exclude paths
 /.gradle/
+local.properties
+*.jks
+*.keystore
 /app/build/
-/app/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/
 /build/
-/core/analytics/build/
-/core/analytics/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/
-/core/common/build/
-/core/data/build/
-/core/data/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/
-/core/database/build/
-/core/database/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/
-/core/datastore/build/
-/core/datastore/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/
-/core/designsystem/build/
-/core/domain/build/
-/core/network/build/
-/core/network/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/
-/core/notifications/build/
-/core/ui/build/
-/feature/achievements/build/
-/feature/ai/build/
-/feature/auth/build/
-/feature/auth/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/
-/feature/certifications/build/
-/feature/explore/build/
-/feature/goals/build/
-/feature/growth/build/
-/feature/home/build/
-/feature/home/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/
-/feature/internships/build/
-/feature/notifications/build/
-/feature/onboarding/build/
-/feature/productivity/build/
-/feature/profile/build/
-/feature/settings/build/
+
+# Core modules
+/core/*/build/
+
+# Feature modules
+/feature/*/build/
+
+# AI audit and phase analyzers
+/audit-core/build/
+/audit-scanner/build/
+/audit-reporting/build/
+/audit-rules/build/
+/audit-cli/build/
+/phase-analyzers/build/
+
+# Macrobenchmark
+/macrobenchmark/build/
+
+# OS files
+.DS_Store
+thumbs.db
+
+# Firebase configuration (should be kept private)
+/app/google-services.json
+
+# IDE
+/.idea/
+*.iml
+
+# Backend
+/backend/functions/node_modules/
+/backend/functions/lib/
+/backend/functions/.runtimeconfig.json
