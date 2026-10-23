@@ -1,0 +1,390 @@
+[
+  {
+    "id": "android-dev",
+    "title": "Android Development",
+    "description": "Complete roadmap to becoming a professional Android developer using Kotlin and Jetpack Compose.",
+    "targetRole": "Android Developer",
+    "phases": [
+      {
+        "title": "Kotlin Fundamentals",
+        "duration": "4-6 weeks",
+        "skills": ["Kotlin", "OOP", "Data Structures", "Algorithms"],
+        "resources": ["Google Kotlin Basics codelab", "Kotlin docs"],
+        "project": "Build a CLI to-do app in Kotlin"
+      },
+      {
+        "title": "Android Basics",
+        "duration": "6-8 weeks",
+        "skills": ["Android SDK", "Activity", "Fragment", "XML Layouts", "RecyclerView"],
+        "resources": ["Android Basics in Kotlin course", "developer.android.com"],
+        "project": "Simple note-taking app with local storage"
+      },
+      {
+        "title": "Jetpack Compose",
+        "duration": "4-6 weeks",
+        "skills": ["Jetpack Compose", "State Management", "Material3", "Navigation Compose"],
+        "resources": ["Android Compose codelabs", "Now in Android app"],
+        "project": "Redesign the notes app with Compose UI"
+      },
+      {
+        "title": "Architecture & DI",
+        "duration": "4-6 weeks",
+        "skills": ["MVVM", "Hilt", "Room", "Retrofit", "Repository Pattern"],
+        "resources": ["Android Architecture guide", "Hilt docs"],
+        "project": "Weather app with remote API and local caching"
+      },
+      {
+        "title": "Advanced Topics",
+        "duration": "8-10 weeks",
+        "skills": ["Coroutines", "Flow", "WorkManager", "Paging3", "Testing"],
+        "resources": ["Kotlin Coroutines guide", "Android Testing codelabs"],
+        "project": "Production-grade social feed app with offline support"
+      }
+    ]
+  },
+  {
+    "id": "web-dev",
+    "title": "Web Development",
+    "description": "Full-stack web development roadmap covering modern frontend and backend technologies.",
+    "targetRole": "Full-Stack Web Developer",
+    "phases": [
+      {
+        "title": "HTML/CSS/JS Fundamentals",
+        "duration": "4-6 weeks",
+        "skills": ["HTML", "CSS", "JavaScript", "DOM Manipulation", "Responsive Design"],
+        "resources": ["MDN Web Docs", "FreeCodeCamp"],
+        "project": "Personal portfolio website"
+      },
+      {
+        "title": "Frontend Framework",
+        "duration": "6-8 weeks",
+        "skills": ["React", "TypeScript", "State Management", "React Router"],
+        "resources": ["React docs", "TypeScript handbook"],
+        "project": "E-commerce product listing page"
+      },
+      {
+        "title": "Backend Development",
+        "duration": "6-8 weeks",
+        "skills": ["Node.js", "Express.js", "REST API", "Authentication", "JWT"],
+        "resources": ["Node.js docs", "Express.js guide"],
+        "project": "RESTful blog API with user auth"
+      },
+      {
+        "title": "Database & DevOps",
+        "duration": "4-6 weeks",
+        "skills": ["PostgreSQL", "MongoDB", "Docker", "CI/CD", "Cloud Deployment"],
+        "resources": ["PostgreSQL tutorial", "Docker docs"],
+        "project": "Deploy full-stack app on AWS/GCP"
+      },
+      {
+        "title": "Advanced Concepts",
+        "duration": "8-10 weeks",
+        "skills": ["GraphQL", "WebSockets", "Microservices", "Testing", "Performance"],
+        "resources": ["Apollo GraphQL docs", "OWASP Security guide"],
+        "project": "Real-time collaborative whiteboard app"
+      }
+    ]
+  },
+  {
+    "id": "ai-ml",
+    "title": "AI & Machine Learning",
+    "description": "Comprehensive roadmap to become an AI/ML engineer covering theory and practical applications.",
+    "targetRole": "AI/ML Engineer",
+    "phases": [
+      {
+        "title": "Mathematics for ML",
+        "duration": "6-8 weeks",
+        "skills": ["Linear Algebra", "Calculus", "Probability", "Statistics"],
+        "resources": ["3Blue1Brown videos", "Khan Academy"],
+        "project": "Implement linear regression from scratch"
+      },
+      {
+        "title": "Python for Data Science",
+        "duration": "4-6 weeks",
+        "skills": ["Python", "NumPy", "Pandas", "Matplotlib", "Seaborn"],
+        "resources": ["Kaggle Learn", "DataCamp"],
+        "project": "Exploratory data analysis on a real dataset"
+      },
+      {
+        "title": "Classic ML Algorithms",
+        "duration": "8-10 weeks",
+        "skills": ["Supervised Learning", "Unsupervised Learning", "Scikit-learn", "Cross-Validation"],
+        "resources": ["Andrew Ng ML course", "Scikit-learn docs"],
+        "project": "House price prediction pipeline"
+      },
+      {
+        "title": "Deep Learning",
+        "duration": "8-10 weeks",
+        "skills": ["Neural Networks", "TensorFlow", "PyTorch", "CNN", "RNN"],
+        "resources": ["fast.ai course", "PyTorch tutorials"],
+        "project": "Image classifier with transfer learning"
+      },
+      {
+        "title": "Specialization",
+        "duration": "10-12 weeks",
+        "skills": ["NLP", "Computer Vision", "LLMs", "MLOps", "Model Deployment"],
+        "resources": ["Hugging Face course", "MLOps guide"],
+        "project": "End-to-end conversational AI chatbot"
+      }
+    ]
+  },
+  {
+    "id": "data-science",
+    "title": "Data Science",
+    "description": "Roadmap for aspiring data scientists covering analysis, visualization, and machine learning.",
+    "targetRole": "Data Scientist",
+    "phases": [
+      {
+        "title": "Foundations",
+        "duration": "4-6 weeks",
+        "skills": ["Statistics", "Probability", "Python", "SQL"],
+        "resources": ["StatQuest videos", "Mode SQL tutorial"],
+        "project": "Analyze a public dataset with SQL + Python"
+      },
+      {
+        "title": "Data Wrangling & Viz",
+        "duration": "4-6 weeks",
+        "skills": ["Pandas", "NumPy", "Matplotlib", "Plotly", "Tableau"],
+        "resources": ["Python for Data Analysis book", "Tableau Public"],
+        "project": "Interactive dashboards with Plotly Dash"
+      },
+      {
+        "title": "Machine Learning",
+        "duration": "8-10 weeks",
+        "skills": ["Scikit-learn", "Feature Engineering", "Model Evaluation", "Hyperparameter Tuning"],
+        "resources": ["Kaggle courses", "Hands-On ML book"],
+        "project": "Kaggle competition: Titanic or House Prices"
+      },
+      {
+        "title": "Big Data & Deployment",
+        "duration": "6-8 weeks",
+        "skills": ["Spark", "Airflow", "Docker", "MLflow", "AWS SageMaker"],
+        "resources": ["Spark docs", "MLflow docs"],
+        "project": "End-to-end ML pipeline with model registry"
+      }
+    ]
+  },
+  {
+    "id": "devops",
+    "title": "DevOps & SRE",
+    "description": "Roadmap for DevOps engineers covering CI/CD, cloud infrastructure, and monitoring.",
+    "targetRole": "DevOps Engineer",
+    "phases": [
+      {
+        "title": "Linux & Scripting",
+        "duration": "4-6 weeks",
+        "skills": ["Linux", "Bash", "Python", "Networking Basics"],
+        "resources": ["Linux Journey", "Bash scripting guide"],
+        "project": "Automate server setup with bash scripts"
+      },
+      {
+        "title": "Containers & Orchestration",
+        "duration": "6-8 weeks",
+        "skills": ["Docker", "Kubernetes", "Helm", "Docker Compose"],
+        "resources": ["Docker docs", "Kubernetes docs", "KodeKloud"],
+        "project": "Containerize a microservices app on K8s"
+      },
+      {
+        "title": "CI/CD & IaC",
+        "duration": "6-8 weeks",
+        "skills": ["Jenkins", "GitHub Actions", "Terraform", "Ansible"],
+        "resources": ["Terraform docs", "GitHub Actions docs"],
+        "project": "Infrastructure-as-code with Terraform + CI pipeline"
+      },
+      {
+        "title": "Monitoring & SRE",
+        "duration": "4-6 weeks",
+        "skills": ["Prometheus", "Grafana", "ELK Stack", "Datadog", "Incident Response"],
+        "resources": ["SRE book", "Prometheus docs"],
+        "project": "Monitor a production app with dashboards and alerts"
+      }
+    ]
+  },
+  {
+    "id": "cybersecurity",
+    "title": "Cybersecurity",
+    "description": "Roadmap for cybersecurity professionals covering network security, ethical hacking, and defense.",
+    "targetRole": "Cybersecurity Analyst",
+    "phases": [
+      {
+        "title": "Networking & OS Basics",
+        "duration": "4-6 weeks",
+        "skills": ["TCP/IP", "DNS", "HTTP/HTTPS", "Linux Security", "Windows Security"],
+        "resources": ["CompTIA Network+ guide", "OverTheWire Bandit"],
+        "project": "Set up a secure home lab environment"
+      },
+      {
+        "title": "Ethical Hacking",
+        "duration": "8-10 weeks",
+        "skills": ["Kali Linux", "Nmap", "Metasploit", "Wireshark", "Burp Suite"],
+        "resources": ["TryHackMe", "HackTheBox", "PWK/OSCP"],
+        "project": "Capture The Flag challenges on HackTheBox"
+      },
+      {
+        "title": "Defense & Blue Team",
+        "duration": "6-8 weeks",
+        "skills": ["SIEM", "IDS/IPS", "Firewall", "Endpoint Security", "Incident Response"],
+        "resources": ["Splunk docs", "Blue Team Handbook"],
+        "project": "Set up Splunk SIEM and analyze attack logs"
+      },
+      {
+        "title": "Advanced Topics",
+        "duration": "8-10 weeks",
+        "skills": ["Penetration Testing", "Web App Security", "Cloud Security", "CISSP Prep"],
+        "resources": ["OWASP Top 10", "PortSwigger Web Academy"],
+        "project": "Full pentest report on a vulnerable web app"
+      }
+    ]
+  },
+  {
+    "id": "cloud",
+    "title": "Cloud Computing",
+    "description": "Roadmap for cloud architects and engineers covering AWS, GCP, and Azure.",
+    "targetRole": "Cloud Engineer",
+    "phases": [
+      {
+        "title": "Cloud Fundamentals",
+        "duration": "4-6 weeks",
+        "skills": ["Cloud Concepts", "AWS Basics", "GCP Basics", "Azure Basics", "Billing"],
+        "resources": ["AWS Cloud Practitioner guide", "GCP docs"],
+        "project": "Deploy a static website on S3 + CloudFront"
+      },
+      {
+        "title": "Compute & Storage",
+        "duration": "6-8 weeks",
+        "skills": ["EC2", "Lambda", "S3", "RDS", "Cloud Storage"],
+        "resources": ["AWS Solutions Architect course", "A Cloud Guru"],
+        "project": "Serverless image processing pipeline"
+      },
+      {
+        "title": "Networking & Security",
+        "duration": "4-6 weeks",
+        "skills": ["VPC", "IAM", "Load Balancers", "DNS", "Cloud Networking"],
+        "resources": ["AWS Networking guide", "IAM docs"],
+        "project": "Multi-tier architecture with private subnets"
+      },
+      {
+        "title": "Advanced & Multi-Cloud",
+        "duration": "8-10 weeks",
+        "skills": ["Terraform", "Kubernetes on Cloud", "Monitoring", "Cost Optimization"],
+        "resources": ["Terraform AWS provider docs", "Cloud Native Patterns"],
+        "project": "Multi-cloud HA architecture with Terraform"
+      }
+    ]
+  },
+  {
+    "id": "blockchain",
+    "title": "Blockchain Development",
+    "description": "Roadmap for blockchain developers covering smart contracts, dApps, and Web3.",
+    "targetRole": "Blockchain Developer",
+    "phases": [
+      {
+        "title": "Blockchain Fundamentals",
+        "duration": "4-6 weeks",
+        "skills": ["Cryptography", "Consensus Mechanisms", "Ethereum", "Bitcoin"],
+        "resources": ["Ethereum.org docs", "Bitcoin whitepaper"],
+        "project": "Mine a testnet block and explore a block explorer"
+      },
+      {
+        "title": "Smart Contracts",
+        "duration": "8-10 weeks",
+        "skills": ["Solidity", "Remix IDE", "Hardhat", "Ethers.js"],
+        "resources": ["CryptoZombies", "Solidity docs"],
+        "project": "ERC-20 token with staking rewards"
+      },
+      {
+        "title": "dApp Development",
+        "duration": "6-8 weeks",
+        "skills": ["Web3.js", "React", "MetaMask", "IPFS", "The Graph"],
+        "resources": ["Web3.js docs", "The Graph docs"],
+        "project": "NFT marketplace dApp"
+      },
+      {
+        "title": "Security & Advanced",
+        "duration": "6-8 weeks",
+        "skills": ["Smart Contract Security", "Auditing", "Layer 2", "DeFi Protocols"],
+        "resources": ["OpenZeppelin docs", "Ethereum security guide"],
+        "project": "Audit a DeFi protocol and write security report"
+      }
+    ]
+  },
+  {
+    "id": "game-dev",
+    "title": "Game Development",
+    "description": "Roadmap for aspiring game developers covering Unity, Unreal Engine, and game design.",
+    "targetRole": "Game Developer",
+    "phases": [
+      {
+        "title": "Foundations & Design",
+        "duration": "4-6 weeks",
+        "skills": ["Game Design Principles", "C# Basics", "Math for Games"],
+        "resources": ["Unity Learn", "Game Programming Patterns book"],
+        "project": "Design document for a 2D platformer"
+      },
+      {
+        "title": "Unity Engine",
+        "duration": "8-10 weeks",
+        "skills": ["Unity Editor", "C# Scripting", "Physics", "Animation", "UI Toolkit"],
+        "resources": ["Unity docs", "Brackeys tutorials"],
+        "project": "2D platformer with player mechanics and levels"
+      },
+      {
+        "title": "Advanced Game Systems",
+        "duration": "6-8 weeks",
+        "skills": ["State Machines", "Object Pooling", "Save Systems", "Audio", "Shader Graph"],
+        "resources": ["Unity shader tutorials", "FMOD docs"],
+        "project": "3D endless runner with procedural generation"
+      },
+      {
+        "title": "Unreal Engine & Polish",
+        "duration": "8-10 weeks",
+        "skills": ["Unreal Engine", "Blueprints", "C++ in UE", "Multiplayer", "Optimization"],
+        "resources": ["Unreal docs", "Unreal Sensei courses"],
+        "project": "Multiplayer FPS prototype with matchmaking"
+      }
+    ]
+  },
+  {
+    "id": "product-management",
+    "title": "Product Management",
+    "description": "Roadmap for aspiring product managers covering strategy, execution, and leadership.",
+    "targetRole": "Product Manager",
+    "phases": [
+      {
+        "title": "Product Thinking",
+        "duration": "4-6 weeks",
+        "skills": ["Product Lifecycle", "Market Research", "User Personas", "Problem Validation"],
+        "resources": ["Inspired by Marty Cagan", "Product School blog"],
+        "project": "Product teardown of a popular app"
+      },
+      {
+        "title": "Strategy & Roadmapping",
+        "duration": "4-6 weeks",
+        "skills": ["OKRs", "Roadmapping", "Prioritization", "Competitive Analysis"],
+        "resources": ["RICE framework", "Product Roadmaps book"],
+        "project": "Quarterly product roadmap with OKRs"
+      },
+      {
+        "title": "Execution & Agile",
+        "duration": "6-8 weeks",
+        "skills": ["Agile/Scrum", "User Stories", "Sprint Planning", "Stakeholder Mgmt"],
+        "resources": ["Scrum Guide", "Jira docs"],
+        "project": "Lead a mock sprint with a cross-functional team"
+      },
+      {
+        "title": "Data & Growth",
+        "duration": "6-8 weeks",
+        "skills": ["A/B Testing", "Product Analytics", "Metrics & KPIs", "Growth Loops"],
+        "resources": ["Lean Analytics book", "Reforge courses"],
+        "project": "Design an A/B test and analyze results"
+      },
+      {
+        "title": "Leadership",
+        "duration": "4-6 weeks",
+        "skills": ["Influence without Authority", "Communication", "Mentoring", "Executive Presence"],
+        "resources": ["The Making of a Manager", "PM interview prep"],
+        "project": "Case study presentation to executive stakeholders"
+      }
+    ]
+  }
+]

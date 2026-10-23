@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_explore">Explore</string>
+    <string name="explore_search_hint">Search opportunities, companies...</string>
+    <string name="home_opportunities_title">For You</string>
+</resources>

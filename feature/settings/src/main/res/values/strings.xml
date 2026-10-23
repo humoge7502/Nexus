@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Settings</string>
+    <string name="settings_account">Account</string>
+    <string name="settings_preferences">Preferences</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_privacy">Privacy &amp; Security</string>
+    <string name="settings_about">About</string>
+    <string name="settings_dark_mode">Dark Mode</string>
+    <string name="settings_terms">Terms of Service</string>
+    <string name="settings_export_data">Export My Data</string>
+    <string name="settings_delete_account">Delete Account</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="delete_title">Delete Account</string>
+    <string name="delete_warning">This will permanently delete all your NEXUS data.</string>
+    <string name="delete_confirm_hint">Type DELETE to confirm</string>
+    <string name="delete_confirm_keyword">DELETE</string>
+    <string name="delete_button">Delete Forever</string>
+    <string name="delete_cancel">Cancel</string>
+</resources>

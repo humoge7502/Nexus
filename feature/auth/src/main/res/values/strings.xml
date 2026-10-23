@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_tagline">Engineer Your Future.</string>
+    <string name="auth_google">Continue with Google</string>
+    <string name="auth_github">Continue with GitHub</string>
+    <string name="auth_email">Continue with Email</string>
+    <string name="auth_privacy_prefix">By continuing, you agree to our </string>
+    <string name="auth_terms">Terms of Service</string>
+    <string name="auth_privacy">Privacy Policy</string>
+    <string name="auth_privacy_conjunction"> and </string>
+</resources>

@@ -1,0 +1,30 @@
+# NEXUS Fastlane Fastfile
+default_platform(:android)
+
+platform :android do
+  desc "Deploy to Google Play Console"
+  lane :deploy do
+    gradle(task: "clean bundleRelease")
+    upload_to_play_store(
+      track: "production",
+      release_status: "completed",
+      skip_upload_metadata: false,
+      skip_upload_images: false,
+      skip_upload_screenshots: false,
+    )
+  end
+
+  desc "Deploy to Internal Testing track"
+  lane :internal do
+    gradle(task: "clean assembleRelease")
+    upload_to_play_store(
+      track: "internal",
+      release_status: "draft",
+    )
+  end
+
+  desc "Run all tests"
+  lane :test do
+    gradle(task: "test")
+  end
+end

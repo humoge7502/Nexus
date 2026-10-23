@@ -1,0 +1,25 @@
+# 🔴 REQUIRED: OpenRouter API Key (for AI features)
+OPENROUTER_API_KEY=sk-or-v1-your-key-here
+
+# 🔴 REQUIRED: GitHub OAuth credentials
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+
+# LeetCode API URL (third-party, no auth needed)
+LEETCODE_API_URL=https://alfa-leetcode-api.onrender.com/
+
+# 🔴 NEXUS Backend URL — deploy your API server here
+NEXUS_BACKEND_URL=https://api.nexusapp.in/v1
+
+# AI Proxy URL — set to backend Cloud Function URL when deployed
+# Leave empty to use direct OpenRouter (current default)
+AI_PROXY_URL=
+
+# 🔴 REQUIRED: Google OAuth Web Client ID (from Firebase Console)
+GOOGLE_WEB_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+
+# 🔴 OPTIONAL: Keystore config for release builds
+# KEYSTORE_PATH=/path/to/keystore.jks
+# STORE_PASSWORD=your-store-password
+# KEY_ALIAS=your-key-alias
+# KEY_PASSWORD=your-key-password

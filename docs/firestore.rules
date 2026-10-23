@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isValidScore(score) {
+      return score is int && score >= 0 && score <= 1000;
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId)
+        && (!request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['nexusScore', 'isPro', 'level']))
+        || request.auth.token.admin == true;
+      allow delete: if isOwner(userId);
+
+      match /goals/{goalId} {
+        allow read, write: if isOwner(userId);
+      }
+      match /achievements/{achievementId} {
+        allow read: if isOwner(userId);
+        allow write: if request.auth.token.admin == true;
+      }
+      match /applications/{applicationId} {
+        allow read, write: if isOwner(userId);
+      }
+      match /conversations/{conversationId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    match /opportunities/{opportunityId} {
+      allow read: if isAuthenticated();
+      allow write: if request.auth.token.admin == true;
+    }
+
+    match /hackathons/{hackathonId} {
+      allow read: if isAuthenticated();
+      allow write: if request.auth.token.admin == true;
+    }
+
+    match /certifications/{certificationId} {
+      allow read: if isAuthenticated();
+      allow write: if request.auth.token.admin == true;
+    }
+
+    match /dsaProblems/{problemId} {
+      allow read: if isAuthenticated();
+      allow write: if request.auth.token.admin == true;
+    }
+
+    match /roadmaps/{roadmapId} {
+      allow read: if isAuthenticated();
+      allow write: if request.auth.token.admin == true;
+    }
+
+    match /publicProfiles/{userId} {
+      allow read: if true;
+      allow write: if isOwner(userId);
+    }
+
+    match /leaderboard/{entry} {
+      allow read: if isAuthenticated();
+      allow write: if request.auth.token.admin == true;
+    }
+  }
+}

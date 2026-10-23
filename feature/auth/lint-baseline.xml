@@ -1,0 +1,971 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.7.2" type="baseline" client="gradle" dependencies="true" name="AGP (8.7.2)" variant="all" version="8.7.2">
+
+    <issue
+        id="ObsoleteLintCustomCheck"
+        message="Library lint checks out of date;&#xA;these checks **will be skipped**!&#xA;&#xA;Lint found an issue registry (`androidx.navigation.common.lint.NavigationCommonIssueRegistry`)&#xA;which was compiled against an older version of lint&#xA;than this one. This is usually fine, but not in this&#xA;case; some basic verification shows that the lint&#xA;check jar references (for example) the following API&#xA;which is no longer valid in this version of lint:&#xA;org.jetbrains.kotlin.analysis.api.lifetime.KaDefaultLifetimeTokenProvider#Companion&#xA;(Referenced from androidx/navigation/lint/UtilKt.class)&#xA;&#xA;Therefore, this lint check library is **not** included&#xA;in analysis. This affects the following lint checks:&#xA;`EmptyNavDeepLink`,`WrongStartDestinationType`,`MissingSerializableAnnotation`,`MissingKeepAnnotation`&#xA;&#xA;Recompile the checks against the latest version, or if&#xA;this is a check bundled with a third-party library, see&#xA;if there is a more recent version available.&#xA;&#xA;Version of Lint API this lint check is using is 14.&#xA;The Lint API version currently running is 16 (8.7+).">
+        <location
+            file="build/intermediates/lint-cache/lintReportDebug/migrated-jars/androidx.navigation.common.lint.NavigationCommonIssueRegistry-5daa12651be0734e..jar"/>
+    </issue>
+
+    <issue
+        id="ObsoleteLintCustomCheck"
+        message="Library lint checks out of date;&#xA;these checks **will be skipped**!&#xA;&#xA;Lint found an issue registry (`androidx.navigation.compose.lint.NavigationComposeIssueRegistry`)&#xA;which was compiled against an older version of lint&#xA;than this one. This is usually fine, but not in this&#xA;case; some basic verification shows that the lint&#xA;check jar references (for example) the following API&#xA;which is no longer valid in this version of lint:&#xA;org.jetbrains.kotlin.analysis.api.lifetime.KaDefaultLifetimeTokenProvider#Companion&#xA;(Referenced from androidx/navigation/lint/UtilKt.class)&#xA;&#xA;Therefore, this lint check library is **not** included&#xA;in analysis. This affects the following lint checks:&#xA;`ComposableDestinationInComposeScope`&#xA;`ComposableNavGraphInComposeScope`&#xA;`UnrememberedGetBackStackEntry`&#xA;`WrongStartDestinationType`&#xA;`MissingKeepAnnotation`&#xA;`MissingSerializableAnnotation`&#xA;&#xA;Recompile the checks against the latest version, or if&#xA;this is a check bundled with a third-party library, see&#xA;if there is a more recent version available.&#xA;&#xA;Version of Lint API this lint check is using is 14.&#xA;The Lint API version currently running is 16 (8.7+).">
+        <location
+            file="build/intermediates/lint-cache/lintReportDebug/migrated-jars/androidx.navigation.compose.lint.NavigationComposeIssueRegistry-598b224f0ce2f9f2..jar"/>
+    </issue>
+
+    <issue
+        id="ObsoleteLintCustomCheck"
+        message="Library lint checks out of date;&#xA;these checks **will be skipped**!&#xA;&#xA;Lint found an issue registry (`androidx.navigation.runtime.lint.NavigationRuntimeIssueRegistry`)&#xA;which was compiled against an older version of lint&#xA;than this one. This is usually fine, but not in this&#xA;case; some basic verification shows that the lint&#xA;check jar references (for example) the following API&#xA;which is no longer valid in this version of lint:&#xA;org.jetbrains.kotlin.analysis.api.lifetime.KaDefaultLifetimeTokenProvider#Companion&#xA;(Referenced from androidx/navigation/lint/UtilKt.class)&#xA;&#xA;Therefore, this lint check library is **not** included&#xA;in analysis. This affects the following lint checks:&#xA;`DeepLinkInActivityDestination`,`WrongStartDestinationType`,`WrongNavigateRouteType`,`MissingKeepAnnotation`,`MissingSerializableAnnotation`&#xA;&#xA;Recompile the checks against the latest version, or if&#xA;this is a check bundled with a third-party library, see&#xA;if there is a more recent version available.&#xA;&#xA;Version of Lint API this lint check is using is 14.&#xA;The Lint API version currently running is 16 (8.7+).">
+        <location
+            file="build/intermediates/lint-cache/lintReportDebug/migrated-jars/androidx.navigation.runtime.lint.NavigationRuntimeIssueRegistry-a8fea42aedb9bdb3..jar"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableLambdaParameterNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableLambdaParameterNaming&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="14"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableLambdaParameterNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableLambdaParameterNaming&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="14"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableLambdaParameterNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableLambdaParameterNaming&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="14"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableLambdaParameterNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableLambdaParameterNaming&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="14"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableLambdaParameterNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableLambdaParameterNaming&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="14"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableLambdaParameterNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableLambdaParameterNaming&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="14"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableLambdaParameterNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableLambdaParameterNaming&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="14"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableLambdaParameterNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableLambdaParameterNaming&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="14"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableLambdaParameterNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableLambdaParameterNaming&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="14"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableLambdaParameterNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableLambdaParameterNaming&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="14"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableLambdaParameterNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableLambdaParameterNaming&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="14"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableLambdaParameterNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableLambdaParameterNaming&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="14"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableLambdaParameterNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableLambdaParameterNaming&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="14"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableLambdaParameterNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableLambdaParameterNaming&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="14"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableLambdaParameterNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableLambdaParameterNaming&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="14"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableLambdaParameterNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableLambdaParameterNaming&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="14"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableLambdaParameterNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableLambdaParameterNaming&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="14"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableLambdaParameterNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableLambdaParameterNaming&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="14"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="15"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="15"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="15"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="15"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="15"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="15"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="15"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="15"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="15"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="15"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="15"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="15"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="15"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="15"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="15"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="15"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="15"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ComposableNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;ComposableNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="15"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;CompositionLocalNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;CompositionLocalNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;CompositionLocalNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;CompositionLocalNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;CompositionLocalNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;CompositionLocalNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;CompositionLocalNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;CompositionLocalNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;CompositionLocalNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;CompositionLocalNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;CompositionLocalNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;CompositionLocalNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;CompositionLocalNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;CompositionLocalNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;CompositionLocalNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;CompositionLocalNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;CompositionLocalNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;CompositionLocalNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;CompositionLocalNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;CompositionLocalNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;CompositionLocalNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;CompositionLocalNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;CompositionLocalNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;CompositionLocalNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;CompositionLocalNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;CompositionLocalNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;CompositionLocalNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;CompositionLocalNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;CompositionLocalNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;CompositionLocalNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;CompositionLocalNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;CompositionLocalNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;CompositionLocalNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;CompositionLocalNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;CompositionLocalNaming&quot;"
+        errorLine1="    &lt;issue id=&quot;CompositionLocalNaming&quot; severity=&quot;error&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="16"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ModifierParameter&quot;"
+        errorLine1="    &lt;issue id=&quot;ModifierParameter&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ModifierParameter&quot;"
+        errorLine1="    &lt;issue id=&quot;ModifierParameter&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ModifierParameter&quot;"
+        errorLine1="    &lt;issue id=&quot;ModifierParameter&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ModifierParameter&quot;"
+        errorLine1="    &lt;issue id=&quot;ModifierParameter&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ModifierParameter&quot;"
+        errorLine1="    &lt;issue id=&quot;ModifierParameter&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ModifierParameter&quot;"
+        errorLine1="    &lt;issue id=&quot;ModifierParameter&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ModifierParameter&quot;"
+        errorLine1="    &lt;issue id=&quot;ModifierParameter&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ModifierParameter&quot;"
+        errorLine1="    &lt;issue id=&quot;ModifierParameter&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ModifierParameter&quot;"
+        errorLine1="    &lt;issue id=&quot;ModifierParameter&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ModifierParameter&quot;"
+        errorLine1="    &lt;issue id=&quot;ModifierParameter&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ModifierParameter&quot;"
+        errorLine1="    &lt;issue id=&quot;ModifierParameter&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ModifierParameter&quot;"
+        errorLine1="    &lt;issue id=&quot;ModifierParameter&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ModifierParameter&quot;"
+        errorLine1="    &lt;issue id=&quot;ModifierParameter&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ModifierParameter&quot;"
+        errorLine1="    &lt;issue id=&quot;ModifierParameter&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ModifierParameter&quot;"
+        errorLine1="    &lt;issue id=&quot;ModifierParameter&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ModifierParameter&quot;"
+        errorLine1="    &lt;issue id=&quot;ModifierParameter&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ModifierParameter&quot;"
+        errorLine1="    &lt;issue id=&quot;ModifierParameter&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;ModifierParameter&quot;"
+        errorLine1="    &lt;issue id=&quot;ModifierParameter&quot; severity=&quot;warning&quot; />"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="../../app/lint.xml"
+            line="17"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Missing permissions required by ConnectivityManager.registerNetworkCallback: android.permission.ACCESS_NETWORK_STATE"
+        errorLine1="        connectivityManager.registerNetworkCallback(request, callback)"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/com/nexus/common/NetworkMonitor.kt"
+            line="41"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="MissingPermission"
+        message="Missing permissions required by ConnectivityManager.getActiveNetwork: android.permission.ACCESS_NETWORK_STATE"
+        errorLine1="        trySend(connectivityManager.activeNetwork != null)"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/com/nexus/common/NetworkMonitor.kt"
+            line="42"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 34, or core library desugaring (current min is 26): `java.time.LocalDate#ofInstant`"
+        errorLine1="    LocalDate.ofInstant(Instant.ofEpochMilli(this), ZoneId.systemDefault())"
+        errorLine2="              ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/com/nexus/common/Extensions.kt"
+            line="11"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 34, or core library desugaring (current min is 26): `java.time.LocalDate#ofInstant`"
+        errorLine1="    return LocalDate.ofInstant(Instant.ofEpochMilli(this), ZoneId.systemDefault()).format(formatter)"
+        errorLine2="                     ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/com/nexus/common/Extensions.kt"
+            line="15"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.android.gms:play-services-auth than 21.2.0 is available: 21.6.0"
+        errorLine1="    implementation(&quot;com.google.android.gms:play-services-auth:21.2.0&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="30"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="ModifierParameter"
+        message="Modifier parameter should be the first optional parameter"
+        errorLine1="    modifier: Modifier = Modifier,"
+        errorLine2="    ~~~~~~~~">
+        <location
+            file="src/main/kotlin/com/nexus/designsystem/chart/CareerScoreRing.kt"
+            line="27"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ModifierParameter"
+        message="Modifier parameter should be the first optional parameter"
+        errorLine1="    modifier: Modifier = Modifier,"
+        errorLine2="    ~~~~~~~~">
+        <location
+            file="src/main/kotlin/com/nexus/designsystem/component/EmptyState.kt"
+            line="37"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ModifierParameter"
+        message="Modifier parameter should be the first optional parameter"
+        errorLine1="    modifier: Modifier = Modifier,"
+        errorLine2="    ~~~~~~~~">
+        <location
+            file="src/main/kotlin/com/nexus/designsystem/component/IntelligenceCard.kt"
+            line="65"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ModifierParameter"
+        message="Modifier parameter should be the first optional parameter"
+        errorLine1="    modifier: Modifier = Modifier,"
+        errorLine2="    ~~~~~~~~">
+        <location
+            file="src/main/kotlin/com/nexus/designsystem/component/IntelligenceCard.kt"
+            line="216"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ModifierParameter"
+        message="Modifier parameter should be the first optional parameter"
+        errorLine1="    modifier: Modifier = Modifier,"
+        errorLine2="    ~~~~~~~~">
+        <location
+            file="src/main/kotlin/com/nexus/designsystem/component/NexusCard.kt"
+            line="35"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ModifierParameter"
+        message="Modifier parameter should be the first optional parameter"
+        errorLine1="    modifier: Modifier = Modifier,"
+        errorLine2="    ~~~~~~~~">
+        <location
+            file="src/main/kotlin/com/nexus/designsystem/effect/NexusMotion.kt"
+            line="179"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ModifierParameter"
+        message="Modifier parameter should be the first optional parameter"
+        errorLine1="    modifier: Modifier = Modifier,"
+        errorLine2="    ~~~~~~~~">
+        <location
+            file="src/main/kotlin/com/nexus/designsystem/effect/NexusMotion.kt"
+            line="269"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ModifierParameter"
+        message="Modifier parameter should be the first optional parameter"
+        errorLine1="    modifier: Modifier = Modifier,"
+        errorLine2="    ~~~~~~~~">
+        <location
+            file="src/main/kotlin/com/nexus/designsystem/effect/SharedElementTransition.kt"
+            line="29"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ModifierParameter"
+        message="Modifier parameter should be the first optional parameter"
+        errorLine1="    modifier: Modifier = Modifier,"
+        errorLine2="    ~~~~~~~~">
+        <location
+            file="src/main/kotlin/com/nexus/designsystem/component/StatCard.kt"
+            line="37"
+            column="5"/>
+    </issue>
+
+</issues>

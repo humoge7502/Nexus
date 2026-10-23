@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_greeting_morning">Good morning</string>
+    <string name="home_greeting_afternoon">Good afternoon</string>
+    <string name="home_greeting_evening">Good evening</string>
+    <string name="home_greeting_night">Good night</string>
+    <string name="home_streak_label">DAY STREAK</string>
+    <string name="home_opportunities_title">For You</string>
+    <string name="home_see_all">See All</string>
+</resources>

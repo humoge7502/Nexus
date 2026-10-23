@@ -1,0 +1,33 @@
+NEXUS is your AI-powered career companion that helps you discover opportunities, build skills, and land your dream role.
+
+**AI Career Coach**
+Get personalized career guidance powered by AI. Ask questions, get interview tips, and receive tailored advice based on your profile and goals.
+
+**Smart Opportunity Discovery**
+Find internships, jobs, certifications, hackathons, and scholarships matched to your skills. Real-time feed with personalized recommendations.
+
+**Skill Graph & Career Mirror**
+Visualize your skill progression with an interactive graph. See how you stack up against peers and track your growth over time with detailed analytics.
+
+**Interview Intelligence**
+Prepare smarter with anonymized interview reports from real candidates. Track your interview outcomes, confidence scores, and identify areas for improvement.
+
+**Placement Forecast & Cohort Intelligence**
+Predict your placement probability with AI-driven forecasts. Compare your readiness against college cohorts and industry benchmarks.
+
+**Goal Tracking & Study Sessions**
+Set career goals, track DSA practice, and log study sessions with focus scoring. Stay accountable with streaks and progress metrics.
+
+**Portfolio Builder**
+Showcase your projects, certifications, and achievements in a professional portfolio. Share your career journey with recruiters.
+
+**Community & Tribe**
+Connect with peers in your college tribe. Share interview experiences, collaborate on projects, and grow together.
+
+**Offline First**
+Core features work offline with automatic sync when connected. Never lose your progress.
+
+**Privacy Focused**
+Your data stays private with on-device storage and encrypted sync. Anonymized contributions help the community while protecting your identity.
+
+Download NEXUS today and accelerate your career journey.

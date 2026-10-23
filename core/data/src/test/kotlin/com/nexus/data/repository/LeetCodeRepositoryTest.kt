@@ -1,0 +1,55 @@
+package com.nexus.data.repository
+
+import com.nexus.common.NexusResult
+import com.nexus.database.dao.DSAProblemDao
+import com.nexus.network.api.LeetCodeApiService
+import com.nexus.network.dto.LeetCodeUserDto
+import io.mockk.*
+import io.mockk.impl.annotations.MockK
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+import retrofit2.Response
+
+class LeetCodeRepositoryTest {
+  @MockK
+  private lateinit var api: LeetCodeApiService
+
+  @MockK
+  private lateinit var dao: DSAProblemDao
+
+  private lateinit var repository: LeetCodeRepository
+
+  @Before
+  fun setUp() {
+    MockKAnnotations.init(this)
+    repository = LeetCodeRepository(api, dao)
+  }
+
+  @Test
+  fun `syncUserStats returns success with valid data`() = runTest {
+    val dto = LeetCodeUserDto(
+      username = "testuser",
+      totalSolved = 150,
+      easySolved = 80,
+      mediumSolved = 50,
+      hardSolved = 20,
+      ranking = 50000,
+    )
+    coEvery { api.getUserStats("testuser") } returns Response.success(dto)
+
+    val result = repository.syncUserStats("testuser")
+    assertTrue(result.isSuccess)
+    assertEquals(150, (result as NexusResult.Success).data.totalSolved)
+  }
+
+  @Test
+  fun `syncUserStats returns error on exception`() = runTest {
+    coEvery { api.getUserStats("testuser") } throws Exception("API down")
+
+    val result = repository.syncUserStats("testuser")
+    assertTrue(result.isError)
+  }
+}
