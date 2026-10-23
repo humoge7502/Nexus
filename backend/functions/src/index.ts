@@ -1,4 +1,3 @@
-import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { healthCheck } from "./health";
 import { aiProxy } from "./ai/proxy";
@@ -8,8 +7,12 @@ import { cohortIntelligence } from "./intelligence/cohort";
 
 admin.initializeApp();
 
-export const health = functions.https.onCall(healthCheck);
-export const proxyAI = functions.https.onCall(aiProxy);
-export const getOpportunityFeed = functions.https.onCall(opportunityFeed);
-export const getIntelligenceOutcomes = functions.https.onCall(intelligenceOutcomes);
-export const getCohortIntelligence = functions.https.onCall(cohortIntelligence);
+// Each handler module already exports a fully-built HttpsFunction
+// (functions.https.onCall(...)). Export them directly — wrapping an
+// HttpsFunction in onCall() again passes the object as a handler and
+// breaks the deployment.
+export const health = healthCheck;
+export const proxyAI = aiProxy;
+export const getOpportunityFeed = opportunityFeed;
+export const getIntelligenceOutcomes = intelligenceOutcomes;
+export const getCohortIntelligence = cohortIntelligence;

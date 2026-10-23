@@ -11,4 +11,6 @@ dependencies {
     implementation(platform(libs.compose.bom)); implementation(libs.bundles.compose)
     implementation(libs.hilt.android); ksp(libs.hilt.compiler); implementation(libs.coil)
     implementation(libs.kotlinx.collections)
+    implementation(libs.paging.runtime)
+    implementation(libs.paging.compose)
 }

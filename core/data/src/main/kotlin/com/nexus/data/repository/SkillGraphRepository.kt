@@ -78,18 +78,18 @@ class SkillGraphRepository @Inject constructor(
     )
 
     private fun SkillNodeDto.toEntity() = SkillNodeEntity(
-        id = id,
+        skillId = id,
         displayName = displayName,
         category = category,
-        level = level,
-        proficiency = proficiency
+        difficultyLevel = level,
+        userProficiency = proficiency
     )
 
     private fun SkillEdgeDto.toEntity() = SkillEdgeEntity(
-        fromId = fromId,
-        toId = toId,
-        relationship = relationship,
+        fromSkillId = fromId,
+        toSkillId = toId,
+        edgeType = relationship,
         weight = weight,
-        confidence = confidence
+        transferability = confidence
     )
 }

@@ -18,4 +18,6 @@ dependencies {
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.coil)
     implementation(libs.kotlinx.collections)
+    implementation(libs.paging.runtime)
+    implementation(libs.paging.compose)
 }

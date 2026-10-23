@@ -38,13 +38,14 @@ class AuditOrchestrator(
      * @return Complete audit result with findings from all phases
      */
     suspend fun runFullAudit(config: AuditConfig): AuditResult {
+        var result: AuditResult? = null
         val executionTime = measureTime {
-            return runAuditInternal(config)
+            result = runAuditInternal(config)
         }
-        
+
         // Adjust timing in the result
-        val result = runAuditInternal(config)
-        return result.copy(executionTime = executionTime.toIsoString())
+        return requireNotNull(result) { "Audit run produced no result" }
+            .copy(executionTime = executionTime.toIsoString())
     }
     
     /**
@@ -461,5 +462,5 @@ class AuditOrchestrator(
  * Extension to convert Duration to ISO-8601 string format.
  */
 private fun Duration.toIsoString(): String {
-    return this.toIsoString()
+    return this.toString()
 }

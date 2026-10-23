@@ -73,7 +73,13 @@ enum class SkillCategory {
 }
 
 enum class ApplicationStatus {
-    NOT_APPLIED, APPLIED, IN_REVIEW, INTERVIEW, ACCEPTED, REJECTED, COMPLETED
+    NOT_APPLIED, SAVED, APPLIED, IN_REVIEW, INTERVIEW, INTERVIEWING,
+    OFFERED, ACCEPTED, REJECTED, COMPLETED;
+
+    companion object {
+        fun fromString(value: String): ApplicationStatus =
+            entries.firstOrNull { it.name.equals(value, ignoreCase = true) } ?: NOT_APPLIED
+    }
 }
 
 data class Certification(

@@ -5,4 +5,14 @@ android {
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     kotlinOptions { jvmTarget = "17" }
 }
-dependencies { implementation(libs.hilt.android); ksp(libs.hilt.compiler) }
+dependencies {
+    implementation(libs.hilt.android); ksp(libs.hilt.compiler)
+    implementation(platform(libs.firebase.bom))
+    implementation("com.google.firebase:firebase-config")
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.timber)
+
+    // Unit tests
+    testImplementation(libs.junit)
+    testImplementation(libs.coroutines.test)
+}

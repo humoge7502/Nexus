@@ -2,42 +2,106 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // User profiles: owner only
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    // User profiles: owner only. Server-computed fields (nexusScore, isPro,
+    // level, xp) can only be written by the Admin SDK / admin tokens — a
+    // client must never be able to grant itself Pro or inflate its score.
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId)
+        && (!request.resource.data.diff(resource.data).affectedKeys()
+              .hasAny(['nexusScore', 'isPro', 'level', 'xp', 'xpTotal']))
+        || isAdmin();
+      allow delete: if isOwner(userId);
+
+      match /goals/{goalId} {
+        allow read, write: if isOwner(userId);
+      }
+      match /achievements/{achievementId} {
+        allow read: if isOwner(userId);
+        allow write: if isAdmin();
+      }
+      match /applications/{applicationId} {
+        allow read, write: if isOwner(userId);
+      }
+      match /conversations/{conversationId} {
+        allow read, write: if isOwner(userId);
+      }
     }
 
     // User preferences: owner only
     match /user_preferences/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isOwner(userId);
     }
 
-    // Opportunities: readable by any authenticated user, writable only by admins
+    // Catalog collections: readable by authenticated users, writable by admins
     match /opportunities/{opportunityId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.token.admin == true;
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    match /hackathons/{hackathonId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    match /certifications/{certificationId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    match /dsaProblems/{problemId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    match /roadmaps/{roadmapId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    match /leaderboard/{entry} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
     }
 
-    // Interview outcomes: readable by authenticated users, writable by reporters
+    // Public leaderboard profiles: world-readable, owner-writable
+    match /publicProfiles/{userId} {
+      allow read: if true;
+      allow write: if isOwner(userId);
+    }
+
+    // Interview outcomes: only anonymized docs are ever readable; creates must
+    // be anonymized and owned by the reporter.
     match /interview_outcomes/{outcomeId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.reporterId;
+      allow read: if isAuthenticated() && resource.data.isAnonymized == true;
+      allow create: if isAuthenticated()
+        && request.resource.data.isAnonymized == true
+        && request.resource.data.reporterId == request.auth.uid;
+      allow update, delete: if isAuthenticated()
+        && request.auth.uid == resource.data.reporterId;
     }
 
-    // Cohort intelligence: readable by authenticated users, writable by system
+    // Cohort intelligence: read-only for users, system-written
     match /cohort_intelligence/{entryId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.token.admin == true;
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
     }
 
-    // AI proxy logs: readable by the owning user or admin
+    // AI proxy logs: written only by the Admin SDK; readable by owner/admin.
+    // Client creates are denied so usage accounting cannot be forged.
     match /ai_proxy_logs/{logId} {
-      allow read: if request.auth != null && (
-        request.auth.uid == resource.data.uid ||
-        request.auth.token.admin == true
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.uid || isAdmin()
       );
-      allow create: if request.auth != null;
+      allow write: if false;
     }
 
     // Deny everything else

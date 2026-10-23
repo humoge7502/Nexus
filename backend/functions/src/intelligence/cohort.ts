@@ -36,9 +36,13 @@ export const cohortIntelligence: functions.HttpsFunction = functions.https.onCal
 
       return { results, total: results.length };
     } catch (error) {
+      console.error(
+        "getCohortIntelligence failed uid=${context.auth?.uid}:",
+        error instanceof Error ? error.message : String(error)
+      );
       throw new functions.https.HttpsError(
         "internal",
-        `Failed to fetch cohort intelligence: ${error instanceof Error ? error.message : String(error)}`
+        "Failed to fetch cohort intelligence. Try again later."
       );
     }
   }

@@ -32,7 +32,19 @@ thumbs.db
 
 # IDE
 /.idea/
+/.vscode/
+/.kiro/
 *.iml
+
+# JVM crash / build diagnostic dumps (never commit these)
+hs_err_pid*.log
+replay_pid*.log
+build_data.txt
+build_err.txt
+.kotlin/
+
+# Stray local tooling
+check_file.ps1
 
 # Backend
 /backend/functions/node_modules/

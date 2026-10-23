@@ -2,9 +2,25 @@ package com.nexus.database.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
+import java.util.UUID
 
-@Entity(tableName = "internships")
+/**
+ * Base entities (schema v1→v8). Index declarations mirror
+ * schemas/com.nexus.database.NexusDatabase/8.json so post-migration
+ * validation passes; Migration.kt backfills them on the v2→v8 path.
+ */
+
+@Entity(
+    tableName = "internships",
+    indices = [
+        Index("is_saved"),
+        Index("deadline"),
+        Index("company_name"),
+        Index("cached_at"),
+    ],
+)
 data class InternshipEntity(
     @PrimaryKey val id: String,
     val title: String,
@@ -24,7 +40,10 @@ data class InternshipEntity(
     @ColumnInfo(name = "cached_at") val cachedAt: Long = System.currentTimeMillis(),
 )
 
-@Entity(tableName = "certifications")
+@Entity(
+    tableName = "certifications",
+    indices = [Index("provider"), Index("is_trending")],
+)
 data class CertificationEntity(
     @PrimaryKey val id: String,
     val title: String,
@@ -37,17 +56,33 @@ data class CertificationEntity(
     @ColumnInfo(name = "employer_recognition") val employerRecognition: Int = 0,
 )
 
-@Entity(tableName = "applications")
+@Entity(
+    tableName = "applications",
+    indices = [Index("status"), Index("company"), Index("opportunity_id")],
+)
 data class ApplicationEntity(
-    @PrimaryKey val id: String,
-    @ColumnInfo(name = "internship_id") val internshipId: String,
-    val status: String = "APPLIED",
-    @ColumnInfo(name = "applied_at") val appliedAt: Long = 0,
-    @ColumnInfo(name = "last_updated") val lastUpdated: Long = 0,
-    val notes: String = "",
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    @ColumnInfo(name = "opportunity_id") val opportunityId: String,
+    val company: String,
+    val role: String,
+    @ColumnInfo(name = "opportunity_type") val opportunityType: String,
+    val status: String = "SAVED",
+    @ColumnInfo(name = "match_score") val matchScore: Float = 0f,
+    @ColumnInfo(name = "applied_date") val appliedDate: Long? = null,
+    @ColumnInfo(name = "interview_date") val interviewDate: Long? = null,
+    @ColumnInfo(name = "interview_rounds") val interviewRounds: Int = 0,
+    @ColumnInfo(name = "outcome_date") val outcomeDate: Long? = null,
+    @ColumnInfo(name = "outcome_notes") val outcomeNotes: String? = null,
+    @ColumnInfo(name = "salary_offered") val salaryOffered: String? = null,
+    @ColumnInfo(name = "preparation_notes") val preparationNotes: String? = null,
+    @ColumnInfo(name = "created_at") val createdAt: Long = System.currentTimeMillis(),
+    @ColumnInfo(name = "updated_at") val updatedAt: Long = System.currentTimeMillis(),
 )
 
-@Entity(tableName = "study_sessions")
+@Entity(
+    tableName = "study_sessions",
+    indices = [Index("start_time")],
+)
 data class StudySessionEntity(
     @PrimaryKey val id: String,
     @ColumnInfo(name = "start_time") val startTime: Long,
@@ -56,7 +91,10 @@ data class StudySessionEntity(
     @ColumnInfo(name = "focus_score") val focusScore: Float = 1f,
 )
 
-@Entity(tableName = "achievements")
+@Entity(
+    tableName = "achievements",
+    indices = [Index("is_unlocked"), Index("type")],
+)
 data class AchievementEntity(
     @PrimaryKey val id: String,
     val type: String,
@@ -69,7 +107,15 @@ data class AchievementEntity(
     @ColumnInfo(name = "xp_reward") val xpReward: Int = 0,
 )
 
-@Entity(tableName = "hackathons")
+@Entity(
+    tableName = "hackathons",
+    indices = [
+        Index("isLive"),
+        Index("isSaved"),
+        Index("startDate"),
+        Index("registrationDeadline"),
+    ],
+)
 data class HackathonEntity(
     @PrimaryKey val id: String,
     val title: String,
@@ -88,7 +134,10 @@ data class HackathonEntity(
     val cachedAt: Long = System.currentTimeMillis(),
 )
 
-@Entity(tableName = "scholarships")
+@Entity(
+    tableName = "scholarships",
+    indices = [Index("isOpen"), Index("deadline")],
+)
 data class ScholarshipEntity(
     @PrimaryKey val id: String,
     val title: String,
@@ -102,7 +151,10 @@ data class ScholarshipEntity(
     val tags: String = "",
 )
 
-@Entity(tableName = "projects")
+@Entity(
+    tableName = "projects",
+    indices = [Index("isFeatured"), Index("category")],
+)
 data class ProjectEntity(
     @PrimaryKey val id: String,
     val title: String,
@@ -117,7 +169,10 @@ data class ProjectEntity(
     val category: String = "GENERAL",
 )
 
-@Entity(tableName = "goals")
+@Entity(
+    tableName = "goals",
+    indices = [Index("isCompleted"), Index("category"), Index("targetDate")],
+)
 data class GoalEntity(
     @PrimaryKey val id: String,
     val title: String,
@@ -131,7 +186,10 @@ data class GoalEntity(
     val completedAt: Long? = null,
 )
 
-@Entity(tableName = "dsa_problems")
+@Entity(
+    tableName = "dsa_problems",
+    indices = [Index("difficulty"), Index("status"), Index("platform")],
+)
 data class DSAProblemEntity(
     @PrimaryKey val id: String,
     val title: String,
@@ -146,7 +204,10 @@ data class DSAProblemEntity(
     val userNotes: String = "",
 )
 
-@Entity(tableName = "notifications")
+@Entity(
+    tableName = "notifications",
+    indices = [Index("isRead"), Index("createdAt"), Index("type")],
+)
 data class NotificationEntity(
     @PrimaryKey val id: String,
     val type: String,
@@ -157,7 +218,10 @@ data class NotificationEntity(
     val createdAt: Long = System.currentTimeMillis(),
 )
 
-@Entity(tableName = "ai_conversations")
+@Entity(
+    tableName = "ai_conversations",
+    indices = [Index("lastMessageAt")],
+)
 data class AIConversationEntity(
     @PrimaryKey val id: String,
     val title: String = "",

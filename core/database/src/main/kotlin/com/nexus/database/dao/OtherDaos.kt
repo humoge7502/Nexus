@@ -33,14 +33,45 @@ interface StudySessionDao {
 
 @Dao
 interface ApplicationDao {
-    @Query("SELECT * FROM applications ORDER BY last_updated DESC")
+    @Query("SELECT * FROM applications ORDER BY updated_at DESC")
     fun getAll(): Flow<List<ApplicationEntity>>
+
+    @Query("SELECT * FROM applications ORDER BY updated_at DESC")
+    fun getAllApplications(): Flow<List<ApplicationEntity>>
+
+    @Query("SELECT * FROM applications WHERE status = :status ORDER BY updated_at DESC")
+    fun getByStatus(status: String): Flow<List<ApplicationEntity>>
+
+    @Query("SELECT COUNT(*) FROM applications WHERE status = :status")
+    fun getCountByStatus(status: String): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM applications")
+    fun getTotalCount(): Flow<Int>
+
+    @Query("SELECT * FROM applications WHERE opportunity_id = :opportunityId LIMIT 1")
+    suspend fun getByOpportunityId(opportunityId: String): ApplicationEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(application: ApplicationEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun update(application: ApplicationEntity)
+
+    @Query("DELETE FROM applications WHERE id = :id")
+    suspend fun deleteById(id: String)
+
+    @androidx.room.Delete
+    suspend fun delete(application: ApplicationEntity)
+
     @Query("UPDATE applications SET status = :status WHERE id = :id")
     suspend fun updateStatus(id: String, status: String)
+
+    @Query(
+        "SELECT company, COUNT(*) as totalApplications, " +
+            "AVG(CASE WHEN status IN ('OFFERED', 'ACCEPTED') THEN 1.0 ELSE 0.0 END) as successRate " +
+            "FROM applications GROUP BY company ORDER BY totalApplications DESC"
+    )
+    fun getCompanyStats(): Flow<List<CompanyApplicationStats>>
 }
 
 @Dao

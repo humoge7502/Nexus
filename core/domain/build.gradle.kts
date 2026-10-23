@@ -16,4 +16,8 @@ android {
 
 dependencies {
     implementation(libs.kotlinx.collections)
+
+    // Unit tests
+    testImplementation(libs.junit)
+    testImplementation(libs.coroutines.test)
 }

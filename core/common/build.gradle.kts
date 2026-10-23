@@ -5,4 +5,8 @@ android {
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     kotlinOptions { jvmTarget = "17" }
 }
-dependencies { implementation(libs.kotlinx.serialization); implementation(libs.kotlinx.collections) }
+dependencies { implementation(libs.kotlinx.serialization); implementation(libs.kotlinx.collections) 
+    // Unit tests
+    testImplementation(libs.junit)
+    testImplementation(libs.coroutines.test)
+}

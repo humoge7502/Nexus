@@ -30,4 +30,11 @@ dependencies {
     implementation(libs.datastore)
     implementation(libs.kotlinx.serialization)
     implementation(libs.kotlinx.collections)
+    implementation(libs.billing)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.timber)
+
+    // Unit tests
+    testImplementation(libs.junit)
+    testImplementation(libs.coroutines.test)
 }

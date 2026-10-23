@@ -107,7 +107,7 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
             CREATE TABLE IF NOT EXISTS `notifications` (
                 `id` TEXT NOT NULL, `type` TEXT NOT NULL, `title` TEXT NOT NULL,
                 `body` TEXT NOT NULL, `isRead` INTEGER NOT NULL DEFAULT 0,
-                `actionUrl` TEXT, `created_at` INTEGER NOT NULL,
+                `actionUrl` TEXT, `createdAt` INTEGER NOT NULL,
                 PRIMARY KEY(`id`)
             )
         """)
@@ -186,9 +186,9 @@ db.execSQL(
 `lastReferencedAt` INTEGER NOT NULL,
 `referenceCount` INTEGER NOT NULL DEFAULT 0
 ) """)
-db.execSQL("CREATE INDEX IF NOT EXISTS index_career_memory_type ON career_memory(memoryType)")
+db.execSQL("CREATE INDEX IF NOT EXISTS index_career_memory_memoryType ON career_memory(memoryType)")
 db.execSQL("CREATE INDEX IF NOT EXISTS index_career_memory_createdAt ON career_memory(createdAt)")
-db.execSQL("CREATE INDEX IF NOT EXISTS index_career_memory_relevance ON career_memory(relevanceScore)")
+db.execSQL("CREATE INDEX IF NOT EXISTS index_career_memory_relevanceScore ON career_memory(relevanceScore)")
 db.execSQL(
 """ CREATE TABLE IF NOT EXISTS `skill_nodes` (
 `skillId` TEXT NOT NULL PRIMARY KEY,
@@ -209,8 +209,10 @@ db.execSQL(
 `transferability` REAL NOT NULL DEFAULT 0.5,
 PRIMARY KEY(`fromSkillId`, `toSkillId`)
 ) """)
-db.execSQL("CREATE INDEX IF NOT EXISTS index_skill_edges_from ON skill_edges(fromSkillId)")
-  db.execSQL("CREATE INDEX IF NOT EXISTS index_skill_edges_to ON skill_edges(toSkillId)")
+db.execSQL("CREATE INDEX IF NOT EXISTS index_skill_nodes_isUserKnown ON skill_nodes(isUserKnown)")
+db.execSQL("CREATE INDEX IF NOT EXISTS index_skill_nodes_category ON skill_nodes(category)")
+db.execSQL("CREATE INDEX IF NOT EXISTS index_skill_edges_fromSkillId ON skill_edges(fromSkillId)")
+db.execSQL("CREATE INDEX IF NOT EXISTS index_skill_edges_toSkillId ON skill_edges(toSkillId)")
   }
 }
 
@@ -246,8 +248,8 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
         `recordedAt` INTEGER NOT NULL
       )
     """.trimIndent())
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_retention_installWeek ON retention_events(installWeek)")
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_retention_activityWeek ON retention_events(activityWeek)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_retention_events_installWeek ON retention_events(installWeek)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_retention_events_activityWeek ON retention_events(activityWeek)")
     db.execSQL("""
       CREATE TABLE IF NOT EXISTS `user_surveys` (
         `id` TEXT NOT NULL PRIMARY KEY,
@@ -259,6 +261,7 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
         `completedAt` INTEGER NOT NULL
       )
     """.trimIndent())
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_user_surveys_surveyType ON user_surveys(surveyType)")
   }
 }
 
@@ -283,9 +286,9 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
       )
     """.trimIndent())
     db.execSQL("CREATE INDEX IF NOT EXISTS index_interview_outcomes_company ON interview_outcomes(company)")
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_interview_outcomes_date ON interview_outcomes(interviewDate)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_interview_outcomes_interviewDate ON interview_outcomes(interviewDate)")
     db.execSQL("CREATE INDEX IF NOT EXISTS index_interview_outcomes_result ON interview_outcomes(result)")
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_interview_outcomes_appId ON interview_outcomes(applicationId)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_interview_outcomes_applicationId ON interview_outcomes(applicationId)")
 
     db.execSQL("""
       CREATE TABLE IF NOT EXISTS `confidence_assessments` (
@@ -297,8 +300,8 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
         `createdAt` INTEGER NOT NULL
       )
     """.trimIndent())
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_conf_type ON confidence_assessments(assessmentType)")
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_conf_date ON confidence_assessments(createdAt)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_confidence_assessments_assessmentType ON confidence_assessments(assessmentType)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_confidence_assessments_createdAt ON confidence_assessments(createdAt)")
 
     db.execSQL("""
       CREATE TABLE IF NOT EXISTS `placement_forecasts` (
@@ -310,9 +313,9 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
         `calculatedAt` INTEGER NOT NULL
       )
     """.trimIndent())
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_forecast_user ON placement_forecasts(userId)")
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_forecast_tier ON placement_forecasts(companyTier)")
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_forecast_calc ON placement_forecasts(calculatedAt)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_placement_forecasts_userId ON placement_forecasts(userId)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_placement_forecasts_companyTier ON placement_forecasts(companyTier)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_placement_forecasts_calculatedAt ON placement_forecasts(calculatedAt)")
 
     db.execSQL("""
       CREATE TABLE IF NOT EXISTS `career_mirrors` (
@@ -327,9 +330,9 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
         `createdAt` INTEGER NOT NULL
       )
     """.trimIndent())
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_mirror_user ON career_mirrors(userId)")
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_mirror_period ON career_mirrors(periodStart)")
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_mirror_created ON career_mirrors(createdAt)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_career_mirrors_userId ON career_mirrors(userId)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_career_mirrors_periodStart ON career_mirrors(periodStart)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_career_mirrors_createdAt ON career_mirrors(createdAt)")
 
     db.execSQL("""
       CREATE TABLE IF NOT EXISTS `score_snapshots` (
@@ -341,8 +344,8 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
         `recordedAt` INTEGER NOT NULL
       )
     """.trimIndent())
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_snap_user ON score_snapshots(userId)")
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_snap_time ON score_snapshots(recordedAt)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_score_snapshots_userId ON score_snapshots(userId)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_score_snapshots_recordedAt ON score_snapshots(recordedAt)")
 
     db.execSQL("""
       CREATE TABLE IF NOT EXISTS `cohort_intelligence` (
@@ -358,9 +361,9 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
         `updatedAt` INTEGER NOT NULL
       )
     """.trimIndent())
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_cohort_college ON cohort_intelligence(collegeId)")
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_cohort_college_tier ON cohort_intelligence(collegeId, companyTier)")
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_cohort_semester ON cohort_intelligence(semester)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_cohort_intelligence_collegeId ON cohort_intelligence(collegeId)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_cohort_intelligence_collegeId_companyTier ON cohort_intelligence(collegeId, companyTier)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_cohort_intelligence_semester ON cohort_intelligence(semester)")
 
     db.execSQL("""
       CREATE TABLE IF NOT EXISTS `skill_velocity` (
@@ -376,8 +379,8 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
         PRIMARY KEY(`userId`, `skillId`)
       )
     """.trimIndent())
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_vel_user ON skill_velocity(userId)")
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_vel_time ON skill_velocity(recordedAt)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_skill_velocity_userId ON skill_velocity(userId)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_skill_velocity_recordedAt ON skill_velocity(recordedAt)")
   }
 }
 
@@ -401,9 +404,38 @@ val MIGRATION_7_8 = object : Migration(7, 8) {
         `reportedAt` INTEGER NOT NULL
       )
     """.trimIndent())
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_interview_company ON interview_reports(company)")
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_interview_role ON interview_reports(role)")
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_interview_reportedAt ON interview_reports(reportedAt)")
-    db.execSQL("CREATE INDEX IF NOT EXISTS index_interview_appId ON interview_reports(applicationId)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_interview_reports_company ON interview_reports(company)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_interview_reports_role ON interview_reports(role)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_interview_reports_reportedAt ON interview_reports(reportedAt)")
+
+    // Backfill indices declared by the v8 entities on base tables created in
+    // MIGRATION_1_2. IF NOT EXISTS makes this idempotent on fresh installs.
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_internships_is_saved ON internships(is_saved)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_internships_deadline ON internships(deadline)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_internships_company_name ON internships(company_name)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_internships_cached_at ON internships(cached_at)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_certifications_provider ON certifications(provider)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_certifications_is_trending ON certifications(is_trending)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_study_sessions_start_time ON study_sessions(start_time)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_achievements_is_unlocked ON achievements(is_unlocked)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_achievements_type ON achievements(type)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_hackathons_isLive ON hackathons(isLive)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_hackathons_isSaved ON hackathons(isSaved)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_hackathons_startDate ON hackathons(startDate)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_hackathons_registrationDeadline ON hackathons(registrationDeadline)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_scholarships_isOpen ON scholarships(isOpen)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_scholarships_deadline ON scholarships(deadline)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_projects_isFeatured ON projects(isFeatured)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_projects_category ON projects(category)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_goals_isCompleted ON goals(isCompleted)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_goals_category ON goals(category)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_goals_targetDate ON goals(targetDate)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_dsa_problems_difficulty ON dsa_problems(difficulty)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_dsa_problems_status ON dsa_problems(status)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_dsa_problems_platform ON dsa_problems(platform)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_notifications_isRead ON notifications(isRead)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_notifications_createdAt ON notifications(createdAt)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_notifications_type ON notifications(type)")
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_ai_conversations_lastMessageAt ON ai_conversations(lastMessageAt)")
   }
 }

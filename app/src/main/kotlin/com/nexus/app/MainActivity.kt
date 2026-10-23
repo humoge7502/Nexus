@@ -1,8 +1,8 @@
 package com.nexus.app
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,7 +16,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -62,11 +62,6 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-     internal val googleSignInLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        googleSignInResult = result.data
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -76,18 +71,26 @@ class MainActivity : ComponentActivity() {
             NexusTheme { NexusApp(activity = this@MainActivity) }
         }
     }
-
-    companion object {
-        var googleSignInResult: Intent? = null
-    }
 }
 
 @Composable
 fun NexusApp(activity: MainActivity? = null) {
     val authViewModel: AuthViewModel = hiltViewModel()
-    val authState by authViewModel.authState.collectAsState()
+    val authState by authViewModel.authState.collectAsStateWithLifecycle()
     var currentStep by remember { mutableStateOf("loading") }
     val scope = rememberCoroutineScope()
+
+    // Result is handled in the launcher callback — the sign-in activity's
+    // result can never be missed (the old static-variable + immediate
+    // coroutine read raced the activity result and always saw null).
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        scope.launch {
+            val success = authViewModel.handleGoogleSignInResult(result.data)
+            if (success) currentStep = "main"
+        }
+    }
 
     LaunchedEffect(authState) {
         when (authState) {
@@ -109,17 +112,10 @@ fun NexusApp(activity: MainActivity? = null) {
             "loading" -> { /* splash screen visible */ }
             "auth" -> AuthScreen(
                 onGoogleSignIn = {
-                    authViewModel.initGoogleSignIn(activity ?: return@AuthScreen)
-                    val intent = authViewModel.getGoogleSignInIntent()
-                    if (intent != null) {
-                        activity?.let {
-                            it.googleSignInLauncher.launch(intent)
-                            scope.launch {
-                                MainActivity.googleSignInResult?.let { data ->
-                                    authViewModel.handleGoogleSignInResult(data)
-                                }
-                            }
-                        }
+                    val act = activity ?: return@AuthScreen
+                    authViewModel.initGoogleSignIn(act)
+                    authViewModel.getGoogleSignInIntent()?.let { intent ->
+                        googleSignInLauncher.launch(intent)
                     }
                 },
                 onGitHubSignIn = { /* GitHub OAuth - implement web flow */ currentStep = "onboarding" },
