@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 8,
-    "identityHash": "f0d109122b7ab4fa14d4f88c06f6d2da",
+    "identityHash": "3d15bb5a0b439ac3192d99e845d1f25c",
     "entities": [
       {
         "tableName": "internships",
@@ -1200,7 +1200,7 @@
       },
       {
         "tableName": "career_memory",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `memoryType` TEXT NOT NULL, `content` TEXT NOT NULL, `sourceConversationId` TEXT, `sourceTool` TEXT, `relevanceScore` REAL NOT NULL, `isActive` INTEGER NOT NULL, `tags` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `lastReferencedAt` INTEGER NOT NULL, `referenceCount` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`sourceConversationId`) REFERENCES `ai_conversations`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `memoryType` TEXT NOT NULL, `content` TEXT NOT NULL, `sourceConversationId` TEXT, `sourceTool` TEXT, `relevanceScore` REAL NOT NULL, `isActive` INTEGER NOT NULL, `tags` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `lastReferencedAt` INTEGER NOT NULL, `referenceCount` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -1304,19 +1304,7 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_career_memory_relevanceScore` ON `${TABLE_NAME}` (`relevanceScore`)"
           }
         ],
-        "foreignKeys": [
-          {
-            "table": "ai_conversations",
-            "onDelete": "SET NULL",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "sourceConversationId"
-            ],
-            "referencedColumns": [
-              "id"
-            ]
-          }
-        ]
+        "foreignKeys": []
       },
       {
         "tableName": "skill_nodes",
@@ -1401,7 +1389,7 @@
       },
       {
         "tableName": "skill_edges",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`fromSkillId` TEXT NOT NULL, `toSkillId` TEXT NOT NULL, `edgeType` TEXT NOT NULL, `weight` REAL NOT NULL, `transferability` REAL NOT NULL, PRIMARY KEY(`fromSkillId`, `toSkillId`), FOREIGN KEY(`fromSkillId`) REFERENCES `skill_nodes`(`skillId`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`toSkillId`) REFERENCES `skill_nodes`(`skillId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`fromSkillId` TEXT NOT NULL, `toSkillId` TEXT NOT NULL, `edgeType` TEXT NOT NULL, `weight` REAL NOT NULL, `transferability` REAL NOT NULL, PRIMARY KEY(`fromSkillId`, `toSkillId`))",
         "fields": [
           {
             "fieldPath": "fromSkillId",
@@ -1461,30 +1449,7 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_skill_edges_toSkillId` ON `${TABLE_NAME}` (`toSkillId`)"
           }
         ],
-        "foreignKeys": [
-          {
-            "table": "skill_nodes",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "fromSkillId"
-            ],
-            "referencedColumns": [
-              "skillId"
-            ]
-          },
-          {
-            "table": "skill_nodes",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "toSkillId"
-            ],
-            "referencedColumns": [
-              "skillId"
-            ]
-          }
-        ]
+        "foreignKeys": []
       },
       {
         "tableName": "opportunity_embeddings",
@@ -2456,7 +2421,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f0d109122b7ab4fa14d4f88c06f6d2da')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3d15bb5a0b439ac3192d99e845d1f25c')"
     ]
   }
 }

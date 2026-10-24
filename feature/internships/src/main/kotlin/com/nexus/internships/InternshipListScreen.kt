@@ -37,6 +37,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.nexus.domain.model.UiState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,7 +53,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.component.NexusChip
 import com.nexus.domain.model.Internship
 import com.nexus.domain.model.Location
@@ -61,9 +65,17 @@ import com.nexus.domain.model.Duration
 fun InternshipListScreen(
     onInternshipClick: (String) -> Unit,
     onBack: () -> Unit,
+    viewModel: InternshipViewModel = hiltViewModel(),
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilters by remember { mutableStateOf(setOf<String>()) }
+
+    val allInternships = (uiState as? UiState.Success)?.data ?: emptyList()
+    val internships = if (searchQuery.isBlank()) allInternships else allInternships.filter {
+        it.title.contains(searchQuery, ignoreCase = true) ||
+            it.company.name.contains(searchQuery, ignoreCase = true)
+    }
 
     val filters = listOf("Remote", "Tech", "Paid", "AI/ML", "Web", "Mobile")
 
@@ -121,17 +133,32 @@ fun InternshipListScreen(
                 }
             }
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                    horizontal = 16.dp, vertical = 8.dp
+            when {
+                uiState is UiState.Loading -> Text(
+                    "Loading internships...",
+                    modifier = Modifier.fillMaxWidth().padding(32.dp),
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-            ) {
-                items(sampleInternships) { internship ->
-                    InternshipListItem(
-                        internship = internship,
-                        onClick = { onInternshipClick(internship.id) }
+                internships.isEmpty() -> Text(
+                    if (allInternships.isEmpty()) "No internships cached yet.\nThey sync automatically once the backend feed is reachable."
+                    else "No matches for \"$searchQuery\"",
+                    modifier = Modifier.fillMaxWidth().padding(32.dp),
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                else -> LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                        horizontal = 16.dp, vertical = 8.dp
                     )
+                ) {
+                    items(internships, key = { it.id }) { internship ->
+                        InternshipListItem(
+                            internship = internship,
+                            onClick = { onInternshipClick(internship.id) }
+                        )
+                    }
                 }
             }
         }
@@ -210,11 +237,3 @@ private fun InternshipListItem(
     }
 }
 
-val sampleInternships = listOf(
-    Internship("1", "Android Developer Intern", Company("Google", domain = "Tech"), Location("Bangalore"), Stipend(50000), Duration(6), deadline = java.time.LocalDate.now().plusDays(15), applyUrl = "", postedAt = java.time.Instant.now(), tags = kotlinx.collections.immutable.persistentListOf("Kotlin", "Compose")),
-    Internship("2", "Software Engineer Intern", Company("Microsoft", domain = "Tech"), Location("Hyderabad"), Stipend(45000), Duration(3), deadline = java.time.LocalDate.now().plusDays(21), applyUrl = "", postedAt = java.time.Instant.now(), tags = kotlinx.collections.immutable.persistentListOf("C++", "Azure")),
-    Internship("3", "Data Science Intern", Company("Amazon", domain = "Tech"), Location("Remote", country = "India"), Stipend(40000), Duration(6), deadline = java.time.LocalDate.now().plusDays(10), applyUrl = "", postedAt = java.time.Instant.now(), isRemote = true, tags = kotlinx.collections.immutable.persistentListOf("Python", "ML")),
-    Internship("4", "Frontend Developer Intern", Company("Flipkart", domain = "E-commerce"), Location("Bangalore"), Stipend(35000), Duration(6), deadline = java.time.LocalDate.now().plusDays(30), applyUrl = "", postedAt = java.time.Instant.now(), tags = kotlinx.collections.immutable.persistentListOf("React", "TypeScript")),
-    Internship("5", "Backend Developer Intern", Company("Uber", domain = "Tech"), Location("Bangalore"), Stipend(55000), Duration(6), deadline = java.time.LocalDate.now().plusDays(7), applyUrl = "", postedAt = java.time.Instant.now(), tags = kotlinx.collections.immutable.persistentListOf("Go", "Kafka")),
-    Internship("6", "ML Engineer Intern", Company("Tesla", domain = "Automotive"), Location("Remote", country = "India"), Stipend(60000), Duration(6), deadline = java.time.LocalDate.now().plusDays(45), applyUrl = "", postedAt = java.time.Instant.now(), isRemote = true, tags = kotlinx.collections.immutable.persistentListOf("Python", "TensorFlow")),
-)

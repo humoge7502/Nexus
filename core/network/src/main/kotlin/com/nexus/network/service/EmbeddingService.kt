@@ -2,7 +2,9 @@ package com.nexus.network.service
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.viewModelScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import com.nexus.network.api.NexusApiService
 import com.nexus.network.dto.EmbeddingConfigDto
 import javax.inject.Inject
@@ -14,6 +16,11 @@ import timber.log.Timber
 class EmbeddingService @Inject constructor(
     private val api: NexusApiService
 ) {
+    companion object {
+        const val MODEL_VERSION = "nexus-tfidf-v1"
+        const val EMBEDDING_DIM = 128
+    }
+
     private var embeddingDim = 128
     private var modelVersion = "nexus-tfidf-v1"
     private var semanticGroups: Map<Set<String>, Float> = emptyMap()
@@ -21,11 +28,20 @@ class EmbeddingService @Inject constructor(
     private var defaultIdf = 1.0f
     private var configLoaded = false
 
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     init {
-        // Load default config immediately (synchronous fallback)
+        // Load default config immediately (synchronous fallback). Remote config
+        // is fetched lazily on first use — launching network I/O from a singleton
+        // constructor hangs test JVMs and violates DI construction discipline.
         loadDefaultConfig()
-        // Attempt to load remote config (doesn't block initialization)
-        viewModelScope.launch { loadRemoteConfig() }
+    }
+
+    private fun ensureRemoteConfig() {
+        if (!configLoaded) {
+            configLoaded = true
+            serviceScope.launch { loadRemoteConfig() }
+        }
     }
 
     private fun loadDefaultConfig() {
@@ -121,6 +137,7 @@ class EmbeddingService @Inject constructor(
     }
 
     suspend fun computeEmbedding(text: String): ByteArray = withContext(Dispatchers.Default) {
+        ensureRemoteConfig()
         val tokens = tokenize(text)
         if (tokens.isEmpty()) return@withContext ByteArray(embeddingDim * 4)
 

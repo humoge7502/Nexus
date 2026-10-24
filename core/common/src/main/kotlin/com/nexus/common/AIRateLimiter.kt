@@ -62,8 +62,12 @@ class AIRateLimiter private constructor(
     suspend fun canMakeAICall(isPro: Boolean): RateLimitResult = canMakeCall(isPro)
 
     suspend fun recordCall() {
+        val today = System.currentTimeMillis() / 86_400_000L
         dataStore.edit { prefs ->
-            prefs[CALLS_TODAY] = (prefs[CALLS_TODAY] ?: 0) + 1
+            val resetDay = prefs[RESET_DAY] ?: today
+            val current = if (resetDay < today) 0 else (prefs[CALLS_TODAY] ?: 0)
+            prefs[RESET_DAY] = today
+            prefs[CALLS_TODAY] = current + 1
         }
     }
 

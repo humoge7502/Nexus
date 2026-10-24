@@ -10,6 +10,7 @@ dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:domain"))
     implementation(project(":core:data"))
+    implementation(project(":core:datastore"))
     implementation(project(":core:common"))
     implementation(platform(libs.compose.bom)); implementation(libs.bundles.compose)
     implementation(libs.hilt.android); ksp(libs.hilt.compiler)

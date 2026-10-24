@@ -74,7 +74,7 @@ object DatabaseModule {
     @Provides fun provideCareerMirrorDao(db: NexusDatabase): CareerMirrorDao = db.careerMirrorDao()
     @Provides fun provideScoreSnapshotDao(db: NexusDatabase): ScoreSnapshotDao = db.scoreSnapshotDao()
     @Provides fun provideCohortIntelligenceDao(db: NexusDatabase): CohortIntelligenceDao = db.cohortIntelligenceDao()
-    @Provides fun provideSkillVelocityDao(db: NexusDatabase): SkillVelocitySnapshotDao = db.skillVelocityDao()
+    @Provides fun provideSkillVelocityDao(db: NexusDatabase): SkillVelocitySnapshotDao = db.skillVelocitySnapshotDao()
     @Provides fun provideInterviewReportDao(db: NexusDatabase): InterviewReportDao = db.interviewReportDao()
     @Provides fun provideOpportunityEmbeddingDao(db: NexusDatabase): OpportunityEmbeddingDao = db.opportunityEmbeddingDao()
 }

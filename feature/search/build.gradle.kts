@@ -17,4 +17,6 @@ dependencies {
     implementation(libs.hilt.android); ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.paging.runtime); implementation(libs.paging.compose); implementation(libs.datastore)
+
+    implementation(libs.lifecycle.runtime.compose)
 }

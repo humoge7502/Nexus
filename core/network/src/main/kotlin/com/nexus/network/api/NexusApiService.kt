@@ -18,6 +18,18 @@ interface NexusApiService {
     @GET("internships/{id}")
     suspend fun getInternshipById(@Path("id") id: String): Response<InternshipDto>
 
+    @GET("career-hits/daily")
+    suspend fun getDailyCareerHits(): Response<List<com.nexus.network.dto.CareerHitDto>>
+
+    @GET("skills/graph/nodes")
+    suspend fun getSkillGraphNodes(): Response<List<com.nexus.network.dto.SkillNodeDto>>
+
+    @GET("skills/graph/edges")
+    suspend fun getSkillGraphEdges(): Response<List<com.nexus.network.dto.SkillEdgeDto>>
+
+    @GET("config/embedding")
+    suspend fun getEmbeddingConfig(): Response<com.nexus.network.dto.EmbeddingConfigDto>
+
     @GET("certifications/recommended")
     suspend fun getRecommendedCertifications(
         @Query("limit") limit: Int = 10,

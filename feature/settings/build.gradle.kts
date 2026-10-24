@@ -7,7 +7,23 @@ android {
     buildFeatures { compose = true }
 }
 dependencies {
-    implementation(project(":core:designsystem")); implementation(project(":core:domain"))
-    implementation(platform(libs.compose.bom)); implementation(libs.bundles.compose)
-    implementation(libs.hilt.android); ksp(libs.hilt.compiler)
+    implementation(project(":core:designsystem"))
+    implementation(project(":core:analytics"))
+    implementation(project(":core:common"))
+    implementation(project(":core:data"))
+    implementation(project(":core:datastore"))
+    implementation(project(":core:domain"))
+    implementation(platform(libs.compose.bom))
+    implementation(libs.bundles.compose)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation("com.google.firebase:firebase-storage")
+
+    implementation(libs.timber)
+    implementation(libs.lifecycle.runtime.compose)
+
+    implementation(libs.hilt.navigation.compose)
 }

@@ -6,6 +6,7 @@ import com.nexus.database.entity.CertificationEntity
 import com.nexus.domain.model.*
 import com.nexus.network.api.NexusApiService
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.collections.immutable.toImmutableList
 import javax.inject.Inject
@@ -16,6 +17,8 @@ class CertificationRepository @Inject constructor(
     private val api: NexusApiService,
     private val dao: CertificationDao,
 ) {
+    suspend fun getCertificationCount(): Int = runCatching { dao.getAll().first().size }.getOrDefault(0)
+
     fun getAllCertifications(): Flow<List<Certification>> =
         dao.getAll().map { entities -> entities.map { it.toDomain() } }
 

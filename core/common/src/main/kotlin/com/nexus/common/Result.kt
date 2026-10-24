@@ -2,7 +2,7 @@ package com.nexus.common
 
 sealed class ApiResult<out T> {
     data class Success<T>(val data: T) : ApiResult<T>()
-    data class Error(val message: String, val code: Int = -1) : ApiResult<Nothing>()
+    data class Error(val message: String, val code: Int = -1, val throwable: Throwable? = null) : ApiResult<Nothing>()
     data object Loading : ApiResult<Nothing>()
 
     val isSuccess get() = this is Success

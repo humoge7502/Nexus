@@ -126,7 +126,7 @@ class GrowthViewModel @Inject constructor(
         val total = problemData.second
         val completedGoals = problemData.third
         val certCount = try { certificationRepository.getCertificationCount() } catch (_: Exception) { 0 }
-        val achievements = try { achievementRepository.getEarnedAchievements().first() } catch (_: Exception) { emptyList() }
+        val achievements = try { achievementRepository.getUnlocked().first() } catch (_: Exception) { emptyList<com.nexus.domain.model.Achievement>() }
         val skillProgress = (solved.toFloat() / total.coerceAtLeast(1)).coerceIn(0f, 1f)
         val opportunityEngagement = (completedGoals.coerceAtMost(20) / 20f).coerceIn(0f, 1f)
         val consistency = (streak.currentStreak.coerceAtMost(365) / 365f).coerceIn(0f, 1f)
@@ -201,6 +201,14 @@ class GrowthViewModel @Inject constructor(
       } catch (e: Exception) {
         Timber.e(e, "Failed to calculate placement readiness")
       }
+    }
+  }
+
+  fun updateProblemStatus(problemId: String, status: DsaStatus) {
+    viewModelScope.launch {
+      try {
+        problemRepository.updateStatus(problemId, status)
+      } catch (e: Exception) { Timber.w(e, "Failed to update problem status") }
     }
   }
 

@@ -11,11 +11,17 @@ object Constants {
     const val TARGET_SDK = 35
 
     const val STREAK_GRACE_FREEZES = 2
+    const val MAX_RETRY_ATTEMPTS = 5
+    const val PAGE_SIZE = 20
+    const val INITIAL_PAGE_SIZE = 40
+    const val PREFETCH_DISTANCE = 10
     const val MAX_AI_CHAT_FREE_TIER = 10
     const val MIN_SKILL_SELECTION = 2
     const val MAX_SKILL_SELECTION = 5
     const val NEXUS_SCORE_MAX = 1000
     const val XP_PER_LOGIN = 10
+    const val XP_ONBOARDING_COMPLETE = 50
+    const val XP_PER_DAILY_HIT = 15
     const val XP_PER_CHALLENGE = 25
     const val XP_PER_APPLICATION = 30
     const val XP_PER_CERT_MODULE = 50
@@ -24,6 +30,20 @@ object Constants {
     const val XP_PER_ROADMAP_MILESTONE = 75
     const val XP_STREAK_BONUS_7 = 100
     const val XP_MAX_PROFILE = 150
+    const val XP_PER_DSA_EASY = 10
+    const val XP_PER_DSA_MEDIUM = 20
+    const val XP_PER_DSA_HARD = 40
+    const val XP_PER_GOAL_COMPLETED = 100
+    const val XP_PER_SKILL_ADDED = 15
+    const val XP_PER_RESUME_ANALYZED = 50
+    const val XP_PER_MOCK_INTERVIEW = 80
+    const val XP_PER_PORTFOLIO_PROJECT = 120
+    const val XP_PER_REFERRAL = 60
+    const val XP_PER_ACHIEVEMENT_SHARED = 25
+    const val ANIMATION_DURATION_FAST = 300
+    const val ANIMATION_DURATION_NORMAL = 600
+    const val PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.nexus.app"
+
 
     val LEVEL_THRESHOLDS = mapOf(
         "Rookie" to 0..500,

@@ -8,13 +8,18 @@ android {
 }
 dependencies {
     implementation(project(":core:designsystem"))
+    implementation(project(":core:analytics"))
     implementation(project(":core:domain"))
     implementation(project(":core:data"))
     implementation(project(":core:common"))
-    implementation(platform(libs.compose.bom)); implementation(libs.bundles.compose)
-    implementation(libs.hilt.android); ksp(libs.hilt.compiler)
+    implementation(platform(libs.compose.bom))
+    implementation(libs.bundles.compose)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
     implementation(libs.navigation.compose)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.coil)
+
+    implementation(libs.hilt.navigation.compose)
 }

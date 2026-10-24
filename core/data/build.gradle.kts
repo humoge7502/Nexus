@@ -22,6 +22,7 @@ dependencies {
     implementation(project(":core:network"))
     implementation(project(":core:database"))
     implementation(project(":core:datastore"))
+    implementation(project(":core:analytics"))
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.bundles.retrofit)
@@ -33,8 +34,13 @@ dependencies {
     implementation(libs.billing)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.timber)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.auth)
 
     // Unit tests
     testImplementation(libs.junit)
     testImplementation(libs.coroutines.test)
+
+    testImplementation(libs.mockk)
 }

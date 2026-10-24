@@ -6,7 +6,8 @@ import com.nexus.data.repository.UserXpRepository
 import com.nexus.data.repository.ApplicationRepository
 import com.nexus.domain.repository.ApplicationCounts
 import com.nexus.database.dao.SkillGraphDao
-import com.nexus.domain.usecase.StreakData
+import com.nexus.domain.model.StreakData
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
@@ -22,6 +23,7 @@ class PlacementReadinessCalculatorTest {
   private lateinit var mockAppRepo: ApplicationRepository
   private lateinit var mockDsaRepo: DSAProblemRepository
   private lateinit var mockStreakRepo: StreakRepository
+  private lateinit var mockPrefs: com.nexus.datastore.UserPreferences
   private lateinit var calculator: PlacementReadinessCalculator
 
   @Before
@@ -31,9 +33,12 @@ class PlacementReadinessCalculatorTest {
     mockAppRepo = mockk(relaxed = true)
     mockDsaRepo = mockk(relaxed = true)
     mockStreakRepo = mockk(relaxed = true)
+    mockPrefs = mockk(relaxed = true)
+    every { mockPrefs.collegeTier } returns flowOf("TIER_2")
+    every { mockPrefs.userYear } returns flowOf(2)
     calculator = PlacementReadinessCalculator(
       mockXpRepo, mockSkillDao, mockAppRepo, mockDsaRepo,
-      mockStreakRepo, mockk(relaxed = true),
+      mockStreakRepo, mockPrefs,
     )
   }
 
@@ -42,7 +47,7 @@ class PlacementReadinessCalculatorTest {
     appsTotal: Int, appsOffered: Int, appsInterviewing: Int,
   ) {
     every { mockXpRepo.totalXP } returns flowOf(xp)
-    every { mockDsaRepo.getSolvedCount() } returns dsa
+    coEvery { mockDsaRepo.getSolvedCount() } returns dsa
     every { mockStreakRepo.currentStreak } returns flowOf(
       StreakData(currentStreak = streak, longestStreak = streak, isActive = true))
     every { mockAppRepo.getApplicationCounts() } returns flowOf(

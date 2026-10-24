@@ -12,6 +12,7 @@ import com.nexus.domain.usecase.ConversationMemoryManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -46,7 +47,9 @@ class AIChatViewModelTest {
         Dispatchers.setMain(testDispatcher)
         repository = mock()
         whenever(repository.getAllConversations()).thenReturn(flowOf(emptyList()))
-        whenever(repository.createConversation(org.mockito.kotlin.any())).thenReturn("conv_1")
+        runBlocking {
+            whenever(repository.createConversation(org.mockito.kotlin.any())).thenReturn("conv_1")
+        }
     }
 
     @After

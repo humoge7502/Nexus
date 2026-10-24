@@ -33,14 +33,8 @@ class AuthInterceptorTest {
 
         `when`(userPreferences.authToken)
             .thenReturn(MutableStateFlow("test-token"))
-        `when`(userPreferences.saveAuthToken(any()))
-            .thenReturn(runBlocking { Unit })
-
         val firebaseUser = mock(FirebaseUser::class.java)
         `when`(firebaseAuth.currentUser).thenReturn(firebaseUser)
-        `when`(firebaseUser.getIdToken(eq(true))).thenReturn(
-            mock(com.google.android.gms.tasks.Task::class.java)
-        )
 
         authInterceptor = AuthInterceptor(userPreferences, firebaseAuth)
     }

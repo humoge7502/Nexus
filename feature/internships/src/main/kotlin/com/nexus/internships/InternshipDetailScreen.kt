@@ -31,6 +31,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,8 +54,24 @@ import com.nexus.domain.model.Stipend
 fun InternshipDetailScreen(
     internshipId: String,
     onBack: () -> Unit,
+    viewModel: InternshipViewModel = hiltViewModel(),
 ) {
-    val internship = sampleInternships.find { it.id == internshipId } ?: sampleInternships.first()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val internships: List<Internship> = (uiState as? com.nexus.domain.model.UiState.Success<List<Internship>>)?.data
+        ?: emptyList()
+    val internship = internships.find { it.id == internshipId }
+    if (internship == null) {
+        // Opportunity not in the local cache yet — refresh and show a light state.
+        androidx.compose.runtime.LaunchedEffect(internshipId) { viewModel.refresh() }
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                "Opening opportunity...",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        return
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(

@@ -115,6 +115,7 @@ dependencies {
     implementation(project(":feature:growth"))
     implementation(project(":feature:goals"))
     implementation(project(":feature:notifications"))
+    implementation(project(":feature:paywall"))
 
     // Compose
     implementation(platform(libs.compose.bom))
@@ -137,6 +138,7 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.functions)
     implementation(libs.firebase.analytics)
+    implementation("com.google.firebase:firebase-storage")
 
     // Misc
     implementation(libs.splash)

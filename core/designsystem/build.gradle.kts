@@ -27,6 +27,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:domain"))
+    implementation(project(":core:common"))
     implementation(platform(libs.compose.bom))
     implementation(libs.bundles.compose)
     implementation(libs.compose.ui.tooling.preview)
@@ -35,4 +37,6 @@ dependencies {
     implementation(libs.haze)
     implementation(libs.haze.materials)
     implementation(libs.lottie)
+    implementation(libs.coil)
+    implementation(libs.konfetti)
 }

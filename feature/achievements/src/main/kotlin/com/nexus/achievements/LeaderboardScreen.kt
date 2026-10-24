@@ -30,9 +30,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,38 +40,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.material3.CircularProgressIndicator
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.domain.model.LeaderboardEntry
+import com.nexus.domain.repository.LeaderboardTab
 import kotlinx.collections.immutable.persistentListOf
 
 private val tabs = persistentListOf("Global", "College", "Friends", "Domain: DSA")
 
-private val sampleLeaderboard = persistentListOf(
-    LeaderboardEntry("1", "Aryan Sharma", score = 847, rank = 1, isCurrentUser = false),
-    LeaderboardEntry("2", "Priya Patel", score = 812, rank = 2, isCurrentUser = false),
-    LeaderboardEntry("3", "Rahul Verma", score = 789, rank = 3, isCurrentUser = false),
-    LeaderboardEntry("4", "Sneha Kapoor", score = 756, rank = 4, isCurrentUser = false),
-    LeaderboardEntry("5", "Arjun Mehta", score = 723, rank = 5, isCurrentUser = false),
-    LeaderboardEntry("6", "Neha Gupta", score = 698, rank = 6, isCurrentUser = false),
-    LeaderboardEntry("7", "Vikram Singh", score = 674, rank = 7, isCurrentUser = false),
-    LeaderboardEntry("8", "Kavya Reddy", score = 651, rank = 8, isCurrentUser = false),
-    LeaderboardEntry("9", "Rohit Joshi", score = 632, rank = 9, isCurrentUser = false),
-    LeaderboardEntry("10", "Ananya Iyer", score = 614, rank = 10, isCurrentUser = false),
-    LeaderboardEntry("11", "Krishna Nair", score = 847, rank = 42, isCurrentUser = true),
-    LeaderboardEntry("12", "Divya Khanna", score = 590, rank = 12, isCurrentUser = false),
-    LeaderboardEntry("13", "Manav Desai", score = 572, rank = 13, isCurrentUser = false),
-    LeaderboardEntry("14", "Isha Agarwal", score = 558, rank = 14, isCurrentUser = false),
-    LeaderboardEntry("15", "Karan Bhatia", score = 541, rank = 15, isCurrentUser = false),
+
+private val tabEntries = persistentListOf(
+    "Global" to LeaderboardTab.GLOBAL,
+    "College" to LeaderboardTab.COLLEGE,
+    "Friends" to LeaderboardTab.FRIENDS,
+    "Domain: DSA" to LeaderboardTab.DOMAIN_DSA,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LeaderboardScreen(
     onBack: () -> Unit = {},
+    viewModel: LeaderboardViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
 ) {
-    var selectedTab by remember { mutableIntStateOf(0) }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val selectedTab = tabEntries.indexOfFirst { it.second == uiState.selectedTab }.coerceAtLeast(0)
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
@@ -94,10 +86,10 @@ fun LeaderboardScreen(
             edgePadding = 20.dp,
             modifier = Modifier.padding(bottom = 8.dp),
         ) {
-            for ((index, title) in tabs.withIndex()) {
+            tabEntries.forEachIndexed { index, (title, tab) ->
                 Tab(
                     selected = selectedTab == index,
-                    onClick = { selectedTab = index },
+                    onClick = { viewModel.selectTab(tab) },
                     text = {
                         Text(
                             text = title,
@@ -108,9 +100,9 @@ fun LeaderboardScreen(
             }
         }
 
-        val currentUser = sampleLeaderboard.first { it.isCurrentUser }
+        val currentUser = uiState.currentUser
 
-        NexusCard(
+        if (currentUser != null) NexusCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp),
@@ -169,16 +161,37 @@ fun LeaderboardScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            itemsIndexed(sampleLeaderboard) { index, entry ->
-                LeaderboardRow(
-                    entry = entry,
-                    isTop3 = index < 3,
+        when {
+            uiState.isLoading -> Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(color = NexusColors.Indigo400)
+            }
+
+            uiState.entries.isEmpty() -> Box(
+                modifier = Modifier.fillMaxSize().padding(32.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "No one here yet.\nEarn XP and claim Rank #1 on this leaderboard!",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            }
+
+            else -> LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                itemsIndexed(uiState.entries, key = { _, entry -> entry.userId }) { index, entry ->
+                    LeaderboardRow(
+                        entry = entry,
+                        isTop3 = index < 3,
+                    )
+                }
             }
         }
     }

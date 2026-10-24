@@ -7,8 +7,16 @@ android {
     buildFeatures { compose = true }
 }
 dependencies {
-    implementation(project(":core:designsystem")); implementation(project(":core:domain"))
+    implementation(project(":core:designsystem"))
+    implementation(libs.hilt.navigation.compose)
+    implementation(libs.timber)
+    implementation(project(":core:analytics"))
+    implementation(project(":core:common"))
+    implementation(project(":core:data"))
+    implementation(project(":core:domain"))
     implementation(platform(libs.compose.bom)); implementation(libs.bundles.compose)
     implementation(libs.hilt.android); ksp(libs.hilt.compiler); implementation(libs.lottie); implementation(libs.konfetti)
     implementation(libs.kotlinx.collections)
+
+    implementation(libs.lifecycle.runtime.compose)
 }

@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material.icons.filled.BrightnessMedium
 import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.Notifications
@@ -49,6 +50,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
+    onGoPro: () -> Unit = {},
 ) {
     var isDarkMode by remember { mutableStateOf(true) }
     var notificationsEnabled by remember { mutableStateOf(true) }
@@ -70,6 +72,23 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
         ) {
+            SettingsItem(
+                icon = androidx.compose.material.icons.Icons.Default.WorkspacePremium,
+                title = "NEXUS Pro",
+                subtitle = "AI Interview Coach, Oracle, Arena and more",
+                trailing = {
+                    Text(
+                        "Upgrade",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                },
+                onClick = onGoPro
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             Text(
                 text = "Appearance",
                 style = MaterialTheme.typography.labelLarge,

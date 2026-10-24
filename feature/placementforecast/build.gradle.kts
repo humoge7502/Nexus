@@ -12,7 +12,6 @@ android {
 
     defaultConfig {
         minSdk = 26
-        targetSdk = 35
     }
 
     buildFeatures {
@@ -31,10 +30,10 @@ android {
 
 dependencies {
     implementation(project(":core:designsystem"))
+    implementation(project(":core:datastore"))
     implementation(project(":core:domain"))
     implementation(project(":core:data"))
     implementation(project(":core:analytics"))
-
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)

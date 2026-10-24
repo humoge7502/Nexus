@@ -7,7 +7,18 @@ android {
     buildFeatures { compose = true }
 }
 dependencies {
-    implementation(project(":core:designsystem")); implementation(project(":core:domain"))
-    implementation(platform(libs.compose.bom)); implementation(libs.bundles.compose)
-    implementation(libs.hilt.android); ksp(libs.hilt.compiler); implementation(libs.coil)
+    implementation(project(":core:designsystem"))
+    implementation(project(":core:common"))
+    implementation(project(":core:data"))
+    implementation(project(":core:datastore"))
+    implementation(project(":core:domain"))
+    implementation(platform(libs.compose.bom))
+    implementation(libs.bundles.compose)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.coil)
+    implementation(libs.lifecycle.runtime.compose)
+    implementation(libs.lifecycle.viewmodel.compose)
+
+    implementation(libs.hilt.navigation.compose)
 }

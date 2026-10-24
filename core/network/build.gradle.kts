@@ -50,6 +50,7 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.bundles.retrofit)
     implementation(libs.kotlinx.serialization)
+    implementation(libs.timber)
     implementation(libs.kotlinx.coroutines.play.services)
 
     implementation(platform(libs.firebase.bom))
@@ -64,4 +65,12 @@ dependencies {
     testImplementation(libs.mockwebserver)
     testImplementation(platform(libs.firebase.bom))
     testImplementation(libs.firebase.auth)
+}
+
+// Windows file-lock workaround: keep test outputs out of the watched
+// build/test-results path, which an external process keeps holding open.
+tasks.withType<Test>().configureEach {
+    binaryResultsDirectory.set(layout.buildDirectory.dir("test-binary-results/testDebugUnitTest"))
+    reports.html.outputLocation.set(layout.buildDirectory.dir("test-reports/testDebugUnitTest"))
+    reports.junitXml.outputLocation.set(layout.buildDirectory.dir("test-xml-results/testDebugUnitTest"))
 }

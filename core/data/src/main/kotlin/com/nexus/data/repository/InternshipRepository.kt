@@ -6,6 +6,7 @@ import com.nexus.database.entity.InternshipEntity
 import com.nexus.domain.model.*
 import com.nexus.network.api.NexusApiService
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,6 +24,15 @@ class InternshipRepository @Inject constructor(
 
     suspend fun toggleSave(internshipId: String, isSaved: Boolean) =
         dao.updateSaveStatus(internshipId, isSaved)
+
+    suspend fun isSaved(internshipId: String): Boolean =
+        dao.getSavedInternships().first().any { it.id == internshipId }
+
+    suspend fun getCachedInternshipsPage(page: Int, loadSize: Int): List<Internship> =
+        dao.getPage(loadSize, page * loadSize).map { it.toDomain() }
+
+    suspend fun refreshInternshipsPage(page: Int, loadSize: Int): ApiResult<List<Internship>> =
+        refreshInternships()
 
     suspend fun refreshInternships(): ApiResult<List<Internship>> {
         return try {

@@ -14,6 +14,7 @@ object NotificationHelper {
     const val CHANNEL_STREAK = "nexus_streak"
     const val CHANNEL_SOCIAL = "nexus_social"
     const val CHANNEL_AI = "nexus_ai"
+    const val CHANNEL_DEADLINES = "nexus_deadlines"
 
     private var notificationId = 1000
 

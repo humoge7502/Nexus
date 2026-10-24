@@ -3,8 +3,13 @@ package com.nexus.common
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import java.io.File
@@ -13,19 +18,29 @@ import kotlin.test.assertTrue
 
 class AIRateLimiterTest {
 
-    private val testScope = TestScope()
+    // DataStore needs an eager, independently-owned scope: with the test
+    // scope itself its actor coroutine never completes (UncompletedCoroutinesError)
+    // and buffered writes don't flush before assertions.
+    private val dispatcher = UnconfinedTestDispatcher()
+    private val storeScope = CoroutineScope(dispatcher + Job())
+    private val testScope = TestScope(dispatcher)
     private lateinit var dataStore: DataStore<Preferences>
     private lateinit var rateLimiter: AIRateLimiter
 
     @Before
     fun setUp() {
         dataStore = PreferenceDataStoreFactory.create(
-            scope = testScope,
+            scope = storeScope,
             produceFile = {
-                File.createTempFile("ai_rate_limit_test", ".preferences_pb")
+                File.createTempFile("ai_rate_limit_test_${System.nanoTime()}", ".preferences_pb")
             }
         )
         rateLimiter = AIRateLimiter(dataStore)
+    }
+
+    @After
+    fun tearDown() {
+        storeScope.cancel()
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.nexus.data.usecase
 
 import com.nexus.analytics.AnalyticsTracker
 import com.nexus.database.dao.UserSurveyDao
+import com.nexus.database.entity.UserSurveyEntity
 import com.nexus.datastore.UserPreferences
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -17,19 +18,17 @@ import org.junit.Test
 class SurveyManagerTest {
 
     private val surveyDao: UserSurveyDao = mockk(relaxed = true)
-    private val userPreferences: UserPreferences = mockk(relaxed = true)
     private val analyticsTracker: AnalyticsTracker = mockk(relaxed = true)
     private lateinit var surveyManager: SurveyManager
 
     @Before
     fun setUp() {
-        surveyManager = SurveyManager(surveyDao, userPreferences, analyticsTracker)
+        surveyManager = SurveyManager(surveyDao, analyticsTracker)
     }
 
     @Test
     fun `evaluateSurveyEligibility returns null for new user`() = runTest {
-        coEvery { userPreferences.lastLoginDate } returns flowOf("")
-
+        
         val survey = surveyManager.evaluateSurveyEligibility(daysActive = 0, sessionCount = 0)
 
         assertNull(survey)
@@ -37,8 +36,7 @@ class SurveyManagerTest {
 
     @Test
     fun `evaluateSurveyEligibility returns null before day 7 with few sessions`() = runTest {
-        coEvery { userPreferences.lastLoginDate } returns flowOf("")
-
+        
         val survey = surveyManager.evaluateSurveyEligibility(daysActive = 5, sessionCount = 2)
 
         assertNull(survey)
@@ -46,8 +44,7 @@ class SurveyManagerTest {
 
     @Test
     fun `evaluateSurveyEligibility returns SeanEllis at day 7 with 5 sessions`() = runTest {
-        coEvery { userPreferences.lastLoginDate } returns flowOf("")
-
+        
         val survey = surveyManager.evaluateSurveyEligibility(daysActive = 7, sessionCount = 5)
 
         assertTrue(survey is SurveyPrompt.SeanEllis)
@@ -55,8 +52,7 @@ class SurveyManagerTest {
 
     @Test
     fun `evaluateSurveyEligibility returns NPS at day 14 regardless of sessions`() = runTest {
-        coEvery { userPreferences.lastLoginDate } returns flowOf("")
-
+        
         val survey = surveyManager.evaluateSurveyEligibility(daysActive = 14, sessionCount = 0)
 
         assertTrue(survey is SurveyPrompt.NPS)
@@ -64,16 +60,21 @@ class SurveyManagerTest {
 
     @Test
     fun `evaluateSurveyEligibility returns SeanEllis at day 21 even with zero sessions`() = runTest {
-        coEvery { userPreferences.lastLoginDate } returns flowOf("")
-
+        
         val survey = surveyManager.evaluateSurveyEligibility(daysActive = 21, sessionCount = 0)
 
         assertTrue(survey is SurveyPrompt.SeanEllis)
     }
 
     @Test
-    fun `evaluateSurveyEligibility returns null when lastSurveyKnown`() = runTest {
-        coEvery { userPreferences.lastLoginDate } returns flowOf("2026-05-01")
+    fun `evaluateSurveyEligibility returns null when last survey is recent`() = runTest {
+        val recent = UserSurveyEntity(
+            id = "s1", surveyType = "NPS", score = 9, responseText = null,
+            triggerEvent = "test", daysActive = 21,
+            completedAt = System.currentTimeMillis() - 3L * 24 * 60 * 60 * 1000,
+        )
+        coEvery { surveyDao.getCount() } returns 1
+        coEvery { surveyDao.getAll() } returns flowOf(listOf(recent))
 
         val survey = surveyManager.evaluateSurveyEligibility(daysActive = 21, sessionCount = 10)
 

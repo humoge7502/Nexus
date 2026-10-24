@@ -59,7 +59,12 @@ import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.domain.model.Goal
 import com.nexus.domain.model.GoalCategory
+import com.nexus.domain.model.UiState
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import java.time.format.DateTimeFormatter
 
 data class GoalItem(
     val id: String,
@@ -70,13 +75,6 @@ data class GoalItem(
     val isCompleted: Boolean,
 )
 
-private val sampleGoals = listOf(
-    GoalItem("g1", "AWS Cloud Practitioner", GoalCategory.CERTIFICATION, 0.68f, "Dec 30, 2024", false),
-    GoalItem("g2", "LeetCode 150 Problems", GoalCategory.DSA, 0.42f, "Jan 15, 2025", false),
-    GoalItem("g3", "Complete React Course", GoalCategory.SKILL, 0.15f, "Feb 1, 2025", false),
-    GoalItem("g4", "Apply to 20 Internships", GoalCategory.INTERNSHIP, 0.55f, "Mar 1, 2025", false),
-    GoalItem("g5", "Build Portfolio Website", GoalCategory.PROJECT, 0.0f, "Jan 10, 2025", false),
-)
 
 private fun categoryIcon(cat: GoalCategory): ImageVector = when (cat) {
     GoalCategory.CERTIFICATION -> Icons.Default.School
@@ -93,8 +91,14 @@ private fun categoryIcon(cat: GoalCategory): ImageVector = when (cat) {
 @Composable
 fun GoalsScreen(
     onBack: () -> Unit = {},
+    viewModel: GoalsViewModel = hiltViewModel(),
 ) {
-    var goals by remember { mutableStateOf(sampleGoals) }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val goals: List<GoalItem> = when (val s = uiState) {
+        is UiState.Success -> s.data.map { it.toItem() }
+        else -> emptyList()
+    }
+    val isLoading = uiState is UiState.Loading
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
@@ -146,19 +150,45 @@ fun GoalsScreen(
                 }
             }
 
-            items(goals) { goal ->
-                GoalCard(
-                    goal = goal,
-                    onToggleComplete = {
-                        goals = goals.map {
-                            if (it.id == goal.id) it.copy(
-                                isCompleted = !it.isCompleted,
-                                progress = if (!it.isCompleted) 1f else 0f,
-                            ) else it
-                        }
-                    },
-                    onDelete = { goals = goals.filter { it.id != goal.id } },
-                )
+            when {
+                isLoading && goals.isEmpty() -> item {
+                    Text(
+                        "Loading your goals...",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    )
+                }
+                goals.isEmpty() -> item {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
+                    ) {
+                        Text(
+                            "No goals yet",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "Tap + to set your first goal — certification, DSA count, anything.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        )
+                    }
+                }
+                else -> items(goals, key = { it.id }) { goal ->
+                    GoalCard(
+                        goal = goal,
+                        onToggleComplete = {
+                            if (!goal.isCompleted) viewModel.completeGoal(goal.id)
+                            else viewModel.updateProgress(goal.id, 0f)
+                        },
+                        onDelete = { viewModel.deleteGoal(goal.id) },
+                    )
+                }
             }
 
             item { Spacer(Modifier.height(80.dp)) }
@@ -244,3 +274,12 @@ private fun GoalCard(
         }
     }
 }
+
+private fun Goal.toItem(): GoalItem = GoalItem(
+    id = id,
+    title = title,
+    category = category,
+    progress = progress,
+    targetDate = targetDate?.format(DateTimeFormatter.ofPattern("MMM d, yyyy")) ?: "No deadline",
+    isCompleted = isCompleted,
+)

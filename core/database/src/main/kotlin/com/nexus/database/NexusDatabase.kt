@@ -109,7 +109,7 @@ abstract class NexusDatabase : RoomDatabase() {
     abstract fun careerMirrorDao(): CareerMirrorDao
     abstract fun scoreSnapshotDao(): ScoreSnapshotDao
     abstract fun cohortIntelligenceDao(): CohortIntelligenceDao
-    abstract fun skillVelocityDao(): SkillVelocitySnapshotDao
+    abstract fun skillVelocitySnapshotDao(): SkillVelocitySnapshotDao
     abstract fun interviewReportDao(): InterviewReportDao
     abstract fun opportunityEmbeddingDao(): OpportunityEmbeddingDao
 }

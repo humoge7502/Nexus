@@ -39,6 +39,9 @@ data class CollegeTierBreakdown(
 
 @Dao
 interface CareerMemoryDao {
+    @androidx.room.Query("SELECT * FROM career_memory")
+    suspend fun getAllEntities(): List<CareerMemoryEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(memory: CareerMemoryEntity)
 
@@ -125,6 +128,9 @@ interface UserSurveyDao {
 
 @Dao
 interface InterviewOutcomeDao {
+    @androidx.room.Query("SELECT * FROM interview_outcomes")
+    suspend fun getAllEntities(): List<InterviewOutcomeEntity>
+
     @Query("SELECT * FROM interview_outcomes ORDER BY interviewDate DESC")
     fun getAll(): Flow<List<InterviewOutcomeEntity>>
 
@@ -164,6 +170,9 @@ interface InterviewOutcomeDao {
 
 @Dao
 interface ConfidenceAssessmentDao {
+    @androidx.room.Query("SELECT * FROM confidence_assessments")
+    suspend fun getAllEntities(): List<ConfidenceSelfAssessmentEntity>
+
     @Query("SELECT * FROM confidence_assessments ORDER BY createdAt DESC")
     fun getAll(): Flow<List<ConfidenceSelfAssessmentEntity>>
 
@@ -182,6 +191,9 @@ interface ConfidenceAssessmentDao {
 
 @Dao
 interface PlacementForecastDao {
+    @androidx.room.Query("SELECT * FROM placement_forecasts")
+    suspend fun getAllEntities(): List<PlacementForecastEntity>
+
     @Query("SELECT * FROM placement_forecasts WHERE userId = :userId ORDER BY calculatedAt DESC")
     fun getById(userId: String): Flow<List<PlacementForecastEntity>>
 
@@ -203,6 +215,9 @@ interface PlacementForecastDao {
 
 @Dao
 interface CareerMirrorDao {
+    @androidx.room.Query("SELECT * FROM career_mirrors")
+    suspend fun getAllEntities(): List<CareerMirrorEntity>
+
     @Query("SELECT * FROM career_mirrors WHERE userId = :userId ORDER BY periodStart DESC")
     fun getByUserId(userId: String): Flow<List<CareerMirrorEntity>>
 
@@ -221,6 +236,9 @@ interface CareerMirrorDao {
 
 @Dao
 interface ScoreSnapshotDao {
+    @androidx.room.Query("SELECT * FROM score_snapshots")
+    suspend fun getAllEntities(): List<ScoreSnapshotEntity>
+
     @Query("SELECT * FROM score_snapshots WHERE userId = :userId ORDER BY recordedAt ASC")
     fun getHistoryForUser(userId: String): Flow<List<ScoreSnapshotEntity>>
 
@@ -278,6 +296,9 @@ interface CohortIntelligenceDao {
 
 @Dao
 interface SkillVelocitySnapshotDao {
+    @androidx.room.Query("SELECT * FROM skill_velocity")
+    suspend fun getAllEntities(): List<SkillVelocitySnapshotEntity>
+
     @Query("SELECT * FROM skill_velocity WHERE userId = :userId ORDER BY recordedAt DESC")
     fun getByUserId(userId: String): Flow<List<SkillVelocitySnapshotEntity>>
 

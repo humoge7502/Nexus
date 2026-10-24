@@ -1,10 +1,7 @@
 package com.nexus.notifications
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,10 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -35,22 +30,18 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.nexus.designsystem.component.EmptyState
-import com.nexus.designsystem.component.NexusCard
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
-import com.nexus.designsystem.theme.NexusShapes
-import com.nexus.domain.model.NotificationItem
-import com.nexus.domain.model.NotificationType
+import com.nexus.domain.model.UiState
 
 data class NotificationDisplay(
     val id: String,
@@ -58,27 +49,21 @@ data class NotificationDisplay(
     val title: String,
     val body: String,
     val time: String,
-    val type: NotificationType,
+    val type: com.nexus.domain.model.NotificationType,
     val isRead: Boolean,
-)
-
-private val sampleNotifications = listOf(
-    NotificationDisplay("n1", "\uD83C\uDFE2", "New Internship Match", "Google STEP Internship - 98% match for your profile", "2m ago", NotificationType.OPPORTUNITY_ALERT, false),
-    NotificationDisplay("n2", "\u23F0", "Deadline Approaching", "Amazon SDE Internship closes in 3 days", "1h ago", NotificationType.DEADLINE_REMINDER, false),
-    NotificationDisplay("n3", "\uD83C\uDFC6", "Achievement Unlocked", "First Streak badge earned! 7-day streak completed.", "3h ago", NotificationType.ACHIEVEMENT_UNLOCKED, true),
-    NotificationDisplay("n4", "\uD83D\uDD25", "Streak at Risk", "Complete today's challenge to maintain your 23-day streak!", "5h ago", NotificationType.STREAK_REMINDER, false),
-    NotificationDisplay("n5", "\uD83E\uDD16", "AI Insight", "Based on your profile, GSOC opens in 12 days. Your React skills are a strong match!", "1d ago", NotificationType.AI_INSIGHT, true),
-    NotificationDisplay("n6", "\uD83D\uDE80", "Level Up!", "You've reached Engineer level! 2,450 XP earned.", "2d ago", NotificationType.LEVEL_UP, true),
-    NotificationDisplay("n7", "\uD83D\uDCCA", "Weekly Report", "You applied to 3 internships this week. Career score up by 12 points!", "3d ago", NotificationType.WEEKLY_REPORT, true),
-    NotificationDisplay("n8", "\uD83C\uDFAF", "New Hackathon", "Smart India Hackathon registration is now open!", "5d ago", NotificationType.OPPORTUNITY_ALERT, true),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationsScreen(
     onBack: () -> Unit = {},
+    viewModel: NotificationsViewModel = hiltViewModel(),
 ) {
-    var notifications by remember { mutableStateOf(sampleNotifications) }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val notifications: List<NotificationDisplay> = when (val s = uiState) {
+        is UiState.Success -> s.data.map { it.toDisplay() }
+        else -> emptyList()
+    }
     val unreadCount = notifications.count { !it.isRead }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -107,9 +92,7 @@ fun NotificationsScreen(
             },
             actions = {
                 if (notifications.any { !it.isRead }) {
-                    TextButton(onClick = {
-                        notifications = notifications.map { it.copy(isRead = true) }
-                    }) {
+                    TextButton(onClick = { viewModel.markAllAsRead() }) {
                         Text("Mark all read", style = MaterialTheme.typography.labelMedium)
                     }
                 }
@@ -118,25 +101,38 @@ fun NotificationsScreen(
         )
 
         if (notifications.isEmpty()) {
-            EmptyState(
-                icon = { Icon(Icons.Default.Notifications, contentDescription = null,
-                    modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant) },
-                title = "No notifications yet",
-                description = "We'll notify you about new opportunities, deadlines, and achievements.",
-            )
+            Column(
+                modifier = Modifier.fillMaxSize().padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Icon(
+                    Icons.Default.Notifications, contentDescription = null,
+                    modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    "No notifications yet",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "We'll notify you about new opportunities, deadlines, and achievements.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         } else {
             LazyColumn(
+                modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                items(notifications) { notification ->
+                items(notifications, key = { it.id }) { notification ->
                     NotificationCard(
                         notification = notification,
-                        onRead = {
-                            notifications = notifications.map {
-                                if (it.id == notification.id) it.copy(isRead = true) else it
-                            }
-                        },
+                        onRead = { viewModel.markAsRead(notification.id) },
                     )
                 }
             }
@@ -149,66 +145,80 @@ private fun NotificationCard(
     notification: NotificationDisplay,
     onRead: () -> Unit,
 ) {
-    AnimatedVisibility(
-        visible = true,
-        enter = fadeIn() + slideInVertically(animationSpec = spring()) { it / 2 },
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                if (notification.isRead) Color.Transparent
+                else NexusColors.Indigo500.copy(alpha = 0.08f),
+                shape = MaterialTheme.shapes.medium,
+            )
+            .clickable(onClick = onRead)
+            .padding(12.dp),
+        verticalAlignment = Alignment.Top,
     ) {
-        NexusCard(
-            onClick = if (!notification.isRead) onRead else null,
-            modifier = Modifier.fillMaxWidth(),
-            shape = NexusShapes.sm,
-            glassEffect = notification.isRead,
+        Box(
+            modifier = Modifier.size(40.dp).clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center,
         ) {
-            Row(verticalAlignment = Alignment.Top) {
-                Box(
-                    modifier = Modifier.size(40.dp).clip(CircleShape)
-                        .background(
-                            if (notification.isRead) MaterialTheme.colorScheme.surfaceVariant
-                            else when (notification.type) {
-                                NotificationType.OPPORTUNITY_ALERT -> NexusColors.NexusBlue.copy(alpha = 0.15f)
-                                NotificationType.DEADLINE_REMINDER -> NexusColors.PlasmaOrange.copy(alpha = 0.15f)
-                                NotificationType.ACHIEVEMENT_UNLOCKED -> NexusColors.StellarPink.copy(alpha = 0.15f)
-                                NotificationType.STREAK_REMINDER -> NexusColors.AuroraGreen.copy(alpha = 0.15f)
-                                NotificationType.AI_INSIGHT -> NexusColors.ElectricIndigo.copy(alpha = 0.15f)
-                                else -> MaterialTheme.colorScheme.surfaceVariant
-                            }
-                        ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(notification.emoji, style = MaterialTheme.typography.titleSmall)
-                }
-                Spacer(Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            notification.title,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = if (notification.isRead) FontWeight.Normal
-                                else FontWeight.SemiBold,
-                            modifier = Modifier.weight(1f),
-                        )
-                        if (!notification.isRead) {
-                            Box(
-                                modifier = Modifier.size(8.dp).clip(CircleShape)
-                                    .background(NexusColors.NexusBlue)
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(2.dp))
-                    Text(
-                        notification.body,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        notification.time,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                    )
-                }
-            }
+            Text(notification.emoji, fontSize = 18.sp)
         }
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                notification.title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = if (notification.isRead) FontWeight.Normal else FontWeight.SemiBold,
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                notification.body,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                notification.time,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            )
+        }
+        if (!notification.isRead) {
+            Spacer(Modifier.width(8.dp))
+            Box(
+                modifier = Modifier.size(8.dp).clip(CircleShape)
+                    .background(NexusColors.Indigo400),
+            )
+        }
+    }
+}
+
+private fun com.nexus.domain.model.NotificationItem.toDisplay() = NotificationDisplay(
+    id = id,
+    emoji = when (type) {
+        com.nexus.domain.model.NotificationType.OPPORTUNITY_ALERT -> "🚀"
+        com.nexus.domain.model.NotificationType.DEADLINE_REMINDER -> "⏰"
+        com.nexus.domain.model.NotificationType.ACHIEVEMENT_UNLOCKED -> "🏆"
+        com.nexus.domain.model.NotificationType.STREAK_REMINDER -> "🔥"
+        com.nexus.domain.model.NotificationType.AI_INSIGHT -> "🧠"
+        com.nexus.domain.model.NotificationType.LEVEL_UP -> "📈"
+        com.nexus.domain.model.NotificationType.WEEKLY_REPORT -> "📊"
+        com.nexus.domain.model.NotificationType.SYSTEM -> "⚙"
+    },
+    title = title,
+    body = body,
+    time = formatRelative(createdAt),
+    type = type,
+    isRead = isRead,
+)
+
+private fun formatRelative(time: java.time.Instant): String {
+    val mins = java.time.Duration.between(time, java.time.Instant.now()).toMinutes()
+    return when {
+        mins < 1 -> "just now"
+        mins < 60 -> mins.toString() + "m ago"
+        mins < 60 * 24 -> (mins / 60).toString() + "h ago"
+        else -> (mins / (60 * 24)).toString() + "d ago"
     }
 }

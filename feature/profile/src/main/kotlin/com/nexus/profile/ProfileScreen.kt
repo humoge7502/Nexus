@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -33,6 +34,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,12 +59,21 @@ fun ProfileScreen(
     onSettings: () -> Unit,
     onAchievements: () -> Unit = {},
     onLeaderboard: () -> Unit = {},
+    onGoPro: () -> Unit = {},
+    viewModel: ProfileViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val displayName = uiState.name.ifBlank { "CSE Student" }
+    val avatarInitial = displayName.trim().firstOrNull()?.uppercase() ?: "N"
+
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text("Profile", fontWeight = FontWeight.Bold) },
             navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Back") } },
-            actions = { IconButton(onClick = onSettings) { Icon(Icons.Default.Settings, contentDescription = "Settings") } },
+            actions = {
+                IconButton(onClick = onGoPro) { Icon(Icons.Default.WorkspacePremium, contentDescription = "NEXUS Pro", tint = Color(0xFFF59E0B)) }
+                IconButton(onClick = onSettings) { Icon(Icons.Default.Settings, contentDescription = "Settings") }
+            },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
         )
 
@@ -72,10 +84,10 @@ fun ProfileScreen(
             Box(modifier = Modifier.size(100.dp).clip(CircleShape).background(
                 brush = Brush.linearGradient(listOf(Color(0xFF6366F1), Color(0xFF8B5CF6)))
             ), contentAlignment = Alignment.Center) {
-                Text(text = "K", style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Bold, color = Color.White)
+                Text(text = avatarInitial, style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Bold, color = Color.White)
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Krishna", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+            Text(text = displayName, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
             Text(text = "CSE Student", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {

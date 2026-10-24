@@ -40,6 +40,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -77,27 +79,7 @@ data class RecentUnlock(
     val timestamp: String,
 )
 
-private val sampleBadges = persistentListOf(
-    AchievementBadge("1", "\uD83D\uDD25", "First Streak", true),
-    AchievementBadge("2", "\uD83D\uDCAA", "10 Applications", true),
-    AchievementBadge("3", "\uD83C\uDF1F", "Certification Star", true),
-    AchievementBadge("4", "\uD83D\uDE80", "Super Streak", true),
-    AchievementBadge("5", "\uD83C\uDFAF", "Interview Ready", true),
-    AchievementBadge("6", "\uD83C\uDFC6", "Master Coder", true),
-    AchievementBadge("7", "\u26A1", "Speed Runner", false),
-    AchievementBadge("8", "\uD83D\uDCDA", "Scholar", false),
-    AchievementBadge("9", "\uD83E\uDD1D", "Networker", false),
-    AchievementBadge("10", "\uD83C\uDFA8", "Portfolio Pro", false),
-    AchievementBadge("11", "\uD83E\uDDE0", "AI Master", false),
-    AchievementBadge("12", "\uD83D\uDCBC", "Intern Achiever", false),
-)
 
-private val sampleRecentUnlocks = persistentListOf(
-    RecentUnlock("1", "First Streak", "\uD83D\uDD25", "2h ago"),
-    RecentUnlock("2", "10 Applications", "\uD83D\uDCAA", "1d ago"),
-    RecentUnlock("3", "Certification Star", "\uD83C\uDF1F", "3d ago"),
-    RecentUnlock("4", "Super Streak", "\uD83D\uDE80", "5d ago"),
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -105,15 +87,29 @@ fun AchievementsScreen(
     onBack: () -> Unit = {},
     onSettings: () -> Unit = {},
     onLeaderboard: () -> Unit = {},
+    viewModel: AchievementsViewModel = hiltViewModel(),
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val badges = (uiState.allAchievements as? com.nexus.domain.model.UiState.Success)?.data
+        ?.map { AchievementBadge(it.id, badgeEmoji(it.type), it.title, it.isUnlocked) }
+        ?: emptyList()
+
+    val unlocks = (uiState.unlockedAchievements as? com.nexus.domain.model.UiState.Success)?.data
+        ?.filter { it.unlockedAt != null }
+        ?.sortedByDescending { it.unlockedAt }
+        ?.take(4)
+        ?.map { RecentUnlock(it.id, it.title, badgeEmoji(it.type), it.unlockedAt.toString()) }
+        ?: emptyList()
+
     val animatedXp by animateFloatAsState(
-        targetValue = 2450f / 4000f,
+        targetValue = (uiState.totalXP.toFloat() / uiState.xpToNextLevel.coerceAtLeast(1)).coerceIn(0f, 1f),
         animationSpec = spring(dampingRatio = 0.7f, stiffness = 100f),
         label = "xpProgress",
     )
 
     val animatedScore by animateFloatAsState(
-        targetValue = 847f / 1000f,
+        targetValue = (uiState.nexusScore / 1000f).coerceIn(0f, 1f),
         animationSpec = tween(1500),
         label = "scoreArc",
     )
@@ -138,25 +134,25 @@ fun AchievementsScreen(
 
         item {
             LevelXpCard(
-                level = 3,
-                title = "Engineer",
-                currentXp = 2450,
-                xpForNext = 4000,
+                level = uiState.level,
+                title = uiState.levelName,
+                currentXp = uiState.totalXP,
+                xpForNext = uiState.xpToNextLevel,
                 animatedProgress = animatedXp,
             )
         }
 
         item {
             NexusScoreCard(
-                score = 847,
-                weeklyChange = 12,
-                percentile = 8,
+                score = uiState.nexusScore,
+                weeklyChange = uiState.weeklyChange,
+                percentile = uiState.percentile,
                 animatedProgress = animatedScore,
             )
         }
 
         item {
-            BadgeGallery(badges = sampleBadges)
+            BadgeGallery(badges = badges)
         }
 
         item {
@@ -164,7 +160,7 @@ fun AchievementsScreen(
         }
 
         item {
-            RecentUnlocksSection(unlocks = sampleRecentUnlocks)
+            RecentUnlocksSection(unlocks = unlocks)
         }
 
         item {
@@ -486,4 +482,17 @@ private fun RecentUnlockCard(unlock: RecentUnlock) {
             )
         }
     }
+}
+
+private fun badgeEmoji(type: com.nexus.domain.model.AchievementType): String = when (type) {
+    com.nexus.domain.model.AchievementType.FIRST_INTERNSHIP -> "💼"
+    com.nexus.domain.model.AchievementType.FIRST_CERTIFICATION -> "🌟"
+    com.nexus.domain.model.AchievementType.STREAK_7 -> "🔥"
+    com.nexus.domain.model.AchievementType.STREAK_30 -> "🚀"
+    com.nexus.domain.model.AchievementType.TEN_APPLICATIONS -> "💪"
+    com.nexus.domain.model.AchievementType.FIVE_CERTS -> "🎖"
+    com.nexus.domain.model.AchievementType.MASTER_CODER -> "🏆"
+    com.nexus.domain.model.AchievementType.NETWORKER -> "🤝"
+    com.nexus.domain.model.AchievementType.EARLY_BIRD -> "⚡"
+    com.nexus.domain.model.AchievementType.NIGHT_OWL -> "🌙"
 }

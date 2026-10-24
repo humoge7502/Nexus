@@ -1,9 +1,12 @@
 package com.nexus.home
 
 import com.nexus.common.ApiResult
+import com.nexus.data.repository.ApplicationRepository
 import com.nexus.data.repository.InternshipRepository
+import com.nexus.datastore.UserPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -21,13 +24,22 @@ class HomeViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var repository: InternshipRepository
+    private lateinit var applicationRepository: ApplicationRepository
+    private lateinit var userPreferences: UserPreferences
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         repository = mock()
+        applicationRepository = mock()
+        userPreferences = mock()
         whenever(repository.getAllInternships()).thenReturn(flowOf(emptyList()))
-        whenever(repository.refreshInternships()).thenReturn(ApiResult.Success(emptyList()))
+        runBlocking {
+            whenever(repository.refreshInternships()).thenReturn(ApiResult.Success(emptyList()))
+        }
+        whenever(applicationRepository.getAllApplications()).thenReturn(flowOf(emptyList()))
+        whenever(userPreferences.displayName).thenReturn(flowOf("Test User"))
+        whenever(userPreferences.studyStreak).thenReturn(flowOf(7))
     }
 
     @After
@@ -37,21 +49,29 @@ class HomeViewModelTest {
 
     @Test
     fun `initial state exposes ui state immediately`() = runTest(testDispatcher) {
-        val viewModel = HomeViewModel(repository)
+        val viewModel = HomeViewModel(repository, applicationRepository, userPreferences)
         assertNotNull(viewModel.uiState.value)
     }
 
     @Test
-    fun `loading completes after sample data collection`() = runTest(testDispatcher) {
-        val viewModel = HomeViewModel(repository)
+    fun `real display name replaces default`() = runTest(testDispatcher) {
+        val viewModel = HomeViewModel(repository, applicationRepository, userPreferences)
         advanceUntilIdle()
-        assertEquals(false, viewModel.uiState.value.isLoading)
+        assertEquals("Test User", viewModel.uiState.value.userName)
     }
 
     @Test
-    fun `hardcoded stats are seeded until real data lands`() = runTest(testDispatcher) {
-        val viewModel = HomeViewModel(repository)
+    fun `streak comes from preferences`() = runTest(testDispatcher) {
+        val viewModel = HomeViewModel(repository, applicationRepository, userPreferences)
         advanceUntilIdle()
-        assertEquals(23, viewModel.uiState.value.stats.totalApplications)
+        assertEquals(7, viewModel.uiState.value.streakDays)
+    }
+
+    @Test
+    fun `blank name falls back to aspirational default`() = runTest(testDispatcher) {
+        whenever(userPreferences.displayName).thenReturn(flowOf(""))
+        val viewModel = HomeViewModel(repository, applicationRepository, userPreferences)
+        advanceUntilIdle()
+        assertEquals("Future Engineer", viewModel.uiState.value.userName)
     }
 }

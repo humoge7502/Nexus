@@ -36,8 +36,9 @@ class InternshipRepositoryTest {
     val entities = listOf(
       InternshipEntity(
         id = "1", title = "Test Intern", companyName = "TestCo",
-        location = "Remote", isRemote = true, durationMonths = 3,
-        applyUrl = "https://test.com/apply", companyLogoUrl = null,
+        companyLogoUrl = null, location = "Remote", isRemote = true,
+        stipendAmount = null, durationMonths = 3,
+        applyUrl = "https://test.com/apply",
       ),
     )
     every { dao.getAllInternships() } returns flowOf(entities)

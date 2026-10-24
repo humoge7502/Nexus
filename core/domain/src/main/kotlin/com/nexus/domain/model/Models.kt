@@ -357,6 +357,7 @@ data class LeaderboardEntry(
     val score: Int = 0,
     val rank: Int = 0,
     val isCurrentUser: Boolean = false,
+    val college: String? = null,
 )
 
 data class NexusScore(

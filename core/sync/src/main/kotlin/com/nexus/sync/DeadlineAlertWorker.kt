@@ -30,7 +30,8 @@ class DeadlineAlertWorker @AssistedInject constructor(
         val threeDaysFromNowEpochDay = todayEpochDay + 3
 
         try {
-            val internships = internshipDao.getInternshipsWithDeadlineBefore(threeDaysFromNowEpochDay)
+            val cutoffMillis = threeDaysFromNowEpochDay * 86_400_000L
+            val internships = internshipDao.getInternshipsWithDeadlineBefore(cutoffMillis, threeDaysFromNowEpochDay)
             internships.forEach { entity ->
                 val daysLeft = entity.deadlineEpochDay() - todayEpochDay
                 val body = when {
@@ -53,7 +54,10 @@ class DeadlineAlertWorker @AssistedInject constructor(
             val threeDaysFromNowEpochDay = LocalDate.now().plusDays(3).toEpochDay()
             val hackathons = hackathonDao.getAll().first()
             hackathons.forEach { entity ->
-                if (entity.registrationDeadline in (todayEpochDay + 1)..threeDaysFromNowEpochDay) {
+                val regEpochDay = if (entity.registrationDeadline > 10_000_000_000L)
+                    Instant.ofEpochMilli(entity.registrationDeadline).atZone(ZoneId.systemDefault()).toLocalDate().toEpochDay()
+                else entity.registrationDeadline
+                if (regEpochDay in (todayEpochDay + 1)..threeDaysFromNowEpochDay) {
                     NotificationHelper.showNotification(
                         context = applicationContext,
                         title = "Hackathon Deadline: ${entity.title}",

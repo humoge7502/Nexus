@@ -40,6 +40,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -93,10 +95,17 @@ fun ExploreScreen(
     onHackathonClick: (String) -> Unit = {},
     onCertificationClick: (String) -> Unit = {},
     onBack: () -> Unit = {},
+    viewModel: ExploreViewModel = hiltViewModel(),
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("Internships") }
     var selectedFilters by remember { mutableStateOf(setOf<String>()) }
+
+    val exploreItems: List<ExploreItem> = (uiState.internships as? com.nexus.domain.model.UiState.Success)
+        ?.data?.take(10)?.map { it.toExploreItem() } ?: emptyList()
+    val liveHackathons = (uiState.hackathons as? com.nexus.domain.model.UiState.Success)
+        ?.data?.take(6) ?: emptyList()
 
     val filters = listOf("Remote", "Paid", "AI/ML", "Web", "Mobile", "Cloud")
 
@@ -197,7 +206,17 @@ fun ExploreScreen(
 
         item { Spacer(modifier = Modifier.height(8.dp)) }
 
-        items(sampleExploreItems) { item ->
+        if (exploreItems.isEmpty() && uiState.internships is com.nexus.domain.model.UiState.Success) {
+            item {
+                Text(
+                    "No opportunities match yet — pull in internships from the Internships tab to see them here.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 24.dp),
+                )
+            }
+        }
+        items(exploreItems, key = { it.id }) { item ->
             ExploreOpportunityCard(
                 title = item.title,
                 org = item.org,
@@ -218,7 +237,7 @@ fun ExploreScreen(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        items(sampleHackathons) { hackathon ->
+        items(liveHackathons, key = { it.id }) { hackathon ->
             HackathonCard(hackathon = hackathon, onClick = { onHackathonClick(hackathon.id) })
         }
     }
@@ -355,24 +374,10 @@ private data class ExploreItem(
     val matchScore: Int, val tags: List<String>,
 )
 
-private val sampleExploreItems = listOf(
-    ExploreItem("e1", "Google STEP Internship", "Google", 98, listOf("Python", "DSA")),
-    ExploreItem("e2", "Microsoft Learn Intern", "Microsoft", 91, listOf("Cloud", "Azure")),
-    ExploreItem("e3", "Amazon SDE Intern", "Amazon", 87, listOf("Java", "System Design")),
-    ExploreItem("e4", "Flipkart GRiD", "Flipkart", 85, listOf("Web", "Mobile")),
-    ExploreItem("e5", "Goldman Sachs Intern", "Goldman Sachs", 82, listOf("Finance", "DSA")),
-    ExploreItem("e6", "Stripe Backend Intern", "Stripe", 79, listOf("Go", "APIs")),
-)
-
-private val sampleHackathons = listOf(
-    Hackathon("h1", "Smart India Hackathon", "SIH", mode = com.nexus.domain.model.EventMode.HYBRID,
-        startDate = LocalDate.now(), endDate = LocalDate.now().plusDays(2),
-        registrationDeadline = LocalDate.now().plusDays(3), prizePool = "₹1,00,000",
-        registrationUrl = "https://sih.gov.in", isLive = true,
-        tags = kotlinx.collections.immutable.persistentListOf("AI", "Web")),
-    Hackathon("h2", "MLH Hackathon", "Major League Hacking", mode = com.nexus.domain.model.EventMode.ONLINE,
-        startDate = LocalDate.now().plusDays(5), endDate = LocalDate.now().plusDays(7),
-        registrationDeadline = LocalDate.now().plusDays(1), prizePool = "$5,000",
-        registrationUrl = "https://mlh.io", isLive = true,
-        tags = kotlinx.collections.immutable.persistentListOf("All")),
+private fun com.nexus.domain.model.Internship.toExploreItem() = ExploreItem(
+    id = id,
+    title = title,
+    org = company.name,
+    matchScore = (relevanceScore * 100).toInt(),
+    tags = tags.take(3),
 )

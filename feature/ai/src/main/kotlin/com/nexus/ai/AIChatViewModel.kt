@@ -12,6 +12,7 @@ import com.nexus.datastore.UserPreferences
 import com.nexus.domain.model.AIConversation
 import com.nexus.domain.model.AIMessage
 import com.nexus.domain.model.AiMessageRole
+import com.nexus.domain.repository.ISkillGraphRepository
 import com.nexus.domain.usecase.AIResponseValidator
 import com.nexus.domain.usecase.AIWarning
 import com.nexus.data.usecase.CareerMemoryManager

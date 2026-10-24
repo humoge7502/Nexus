@@ -1,10 +1,11 @@
 package com.nexus.data.repository
 
-import com.nexus.common.NexusResult
+import com.nexus.common.ApiResult
 import com.nexus.database.dao.DSAProblemDao
 import com.nexus.network.api.LeetCodeApiService
 import com.nexus.network.dto.LeetCodeUserDto
-import io.mockk.*
+import io.mockk.MockKAnnotations
+import io.mockk.coEvery
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -29,7 +30,7 @@ class LeetCodeRepositoryTest {
   }
 
   @Test
-  fun `syncUserStats returns success with valid data`() = runTest {
+  fun `getStats returns parsed stats on success`() = runTest {
     val dto = LeetCodeUserDto(
       username = "testuser",
       totalSolved = 150,
@@ -40,16 +41,16 @@ class LeetCodeRepositoryTest {
     )
     coEvery { api.getUserStats("testuser") } returns Response.success(dto)
 
-    val result = repository.syncUserStats("testuser")
-    assertTrue(result.isSuccess)
-    assertEquals(150, (result as NexusResult.Success).data.totalSolved)
+    val result = repository.getStats("testuser")
+    assertTrue(result is ApiResult.Success)
+    assertEquals(150, (result as ApiResult.Success).data.totalSolved)
   }
 
   @Test
-  fun `syncUserStats returns error on exception`() = runTest {
+  fun `getStats returns error on exception`() = runTest {
     coEvery { api.getUserStats("testuser") } throws Exception("API down")
 
-    val result = repository.syncUserStats("testuser")
-    assertTrue(result.isError)
+    val result = repository.getStats("testuser")
+    assertTrue(result is ApiResult.Error)
   }
 }

@@ -232,7 +232,14 @@ fun NexusMainScaffold() {
                         onBack = { navController.popBackStack() },
                         onSettings = { navController.navigate(NexusDestination.Settings) },
                         onAchievements = { navController.navigate(NexusDestination.Achievements) },
-                        onLeaderboard = { navController.navigate(NexusDestination.Leaderboard) }
+                        onLeaderboard = { navController.navigate(NexusDestination.Leaderboard) },
+                        onGoPro = { navController.navigate(NexusDestination.Paywall) }
+                    )
+                }
+                composable<NexusDestination.Paywall> {
+                    com.nexus.paywall.PaywallScreen(
+                        onDismiss = { navController.popBackStack() },
+                        onPurchased = { navController.popBackStack() },
                     )
                 }
                 composable<NexusDestination.Achievements> {

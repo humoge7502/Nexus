@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AIDao {
+    @androidx.room.Query("SELECT * FROM ai_conversations")
+    suspend fun getAllEntities(): List<AIConversationEntity>
+
     @Query("SELECT * FROM ai_conversations ORDER BY lastMessageAt DESC")
     fun getAllConversations(): Flow<List<AIConversationEntity>>
 

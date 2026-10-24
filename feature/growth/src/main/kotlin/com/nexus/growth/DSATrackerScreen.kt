@@ -35,6 +35,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexus.domain.model.UiState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,18 +65,6 @@ data class DSAProblemDisplay(
     val isSolved: Boolean,
 )
 
-private val sampleProblems = listOf(
-    DSAProblemDisplay("p1", "Two Sum", "Easy", "Arrays", "LeetCode", true),
-    DSAProblemDisplay("p2", "Reverse Linked List", "Easy", "Linked Lists", "LeetCode", true),
-    DSAProblemDisplay("p3", "Valid Parentheses", "Easy", "Stack", "LeetCode", true),
-    DSAProblemDisplay("p4", "Maximum Subarray", "Medium", "Arrays", "LeetCode", true),
-    DSAProblemDisplay("p5", "LRU Cache", "Medium", "Design", "LeetCode", false),
-    DSAProblemDisplay("p6", "Merge Intervals", "Medium", "Arrays", "LeetCode", false),
-    DSAProblemDisplay("p7", "Serialize and Deserialize BT", "Hard", "Trees", "LeetCode", false),
-    DSAProblemDisplay("p8", "Median of Two Sorted Arrays", "Hard", "Arrays", "LeetCode", false),
-    DSAProblemDisplay("p9", "Longest Palindromic Substring", "Medium", "Strings", "LeetCode", true),
-    DSAProblemDisplay("p10", "Number of Islands", "Medium", "Graph", "LeetCode", false),
-)
 
 private val difficultyColors = mapOf(
     "Easy" to NexusGradients.Success[0],
@@ -85,9 +76,14 @@ private val difficultyColors = mapOf(
 @Composable
 fun DSATrackerScreen(
     onBack: () -> Unit = {},
+    viewModel: GrowthViewModel = hiltViewModel(),
 ) {
     var selectedFilter by remember { mutableStateOf("All") }
-    var problems by remember { mutableStateOf(sampleProblems) }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val problems: List<DSAProblemDisplay> = when (val s = uiState.problems) {
+        is UiState.Success -> s.data.map { it.toDisplay() }
+        else -> emptyList()
+    }
     val filters = listOf("All", "Easy", "Medium", "Hard")
 
     val solvedCount = problems.count { it.isSolved }
@@ -183,9 +179,11 @@ fun DSATrackerScreen(
                 DSAProblemCard(
                     problem = problem,
                     onToggleSolved = {
-                        problems = problems.map {
-                            if (it.id == problem.id) it.copy(isSolved = !it.isSolved) else it
-                        }
+                        viewModel.updateProblemStatus(
+                            problem.id,
+                            if (problem.isSolved) com.nexus.domain.model.DsaStatus.ATTEMPTED
+                            else com.nexus.domain.model.DsaStatus.SOLVED,
+                        )
                     },
                 )
             }
@@ -252,3 +250,12 @@ private fun DSAProblemCard(
         }
     }
 }
+
+private fun com.nexus.domain.model.DSAProblem.toDisplay() = DSAProblemDisplay(
+    id = id,
+    title = title,
+    difficulty = difficulty.name.lowercase().replaceFirstChar { it.uppercase() },
+    category = category.ifBlank { topics.joinToString(", ") },
+    platform = platform,
+    isSolved = status == com.nexus.domain.model.DsaStatus.SOLVED,
+)

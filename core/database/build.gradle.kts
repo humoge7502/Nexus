@@ -27,3 +27,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.coroutines.test)
 }
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}

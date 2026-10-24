@@ -22,7 +22,7 @@ class FirebaseFunctionsAIService @Inject constructor(
             .call()
             .await()
         @Suppress("UNCHECKED_CAST")
-        (result.data as? Map<String, Any?>)?.let { data ->
+        (result.getData() as? Map<String, Any?>)?.let { data ->
             HealthResult(
                 status = data["status"] as? String ?: "unknown",
                 timestamp = (data["timestamp"] as? Number)?.toLong() ?: 0L,
@@ -40,7 +40,7 @@ class FirebaseFunctionsAIService @Inject constructor(
             .call(request)
             .await()
         @Suppress("UNCHECKED_CAST")
-        (result.data as? Map<String, Any?>)?.let { data ->
+        (result.getData() as? Map<String, Any?>)?.let { data ->
             AIProxyResult(
                 id = data["id"] as? String ?: "",
                 content = data["content"] as? String ?: "",
@@ -62,7 +62,7 @@ class FirebaseFunctionsAIService @Inject constructor(
             .call(request)
             .await()
         @Suppress("UNCHECKED_CAST")
-        (result.data as? Map<String, Any?>)?.let { data ->
+        (result.getData() as? Map<String, Any?>)?.let { data ->
             FeedResult(
                 results = (data["results"] as? List<Map<String, Any?>>) ?: emptyList(),
                 total = (data["total"] as? Number)?.toInt() ?: 0,
@@ -77,7 +77,7 @@ class FirebaseFunctionsAIService @Inject constructor(
             .call(request)
             .await()
         @Suppress("UNCHECKED_CAST")
-        (result.data as? Map<String, Any?>)?.let { data ->
+        (result.getData() as? Map<String, Any?>)?.let { data ->
             OutcomesResult(
                 results = (data["results"] as? List<Map<String, Any?>>) ?: emptyList(),
                 total = (data["total"] as? Number)?.toInt() ?: 0,
@@ -91,7 +91,7 @@ class FirebaseFunctionsAIService @Inject constructor(
             .call(request)
             .await()
         @Suppress("UNCHECKED_CAST")
-        (result.data as? Map<String, Any?>)?.let { data ->
+        (result.getData() as? Map<String, Any?>)?.let { data ->
             CohortResult(
                 results = (data["results"] as? List<Map<String, Any?>>) ?: emptyList(),
                 total = (data["total"] as? Number)?.toInt() ?: 0,

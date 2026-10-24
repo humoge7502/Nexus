@@ -26,6 +26,7 @@ data class PaywallUiState(
 class PaywallViewModel @Inject constructor(
     private val billingManager: BillingManager,
     private val analyticsTracker: AnalyticsTracker,
+    private val userPreferences: com.nexus.datastore.UserPreferences,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PaywallUiState())
@@ -48,7 +49,10 @@ class PaywallViewModel @Inject constructor(
                     )
                     is BillingState.Loading -> _uiState.value = _uiState.value.copy(isLoading = true)
                     is BillingState.Unavailable -> _uiState.value = _uiState.value.copy(isLoading = false)
-                    is BillingState.Purchased -> _uiState.value = _uiState.value.copy(isPro = true)
+                    is BillingState.Purchased -> {
+                        _uiState.value = _uiState.value.copy(isPro = true)
+                        userPreferences.saveIsPro(true)
+                    }
                     is BillingState.Error -> _uiState.value = _uiState.value.copy(isLoading = false)
                 }
             }

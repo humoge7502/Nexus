@@ -9,6 +9,17 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface InternshipDao {
+    @Query("SELECT * FROM internships ORDER BY cached_at DESC LIMIT :limit OFFSET :offset")
+    suspend fun getPage(limit: Int, offset: Int): List<com.nexus.database.entity.InternshipEntity>
+
+    @Query(
+        "SELECT * FROM internships WHERE " +
+        "(deadline > 10000000000 AND deadline <= :cutoffMillis) OR " +
+        "(deadline > 0 AND deadline <= 10000000000 AND deadline <= :cutoffEpochDay) " +
+        "ORDER BY deadline ASC"
+    )
+    suspend fun getInternshipsWithDeadlineBefore(cutoffMillis: Long, cutoffEpochDay: Long): List<com.nexus.database.entity.InternshipEntity>
+
 
     @Query("SELECT * FROM internships ORDER BY posted_at DESC")
     fun getAllInternships(): Flow<List<InternshipEntity>>

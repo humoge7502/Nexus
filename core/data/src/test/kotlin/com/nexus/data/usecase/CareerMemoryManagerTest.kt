@@ -86,6 +86,6 @@ class CareerMemoryManagerTest {
     val mem = CareerMemoryEntity(id = "m1", memoryType = "GOAL", content = "Google", relevanceScore = 0.9f)
     coEvery { mockDao.getTopMemories(any()) } returns listOf(mem)
     manager.buildLongitudinalContext()
-    coVerify { mockDao.recordReference("m1") }
+    coVerify { mockDao.recordReference("m1", any()) }
   }
 }

@@ -19,6 +19,8 @@ class GoalRepository @Inject constructor(
     private val api: NexusApiService,
     private val dao: GoalDao,
 ) {
+    fun getCompletedCount(): Flow<Int> = dao.getCompletedCount()
+
     fun getAllGoals(): Flow<List<Goal>> =
         dao.getAll().map { entities -> entities.map { it.toDomain() } }
 

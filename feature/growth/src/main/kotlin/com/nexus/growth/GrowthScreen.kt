@@ -35,6 +35,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -114,7 +116,9 @@ fun GrowthScreen(
     onOracle: () -> Unit = {},
     onArena: () -> Unit = {},
     onBack: () -> Unit = {},
+    viewModel: GrowthViewModel = hiltViewModel(),
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var visible by remember { mutableFloatStateOf(0f) }
     LaunchedEffect(Unit) { visible = 1f }
 
@@ -139,7 +143,7 @@ fun GrowthScreen(
             contentPadding = PaddingValues(horizontal = NexusSpacing.xl, vertical = NexusSpacing.xs),
             verticalArrangement = Arrangement.spacedBy(NexusSpacing.md),
         ) {
-            item(key = "score_card") { NexusScoreCard() }
+            item(key = "score_card") { NexusScoreCard(nexusScore = uiState.nexusScore, nexusScoreFloat = uiState.nexusScoreFloat) }
             item(key = "radar") { SkillRadarChart(radarAxes) }
             item(key = "streak") { LearningStreak() }
             item(key = "stats") { QuickStatsRow() }
@@ -151,9 +155,9 @@ fun GrowthScreen(
 }
 
 @Composable
-private fun NexusScoreCard() {
+private fun NexusScoreCard(nexusScore: Int, nexusScoreFloat: Float) {
     val animatedScore by animateFloatAsState(
-        targetValue = 847f,
+        targetValue = nexusScore.toFloat().coerceIn(0f, 1000f),
         animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium),
         label = "score",
     )
@@ -184,7 +188,7 @@ private fun NexusScoreCard() {
                         style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
                     )
 
-                    val sweep = 847f / 1000f * 360f
+                    val sweep = nexusScoreFloat.coerceIn(0f, 1f) * 360f
                     drawArc(
                         brush = Brush.sweepGradient(
                             listOf(NexusColors.Indigo500, NexusColors.Cyan400, NexusColors.Indigo500),
@@ -218,7 +222,7 @@ private fun NexusScoreCard() {
             Spacer(Modifier.height(NexusSpacing.xs))
 
             Text(
-                "↑ +12 this week · Top 8% of users",
+                if (nexusScore > 0) "Your live NEXUS Score" else "Start earning XP to build your score",
                 style = MaterialTheme.typography.labelSmall,
                 color = NexusColors.Emerald400,
             )

@@ -1,6 +1,7 @@
 package com.nexus.data.di
 
 import com.nexus.data.repository.*
+import com.nexus.domain.repository.ISkillGraphRepository
 import com.nexus.database.dao.*
 import com.nexus.network.api.NexusApiService
 import dagger.Module
@@ -12,6 +13,9 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object RepositoryModule {
+
+    @Provides @Singleton
+    fun provideSkillGraphRepository(impl: SkillGraphRepository): ISkillGraphRepository = impl
 
     @Provides @Singleton
     fun provideInternshipRepository(api: NexusApiService, dao: InternshipDao): InternshipRepository =

@@ -20,6 +20,10 @@ class DSAProblemRepository @Inject constructor(
     private val api: NexusApiService,
     private val dao: DSAProblemDao,
 ) {
+    fun getSolvedCountFlow(): Flow<Int> = dao.getSolvedCountFlow()
+
+    fun getTotalCount(): Flow<Int> = dao.getTotalCount()
+
     fun getAllProblems(): Flow<List<DSAProblem>> =
         dao.getAll().map { entities -> entities.map { it.toDomain() } }
 

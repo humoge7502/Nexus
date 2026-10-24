@@ -3,6 +3,7 @@ package com.nexus.ai
 import com.nexus.data.usecase.CareerMemoryManager
 import com.nexus.domain.model.UserProfile
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -19,7 +20,9 @@ class SystemPromptBuilderTest {
         careerMemoryManager = mock(CareerMemoryManager::class.java)
         builder = SystemPromptBuilder(careerMemoryManager)
 
-        `when`(careerMemoryManager.buildLongitudinalContext()).thenReturn("")
+        runBlocking {
+            `when`(careerMemoryManager.buildLongitudinalContext()).thenReturn("")
+        }
     }
 
     @Test
@@ -42,8 +45,8 @@ class SystemPromptBuilderTest {
             firstName = "Jane",
             email = "jane@test.com",
             skills = persistentListOf(
-                com.nexus.domain.model.Skill("Kotlin"),
-                com.nexus.domain.model.Skill("Android"),
+                com.nexus.domain.model.Skill(name = "Kotlin"),
+                com.nexus.domain.model.Skill(name = "Android"),
             ),
             interests = persistentListOf(),
         )

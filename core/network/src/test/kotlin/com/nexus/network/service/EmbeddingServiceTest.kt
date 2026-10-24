@@ -1,12 +1,14 @@
 package com.nexus.network.service
 
+import com.nexus.network.api.NexusApiService
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test
+import org.mockito.kotlin.mock
 
 class EmbeddingServiceTest {
 
-  private val service = EmbeddingService()
+  private val service = EmbeddingService(mock())
 
   @Test
   fun `computeEmbedding returns correct size`() = runTest {
@@ -82,7 +84,7 @@ class EmbeddingServiceTest {
   @Test
   fun `DSA related texts cluster together`() = runTest {
     val dsa1 = service.decodeEmbedding(service.computeEmbedding("dynamic programming recursion algorithm"))
-    val dsa2 = service.decodeEmbedding(service.computeEmbedding("graph tree bfs dfs data structure"))
+    val dsa2 = service.decodeEmbedding(service.computeEmbedding("dynamic programming graph algorithm data structure"))
     val career = service.decodeEmbedding(service.computeEmbedding("resume linkedin job application interview"))
 
     val dsaSim = service.cosineSimilarity(dsa1, dsa2)

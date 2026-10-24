@@ -59,8 +59,6 @@ import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import kotlinx.coroutines.launch
 
-data class ChatMessage(val id: String, val text: String, val isUser: Boolean)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AIChatScreen(

@@ -7,6 +7,7 @@ import com.nexus.database.dao.GoalDao
 import com.nexus.domain.model.InsightCategory
 import com.nexus.domain.model.InsightPriority
 import com.nexus.domain.model.ProactiveInsight
+import com.nexus.domain.model.StreakData
 import io.mockk.*
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -34,6 +35,7 @@ class ProactiveInsightEngineTest {
       applicationRepository,
       goalDao,
       careerMemoryManager,
+      placementReadinessCalculator = mockk(relaxed = true),
     )
   }
 
@@ -45,7 +47,7 @@ class ProactiveInsightEngineTest {
     every { applicationRepository.getApplicationCounts() } returns flowOf(
       ApplicationCounts(applied = 0, interviewing = 0, offered = 0, accepted = 0, total = 0),
     )
-    every { goalDao.getActive() } returns emptyList()
+    every { goalDao.getActive() } returns flowOf(emptyList())
 
     val insight = engine.generateDailyInsight()
     assertNotNull(insight)
@@ -62,7 +64,7 @@ class ProactiveInsightEngineTest {
     every { applicationRepository.getApplicationCounts() } returns flowOf(
       ApplicationCounts(applied = 3, interviewing = 1, offered = 0, accepted = 0, total = 3),
     )
-    every { goalDao.getActive() } returns emptyList()
+    every { goalDao.getActive() } returns flowOf(emptyList())
 
     val insight = engine.generateDailyInsight()
     assertNotNull(insight)
@@ -77,7 +79,7 @@ class ProactiveInsightEngineTest {
     every { applicationRepository.getApplicationCounts() } returns flowOf(
       ApplicationCounts(0, 0, 0, 0, 0),
     )
-    every { goalDao.getActive() } returns emptyList()
+    every { goalDao.getActive() } returns flowOf(emptyList())
 
     val insight = engine.generateDailyInsight()
     assertNotNull(insight)
@@ -92,7 +94,7 @@ class ProactiveInsightEngineTest {
     every { applicationRepository.getApplicationCounts() } returns flowOf(
       ApplicationCounts(0, 0, 0, 0, 0),
     )
-    every { goalDao.getActive() } returns emptyList()
+    every { goalDao.getActive() } returns flowOf(emptyList())
 
     val insight = engine.generateDailyInsight()
     assertNotNull(insight)

@@ -133,16 +133,20 @@ score >= 20 -> "Early Stage"
 else -> "Getting Started"
 }
 
-private fun estimatePlacementMonth(score: Float, collegeTier: Int): String {
+private fun estimatePlacementMonth(score: Float, collegeTier: String): String {
+val tierAdjustment = when (collegeTier.uppercase()) {
+"TIER_1", "IIT", "BITS" -> -1
+"TIER_3", "STATE" -> 1
+else -> 0
+}
 val baseMonths = when {
 score >= 80 -> 1
 score >= 60 -> 2
 score >= 40 -> 4
-score >= 20 -> 6
-else -> 9
+else -> 6
 }
-val tierAdjustment = when (collegeTier) {1 -> 0 else -> 2}
-val monthsToReady = (baseMonths + tierAdjustment).coerceIn(1, 12)
-return if (monthsToReady <= 1) "This month" else "~$monthsToReady months from now"
+val total = (baseMonths + tierAdjustment).coerceAtLeast(1)
+val target = java.time.LocalDate.now().plusMonths(total.toLong())
+return target.month.name.lowercase().replaceFirstChar { it.uppercase() } + " " + target.year
 }
 }

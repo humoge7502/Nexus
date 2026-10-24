@@ -12,8 +12,11 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:common"))
     implementation(project(":core:analytics"))
+    implementation(project(":core:datastore"))
     implementation(platform(libs.compose.bom)); implementation(libs.bundles.compose)
     implementation(libs.hilt.android); ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.billing)
+
+    implementation(libs.lifecycle.runtime.compose)
 }

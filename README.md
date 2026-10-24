@@ -3,7 +3,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Kotlin-2.0.21-purple?logo=kotlin" />
   <img src="https://img.shields.io/badge/Compose-BOM_2024.12-blue?logo=jetpackcompose" />
-  <img src="https://img.shields.io/badge/Architecture-MVI-green" />
+  <img src="https://img.shields.io/badge/Architecture-MVVM-green" />
   <img src="https://img.shields.io/badge/Dagger-Hilt-orange" />
   <img src="https://img.shields.io/badge/API-26%2B-brightgreen" />
 </p>
@@ -55,7 +55,7 @@ Nexus/
     └── settings/           # App configuration
 ```
 
-**Pattern**: MVI (Model-View-Intent) + Clean Architecture + Modular
+**Pattern**: MVVM (StateFlow-driven) + Clean Architecture + Modular (MVI migration on roadmap)
 
 ## 🛠️ Tech Stack
 
@@ -64,7 +64,7 @@ Nexus/
 | Language | Kotlin 2.0.21 |
 | UI | Jetpack Compose + Material 3 |
 | Navigation | Compose Navigation (type-safe routes) |
-| Architecture | MVI + Clean Architecture |
+| Architecture | MVVM + Clean Architecture |
 | DI | Dagger Hilt 2.52 |
 | Async | Coroutines + Flow + StateFlow |
 | Local DB | Room 2.6.1 |

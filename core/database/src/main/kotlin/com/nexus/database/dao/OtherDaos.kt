@@ -21,6 +21,9 @@ interface CertificationDao {
 
 @Dao
 interface StudySessionDao {
+    @androidx.room.Query("SELECT * FROM study_sessions")
+    suspend fun getAllEntities(): List<StudySessionEntity>
+
     @Query("SELECT * FROM study_sessions ORDER BY start_time DESC LIMIT 30")
     fun getRecentSessions(): Flow<List<StudySessionEntity>>
 
@@ -33,6 +36,9 @@ interface StudySessionDao {
 
 @Dao
 interface ApplicationDao {
+    @androidx.room.Query("SELECT * FROM applications")
+    suspend fun getAllEntities(): List<ApplicationEntity>
+
     @Query("SELECT * FROM applications ORDER BY updated_at DESC")
     fun getAll(): Flow<List<ApplicationEntity>>
 
@@ -76,6 +82,9 @@ interface ApplicationDao {
 
 @Dao
 interface AchievementDao {
+    @androidx.room.Query("SELECT * FROM achievements")
+    suspend fun getAllEntities(): List<AchievementEntity>
+
     @Query("SELECT * FROM achievements")
     fun getAll(): Flow<List<AchievementEntity>>
 

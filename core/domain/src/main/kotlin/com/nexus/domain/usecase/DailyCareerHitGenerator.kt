@@ -5,9 +5,10 @@ import com.nexus.domain.model.CareerHitCategory
 import com.nexus.domain.model.DailyCareerHit
 import com.nexus.network.api.NexusApiService
 import com.nexus.network.dto.CareerHitDto
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
+import javax.inject.Inject
+import javax.inject.Singleton
 import java.time.LocalDate
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.collections.arrayListOf
 
@@ -24,50 +25,38 @@ class DailyCareerHitGenerator @Inject constructor(
     }
 
     private suspend fun initialize() {
-        if (!initialized) {
-            synchronized(this) {
-                if (!initialized) {
-                    try {
-                        val response = api.getDailyCareerHits()
-                        if (response.isSuccessful) {
-                            val dtoList = response.body() ?: emptyList()
-                            val hitList = dtoList.map { dto ->
-                                DailyCareerHit(
-                                    id = dto.id,
-                                    title = dto.title,
-                                    tip = dto.description,
-                                    category = when (dto.category) {
-                                        "CAREER_TIP" -> CareerHitCategory.CAREER_TIP
-                                        "INTERVIEW_TIP" -> CareerHitCategory.INTERVIEW_TIP
-                                        "PRODUCTIVITY_TIP" -> CareerHitCategory.PRODUCTIVITY_TIP
-                                        "DSA_TIP" -> CareerHitCategory.DSA_TIP
-                                        "RESUME_TIP" -> CareerHitCategory.RESUME_TIP
-                                        "NETWORKING_TIP" -> CareerHitCategory.NETWORKING_TIP
-                                        "SKILL_TIP" -> CareerHitCategory.SKILL_TIP
-                                        else -> CareerHitCategory.CAREER_TIP // default
-                                    },
-                                    xpReward = dto.xpReward
-                                )
-                            }
-                            if (hitList.isNotEmpty()) {
-                                hits.clear()
-                                hits.addAll(hitList)
-                            } else {
-                                // Fallback to hardcoded list if API returns empty
-                                loadHardcodedHits()
-                            }
-                        } else {
-                            // Fallback to hardcoded list on API error
-                            loadHardcodedHits()
-                        }
-                    } catch (e: Exception) {
-                        // Fallback to hardcoded list on exception
-                        loadHardcodedHits()
-                    }
-                    initialized = true
-                }
+        if (initialized) return
+        try {
+            val response = api.getDailyCareerHits()
+            val dtoList = if (response.isSuccessful) response.body() ?: emptyList() else emptyList()
+            val hitList = dtoList.map { dto ->
+                DailyCareerHit(
+                    id = dto.id,
+                    title = dto.title,
+                    tip = dto.description,
+                    category = when (dto.category) {
+                        "CAREER_TIP" -> CareerHitCategory.CAREER_TIP
+                        "INTERVIEW_TIP" -> CareerHitCategory.INTERVIEW_TIP
+                        "PRODUCTIVITY_TIP" -> CareerHitCategory.PRODUCTIVITY_TIP
+                        "DSA_TIP" -> CareerHitCategory.DSA_TIP
+                        "RESUME_TIP" -> CareerHitCategory.RESUME_TIP
+                        "NETWORKING_TIP" -> CareerHitCategory.NETWORKING_TIP
+                        "SKILL_TIP" -> CareerHitCategory.SKILL_TIP
+                        else -> CareerHitCategory.CAREER_TIP
+                    },
+                    xpReward = dto.xpReward
+                )
             }
+            if (hitList.isNotEmpty()) {
+                hits.clear()
+                hits.addAll(hitList)
+            } else {
+                loadHardcodedHits()
+            }
+        } catch (e: Exception) {
+            loadHardcodedHits()
         }
+        initialized = true
     }
 
     private fun loadHardcodedHits() {

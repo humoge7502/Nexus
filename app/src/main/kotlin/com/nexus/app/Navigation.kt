@@ -34,4 +34,7 @@ sealed interface NexusDestination {
     // NEXUS 2.0 new features
     @Serializable data object Oracle : NexusDestination
     @Serializable data object Arena : NexusDestination
+
+    // Monetization
+    @Serializable data object Paywall : NexusDestination
 }

@@ -47,10 +47,16 @@ interface ProjectDao {
 
 @Dao
 interface GoalDao {
+    @androidx.room.Query("SELECT * FROM goals")
+    suspend fun getAllEntities(): List<GoalEntity>
+
     @Query("SELECT * FROM goals ORDER BY createdAt DESC")
     fun getAll(): Flow<List<GoalEntity>>
     @Query("SELECT * FROM goals WHERE isCompleted = 0 ORDER BY targetDate ASC")
     fun getActive(): Flow<List<GoalEntity>>
+
+    @Query("SELECT COUNT(*) FROM goals WHERE isCompleted = 1")
+    fun getCompletedCount(): Flow<Int>
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(goal: GoalEntity)
     @Query("UPDATE goals SET progress = :progress WHERE id = :id")
@@ -63,6 +69,9 @@ interface GoalDao {
 
 @Dao
 interface DSAProblemDao {
+    @androidx.room.Query("SELECT * FROM dsa_problems")
+    suspend fun getAllEntities(): List<DSAProblemEntity>
+
     @Query("SELECT * FROM dsa_problems ORDER BY frequency DESC")
     fun getAll(): Flow<List<DSAProblemEntity>>
     @Query("SELECT * FROM dsa_problems WHERE difficulty = :difficulty")
@@ -75,10 +84,19 @@ interface DSAProblemDao {
     suspend fun updateStatus(id: String, status: String, now: Long = System.currentTimeMillis())
     @Query("SELECT COUNT(*) FROM dsa_problems WHERE status = 'SOLVED'")
     suspend fun getSolvedCount(): Int
+
+    @Query("SELECT COUNT(*) FROM dsa_problems WHERE status = 'SOLVED'")
+    fun getSolvedCountFlow(): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM dsa_problems")
+    fun getTotalCount(): Flow<Int>
 }
 
 @Dao
 interface NotificationDao {
+    @androidx.room.Query("SELECT * FROM notifications")
+    suspend fun getAllEntities(): List<NotificationEntity>
+
     @Query("SELECT * FROM notifications ORDER BY createdAt DESC LIMIT 50")
     fun getAll(): Flow<List<NotificationEntity>>
     @Query("SELECT * FROM notifications WHERE isRead = 0 ORDER BY createdAt DESC")
