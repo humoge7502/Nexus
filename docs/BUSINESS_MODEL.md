@@ -103,3 +103,50 @@ they must be enabled in `NexusApplication` (tracked as R5).
 - Server-authoritative `isPro`: the Firestore rules merged in this repair
   already prevent client self-grants; Play Billing real-time developer
   notifications should be the next integration to revoke refunds.
+
+
+---
+
+## v2 — Investor-Ready Addendum (Oct 2026)
+
+### What changed since v1
+- **Deep Research** (agent-search pattern): cited, source-grounded answers with
+  auto-generated follow-up questions — a Perplexity-class experience inside a
+  student career app. No competitor in the India placement-prep market has this.
+- **Full toolchain modernization**: Android 16 (SDK 36), Kotlin 2.1.21,
+  AGP 8.12.3, Gradle 8.14.3, Compose BOM 2025.06 — every library current.
+- **Verified live infrastructure**: owned Firebase project, real accounts
+  creating themselves end-to-end, emulator-verified UI.
+
+### The one-line pitch
+> "NEXUS is the AI career co-pilot for India's 1.5M annual engineering
+> graduates — a live NEXUS Score, an AI mentor that remembers you, and Deep
+> Research with citations — on a freemium model the free AI quota makes
+> margin-safe at scale."
+
+### Investor metrics that matter (all measurable from day 1)
+| Metric | Target (6 mo) | Instrumented via |
+|---|---|---|
+| W1 activation (1 app + 3 DSA) | 40% | ai_proxy_logs + analytics |
+| D7 retention | 25% | score_snapshots cadence |
+| Free→Pro conversion | 3-5% | BillingManager events |
+| AI cost / Pro user / day | < ₹2 | ai_proxy_logs totalTokens |
+| Organic K-factor (score shares) | 0.3 | deep-links + shares |
+
+### Why this can't be copied quickly
+1. **Career Memory** — a per-user longitudinal dataset that compounds daily;
+   a clone starts empty forever.
+2. **Cohort Intelligence** — anonymized placement outcomes per college/tier:
+   network-effect data no solo competitor can bootstrap.
+3. **On-device placement model** — 14-feature explainable logistic model,
+   golden-vector tested, zero inference cost; competitors pay per LLM call.
+4. **Deep Research loop** — the follow-up-question UX creates session depth
+   (5+ turns) that is the strongest retention signal in AI products.
+
+### Series-ready roadmap (what the raise funds)
+1. **₹0 → ₹50L ARR path**: 5 college pilot licenses (₹1L/yr each) + 2,000 Pro
+   subs at ₹499 — both already built and wired.
+2. **Recruiter dashboard** (month 6-9): colleges pay for cohort analytics;
+   recruiters pay for verified skill-velocity data. Two-sided from one dataset.
+3. **Verifiable NEXUS Score API** (year 2): the "credit score for careers"
+   that placement cells and employers query — the infrastructure business.

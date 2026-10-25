@@ -73,6 +73,7 @@ private val LightColorScheme = lightColorScheme(
 enum class ThemeMode { LIGHT, DARK, SYSTEM, AMOLED }
 
 private fun accentColor(name: String): Color = when (name.uppercase()) {
+    "DEFAULT" -> NexusColors.Indigo500
     "CYAN" -> NexusColors.Cyan500
     "EMERALD" -> NexusColors.Emerald500
     "AMBER" -> Color(0xFFF59E0B)
@@ -83,13 +84,16 @@ private fun accentColor(name: String): Color = when (name.uppercase()) {
 @Composable
 fun NexusTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false,
+    // Material You wallpaper theming is the Android 12+ default; an explicit
+    // accent choice (anything but DEFAULT) overrides the wallpaper palette.
+    dynamicColor: Boolean = Build.VERSION.SDK_INT >= 31,
     amoled: Boolean = false,
-    accent: String = "INDIGO",
+    accent: String = "DEFAULT",
     content: @Composable () -> Unit
 ) {
+    val useDynamic = dynamicColor && accent == "DEFAULT" && Build.VERSION.SDK_INT >= 31
     val baseScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= 31 -> {
+        useDynamic -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context)
             else dynamicLightColorScheme(context)
@@ -115,7 +119,6 @@ fun NexusTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = Color.Transparent.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }

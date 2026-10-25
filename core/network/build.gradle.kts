@@ -15,7 +15,7 @@ val localProps = Properties().apply {
 
 android {
     namespace = "com.nexus.network"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig { minSdk = 26 }
     buildFeatures {
         buildConfig = true

@@ -98,6 +98,37 @@ class FirebaseFunctionsAIService @Inject constructor(
             )
         } ?: throw IllegalStateException("Unexpected cohort response")
     }
+
+    suspend fun deepResearch(
+        question: String,
+        depth: String = "standard",
+    ): Result<ResearchResult> = runCatching {
+        val uid = firebaseAuth.currentUser?.uid
+            ?: throw IllegalStateException("Sign in to use Deep Research")
+        val payload = mapOf("question" to question, "depth" to depth)
+        val result = functions
+            .getHttpsCallable("deepResearchFn")
+            .call(payload)
+            .await()
+        @Suppress("UNCHECKED_CAST")
+        val data = result.getData() as? Map<String, Any?>
+            ?: throw IllegalStateException("Empty research response")
+        fun str(v: Any?): String = v?.toString() ?: ""
+        ResearchResult(
+            question = str(data["question"]),
+            answer = str(data["answer"]),
+            sources = (data["sources"] as? List<Map<String, Any?>>)?.map { s ->
+                ResearchSource(
+                    title = str(s["title"]),
+                    url = s["url"]?.toString(),
+                    snippet = s["snippet"]?.toString(),
+                )
+            } ?: emptyList(),
+            followUps = (data["followUps"] as? List<Any?>)?.map { str(it) } ?: emptyList(),
+            usedLiveSearch = data["usedLiveSearch"] == true,
+        )
+    }
+
 }
 
 data class HealthResult(
@@ -164,3 +195,20 @@ data class CohortResult(
     val results: List<Map<String, Any?>>,
     val total: Int,
 )
+
+// ---- Deep Research (agent-search pattern: question -> cited synthesis -> follow-ups) ----
+
+data class ResearchSource(
+    val title: String,
+    val url: String? = null,
+    val snippet: String? = null,
+)
+
+data class ResearchResult(
+    val question: String = "",
+    val answer: String = "",
+    val sources: List<ResearchSource> = emptyList(),
+    val followUps: List<String> = emptyList(),
+    val usedLiveSearch: Boolean = false,
+)
+

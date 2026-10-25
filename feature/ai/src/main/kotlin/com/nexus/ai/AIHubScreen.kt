@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.PostAdd
 import androidx.compose.material.icons.filled.Map
@@ -60,6 +61,8 @@ data class AITool(
 )
 
 private val aiTools = listOf(
+    AITool("\uD83D\uDD0D", "Deep Research", "Cited answers + smart follow-ups", Icons.Default.Search,
+        listOf(Color(0xFF6366F1), Color(0xFF06B6D4)), "research"),
     AITool("\uD83E\uDD16", "NEXUS AI Chat", "Your personal career mentor", Icons.Default.Bolt,
         NexusGradients.Nexus, "chat"),
     AITool("\uD83D\uDCC4", "Resume Analyzer", "Get ATS Score + Tips", Icons.Default.Description,
@@ -81,6 +84,7 @@ private val aiTools = listOf(
 fun AIHubScreen(
     onChatClick: () -> Unit = {},
     onResumeAnalyzer: () -> Unit = {},
+    onResearchClick: () -> Unit = {},
     onBack: () -> Unit = {},
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -157,6 +161,7 @@ fun AIHubScreen(
                         when (tool.route) {
                             "chat" -> onChatClick()
                             "resume" -> onResumeAnalyzer()
+                            "research" -> onResearchClick()
                         }
                     },
                 )

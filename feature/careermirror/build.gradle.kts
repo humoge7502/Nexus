@@ -8,7 +8,7 @@ alias(libs.plugins.ksp)
 
 android {
 namespace = "com.nexus.careermirror"
-compileSdk = 35
+compileSdk = 36
 
 defaultConfig {
 minSdk = 26

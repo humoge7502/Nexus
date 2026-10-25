@@ -48,4 +48,7 @@ sealed interface NexusDestination {
 
     // Monetization
     @Serializable data object Paywall : NexusDestination
+
+    // Deep Research (agent-search pattern)
+    @Serializable data object Research : NexusDestination
 }

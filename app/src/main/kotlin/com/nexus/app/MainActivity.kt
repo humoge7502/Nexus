@@ -41,6 +41,7 @@ import com.nexus.achievements.LeaderboardScreen
 import com.nexus.ai.AIChatScreen
 import com.nexus.ai.AIHubScreen
 import com.nexus.ai.AIResumeAnalyzerScreen
+import com.nexus.ai.ResearchScreen
 import com.nexus.applications.ApplicationsScreen
 import com.nexus.auth.AuthScreen
 import com.nexus.auth.AuthViewModel
@@ -277,6 +278,7 @@ fun NexusMainScaffold(
                     AIHubScreen(
                         onChatClick = { navController.navigate(NexusDestination.AIChat) },
                         onResumeAnalyzer = { navController.navigate(NexusDestination.AIResumeAnalyzer) },
+                        onResearchClick = { navController.navigate(NexusDestination.Research) },
                         onBack = { navController.popBackStack() }
                     )
                 }
@@ -338,6 +340,9 @@ fun NexusMainScaffold(
                         onCommunity = { navController.navigate(NexusDestination.Community) },
                         onTribe = { navController.navigate(NexusDestination.Tribe) },
                     )
+                }
+                composable<NexusDestination.Research> {
+                    ResearchScreen(onBack = { navController.popBackStack() })
                 }
                 composable<NexusDestination.Paywall> {
                     com.nexus.paywall.PaywallScreen(
