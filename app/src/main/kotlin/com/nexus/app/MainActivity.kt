@@ -11,8 +11,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -175,7 +178,10 @@ fun NexusApp(
 
     AnimatedContent(
         targetState = currentStep,
-        transitionSpec = { fadeIn() togetherWith fadeOut() },
+        transitionSpec = {
+            (slideInHorizontally(tween(360)) { it / 8 } + fadeIn(tween(360))) togetherWith
+                (slideOutHorizontally(tween(240)) { -it / 8 } + fadeOut(tween(240)))
+        },
         label = "bootFlow"
     ) { step ->
         when (step) {
@@ -246,6 +252,18 @@ fun NexusMainScaffold(
             NavHost(
                 navController = navController,
                 startDestination = NexusDestination.Home,
+        enterTransition = {
+            slideInHorizontally(animationSpec = tween(300)) { it / 5 } + fadeIn(tween(300))
+        },
+        exitTransition = {
+            fadeOut(animationSpec = tween(220))
+        },
+        popEnterTransition = {
+            fadeIn(tween(280))
+        },
+        popExitTransition = {
+            slideOutHorizontally(animationSpec = tween(300)) { it / 5 } + fadeOut(tween(300))
+        },
                 modifier = Modifier.padding(paddingValues)
             ) {
                 // HOME
