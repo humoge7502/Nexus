@@ -62,6 +62,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.AnimatedStatCard
+import com.nexus.designsystem.component.hairline
+import com.nexus.designsystem.component.sheen
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
@@ -235,6 +237,8 @@ private fun CareerReadinessCard(
                     brush = Brush.linearGradient(NexusGradients.Primary),
                     shape = RoundedCornerShape(24.dp)
                 )
+                .hairline(cornerRadiusDp = 24f)
+                .sheen()
                 .padding(24.dp)
         ) {
             Row(

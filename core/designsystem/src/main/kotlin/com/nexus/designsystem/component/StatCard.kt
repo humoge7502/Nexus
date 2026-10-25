@@ -1,5 +1,6 @@
 package com.nexus.designsystem.component
 
+
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
@@ -50,7 +51,7 @@ fun AnimatedStatCard(
 
     NexusCard(
         onClick = null,
-        modifier = modifier,
+        modifier = modifier.pressScale(),
         gradient = gradient,
         shape = RoundedCornerShape(20.dp),
     ) {

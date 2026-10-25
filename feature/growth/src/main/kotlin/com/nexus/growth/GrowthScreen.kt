@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.component.AnimatedStatCard
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.theme.NexusAnimation
+import com.nexus.designsystem.component.arcGlow
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
@@ -189,6 +190,14 @@ private fun NexusScoreCard(nexusScore: Int, nexusScoreFloat: Float) {
                     )
 
                     val sweep = nexusScoreFloat.coerceIn(0f, 1f) * 360f
+                    if (sweep > 2f) {
+                        arcGlow(
+                            color = NexusColors.Cyan400,
+                            startAngle = -90f,
+                            sweepAngle = sweep,
+                            baseWidthPx = strokeWidth,
+                        )
+                    }
                     drawArc(
                         brush = Brush.sweepGradient(
                             listOf(NexusColors.Indigo500, NexusColors.Cyan400, NexusColors.Indigo500),
