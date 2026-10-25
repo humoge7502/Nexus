@@ -4,59 +4,65 @@ import com.nexus.common.Constants
 import com.nexus.domain.model.CareerHitCategory
 import com.nexus.domain.model.DailyCareerHit
 import com.nexus.network.api.NexusApiService
+import com.nexus.network.di.ApplicationScope
 import com.nexus.network.dto.CareerHitDto
 import javax.inject.Inject
 import javax.inject.Singleton
 import java.time.LocalDate
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.collections.arrayListOf
 
 @Singleton
 class DailyCareerHitGenerator @Inject constructor(
     private val api: NexusApiService,
+    @ApplicationScope private val scope: CoroutineScope,
 ) {
 
     private val hits = CopyOnWriteArrayList<DailyCareerHit>()
-    private var initialized = false
+    private val remoteRefreshStarted = AtomicBoolean(false)
 
     init {
-        // Initialize lazily on first call to avoid blocking startup
+        // Deterministic content is available immediately; remote content is an
+        // optional enhancement that must never block a frame.
+        loadHardcodedHits()
     }
 
-    private suspend fun initialize() {
-        if (initialized) return
-        try {
-            val response = api.getDailyCareerHits()
-            val dtoList = if (response.isSuccessful) response.body() ?: emptyList() else emptyList()
-            val hitList = dtoList.map { dto ->
-                DailyCareerHit(
-                    id = dto.id,
-                    title = dto.title,
-                    tip = dto.description,
-                    category = when (dto.category) {
-                        "CAREER_TIP" -> CareerHitCategory.CAREER_TIP
-                        "INTERVIEW_TIP" -> CareerHitCategory.INTERVIEW_TIP
-                        "PRODUCTIVITY_TIP" -> CareerHitCategory.PRODUCTIVITY_TIP
-                        "DSA_TIP" -> CareerHitCategory.DSA_TIP
-                        "RESUME_TIP" -> CareerHitCategory.RESUME_TIP
-                        "NETWORKING_TIP" -> CareerHitCategory.NETWORKING_TIP
-                        "SKILL_TIP" -> CareerHitCategory.SKILL_TIP
-                        else -> CareerHitCategory.CAREER_TIP
-                    },
-                    xpReward = dto.xpReward
-                )
-            }
-            if (hitList.isNotEmpty()) {
-                hits.clear()
-                hits.addAll(hitList)
-            } else {
-                loadHardcodedHits()
-            }
-        } catch (e: Exception) {
-            loadHardcodedHits()
+    private fun refreshRemoteOnce() {
+        if (!remoteRefreshStarted.compareAndSet(false, true)) return
+        scope.launch {
+            runCatching { fetchRemoteHits() }
+                .onFailure { /* keep the bundled hits */ }
         }
-        initialized = true
+    }
+
+    private suspend fun fetchRemoteHits() {
+        val response = api.getDailyCareerHits()
+        if (!response.isSuccessful) return
+        val hitList = (response.body() ?: emptyList()).map { dto ->
+            DailyCareerHit(
+                id = dto.id,
+                title = dto.title,
+                tip = dto.description,
+                category = when (dto.category) {
+                    "CAREER_TIP" -> CareerHitCategory.CAREER_TIP
+                    "INTERVIEW_TIP" -> CareerHitCategory.INTERVIEW_TIP
+                    "PRODUCTIVITY_TIP" -> CareerHitCategory.PRODUCTIVITY_TIP
+                    "DSA_TIP" -> CareerHitCategory.DSA_TIP
+                    "RESUME_TIP" -> CareerHitCategory.RESUME_TIP
+                    "NETWORKING_TIP" -> CareerHitCategory.NETWORKING_TIP
+                    "SKILL_TIP" -> CareerHitCategory.SKILL_TIP
+                    else -> CareerHitCategory.CAREER_TIP
+                },
+                xpReward = dto.xpReward
+            )
+        }
+        if (hitList.isNotEmpty()) {
+            hits.clear()
+            hits.addAll(hitList)
+        }
     }
 
     private fun loadHardcodedHits() {
@@ -246,14 +252,8 @@ class DailyCareerHitGenerator @Inject constructor(
     }
 
     fun getHitForDate(date: LocalDate = LocalDate.now()): DailyCareerHit {
-        // Initialize lazily
-        if (!initialized) {
-            // Note: This is blocking, but it's okay for now as it's called from the UI thread only once.
-            // In a real app, we might want to do this asynchronously and show a loading state.
-            runBlocking { initialize() }
-        }
+        refreshRemoteOnce()
         if (hits.isEmpty()) {
-            // If still empty after initialization, load hardcoded as fallback
             loadHardcodedHits()
         }
         val dayOfYear = date.dayOfYear
@@ -263,7 +263,8 @@ class DailyCareerHitGenerator @Inject constructor(
 
     // For testing purposes
     fun clearCache() {
-        initialized = false
+        remoteRefreshStarted.set(false)
         hits.clear()
+        loadHardcodedHits()
     }
 }

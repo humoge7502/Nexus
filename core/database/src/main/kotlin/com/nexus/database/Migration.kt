@@ -439,3 +439,11 @@ val MIGRATION_7_8 = object : Migration(7, 8) {
     db.execSQL("CREATE INDEX IF NOT EXISTS index_ai_conversations_lastMessageAt ON ai_conversations(lastMessageAt)")
   }
 }
+
+val MIGRATION_8_9 = object : Migration(8, 9) {
+  override fun migrate(db: SupportSQLiteDatabase) {
+    // The feed orders by posted_at; without this index every refresh scans
+    // and sorts the whole internships table.
+    db.execSQL("CREATE INDEX IF NOT EXISTS index_internships_posted_at ON internships(posted_at)")
+  }
+}

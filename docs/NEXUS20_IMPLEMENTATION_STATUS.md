@@ -1,69 +1,75 @@
-# NEXUS 2.0 Feature Implementations Checklist
+# NEXUS 2.0 Feature Implementation Status
 
-## NEXUS Feature Modules (skip existing — feature_diffusion report)
+> Last verified: 2026-10-25, on JDK 17 + Android SDK 35 + AVD `NexusApi35` and the
+> Firebase emulator. See `docs/NEXUS_COMPREHENSIVE_ANALYSIS.md` for the full
+> verification report and remaining backlog.
 
-Removed from main nav (moved to AI hub / future):
-- ~~Pomodoro timer~~ → in design system as optional utility
-- ~~Portfolio builder~~ → keep screen but deep link only
-- ~~LinkedIn Post Generator~~ → keep as AI tool modal
+## Intelligence layer — COMPLETE
 
-## Current NEXUS 2.0 Status — COMPLETED
-- [x] Database entities (7 new)
-- [x] DAOs (7 new: InterviewOutcome, Confidence, ScoreSnapshot, Forecast, Mirror, Cohort, SkillVelocity)
-- [x] DB Migration 6→7
-- [x] DatabaseModule updated (v7)
-- [x] Domain models (7 new)
-- [x] Repository interfaces (7 new)
-- [x] Repository implementations (7 new)
-- [x] DI bindings in RepositoryModule
-- [x] NexusAnalytics — 15 new events
-- [x] NexusFeatureFlags — 8 new flags
-- [x] Navigation destinations (8 new)
-- [x] UserPreferences — 6 new profile fields
-- [x] PlacementPredictionEngine usecase
-- [x] InterviewIntelligenceEngine usecase
-- [x] CareerMirrorGenerator usecase
-- [x] ConfidenceCalibrationEngine usecase
+- [x] Room entities, DAOs and migrations through **schema v9**
+- [x] Domain models and repository interfaces/implementations
+- [x] Hilt bindings for score snapshots, cohort, forecasts and mirrors
+- [x] `NexusAnalytics` events for mirror/forecast/interview flows
+- [x] `PlacementPredictionEngine` (rule + ML factors)
+- [x] `PlacementReadinessModel` (trained, exported Kotlin, golden-vector tested)
+- [x] `PlacementReadinessFeatures` (raw app signals → model features)
+- [x] `InterviewIntelligenceEngine` (company round maps + weak-spot flags)
+- [x] `CareerMirrorGenerator`, `ConfidenceCalibrationEngine`
+- [x] Onboarding personalization persisted atomically (name, college, year,
+      skills, interests, career goal) with a skip path
+- [x] AMOLED toggle separated from dark mode
 
-## REMAINING IMPLEMENTATION (deferred to individual PRs — too large for single session)
-- [ ] CareerMirrorScreen + CareerMirrorViewModel
-- [ ] PlacementForecastScreen + PlacementForecastViewModel
-- [ ] CohortIntelligenceScreen + CohortIntelligenceViewModel
-- [ ] InterviewLogScreen + InterviewLogViewModel
-- [ ] TribeSetupScreen + TribeViewModel
-- [ ] State-Aware Home Screen (4 placement journey states)
-- [ ] Score Pulse animation effect
-- [ ] Coaching Notification System
-- [ ] New build.gradle.kts for each feature module
-- [ ] Feature flag feature-gating integration
-- [ ] MainActivity composable wiring for new destinations
+## UI layer — COMPLETE for NEXUS 2.0 screens
 
-## What was implemented: THE INTELLIGENCE LAYER
-All data, intelligence, and infrastructure is in place. The UI layer requires additional work sessions.
+- [x] `CareerMirrorScreen` + ViewModel
+- [x] `PlacementForecastScreen` + ViewModel — readiness card, drivers,
+      what-if simulator, refresh, empty/error states
+- [x] `CohortIntelligenceScreen` + ViewModel
+- [x] `InterviewLogScreen` + ViewModel
+- [x] `TribeSetupScreen` + ViewModel — campus tribe creation/join/leave,
+      persisted in DataStore, wired into navigation
+- [x] Interview coach with target-company round intelligence
+- [x] Navigation destinations wired from `MainActivity`
 
-## Files CREATED in this implementation:
-- core/database/src/main/.../dao/InterviewOutcomeDao.kt
-- core/data/src/main/.../repository/InterviewOutcomeRepository.kt
-- core/data/src/main/.../repository/ConfidenceRepository.kt
-- core/data/src/main/.../repository/PlacementForecastRepository.kt
-- core/data/src/main/.../repository/CareerMirrorRepository.kt
-- core/data/src/main/.../repository/CohortIntelligenceRepository.kt
-- core/data/src/main/.../repository/SkillVelocityRepository.kt
-- core/domain/src/main/.../usecase/PlacementPredictionEngine.kt
-- core/domain/src/main/.../usecase/InterviewIntelligenceEngine.kt
-- core/domain/src/main/.../usecase/CareerMirrorGenerator.kt
-- core/domain/src/main/.../usecase/ConfidenceCalibrationEngine.kt
-- core/domain/src/main/.../repository/Nexus20Repositories.kt
+## Verified build & tests
 
-## Files MODIFIED:
-- core/database/src/main/.../entity/Entities.kt (+7 entities appended?)
-- core/database/src/main/.../dao/OtherDaos.kt (+7 DAOs added)
-- core/database/src/main/.../NexusDatabase.kt (v7 + 7 new DAOs)
-- core/database/src/main/.../di/DatabaseModule.kt (+7 providers + MIGRATION_6_7)
-- core/database/src/main/.../Migration.kt (+MIGRATION_6_7)
-- core/domain/src/main/.../model/Models.kt (+7 domain models appended)
-- core/data/src/main/.../di/RepositoryModule.kt (+7 DI bindings)
-- core/analytics/src/.../NexusAnalytics.kt (+15 new track functions)
-- core/common/src/.../Constants.kt (no changes needed)
-- app/src/main/.../Navigation.kt (8 new destinations)
-- core/datastore/src/.../UserPreferences.kt (+6 new profile keys)
+- [x] `:app:assembleDebug` exits 0 (28.7 MB)
+- [x] `:app:assembleRelease` — R8 + resource shrinking, signed, 6.69 MB, `apksigner verify` exit 0
+- [x] `testDebugUnitTest` green — **128 tests / 24 suites, 0 failures, 0 skipped**
+- [x] Backend `npm test` green (10 tests)
+- [x] ML dataset reproducible byte-for-byte; Python↔Kotlin parity green
+- [x] `core:database` androidTest sources compile (migrations 1→9)
+- [x] `connectedDebugAndroidTest` — **11/11 executed on AVD `NexusApi35` (API 35)**:
+      `migrateAll` 1→9 validated against the Room schema, per-step data
+      preservation, `InternshipDaoTest`, `Nexus2DaoTest`
+- [x] Firebase emulator suites — callables **5/5** (`npm run test:emulator`),
+      Firestore rules **11/11** (`npm run test:rules`); both wired into CI
+- [x] Baseline profile generated on-device (`:app:generateBaselineProfile`) and
+      packaged in the release APK as `assets/dexopt/baseline.prof` + `.profm`
+- [x] Release APK scanned for `sk-or-*` key material — clean
+
+Two real defects were found only by running on a device, and are fixed: the
+`internships` seed in `MigrationTest` omitted six `NOT NULL` columns, and
+`feature:notifications` reused `core:notifications`' manifest namespace.
+
+## Remaining
+
+Console/account-gated — cannot be closed from this repo:
+
+- Firebase project login and `firebase deploy` (nothing has ever been deployed)
+- App Check with Play Integrity, so the AI proxy can't be scripted
+- Crashlytics enablement + consent copy
+- Restricting the Firebase client API key by package name + SHA-256 in Cloud
+  Console (this key legitimately ships inside `resources.arsc`)
+
+Engineering backlog:
+
+- Startup/frame-time benchmarks against the shipped profile — the profile is in
+  the APK but cold start is still **unmeasured**
+- Instrumentation suite on CI (locally green, CI has no emulator)
+- Compose UI tests for the five NEXUS 2.0 screens; unit tests for `feature:tribe`,
+  `feature:paywall`, `feature:community` (only 7 of 37 modules are tested)
+- Detekt blocking job; regenerate the 28 stale Lint baselines
+- Paging 3 and SSE streaming
+- i18n and accessibility audit
+- Real (consented, anonymized) placement cohort for retraining

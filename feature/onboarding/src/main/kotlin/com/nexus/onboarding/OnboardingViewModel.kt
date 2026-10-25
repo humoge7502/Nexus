@@ -9,8 +9,10 @@ import com.nexus.analytics.AnalyticsTracker
 import com.nexus.common.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -38,6 +40,10 @@ class OnboardingViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(OnboardingUiState())
     val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()
 
+    /** null while DataStore is loading, so the boot flow does not flash onboarding. */
+    val onboardingCompleted: StateFlow<Boolean?> = userPreferences.onboardingCompleted
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
     init {
         analyticsTracker.track("screen_view", mapOf("screen" to "onboarding"))
     }
@@ -56,13 +62,41 @@ class OnboardingViewModel @Inject constructor(
     }
     fun updateCareerGoal(goal: String) { _uiState.value = _uiState.value.copy(careerGoal = goal) }
 
+    fun skipAndComplete(onComplete: () -> Unit) {
+        viewModelScope.launch {
+            userPreferences.saveOnboardingProfile(
+                name = "Student",
+                college = "",
+                year = 1,
+                skills = emptyList(),
+                interests = emptyList(),
+                careerGoal = "",
+            )
+            analyticsTracker.track("onboarding_skipped")
+            onComplete()
+        }
+    }
+
     fun saveAndComplete(onComplete: () -> Unit) {
         viewModelScope.launch {
             val state = _uiState.value
-            userPreferences.saveDisplayName(state.userName.ifBlank { "Student" })
-            userPreferences.setOnboardingCompleted()
+            userPreferences.saveOnboardingProfile(
+                name = state.userName.ifBlank { "Student" },
+                college = state.college.trim(),
+                year = yearOptions.indexOf(state.academicYear).takeIf { it >= 0 }?.plus(1) ?: 1,
+                skills = state.skills,
+                interests = state.interests,
+                careerGoal = state.careerGoal,
+            )
             xpRepository.awardXP(Constants.XP_ONBOARDING_COMPLETE, "onboarding")
-            analyticsTracker.track("onboarding_complete", mapOf("role" to state.careerGoal))
+            analyticsTracker.track(
+                "onboarding_complete",
+                mapOf(
+                    "role" to state.careerGoal,
+                    "skills" to state.skills.size.toString(),
+                    "interests" to state.interests.size.toString(),
+                ),
+            )
             onComplete()
         }
     }

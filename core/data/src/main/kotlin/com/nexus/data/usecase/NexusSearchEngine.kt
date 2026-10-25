@@ -30,17 +30,25 @@ class NexusSearchEngine @Inject constructor(
             SearchMode.SEMANTIC -> semanticSearch(queryVector, internships, query.topK, query.minSimilarity)
             SearchMode.KEYWORD -> keywordSearch(query.queryText, internships)
             SearchMode.HYBRID -> {
-                val semantic = semanticSearch(queryVector, internships, query.topK * 2, query.minSimilarity * 0.7f)
-                val keyword = keywordSearch(query.queryText, internships)
-                val combined = (semantic + keyword).distinctBy { it.id }
-                val scored = combined.map { result ->
-                    val internship = internships.find { it.id == result.id }
-                    val matchBonus = if (internship != null) {
-                        matchingEngine.calculateMatchScore(internship, userSkills)
-                    } else 0f
-                    result.copy(score = result.score + (matchBonus * 0.3f))
-                }
-                scored.sortedByDescending { it.score }.take(query.topK)
+                val byId = internships.associateBy { it.id }
+                val semantic = semanticSearch(queryVector, internships, query.topK * 3, query.minSimilarity * 0.7f)
+                    .associateBy { it.id }
+                val keyword = keywordSearch(query.queryText, internships).associateBy { it.id }
+                val ids = semantic.keys + keyword.keys
+                ids.mapNotNull { id ->
+                    val internship = byId[id] ?: return@mapNotNull null
+                    val semanticScore = semantic[id]?.score ?: 0f
+                    val keywordScore = keyword[id]?.score ?: 0f
+                    val matchScore = matchingEngine.calculateMatchScore(internship, userSkills)
+                        .coerceIn(0f, 1f)
+                    SearchResult(
+                        id = internship.id,
+                        title = internship.title,
+                        snippet = "${internship.company.name} - ${internship.location.city}",
+                        score = (semanticScore * 0.5f) + (keywordScore * 0.35f) + (matchScore * 0.15f),
+                        sourceType = "internship",
+                    )
+                }.sortedByDescending { it.score }.take(query.topK)
             }
         }
     }
@@ -82,7 +90,7 @@ class NexusSearchEngine @Inject constructor(
                 SearchResult(
                     id = internship.id,
                     title = internship.title,
-                    snippet = "${internship.company.name} - ${internship.location}",
+                    snippet = "${internship.company.name} - ${internship.location.city}",
                     score = matchCount.toFloat() / terms.size,
                     sourceType = "internship",
                 )
@@ -90,27 +98,23 @@ class NexusSearchEngine @Inject constructor(
         }.sortedByDescending { it.score }
     }
 
-    private fun getQueryVector(text: String): FloatArray {
-        val dim = 128
-        val vec = FloatArray(dim)
-        val hash = text.hashCode()
-        for (i in 0 until dim) {
-            vec[i] = ((hash * (i + 1)) % 1000) / 1000f
-        }
-        val norm = kotlin.math.sqrt(vec.sumOf { (it * it).toDouble() }).toFloat()
-        if (norm > 0f) for (i in vec.indices) vec[i] /= norm
-        return vec
-    }
+    private fun getQueryVector(text: String): FloatArray = textToVector(text)
 
+    /**
+     * Sparse bag-of-words embedding. Query and document vectors must use the
+     * same feature space; hashing the whole query as a single number produced
+     * a vector that was orthogonal to every document vector.
+     */
     private fun textToVector(text: String): FloatArray {
         if (text.isBlank()) return floatArrayOf()
-        val dim = 128
-        val vec = FloatArray(dim)
-        val words = text.split("\\s+".toRegex()).filter { it.length > 2 }
-        words.forEachIndexed { index, word ->
-            val hash = word.hashCode()
-            val pos = (hash and Int.MAX_VALUE) % dim
-            vec[pos] += 1f / words.size
+        val vec = FloatArray(VECTOR_DIM)
+        val words = text.lowercase()
+            .split("\\s+".toRegex())
+            .filter { it.length > 2 }
+        if (words.isEmpty()) return floatArrayOf()
+        words.forEach { word ->
+            val pos = (word.hashCode() and Int.MAX_VALUE) % VECTOR_DIM
+            vec[pos] += 1f
         }
         val norm = kotlin.math.sqrt(vec.sumOf { (it * it).toDouble() }).toFloat()
         if (norm > 0f) for (i in vec.indices) vec[i] /= norm
@@ -122,5 +126,9 @@ class NexusSearchEngine @Inject constructor(
         val companyMatch = if (internship.company.name.contains(query, ignoreCase = true)) 0.3f else 0f
         val tagMatch = if (internship.tags.any { it.contains(query, ignoreCase = true) }) 0.2f else 0f
         return titleMatch + companyMatch + tagMatch
+    }
+
+    private companion object {
+        const val VECTOR_DIM = 128
     }
 }

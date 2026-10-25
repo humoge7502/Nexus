@@ -1,0 +1,125 @@
+{
+  "model": "logistic",
+  "version": "1.0.0",
+  "trained_at": "2026-10-24T17:56:16.002385+00:00",
+  "dataset": {
+    "dataset": "placement_cohort_v1.csv",
+    "rows": 24000,
+    "features": [
+      "dsa_solved_log",
+      "dsa_hard_ratio",
+      "dsa_medium_ratio",
+      "applications_log",
+      "interview_rate",
+      "offer_rate",
+      "certs_log",
+      "projects_log",
+      "streak_log",
+      "skills_norm",
+      "mock_interviews_log",
+      "score_norm",
+      "college_tier_norm",
+      "attempts_log"
+    ],
+    "positive_rate": 0.5012,
+    "seed": 20261024,
+    "generator": "generate_dataset.py",
+    "sha256": "7625e344a42e5a111d6b4ff56618ba01e134913d4e244fa5ff176389e53eff55",
+    "created_at": "2026-10-24T17:50:25.938250+00:00",
+    "provenance": "synthetic_v1",
+    "limitations": "Synthetic cohort generated from a documented latent-trait model. Metrics measure pipeline correctness and model capacity, not real-world placement accuracy. Retrain on opt-in anonymized outcomes before making marketing claims."
+  },
+  "split": {
+    "train": 19200,
+    "test": 4800
+  },
+  "baseline_logistic": {
+    "roc_auc": 0.8614,
+    "pr_auc": 0.8647,
+    "log_loss": 0.4611,
+    "brier": 0.1521,
+    "accuracy_at_0_5": 0.771,
+    "ece_10": 0.0164
+  },
+  "mlp_calibrated": {
+    "roc_auc": 0.8329,
+    "pr_auc": 0.8286,
+    "log_loss": 0.5068,
+    "brier": 0.1671,
+    "accuracy_at_0_5": 0.7496,
+    "ece_10": 0.0218
+  },
+  "temperature": 1.0,
+  "mlp_fitted_temperature": 1.49,
+  "calibration_table": [
+    {
+      "bin": "0.0-0.1",
+      "count": 630,
+      "mean_predicted": 0.053,
+      "observed_rate": 0.0476
+    },
+    {
+      "bin": "0.1-0.2",
+      "count": 556,
+      "mean_predicted": 0.1483,
+      "observed_rate": 0.1385
+    },
+    {
+      "bin": "0.2-0.3",
+      "count": 456,
+      "mean_predicted": 0.2501,
+      "observed_rate": 0.2785
+    },
+    {
+      "bin": "0.3-0.4",
+      "count": 397,
+      "mean_predicted": 0.3487,
+      "observed_rate": 0.3753
+    },
+    {
+      "bin": "0.4-0.5",
+      "count": 374,
+      "mean_predicted": 0.4494,
+      "observed_rate": 0.4706
+    },
+    {
+      "bin": "0.5-0.6",
+      "count": 369,
+      "mean_predicted": 0.5492,
+      "observed_rate": 0.523
+    },
+    {
+      "bin": "0.6-0.7",
+      "count": 363,
+      "mean_predicted": 0.652,
+      "observed_rate": 0.6529
+    },
+    {
+      "bin": "0.7-0.8",
+      "count": 432,
+      "mean_predicted": 0.7502,
+      "observed_rate": 0.7269
+    },
+    {
+      "bin": "0.8-0.9",
+      "count": 468,
+      "mean_predicted": 0.8507,
+      "observed_rate": 0.8248
+    },
+    {
+      "bin": "0.9-1.0",
+      "count": 755,
+      "mean_predicted": 0.9581,
+      "observed_rate": 0.9497
+    }
+  ],
+  "selected_metrics": {
+    "roc_auc": 0.8614,
+    "pr_auc": 0.8647,
+    "log_loss": 0.4611,
+    "brier": 0.1521,
+    "accuracy_at_0_5": 0.771,
+    "ece_10": 0.0164
+  },
+  "notes": "Metrics are measured on a synthetic cohort (see dataset limitations). They validate pipeline and on-device parity, not real-world placement accuracy."
+}

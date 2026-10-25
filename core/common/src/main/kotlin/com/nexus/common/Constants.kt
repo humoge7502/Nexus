@@ -3,6 +3,7 @@ package com.nexus.common
 object Constants {
     const val APP_NAME = "NEXUS"
     const val BASE_URL = "https://api.nexus.app/"
+    const val LEETCODE_BASE_URL = "https://alfa-leetcode-api.onrender.com/"
     const val DB_NAME = "nexus.db"
     const val DATASTORE_NAME = "nexus_prefs"
 

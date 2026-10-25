@@ -19,9 +19,10 @@ service cloud.firestore {
     // client must never be able to grant itself Pro or inflate its score.
     match /users/{userId} {
       allow read: if isOwner(userId);
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId)
-        && (!request.resource.data.diff(resource.data).affectedKeys()
+      allow create: if isOwner(userId)
+        && !request.resource.data.keys().hasAny(['nexusScore', 'isPro', 'level', 'xp', 'xpTotal']);
+      allow update: if (isOwner(userId)
+        && !request.resource.data.diff(resource.data).affectedKeys()
               .hasAny(['nexusScore', 'isPro', 'level', 'xp', 'xpTotal']))
         || isAdmin();
       allow delete: if isOwner(userId);
@@ -72,10 +73,19 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Public leaderboard profiles: world-readable, owner-writable
+    // Public leaderboard profiles: world-readable, owner-writable. Ranking
+    // fields are server-computed so a client cannot promote itself.
     match /publicProfiles/{userId} {
       allow read: if true;
-      allow write: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasOnly([
+             'displayName', 'college', 'avatarUrl', 'bio', 'githubUsername',
+             'linkedinUrl', 'skills', 'streak', 'updatedAt'
+           ]);
+      allow update: if isOwner(userId)
+        && !request.resource.data.diff(resource.data).affectedKeys()
+              .hasAny(['nexusScore', 'xp', 'level', 'rank']);
+      allow delete: if isOwner(userId) || isAdmin();
     }
 
     // Interview outcomes: only anonymized docs are ever readable; creates must
@@ -85,7 +95,10 @@ service cloud.firestore {
       allow create: if isAuthenticated()
         && request.resource.data.isAnonymized == true
         && request.resource.data.reporterId == request.auth.uid;
-      allow update, delete: if isAuthenticated()
+      allow update: if isAuthenticated()
+        && request.auth.uid == resource.data.reporterId
+        && request.resource.data.isAnonymized == true;
+      allow delete: if isAuthenticated()
         && request.auth.uid == resource.data.reporterId;
     }
 
@@ -101,6 +114,12 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (
         request.auth.uid == resource.data.uid || isAdmin()
       );
+      allow write: if false;
+    }
+
+    // Daily quota counters: server-only, so clients cannot reset usage.
+    match /ai_usage/{usageId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
       allow write: if false;
     }
 

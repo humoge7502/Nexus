@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.baselineprofile)
     // Re-enable when a real google-services.json + Crashlytics credentials are
     // available to CI: alias(libs.plugins.firebase.crashlytics)
 }
@@ -38,7 +39,7 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystorePath = localProps.getProperty("KEYSTORE_PATH")
+            val keystorePath = localProps.getProperty("KEYSTORE_PATH")?.ifBlank { null }
             if (keystorePath != null) {
                 storeFile = file(keystorePath)
                 storePassword = localProps.getProperty("STORE_PASSWORD")
@@ -59,10 +60,21 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            val hasKeystore = localProps.getProperty("KEYSTORE_PATH") != null
+            // An empty KEYSTORE_PATH (CI without signing secrets) must produce an
+            // unsigned APK, not a signing attempt against a non-existent file.
+            val hasKeystore = localProps.getProperty("KEYSTORE_PATH")?.ifBlank { null } != null
             if (hasKeystore) {
                 signingConfig = signingConfigs.getByName("release")
             }
+        }
+        // Profile-generation build: R8 off so the collected profile maps to
+        // real symbols, profileable injected by the baselineprofile plugin.
+        create("benchmark") {
+            initWith(getByName("release"))
+            matchingFallbacks += listOf("release")
+            isDebuggable = false
+            isMinifyEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
         }
     }
 
@@ -99,6 +111,11 @@ dependencies {
     implementation(project(":core:network"))
     implementation(project(":core:datastore"))
     implementation(project(":core:notifications"))
+    implementation(project(":core:sync"))
+
+    // Background work / Hilt worker factory
+    implementation(libs.work)
+    implementation(libs.hilt.work)
 
     // Feature modules wired into Navigation
     implementation(project(":feature:onboarding"))
@@ -116,6 +133,15 @@ dependencies {
     implementation(project(":feature:goals"))
     implementation(project(":feature:notifications"))
     implementation(project(":feature:paywall"))
+    implementation(project(":feature:applications"))
+    implementation(project(":feature:careermirror"))
+    implementation(project(":feature:cohortintelligence"))
+    implementation(project(":feature:community"))
+    implementation(project(":feature:interviewlog"))
+    implementation(project(":feature:placementforecast"))
+    implementation(project(":feature:portfolio"))
+    implementation(project(":feature:search"))
+    implementation(project(":feature:tribe"))
 
     // Compose
     implementation(platform(libs.compose.bom))
@@ -138,16 +164,22 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.functions)
     implementation(libs.firebase.analytics)
-    implementation("com.google.firebase:firebase-storage")
+    implementation(libs.firebase.messaging)
+    implementation("com.google.firebase:firebase-storage:21.0.0")
 
     // Misc
     implementation(libs.splash)
+    implementation(libs.androidx.profileinstaller)
     implementation(libs.datastore)
     implementation(libs.kotlinx.serialization)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.timber)
 
+    // Consumes the profile produced by :macrobenchmark (androidx.baselineprofile).
+    baselineProfile(project(":macrobenchmark"))
+
     // Tests
     testImplementation(libs.junit)
     testImplementation(libs.coroutines.test)
 }
+

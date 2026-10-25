@@ -64,7 +64,13 @@ class AuthViewModel @Inject constructor(
             val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
             val authResult = auth.signInWithCredential(credential).await()
             authResult.user?.let { saveUserData(it.uid, it.displayName ?: "", it.email ?: "") }
-            true
+            if (authResult.user != null) {
+                _authState.value = ApiResult.Success(true)
+                true
+            } else {
+                _authState.value = ApiResult.Error("Google sign-in returned no user")
+                false
+            }
         } catch (e: Exception) {
             _authState.value = ApiResult.Error(e.message ?: "Google sign-in failed")
             false

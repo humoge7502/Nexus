@@ -35,6 +35,17 @@ sealed interface NexusDestination {
     @Serializable data object Oracle : NexusDestination
     @Serializable data object Arena : NexusDestination
 
+    // Career intelligence & community tooling
+    @Serializable data object Applications : NexusDestination
+    @Serializable data object CareerMirror : NexusDestination
+    @Serializable data object CohortIntelligence : NexusDestination
+    @Serializable data object Community : NexusDestination
+    @Serializable data object InterviewLog : NexusDestination
+    @Serializable data object PlacementForecast : NexusDestination
+    @Serializable data object Portfolio : NexusDestination
+    @Serializable data object Search : NexusDestination
+    @Serializable data object Tribe : NexusDestination
+
     // Monetization
     @Serializable data object Paywall : NexusDestination
 }

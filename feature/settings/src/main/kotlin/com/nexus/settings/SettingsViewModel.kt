@@ -18,6 +18,8 @@ import kotlinx.coroutines.launch
 @Immutable
 data class SettingsUiState(
     val themeMode: String = "SYSTEM",
+    val amoledEnabled: Boolean = false,
+    val accentColor: String = "INDIGO",
     val notificationsEnabled: Boolean = true,
     val leetcodeUsername: String = "",
     val githubUsername: String = "",
@@ -31,11 +33,22 @@ class SettingsViewModel @Inject constructor(
 ) : ViewModel() {
     val uiState: StateFlow<SettingsUiState> = combine(
         userPreferences.themeMode,
+        userPreferences.amoledEnabled,
+        userPreferences.accentColor,
         userPreferences.notificationsEnabled,
-        userPreferences.leetcodeUsername,
-        userPreferences.githubUsername,
-    ) { theme, notifications, leetcode, github ->
-        SettingsUiState(theme, notifications, leetcode, github)
+        combine(
+            userPreferences.leetcodeUsername,
+            userPreferences.githubUsername,
+        ) { leetcode, github -> leetcode to github },
+    ) { theme, amoled, accent, notifications, accounts ->
+        SettingsUiState(
+            themeMode = theme,
+            amoledEnabled = amoled,
+            accentColor = accent,
+            notificationsEnabled = notifications,
+            leetcodeUsername = accounts.first,
+            githubUsername = accounts.second,
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUiState())
 
     init {
@@ -46,6 +59,20 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             userPreferences.saveThemeMode(if (enabled) "DARK" else "LIGHT")
             analyticsTracker.track("theme_changed", mapOf("mode" to if (enabled) "DARK" else "LIGHT"))
+        }
+    }
+
+    fun setAmoled(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferences.setAmoledEnabled(enabled)
+            analyticsTracker.track("theme_changed", mapOf("amoled" to enabled.toString()))
+        }
+    }
+
+    fun setAccentColor(color: String) {
+        viewModelScope.launch {
+            userPreferences.setAccentColor(color)
+            analyticsTracker.track("accent_changed", mapOf("color" to color))
         }
     }
 

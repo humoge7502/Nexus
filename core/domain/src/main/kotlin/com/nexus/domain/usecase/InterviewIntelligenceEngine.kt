@@ -1,16 +1,10 @@
 package com.nexus.domain.usecase
 
-import com.nexus.database.entity.InterviewOutcomeEntity
-import com.nexus.domain.model.Internship
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class InterviewIntelligenceEngine @Inject constructor(
-  private val scoreEngine: CareerScoreCalculator,
-) {
+class InterviewIntelligenceEngine @Inject constructor() {
 
   data class CompanyIntel(
     val company: String,
@@ -18,7 +12,6 @@ class InterviewIntelligenceEngine @Inject constructor(
     val weakAreasForUser: List<String>,
     val prepMessage: String,
     val questionQueries: List<String>,
-    val successRate: Float,
   )
 
   data class RoundIntel(
@@ -53,15 +46,52 @@ class InterviewIntelligenceEngine @Inject constructor(
         RoundSpec("Googly 3", "Hard", listOf("system design", "distributed", "RPC")),
         RoundSpec("Googly 4", "Medium", listOf("Googleyness", "behavioral")),
       ),
+      "microsoft" to listOf(
+        RoundSpec("Coding — Arrays & Trees", "Medium", listOf("arrays", "trees", "strings")),
+        RoundSpec("System Design", "Medium", listOf("system design", "scalability")),
+        RoundSpec("CS Fundamentals", "Medium", listOf("OS", "DBMS", "networks")),
+        RoundSpec("AA (As Appropriate)", "Easy", listOf("behavioral", "culture fit")),
+      ),
+      "amazon" to listOf(
+        RoundSpec("Online Assessment", "Medium", listOf("arrays", "strings", "greedy")),
+        RoundSpec("Coding 1", "Hard", listOf("graphs", "DP", "trees")),
+        RoundSpec("Coding 2", "Hard", listOf("system design", "LLD")),
+        RoundSpec("Bar Raiser", "Medium", listOf("leadership principles", "behavioral")),
+      ),
+      "meta" to listOf(
+        RoundSpec("Coding 1", "Hard", listOf("arrays", "strings", "graphs")),
+        RoundSpec("Coding 2", "Hard", listOf("trees", "DP", "heaps")),
+        RoundSpec("System Design", "Hard", listOf("system design", "distributed", "caching")),
+        RoundSpec("Behavioral", "Medium", listOf("behavioral", "culture fit")),
+      ),
+      "apple" to listOf(
+        RoundSpec("Coding", "Hard", listOf("arrays", "strings", "DP")),
+        RoundSpec("Domain Deep Dive", "Hard", listOf("OS", "memory", "concurrency")),
+        RoundSpec("Hiring Manager", "Medium", listOf("behavioral", "projects")),
+      ),
     )
 
-    val KNOWN_WEAK_TOPIC_KEYWORDS = mapOf(
-      "DSA — Arrays & Strings" to listOf("arrays", "strings", "two pointer"),
-      "DSA — Graphs & Trees" to listOf("graphs", "trees", "DFS", "BFS"),
-      "System Design — E-commerce" to listOf("system design", "URL shortener"),
-      "Low-level Design" to listOf("LLD", "design patterns", "SOLID"),
-      "MS Internals" to listOf("OS", "networks", "OOPS"),
+    private val COMPANY_ALIASES = mapOf(
+      "microsoft" to "microsoft",
+      "msft" to "microsoft",
+      "amazon" to "amazon",
+      "aws" to "amazon",
+      "meta" to "meta",
+      "facebook" to "meta",
+      "apple" to "apple",
+      "google" to "google",
+      "alphabet" to "google",
+      "flipkart" to "flipkart",
+      "swiggy" to "swiggy",
+      "razorpay" to "razorpay",
     )
+
+    val DEFAULT_ROUNDS = listOf(
+      RoundSpec("DSA Round 1", "Medium", listOf("arrays", "strings", "DP")),
+      RoundSpec("Technical Round", "Medium", listOf("OOPs", "DBMS", "OS")),
+      RoundSpec("HR Round", "Easy", listOf("behavioral", "culture fit")),
+    )
+
   }
 
   data class RoundSpec(
@@ -75,36 +105,25 @@ class InterviewIntelligenceEngine @Inject constructor(
     userKnownWeaknesses: List<String>,
     userDsaHistory: Map<String, String>,
   ): CompanyIntel {
-    val normalized = company.lowercase().split(" ").first { stop ->
-      stop in setOf("razorpay", "flipkart", "swiggy", "google", "microsoft", "amazon", "meta", "apple")
-    }.let {
-      when (it) {
-        "razorpay" -> "razorpay"
-        "flipkart" -> "flipkart"
-        "swiggy" -> "swiggy"
-        "google" -> "google"
-        "microsoft" -> "google"
-        else -> "razorpay"
-      }
-    }
-    val rounds = COMPANY_ROUND_MAP[normalized] ?: listOf(
-      RoundSpec("DSA Round 1", "Medium", listOf("arrays", "strings", "DP")),
-      RoundSpec("Technical Round", "Medium", listOf("OOPs", "DBMS", "OS")),
-      RoundSpec("HR Round", "Easy", listOf("behavioral", "culture fit")),
-    )
+    val normalized = normalizeCompany(company)
+    val rounds = COMPANY_ROUND_MAP[normalized] ?: DEFAULT_ROUNDS
 
+    val weaknessKeywords = userKnownWeaknesses.map { it.lowercase() }.filter { it.isNotBlank() }
     val roundsIntel = rounds.map { spec ->
-      val userWeakHere = knownWeakTopics().any { kw ->
-        userKnownWeaknesses.any { ukw -> kw.contains(ukw, ignoreCase = true) } ||
-          spec.topics.any { t -> userDsaHistory[t]?.let { status ->
-            status.equals("NOT_ATTEMPTED", true) || status.equals("REVISIT", true)
-          } ?: false }
+      val missingInDsa = spec.topics.any { topic ->
+        userDsaHistory.entries.any { (name, status) ->
+          name.equals(topic, ignoreCase = true) &&
+            (status.equals("NOT_ATTEMPTED", true) || status.equals("REVISIT", true))
+        }
+      }
+      val matchesKnownWeakness = spec.topics.any { topic ->
+        weaknessKeywords.any { weak -> weak.contains(topic, ignoreCase = true) || topic.contains(weak, ignoreCase = true) }
       }
       RoundIntel(
         roundName = spec.roundName,
         avgDifficulty = spec.difficulty,
         topics = spec.topics,
-        userWeakSpotHere = userWeakHere,
+        userWeakSpotHere = missingInDsa || matchesKnownWeakness,
       )
     }
 
@@ -123,26 +142,17 @@ class InterviewIntelligenceEngine @Inject constructor(
       "common ${company} interview questions on $topic"
     }
 
-    val successRate = when (normalized) {
-      "google" -> 0.02f
-      "flipkart" -> 0.08f
-      "swiggy" -> 0.12f
-      "razorpay" -> 0.15f
-      else -> 0.10f
-    }
+    return CompanyIntel(company, roundsIntel, weakAreasThere, prepMessage, questionQueries)
+  }
 
-    return CompanyIntel(company, roundsIntel, weakAreasThere, prepMessage, questionQueries, successRate)
+  private fun normalizeCompany(company: String): String {
+    val words = company.lowercase().split(Regex("[^a-z0-9]+")).filter { it.isNotBlank() }
+    return words.firstNotNullOfOrNull { COMPANY_ALIASES[it] } ?: "generic"
   }
 
   fun buildMockInterviewPrompt(company: String, role: String): String {
-    val normalized = company.lowercase().split(" ").firstOrNull {
-      it in setOf("razorpay", "flipkart", "swiggy", "google", "microsoft", "amazon")
-    } ?: "generic"
-    val rounds = COMPANY_ROUND_MAP[normalized] ?: listOf(
-      RoundSpec("DSA", "Medium", listOf("arrays", "strings")),
-      RoundSpec("Technical", "Medium", listOf("OOPs", "DBMS")),
-      RoundSpec("HR", "Easy", listOf("behavioral")),
-    )
+    val normalized = normalizeCompany(company)
+    val rounds = COMPANY_ROUND_MAP[normalized] ?: DEFAULT_ROUNDS
 
     val roundList = rounds.joinToString("\n") { r ->
       "- ${r.roundName} (${r.difficulty}): Ask 2 questions on ${r.topics.joinToString(", ")}. Provide evaluation rubric."
@@ -160,6 +170,4 @@ For each question:
 Do NOT skip rounds. Be strict but fair.
     """.trimIndent()
   }
-
-  private fun knownWeakTopics(): List<String> = KNOWN_WEAK_TOPIC_KEYWORDS.keys.toList()
 }

@@ -1,0 +1,26 @@
+{
+  "dataset": "placement_cohort_v1.csv",
+  "rows": 24000,
+  "features": [
+    "dsa_solved_log",
+    "dsa_hard_ratio",
+    "dsa_medium_ratio",
+    "applications_log",
+    "interview_rate",
+    "offer_rate",
+    "certs_log",
+    "projects_log",
+    "streak_log",
+    "skills_norm",
+    "mock_interviews_log",
+    "score_norm",
+    "college_tier_norm",
+    "attempts_log"
+  ],
+  "positive_rate": 0.5012,
+  "seed": 20261024,
+  "generator": "generate_dataset.py",
+  "sha256": "7625e344a42e5a111d6b4ff56618ba01e134913d4e244fa5ff176389e53eff55",
+  "provenance": "synthetic_v1",
+  "limitations": "Synthetic cohort generated from a documented latent-trait model. Metrics measure pipeline correctness and model capacity, not real-world placement accuracy. Retrain on opt-in anonymized outcomes before making marketing claims."
+}

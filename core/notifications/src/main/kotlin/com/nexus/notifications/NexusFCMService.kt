@@ -2,10 +2,29 @@ package com.nexus.notifications
 
 import android.app.PendingIntent
 import android.content.Intent
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.nexus.datastore.UserPreferences
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import timber.log.Timber
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class NexusFCMService : FirebaseMessagingService() {
+
+    @Inject lateinit var userPreferences: UserPreferences
+    @Inject lateinit var firebaseAuth: FirebaseAuth
+    @Inject lateinit var firestore: FirebaseFirestore
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onMessageReceived(message: RemoteMessage) {
         val title = message.notification?.title
@@ -22,8 +41,24 @@ class NexusFCMService : FirebaseMessagingService() {
     }
 
     override fun onNewToken(token: String) {
-        // Send token to backend for push notification targeting
-        sendTokenToServer(token)
+        scope.launch {
+            runCatching { userPreferences.saveFcmToken(token) }
+                .onFailure { Timber.w(it, "Unable to store FCM token") }
+            persistTokenForCurrentUser(token)
+        }
+    }
+
+    override fun onDestroy() {
+        scope.cancel()
+        super.onDestroy()
+    }
+
+    private suspend fun persistTokenForCurrentUser(token: String) {
+        val uid = firebaseAuth.currentUser?.uid ?: return
+        runCatching {
+            firestore.collection("users").document(uid)
+                .set(mapOf("fcmToken" to token), SetOptions.merge())
+        }.onFailure { Timber.w(it, "Unable to persist FCM token") }
     }
 
     private fun showNotification(title: String, body: String, type: String?, targetId: String?) {
@@ -43,15 +78,13 @@ class NexusFCMService : FirebaseMessagingService() {
             "opportunity" -> NotificationHelper.CHANNEL_OPPORTUNITIES
             "streak" -> NotificationHelper.CHANNEL_STREAK
             "social" -> NotificationHelper.CHANNEL_SOCIAL
+            "deadline" -> NotificationHelper.CHANNEL_DEADLINES
+            "insight" -> NotificationHelper.CHANNEL_AI
             else -> NotificationHelper.CHANNEL_DEFAULT
         }
 
         NotificationHelper.showNotification(
             this, title, body, channelId, pendingIntent,
         )
-    }
-
-    private fun sendTokenToServer(token: String) {
-        // TODO: Call backend API to register FCM token
     }
 }

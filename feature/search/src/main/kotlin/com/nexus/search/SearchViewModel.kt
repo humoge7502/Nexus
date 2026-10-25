@@ -8,8 +8,7 @@ import com.nexus.data.usecase.NexusSearchEngine
 import com.nexus.domain.model.SearchMode
 import com.nexus.domain.model.SearchQuery
 import com.nexus.domain.model.SearchResult
-import com.nexus.domain.model.Skill
-import com.nexus.datastore.UserPreferences
+import com.nexus.domain.repository.ISkillGraphRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -32,7 +31,7 @@ data class SearchUiState(
 class SearchViewModel @Inject constructor(
     private val searchEngine: NexusSearchEngine,
     private val internshipRepository: InternshipRepository,
-    private val userPreferences: UserPreferences,
+    private val skillGraphRepository: ISkillGraphRepository,
     private val analyticsTracker: AnalyticsTracker,
 ) : ViewModel() {
 
@@ -74,9 +73,7 @@ class SearchViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isSearching = true)
             try {
                 val internships = internshipRepository.getAllInternships().first()
-                val skills = userPreferences.dataStore.data.first().let { prefs ->
-                    emptyList<Skill>()
-                }
+                val skills = skillGraphRepository.getUserSkills()
                 val searchQuery = SearchQuery(
                     queryText = query,
                     mode = _uiState.value.searchMode,

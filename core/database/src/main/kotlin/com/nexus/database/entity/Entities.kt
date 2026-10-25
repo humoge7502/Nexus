@@ -19,16 +19,17 @@ import java.util.UUID
         Index("deadline"),
         Index("company_name"),
         Index("cached_at"),
+        Index("posted_at"),
     ],
 )
 data class InternshipEntity(
     @PrimaryKey val id: String,
     val title: String,
     @ColumnInfo(name = "company_name") val companyName: String,
-    @ColumnInfo(name = "company_logo_url") val companyLogoUrl: String?,
+    @ColumnInfo(name = "company_logo_url") val companyLogoUrl: String? = null,
     val location: String,
     @ColumnInfo(name = "is_remote") val isRemote: Boolean,
-    @ColumnInfo(name = "stipend_amount") val stipendAmount: Int?,
+    @ColumnInfo(name = "stipend_amount") val stipendAmount: Int? = null,
     @ColumnInfo(name = "stipend_currency") val stipendCurrency: String = "INR",
     @ColumnInfo(name = "duration_months") val durationMonths: Int,
     val skills: String = "", // JSON array

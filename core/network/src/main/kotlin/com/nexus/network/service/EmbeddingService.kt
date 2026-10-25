@@ -21,12 +21,10 @@ class EmbeddingService @Inject constructor(
         const val EMBEDDING_DIM = 128
     }
 
-    private var embeddingDim = 128
-    private var modelVersion = "nexus-tfidf-v1"
     private var semanticGroups: Map<Set<String>, Float> = emptyMap()
     private var idfWeights: Map<String, Float> = emptyMap()
     private var defaultIdf = 1.0f
-    private var configLoaded = false
+    private val configLoaded = java.util.concurrent.atomic.AtomicBoolean(false)
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -38,15 +36,14 @@ class EmbeddingService @Inject constructor(
     }
 
     private fun ensureRemoteConfig() {
-        if (!configLoaded) {
-            configLoaded = true
+        if (configLoaded.compareAndSet(false, true)) {
             serviceScope.launch { loadRemoteConfig() }
         }
     }
 
     private fun loadDefaultConfig() {
-        embeddingDim = 128
-        modelVersion = "nexus-tfidf-v1"
+        // Dimension and model version are fixed for the lifetime of the app so
+        // embeddings persisted under an older configuration always decode.
         semanticGroups = mapOf(
             setOf(
                 "kotlin", "android", "java", "python", "javascript", "typescript",
@@ -111,8 +108,16 @@ class EmbeddingService @Inject constructor(
             if (response.isSuccessful) {
                 val config = response.body()
                 if (config != null) {
-                    embeddingDim = config.embeddingDim
-                    modelVersion = config.modelVersion
+                    if (config.embeddingDim != EMBEDDING_DIM || config.modelVersion != MODEL_VERSION) {
+                        Timber.w(
+                            "Ignoring incompatible embedding config (dim=%d, version=%s); using %d/%s",
+                            config.embeddingDim,
+                            config.modelVersion,
+                            EMBEDDING_DIM,
+                            MODEL_VERSION,
+                        )
+                        return
+                    }
                     defaultIdf = config.defaultIdf
 
                     // Convert semantic groups from DTO format to internal format
@@ -126,7 +131,7 @@ class EmbeddingService @Inject constructor(
                     // Convert IDF weights
                     idfWeights = config.idfWeights.toMap()
 
-                    Timber.i("Embedding config loaded from API: dim=$embeddingDim, version=$modelVersion")
+                    Timber.i("Embedding config loaded from API: dim=$EMBEDDING_DIM, version=$MODEL_VERSION")
                 }
             } else {
                 Timber.w("Failed to fetch embedding config from API, using defaults")
@@ -139,9 +144,9 @@ class EmbeddingService @Inject constructor(
     suspend fun computeEmbedding(text: String): ByteArray = withContext(Dispatchers.Default) {
         ensureRemoteConfig()
         val tokens = tokenize(text)
-        if (tokens.isEmpty()) return@withContext ByteArray(embeddingDim * 4)
+        if (tokens.isEmpty()) return@withContext ByteArray(EMBEDDING_DIM * 4)
 
-        val vec = FloatArray(embeddingDim)
+        val vec = FloatArray(EMBEDDING_DIM)
         val totalTokens = tokens.size
 
         for ((index, token) in tokens.withIndex()) {
@@ -151,8 +156,8 @@ class EmbeddingService @Inject constructor(
             val weight = positionWeight * semanticWeight * idf
 
             val hash = token.hashCode()
-            val dim1 = (hash and 0x7F) % embeddingDim
-            val dim2 = ((hash ushr 7) and 0x7F) % embeddingDim
+            val dim1 = (hash and Int.MAX_VALUE) % EMBEDDING_DIM
+            val dim2 = ((hash ushr 7) and Int.MAX_VALUE) % EMBEDDING_DIM
 
             vec[dim1] += weight * 0.6f
             vec[dim2] += weight * 0.4f
@@ -163,8 +168,8 @@ class EmbeddingService @Inject constructor(
     }
 
     fun decodeEmbedding(bytes: ByteArray): FloatArray {
-        require(bytes.size == embeddingDim * 4) { "Invalid embedding size: ${bytes.size}" }
-        return FloatArray(embeddingDim) { i ->
+        require(bytes.size == EMBEDDING_DIM * 4) { "Invalid embedding size: ${bytes.size}" }
+        return FloatArray(EMBEDDING_DIM) { i ->
             val bits = ((bytes[i * 4].toInt() and 0xFF) shl 24) or
                 ((bytes[i * 4 + 1].toInt() and 0xFF) shl 16) or
                 ((bytes[i * 4 + 2].toInt() and 0xFF) shl 8) or

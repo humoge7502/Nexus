@@ -19,6 +19,7 @@ import com.nexus.common.RateLimitResult
 import com.nexus.datastore.UserPreferences
 import com.nexus.designsystem.component.LoadingState
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.domain.usecase.InterviewIntelligenceEngine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +32,8 @@ import javax.inject.Inject
 data class InterviewCoachUiState(
   val isLoading: Boolean = false,
   val targetRole: String = "",
+  val targetCompany: String = "",
+  val companyIntel: InterviewIntelligenceEngine.CompanyIntel? = null,
   val questionType: String = "Technical",
   val question: String = "",
   val userAnswer: String = "",
@@ -44,12 +47,28 @@ class InterviewCoachViewModel @Inject constructor(
   private val aiService: AIOpenRouterService,
   private val rateLimiter: AIRateLimiter,
   private val userPreferences: UserPreferences,
+  private val intelligenceEngine: InterviewIntelligenceEngine,
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(InterviewCoachUiState())
   val uiState: StateFlow<InterviewCoachUiState> = _uiState.asStateFlow()
 
   fun updateTargetRole(role: String) {
     _uiState.value = _uiState.value.copy(targetRole = role)
+  }
+
+  fun updateTargetCompany(company: String) {
+    _uiState.value = _uiState.value.copy(
+      targetCompany = company,
+      companyIntel = if (company.isBlank()) {
+        null
+      } else {
+        intelligenceEngine.generateCompanyIntel(
+          company = company,
+          userKnownWeaknesses = emptyList(),
+          userDsaHistory = emptyMap(),
+        )
+      },
+    )
   }
 
   fun updateQuestionType(type: String) {
@@ -72,7 +91,13 @@ class InterviewCoachViewModel @Inject constructor(
       }
       _uiState.value = _uiState.value.copy(isLoading = true, error = null, question = "", userAnswer = "", feedback = "")
       try {
-        val prompt = "Act as an interview coach. Generate a $type interview question for a $role position. Just give the question, nothing else."
+        val company = _uiState.value.targetCompany
+        val prompt = if (company.isNotBlank()) {
+          intelligenceEngine.buildMockInterviewPrompt(company, role) +
+            "\nAsk exactly one $type question and nothing else."
+        } else {
+          "Act as an interview coach. Generate a $type interview question for a $role position. Just give the question, nothing else."
+        }
         val response = aiService.sendMessage(prompt)
         rateLimiter.recordCall()
         _uiState.value = _uiState.value.copy(isLoading = false, question = response)
@@ -143,6 +168,34 @@ fun InterviewCoachScreen(
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
       )
+      Spacer(Modifier.height(12.dp))
+      OutlinedTextField(
+        value = uiState.targetCompany,
+        onValueChange = viewModel::updateTargetCompany,
+        label = { Text("Target Company (optional)") },
+        placeholder = { Text("e.g., Google, Razorpay") },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true,
+      )
+      uiState.companyIntel?.let { intel ->
+        Spacer(Modifier.height(12.dp))
+        NexusCard(modifier = Modifier.fillMaxWidth()) {
+          Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+              text = intel.prepMessage,
+              style = MaterialTheme.typography.bodyMedium,
+              fontWeight = FontWeight.SemiBold,
+            )
+            intel.rounds.forEach { round ->
+              Text(
+                text = "• ${round.roundName} (${round.avgDifficulty}) — ${round.topics.joinToString(", ")}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            }
+          }
+        }
+      }
       Spacer(Modifier.height(12.dp))
       Text("Question Type:", style = MaterialTheme.typography.labelLarge)
       Spacer(Modifier.height(8.dp))

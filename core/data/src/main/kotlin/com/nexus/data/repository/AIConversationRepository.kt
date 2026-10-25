@@ -46,7 +46,13 @@ class AIConversationRepository @Inject constructor(
                 )
             )
             if (response.isSuccessful) {
-                val reply = response.body()?.reply ?: "I'm here to help!"
+                // A successful HTTP call with no reply is a failure, not a blank
+                // cheque: persisting a canned line would write fake AI output into
+                // the user's conversation history.
+                val reply = response.body()?.reply
+                if (reply.isNullOrBlank()) {
+                    return ApiResult.Error("The assistant returned no content. Please try again.")
+                }
                 val userMsg = AIMessage(
                     id = "m_${System.currentTimeMillis()}", role = AiMessageRole.USER,
                     content = message, timestamp = Instant.now(),

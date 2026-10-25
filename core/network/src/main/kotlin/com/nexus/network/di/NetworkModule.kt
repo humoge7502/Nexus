@@ -2,12 +2,17 @@ package com.nexus.network.di
 
 import com.nexus.network.BuildConfig
 import com.nexus.network.api.AuthInterceptor
+import com.nexus.network.api.LeetCodeApiService
 import com.nexus.network.api.NexusApiService
 import com.nexus.common.Constants.BASE_URL
+import com.nexus.common.Constants.LEETCODE_BASE_URL
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -18,6 +23,12 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
+
+    @Provides
+    @Singleton
+    @ApplicationScope
+    fun provideApplicationScope(): CoroutineScope =
+        CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     @Provides
     @Singleton
@@ -50,5 +61,16 @@ object NetworkModule {
     @Singleton
     fun provideNexusApiService(retrofit: Retrofit): NexusApiService {
         return retrofit.create(NexusApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideLeetCodeApiService(client: OkHttpClient): LeetCodeApiService {
+        return Retrofit.Builder()
+            .baseUrl(LEETCODE_BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(LeetCodeApiService::class.java)
     }
 }

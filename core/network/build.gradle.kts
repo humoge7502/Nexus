@@ -21,14 +21,20 @@ android {
         buildConfig = true
     }
     buildTypes {
-        all {
-            // Debug builds may call OpenRouter directly with a local key;
-            // release builds always go through the Cloud Function proxy.
+        debug {
             buildConfigField(
                 "String",
                 "OPENROUTER_API_KEY",
                 "\"${localProps.getProperty("OPENROUTER_API_KEY") ?: ""}\""
             )
+        }
+        release {
+            // Never read from local.properties here. The upstream key belongs
+            // to the proxyAI Cloud Function; compiling it into a distributable
+            // artifact would expose it in the APK regardless of runtime routing.
+            buildConfigField("String", "OPENROUTER_API_KEY", "\"\"")
+        }
+        all {
             buildConfigField(
                 "String",
                 "AI_PROXY_URL",

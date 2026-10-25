@@ -23,9 +23,10 @@ class MigrationTest {
         helper.createDatabase(TEST_DB, 1).apply {
             close()
         }
-        helper.runMigrationsAndValidate(TEST_DB, 8, true,
+        helper.runMigrationsAndValidate(TEST_DB, 9, true,
             MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4,
-            MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8
+            MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8,
+            MIGRATION_8_9
         )
     }
 
@@ -33,12 +34,31 @@ class MigrationTest {
     @Throws(IOException::class)
     fun migrate1to2PreservesData() {
         helper.createDatabase(TEST_DB, 1).apply {
-            execSQL("INSERT INTO internships (id, title, company_name, location, is_remote, duration_months, apply_url, cached_at) VALUES ('1', 'Test', 'Test Corp', 'Remote', 0, 3, 'https://apply', 0)")
+            execSQL("INSERT INTO internships (id, title, company_name, location, is_remote, stipend_currency, duration_months, skills, deadline, apply_url, description, posted_at, is_saved, cached_at) VALUES ('1', 'Test', 'Test Corp', 'Remote', 0, 'INR', 3, '[]', 0, 'https://apply', 'desc', 0, 0, 0)")
             close()
         }
         val db = helper.runMigrationsAndValidate(TEST_DB, 2, true, MIGRATION_1_2)
         db.query("SELECT * FROM internships").use { cursor ->
             assert(cursor.count > 0)
+        }
+    }
+
+    @Test
+    @Throws(IOException::class)
+    fun migrate8to9PreservesInternships() {
+        helper.createDatabase(TEST_DB, 8).apply {
+            execSQL("INSERT INTO internships (id, title, company_name, location, is_remote, stipend_currency, duration_months, skills, deadline, apply_url, description, posted_at, is_saved, cached_at) VALUES ('1', 'Test', 'Test Corp', 'Remote', 0, 'INR', 3, '[]', 0, 'https://apply', 'desc', 0, 0, 0)")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate(TEST_DB, 9, true, MIGRATION_8_9)
+        db.query("SELECT * FROM internships").use { cursor ->
+            assert(cursor.count > 0)
+        }
+        db.query("PRAGMA index_list('internships')").use { cursor ->
+            val names = buildList {
+                while (cursor.moveToNext()) add(cursor.getString(1))
+            }
+            assert(names.contains("index_internships_posted_at"))
         }
     }
 

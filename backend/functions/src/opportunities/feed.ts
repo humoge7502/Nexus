@@ -9,15 +9,70 @@ interface FeedRequest {
   skills?: string[];
 }
 
-// Seeded documents store `type` in UPPERCASE ("INTERNSHIP", ...) and skills
-// under `requiredSkills` (see backend/seed/opportunities.json).
+const ALLOWED_TYPES = new Set([
+  "internship",
+  "certification",
+  "scholarship",
+  "hackathon",
+  "all",
+]);
+const MAX_OFFSET = 1_000;
+const MAX_LIMIT = 50;
+const MAX_SKILLS = 10;
+
+export function clampLimit(value: unknown): number {
+  return Math.min(Math.max(Number(value) || 20, 1), MAX_LIMIT);
+}
+
+export function clampOffset(value: unknown): number {
+  return Math.min(Math.max(Number(value) || 0, 0), MAX_OFFSET);
+}
+
+export function sanitizeSkills(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((s): s is string => typeof s === "string" && s.trim().length > 0)
+    .map((s) => s.trim())
+    .slice(0, MAX_SKILLS);
+}
+
+// Seeded documents use role/applicationUrl while the scraper writes both
+// naming conventions; project with fallbacks so neither source loses data.
+export function projectOpportunity(id: string, d: FirebaseFirestore.DocumentData) {
+  return {
+    id,
+    type: d.type,
+    title: d.title ?? d.role ?? "",
+    role: d.role ?? d.title ?? "",
+    company: d.company ?? "",
+    location: d.location ?? "",
+    description: d.description ?? "",
+    applyUrl: d.applyUrl ?? d.applicationUrl ?? "",
+    applicationUrl: d.applicationUrl ?? d.applyUrl ?? "",
+    deadline: d.deadline ?? null,
+    stipend: d.stipend ?? "",
+    requiredSkills: d.requiredSkills ?? [],
+    tags: d.tags ?? [],
+    isActive: d.isActive ?? true,
+    createdAt: d.createdAt ?? null,
+  };
+}
+
 export const opportunityFeed: functions.HttpsFunction = functions.https.onCall(
   async (data: FeedRequest, context: functions.https.CallableContext) => {
     await requireAuth(context);
 
-    const limit = Math.min(Math.max(data.limit || 20, 1), 50);
-    const offset = Math.max(data.offset || 0, 0);
-    const opportunityType = data.opportunityType || "all";
+    const requestedType = (data?.opportunityType || "all").toLowerCase();
+    if (!ALLOWED_TYPES.has(requestedType)) {
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "opportunityType is not supported."
+      );
+    }
+    const limit = clampLimit(data?.limit);
+    const offset = clampOffset(data?.offset);
+    const opportunityType = requestedType;
+    const skills = sanitizeSkills(data?.skills);
 
     try {
       const db = admin.firestore();
@@ -27,12 +82,8 @@ export const opportunityFeed: functions.HttpsFunction = functions.https.onCall(
         query = query.where("type", "==", opportunityType.toUpperCase());
       }
 
-      if (data.skills && data.skills.length > 0) {
-        query = query.where(
-          "requiredSkills",
-          "array-contains-any",
-          data.skills.slice(0, 10)
-        );
+      if (skills.length > 0) {
+        query = query.where("requiredSkills", "array-contains-any", skills);
       }
 
       query = query
@@ -41,10 +92,9 @@ export const opportunityFeed: functions.HttpsFunction = functions.https.onCall(
         .limit(limit);
 
       const snapshot = await query.get();
-      const results = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const results = snapshot.docs.map((doc) =>
+        projectOpportunity(doc.id, doc.data())
+      );
 
       return {
         results,

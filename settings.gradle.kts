@@ -68,6 +68,6 @@ include(":audit-reporting")
 include(":audit-cli")
 include(":phase-analyzers")
 
-// NOTE: :macrobenchmark is intentionally NOT included yet.
-// It requires the baselineprofile plugin + a device/emulator to verify;
-// enable it after `./gradlew :macrobenchmark:connectedCheck` passes locally.
+// Baseline-profile generator (com.android.test). Requires an emulator/device
+// to collect a profile; compile-only on CI is still useful.
+include(":macrobenchmark")

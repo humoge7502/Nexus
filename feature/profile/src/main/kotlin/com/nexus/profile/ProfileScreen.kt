@@ -60,6 +60,15 @@ fun ProfileScreen(
     onAchievements: () -> Unit = {},
     onLeaderboard: () -> Unit = {},
     onGoPro: () -> Unit = {},
+    onApplications: () -> Unit = {},
+    onPlacementForecast: () -> Unit = {},
+    onCareerMirror: () -> Unit = {},
+    onCohort: () -> Unit = {},
+    onInterviewLog: () -> Unit = {},
+    onPortfolio: () -> Unit = {},
+    onSearch: () -> Unit = {},
+    onCommunity: () -> Unit = {},
+    onTribe: () -> Unit = {},
     viewModel: ProfileViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -88,24 +97,62 @@ fun ProfileScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
             Text(text = displayName, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-            Text(text = "CSE Student", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                text = listOfNotNull(
+                    uiState.university.takeIf { it.isNotBlank() },
+                    "Year ${uiState.year}",
+                ).joinToString(" · "),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                ProfileInfoItem(Icons.Default.School, "3rd Year")
-                ProfileInfoItem(Icons.Default.Code, "Kotlin · Compose")
+                ProfileInfoItem(Icons.Default.School, "Level ${uiState.level}")
+                ProfileInfoItem(Icons.Default.Code, "${uiState.totalXP} XP")
+                uiState.githubUsername?.let { ProfileInfoItem(Icons.Default.Code, "@$it") }
             }
             Spacer(modifier = Modifier.height(24.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                AnimatedStatCard(value = 23, label = "Applied", icon = Icons.Default.Work, gradient = listOf(Color(0xFF6366F1), Color(0xFF8B5CF6)), modifier = Modifier.weight(1f))
-                AnimatedStatCard(value = 5, label = "Certs", icon = Icons.Default.EmojiEvents, gradient = listOf(Color(0xFFF59E0B), Color(0xFFFBBF24)), modifier = Modifier.weight(1f))
+                AnimatedStatCard(value = uiState.applicationsCount, label = "Applied", icon = Icons.Default.Work, gradient = listOf(Color(0xFF6366F1), Color(0xFF8B5CF6)), modifier = Modifier.weight(1f))
+                AnimatedStatCard(value = uiState.certificationsCount, label = "Certs", icon = Icons.Default.EmojiEvents, gradient = listOf(Color(0xFFF59E0B), Color(0xFFFBBF24)), modifier = Modifier.weight(1f))
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                AnimatedStatCard(value = uiState.streakDays, label = "Day streak", icon = Icons.Default.School, gradient = listOf(Color(0xFF10B981), Color(0xFF34D399)), modifier = Modifier.weight(1f))
+                AnimatedStatCard(value = uiState.offersCount, label = "Offers", icon = Icons.Default.Work, gradient = listOf(Color(0xFF06B6D4), Color(0xFF22D3EE)), modifier = Modifier.weight(1f))
             }
             Spacer(modifier = Modifier.height(24.dp))
             Text("Skills", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.height(12.dp))
-            SkillRadarChart(skills = listOf("Kotlin" to 0.85f, "Compose" to 0.8f, "Android" to 0.75f, "Python" to 0.6f, "DSA" to 0.7f, "System Design" to 0.45f), modifier = Modifier.fillMaxWidth().height(280.dp))
+            val ratedSkills = uiState.skills.filter { it.proficiency > 0 }
+            if (ratedSkills.size >= 3) {
+                SkillRadarChart(
+                    skills = ratedSkills.take(6).map { it.name to (it.proficiency / 3f) },
+                    modifier = Modifier.fillMaxWidth().height(280.dp),
+                )
+            } else {
+                Text(
+                    text = if (uiState.skills.isEmpty()) {
+                        "No skills added yet. Complete onboarding or mark skills in Growth to build your radar."
+                    } else {
+                        "Add at least 3 rated skills to unlock your radar."
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                if (uiState.skills.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = uiState.skills.take(8).joinToString(" · ") { it.name },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(24.dp))
             NexusCard(modifier = Modifier.fillMaxWidth().clickable { onAchievements() }, glassEffect = true) {
-                if (onLeaderboard != null) {} // reference to suppress unused warning
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Text("Achievements", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
@@ -121,8 +168,62 @@ fun ProfileScreen(
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(24.dp))
+            NexusCard(modifier = Modifier.fillMaxWidth(), glassEffect = true) {
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    Text(
+                        "NEXUS Toolkit",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
+                    ToolkitRow(Icons.Default.Work, "Applications", "Track every application and interview", onApplications)
+                    ToolkitRow(Icons.Default.School, "Placement Forecast", "Readiness by company tier", onPlacementForecast)
+                    ToolkitRow(Icons.Default.EmojiEvents, "Career Mirror", "Weekly retrospective and narrative", onCareerMirror)
+                    ToolkitRow(Icons.Default.Code, "Cohort Intelligence", "See where you stand among peers", onCohort)
+                    ToolkitRow(Icons.Default.Work, "Interview Log", "Record outcomes and calibrate confidence", onInterviewLog)
+                    ToolkitRow(Icons.Default.WorkspacePremium, "Portfolio", "Export a shareable career portfolio", onPortfolio)
+                    ToolkitRow(Icons.Default.Settings, "Search", "Semantic search across opportunities", onSearch)
+                    ToolkitRow(Icons.Default.School, "Community", "Peer circles and discussions", onCommunity)
+                    ToolkitRow(Icons.Default.EmojiEvents, "Tribe", "Small accountability group", onTribe)
+                    ToolkitRow(Icons.Default.Work, "Leaderboard", "Compete on the NEXUS score", onLeaderboard)
+                }
+            }
             Spacer(modifier = Modifier.height(32.dp))
         }
+    }
+}
+
+@Composable
+private fun ToolkitRow(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp),
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+            Text(
+                subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Text("→", color = MaterialTheme.colorScheme.primary)
     }
 }
 

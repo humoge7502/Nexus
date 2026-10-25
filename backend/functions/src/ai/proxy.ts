@@ -1,5 +1,6 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 import { requireAuth } from "../middleware/auth";
 
 /**
@@ -25,15 +26,26 @@ const MAX_TOTAL_PROMPT_CHARS = 48_000;
 
 const DAILY_REQUEST_LIMIT = 40;
 const DAILY_TOKEN_LIMIT = 60_000;
+const UPSTREAM_TIMEOUT_MS = 25_000;
+const ALLOWED_ROLES = new Set(["system", "user", "assistant"]);
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
-interface AIRequest {
+export interface AIRequest {
   model?: string;
   messages: Array<{ role: string; content: string }>;
   max_tokens?: number;
   temperature?: number;
 }
+
+export const PROMPT_LIMITS = {
+  maxTokensPerRequest: MAX_TOKENS_PER_REQUEST,
+  maxMessages: MAX_MESSAGES,
+  maxMessageChars: MAX_MESSAGE_CHARS,
+  maxTotalPromptChars: MAX_TOTAL_PROMPT_CHARS,
+  dailyRequestLimit: DAILY_REQUEST_LIMIT,
+  dailyTokenLimit: DAILY_TOKEN_LIMIT,
+} as const;
 
 interface AIResponse {
   id: string;
@@ -59,7 +71,10 @@ function getApiKey(): string {
   return key;
 }
 
-function validateRequest(data: AIRequest): AIRequest {
+export function validateRequest(data: AIRequest): AIRequest {
+  if (!data || typeof data !== "object") {
+    throw new functions.https.HttpsError("invalid-argument", "Invalid request body.");
+  }
   if (!Array.isArray(data.messages) || data.messages.length === 0) {
     throw new functions.https.HttpsError(
       "invalid-argument",
@@ -82,8 +97,27 @@ function validateRequest(data: AIRequest): AIRequest {
   }
 
   let totalChars = 0;
-  const messages = data.messages.map((m) => {
+  let systemMessages = 0;
+  const messages = data.messages.map((m, index) => {
+    if (!m || typeof m !== "object") {
+      throw new functions.https.HttpsError("invalid-argument", "Invalid message.");
+    }
     const role = typeof m.role === "string" ? m.role : "user";
+    if (!ALLOWED_ROLES.has(role)) {
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "Message role not allowed."
+      );
+    }
+    if (role === "system") {
+      systemMessages += 1;
+      if (index !== 0 || systemMessages > 1) {
+        throw new functions.https.HttpsError(
+          "invalid-argument",
+          "A single system message is only allowed first."
+        );
+      }
+    }
     const content = typeof m.content === "string" ? m.content : "";
     if (content.length > MAX_MESSAGE_CHARS) {
       throw new functions.https.HttpsError(
@@ -101,51 +135,93 @@ function validateRequest(data: AIRequest): AIRequest {
     );
   }
 
+  const requestedTokens = Number(data.max_tokens);
+  const requestedTemperature = Number(data.temperature);
   return {
     model,
     messages,
-    max_tokens: Math.min(Math.max(data.max_tokens || 512, 1), MAX_TOKENS_PER_REQUEST),
-    temperature: Math.min(Math.max(data.temperature ?? 0.7, 0), 2),
+    max_tokens: Math.min(
+      Math.max(Number.isFinite(requestedTokens) ? requestedTokens : 512, 1),
+      MAX_TOKENS_PER_REQUEST
+    ),
+    temperature: Math.min(
+      Math.max(Number.isFinite(requestedTemperature) ? requestedTemperature : 0.7, 0),
+      2
+    ),
   };
 }
 
-async function enforceQuota(uid: string): Promise<void> {
-  const dayStart = new Date();
-  dayStart.setUTCHours(0, 0, 0, 0);
+export function usageDocId(uid: string, now: Date): string {
+  const day = now.toISOString().slice(0, 10);
+  return `${uid}_${day}`;
+}
 
-  const usageSnap = await admin
-    .firestore()
-    .collection("ai_proxy_logs")
-    .where("uid", "==", uid)
-    .where("timestamp", ">=", admin.firestore.Timestamp.fromDate(dayStart))
-    .get();
+/**
+ * Reserves one request in a transaction before the upstream call. A
+ * read-then-call check allowed N parallel requests to all pass the quota.
+ */
+async function reserveQuota(uid: string): Promise<string> {
+  const db = admin.firestore();
+  const docId = usageDocId(uid, new Date());
+  const ref = db.collection("ai_usage").doc(docId);
 
-  let requestCount = 0;
-  let tokenCount = 0;
-  usageSnap.forEach((doc) => {
-    requestCount += 1;
-    tokenCount += Number(doc.get("totalTokens") || 0);
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const requestCount = Number(snap.get("requestCount") || 0);
+    const tokenCount = Number(snap.get("tokenCount") || 0);
+
+    if (requestCount >= DAILY_REQUEST_LIMIT) {
+      throw new functions.https.HttpsError(
+        "resource-exhausted",
+        "Daily AI request limit reached. Try again tomorrow."
+      );
+    }
+    if (tokenCount >= DAILY_TOKEN_LIMIT) {
+      throw new functions.https.HttpsError(
+        "resource-exhausted",
+        "Daily AI token limit reached. Try again tomorrow."
+      );
+    }
+
+    tx.set(
+      ref,
+      {
+        uid,
+        day: docId.slice(docId.lastIndexOf("_") + 1),
+        requestCount: requestCount + 1,
+        tokenCount,
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
   });
 
-  if (requestCount >= DAILY_REQUEST_LIMIT) {
-    throw new functions.https.HttpsError(
-      "resource-exhausted",
-      "Daily AI request limit reached. Try again tomorrow."
+  return docId;
+}
+
+async function recordTokens(docId: string, totalTokens: number): Promise<void> {
+  if (totalTokens <= 0) return;
+  await admin
+    .firestore()
+    .collection("ai_usage")
+    .doc(docId)
+    .set(
+      {
+        tokenCount: FieldValue.increment(totalTokens),
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true }
     );
-  }
-  if (tokenCount >= DAILY_TOKEN_LIMIT) {
-    throw new functions.https.HttpsError(
-      "resource-exhausted",
-      "Daily AI token limit reached. Try again tomorrow."
-    );
-  }
 }
 
 export const aiProxy: functions.HttpsFunction = functions.https.onCall(
   async (data: AIRequest, context: functions.https.CallableContext) => {
     const uid = await requireAuth(context);
     const requestBody = validateRequest(data);
-    await enforceQuota(uid);
+    const usageDocId = await reserveQuota(uid);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
 
     try {
       const response = await fetch(OPENROUTER_URL, {
@@ -157,6 +233,7 @@ export const aiProxy: functions.HttpsFunction = functions.https.onCall(
           "X-Title": "NEXUS",
         },
         body: JSON.stringify(requestBody),
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -171,29 +248,52 @@ export const aiProxy: functions.HttpsFunction = functions.https.onCall(
       }
 
       const result = (await response.json()) as AIResponse;
+      const totalTokens = Number(result.usage?.total_tokens || 0);
+      await recordTokens(usageDocId, totalTokens);
 
       await admin.firestore().collection("ai_proxy_logs").add({
         uid,
         model: requestBody.model,
         promptTokens: result.usage?.prompt_tokens ?? 0,
         completionTokens: result.usage?.completion_tokens ?? 0,
-        totalTokens: result.usage?.total_tokens ?? 0,
-        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        totalTokens,
+        outcome: "success",
+        timestamp: FieldValue.serverTimestamp(),
       });
 
       return {
         id: result.id,
         content: result.choices[0]?.message?.content ?? "",
         finishReason: result.choices[0]?.finish_reason ?? "stop",
-        usage: result.usage,
+        usage: {
+          promptTokens: result.usage?.prompt_tokens ?? 0,
+          completionTokens: result.usage?.completion_tokens ?? 0,
+          totalTokens,
+        },
       };
     } catch (error) {
       if (error instanceof functions.https.HttpsError) throw error;
-      console.error(`aiProxy failed uid=${uid}:`, error);
-      throw new functions.https.HttpsError(
-        "internal",
-        "AI request failed. Please try again."
+      const aborted = controller.signal.aborted;
+      console.error(
+        `aiProxy failed uid=${uid} aborted=${aborted}:`,
+        error instanceof Error ? error.message : String(error)
       );
+      await admin
+        .firestore()
+        .collection("ai_proxy_logs")
+        .add({
+          uid,
+          model: requestBody.model,
+          outcome: aborted ? "timeout" : "error",
+          timestamp: FieldValue.serverTimestamp(),
+        })
+        .catch(() => undefined);
+      throw new functions.https.HttpsError(
+        aborted ? "deadline-exceeded" : "internal",
+        aborted ? "AI request timed out. Please try again." : "AI request failed. Please try again."
+      );
+    } finally {
+      clearTimeout(timeout);
     }
   }
 );

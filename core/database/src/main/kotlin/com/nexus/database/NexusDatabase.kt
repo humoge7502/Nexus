@@ -83,7 +83,7 @@ import com.nexus.database.entity.UserSurveyEntity
         SkillVelocitySnapshotEntity::class,
         InterviewReportEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = true
 )
 abstract class NexusDatabase : RoomDatabase() {

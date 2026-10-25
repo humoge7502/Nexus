@@ -42,6 +42,10 @@ object NotificationHelper {
                 CHANNEL_AI, "AI Insights",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply { description = "Personalized AI career insights" },
+            NotificationChannel(
+                CHANNEL_DEADLINES, "Deadlines",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply { description = "Application and certification deadlines" },
         )
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

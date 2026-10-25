@@ -1,9 +1,5 @@
 package com.nexus.network.api
 
-import com.google.firebase.auth.FirebaseAuth
-import com.nexus.datastore.UserPreferences
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import okhttp3.Authenticator
 import okhttp3.Interceptor
 import okhttp3.Request
@@ -17,21 +13,16 @@ import javax.inject.Singleton
  * openrouter.ai, LeetCode mirrors) — leaking the session token there would
  * hand our credential to external servers.
  *
- * Also acts as an OkHttp [Authenticator]: on a 401 it re-reads the stored
- * token once and retries, capped to avoid loops.
+ * The token comes from [AuthTokenProvider]'s in-memory cache so request
+ * threads never block on DataStore. On a 401 the provider performs one
+ * bounded refresh before the request is retried (capped to avoid loops).
  */
 @Singleton
 class AuthInterceptor @Inject constructor(
-    private val userPreferences: UserPreferences,
-    @Suppress("unused") private val firebaseAuth: FirebaseAuth,
+    private val tokenProvider: AuthTokenProvider,
 ) : Interceptor, Authenticator {
 
-    @Volatile
-    private var cachedToken: String? = null
-
-    fun updateCachedToken(token: String?) {
-        cachedToken = token
-    }
+    fun updateCachedToken(token: String?) = tokenProvider.updateCachedToken(token)
 
     private val trustedHosts = setOf(
         "api.nexus.app",
@@ -47,10 +38,7 @@ class AuthInterceptor @Inject constructor(
         if (host !in trustedHosts) {
             return chain.proceed(chain.request())
         }
-        // OkHttp interceptors run on dispatcher threads, so a short blocking
-        // read of the DataStore value is acceptable here.
-        val token = cachedToken ?: runBlocking { userPreferences.authToken.first() }
-        if (token != null) cachedToken = token
+        val token = tokenProvider.token()
         val request = if (token.isNullOrBlank()) {
             chain.request()
         } else {
@@ -63,8 +51,7 @@ class AuthInterceptor @Inject constructor(
 
     override fun authenticate(route: okhttp3.Route?, response: Response): Request? {
         if (responseCount(response) >= 2) return null
-        val token = runBlocking { userPreferences.authToken.first() } ?: return null
-        cachedToken = token
+        val token = tokenProvider.refreshBlocking() ?: return null
         return response.request.newBuilder()
             .header("Authorization", "Bearer $token")
             .build()

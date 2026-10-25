@@ -15,11 +15,9 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import okio.BufferedSource
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -48,18 +46,7 @@ class NexusAIService @Inject constructor(
         message: String,
         history: List<AIMessage>,
         userProfile: UserProfile? = null,
-    ): Flow<String> = flow {
-        if (!BuildConfig.DEBUG) {
-            if (!aiRequestRouter.useProxy) {
-                emit("AI features are not available in release mode without a configured backend proxy.")
-                return@flow
-            }
-            if (BuildConfig.OPENROUTER_API_KEY.isNotBlank()) {
-                emit("AI features are temporarily unavailable. Please ensure the backend proxy is configured.")
-                return@flow
-            }
-        }
-
+    ): Flow<String> {
         val contextMessages = conversationMemoryManager.buildContext(history)
         val systemPrompt = userProfile?.let {
             systemPromptBuilder.buildSystemPrompt(it)
@@ -69,6 +56,31 @@ class NexusAIService @Inject constructor(
             addAll(contextMessages.map { ChatMessage(it.role.name.lowercase(), it.content) })
             add(ChatMessage("user", message))
         }
+
+        // The proxy is a callable function, not an OpenAI-compatible SSE endpoint.
+        if (aiRequestRouter.useProxy) {
+            return flow {
+                val result = aiRequestRouter.chat(
+                    messages.map { mapOf("role" to it.role, "content" to it.content) }
+                )
+                result.fold(
+                    onSuccess = { emit(it) },
+                    onFailure = { throw IllegalStateException("NEXUS AI backend request failed", it) },
+                )
+            }
+        }
+        if (!BuildConfig.DEBUG) {
+            return flow {
+                throw IllegalStateException("AI features require the backend proxy in release builds")
+            }
+        }
+        if (BuildConfig.OPENROUTER_API_KEY.isBlank()) {
+            return flow {
+                throw IllegalStateException("OpenRouter API key is not configured")
+            }
+        }
+
+        return flow {
         val jsonBody = JSONObject().apply {
             put("model", "openai/gpt-4o-mini")
             put("messages", JSONArray().apply {
@@ -93,11 +105,13 @@ class NexusAIService @Inject constructor(
                 JSONObject(errorBody).optString("error", errorBody)
             } catch (_: Exception) { errorBody }
             emit("I'm having trouble connecting: $errorMessage")
+            response.close()
             return@flow
         }
 
         val body = response.body ?: run {
             emit("I'm having trouble connecting right now. Please try again.")
+            response.close()
             return@flow
         }
 
@@ -133,7 +147,8 @@ class NexusAIService @Inject constructor(
         } finally {
             source.close()
         }
-    }.flowOn(Dispatchers.IO)
+        }.flowOn(Dispatchers.IO)
+    }
 
     data class ChatMessage(val role: String, val content: String)
 }

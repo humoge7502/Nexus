@@ -335,17 +335,32 @@ Additional DataStore instances:
 
 ### 8.1 AI Service Architecture
 
-**File:** `feature/ai/.../AIOpenRouterService.kt` (180 lines)
-- ✅ Primary AI service. Non-streaming. Uses `openai/gpt-4o-mini` via OpenRouter API.
-- Supports `sendPrompt(prompt)` and `sendMessages(messages)` 
-- Provides `MAX_RETRIES = 3` with exponential backoff
-- **⚠️** When API fails after retries, returns a default mock response ("I'm here to help...") — user never knows AI is down
-- API key via `BuildConfig.OPENROUTER_API_KEY`
+**File:** `feature/ai/.../AIOpenRouterService.kt` (103 lines — corrected 2026-10-25)
+- ✅ Non-streaming single-shot AI service. Uses `openai/gpt-4o-mini` via
+  `AIRequestRouter`, which selects the proxy or the direct OpenRouter endpoint.
+- Supports `sendPrompt(prompt)` and `sendMessages(messages)`.
+- **✅ Fixed since this report was written:** the fabricated fallback response is
+  gone. In proxy mode the result is `result.getOrThrow()`; the direct path throws
+  `AIServiceException("AI service returned an empty response", isRetryable = true)`
+  ([AIOpenRouterService.kt:80](../feature/ai/src/main/kotlin/com/nexus/ai/AIOpenRouterService.kt#L80)),
+  so callers surface a real failure instead of a canned line.
+- `MAX_RETRIES = 3` no longer lives in this file. Retry with exponential backoff
+  *does* exist as `core/common/SafeApiCall.kt`, but only `core/sync/SyncWorker`
+  uses it — no AI call site wraps `sendMessage` in `safeApiCall`, so
+  `AIServiceException.isRetryable` is set and then never read on the AI path.
+  **Live gap:** AI requests currently fail on the first transient 5xx.
+- API key via `BuildConfig.OPENROUTER_API_KEY` — **debug builds only.** As of
+  2026-10-25, `core/network/build.gradle.kts` hard-codes that field to `""` for
+  the release variant, so a release APK can never carry the upstream key.
 
 **File:** `feature/ai/.../NexusAIService.kt` (180 lines)
 - ✅ Secondary AI service. **Streaming** support (returns `Flow<String>`).
 - Integrates `ConversationMemoryManager` and `SystemPromptBuilder`
-- **❌ Orphaned** — no screen or ViewModel uses this service. All 7 AI screens use `AIOpenRouterService` instead.
+- **No longer orphaned** — `AIChatViewModel` injects it and routes through
+  `AIRequestRouter`, which forces the `proxyAI` Cloud Function for every non-debug
+  variant. `AIOpenRouterService` still serves the five single-shot screens
+  (Career Insights, Interview Coach, LinkedIn Post, Roadmap, Skill Gap) and
+  `NexusOracleViewModel`.
 
 **File:** `feature/ai/.../SystemPromptBuilder.kt`
 - ✅ Builds personalized system prompts from `UserProfile` (name, college, skills, goals, target companies)
@@ -675,14 +690,23 @@ val username = userPreferences.authToken.first()
 
 ### 15.1 Secrets Management
 
-| Secret | Storage | Risk |
-|--------|---------|------|
-| OPENROUTER_API_KEY | `local.properties` → BuildConfig | ⚠️ Exposed in APK BuildConfig |
-| GITHUB_CLIENT_ID | `local.properties` → BuildConfig | ⚠️ Exposed in APK |
-| GITHUB_CLIENT_SECRET | `local.properties` → BuildConfig | 🔴 Never keep OAuth client secrets in mobile apps |
-| GOOGLE_WEB_CLIENT_ID | `local.properties` → BuildConfig | ⚠️ Standard for Google Sign-In |
-| GITHUB_TOKEN | `local.properties` → BuildConfig | ⚠️ Exposed in APK |
-| NEXUS_BACKEND_URL | `build.gradle.kts` (with fallback) | ✅ Public URL |
+> Corrected 2026-10-25. The original version of this table asserted that five
+> secrets reached `BuildConfig`. Enumerating every `buildConfigField(` call in
+> the project shows **exactly three** exist: `GOOGLE_WEB_CLIENT_ID`
+> (`app/build.gradle.kts:33`), `OPENROUTER_API_KEY` and `AI_PROXY_URL`
+> (`core/network/build.gradle.kts`). The remaining keys in `local.properties`
+> are read by CI or by server-side code and are never compiled into the APK.
+
+| Secret | Storage | Reaches the APK? | Risk |
+|--------|---------|------------------|------|
+| OPENROUTER_API_KEY | `local.properties` → `core:network` BuildConfig | **debug only** | **Fixed 2026-10-25** — release hard-codes the field to `""`. Proven by building release with a sentinel key present: debug BuildConfig received it, release stayed empty and the fresh APK contains no `sk-or-*` material. The proxy Cloud Function holds the real key. |
+| AI_PROXY_URL | `local.properties` → BuildConfig | yes, all variants | ✅ Public function URL, not a secret. |
+| GOOGLE_WEB_CLIENT_ID | `local.properties` → `app` BuildConfig | yes | ✅ Standard and expected for Google Sign-In; OAuth client IDs for installed apps are not secret. Still restrict it in Cloud Console. |
+| GITHUB_CLIENT_SECRET | `local.properties` (CI writes it) | **no** | ✅ No `buildConfigField` and no Kotlin reference exists — it never ships. The original 🔴 "secret inside a mobile APK" finding was wrong. If GitHub OAuth is ever added to the app, use PKCE and keep the secret server-side. |
+| GITHUB_TOKEN | environment / CI only | **no** | ✅ Used by `scripts/github_sync.py` via `os.environ`; no BuildConfig field exists. |
+| NEXUS_BACKEND_URL | `local.properties` only | **no** | ⚠️ Dead config: it is written by CI and the setup scripts but no `buildConfigField` or Kotlin reference consumes it. Either wire it or delete it from `local.properties.template`, the CI jobs and `scripts/setup_secrets.sh` so the surface stops implying a backend base URL the app never reads. |
+| Firebase client API key | `app/google-services.json` → `resources.arsc` | **yes** | ⚠️ Unavoidable for a Firebase app. **Launch requirement:** restrict by package name `com.nexus.app` + signing SHA-256 in Google Cloud Console. |
+| Signing keystore | `keystore/nexus-release.jks`, gitignored (`*.jks`) | n/a | ✅ Not in VCS; passwords live in gitignored `local.properties`. |
 
 All sensitive values loaded from `local.properties` via `requireProp()` — will fail build if missing. ✅ No secrets in source code.
 
@@ -704,11 +728,37 @@ All sensitive values loaded from `local.properties` via `requireProp()` — will
 
 **🔴 High: runBlocking in AuthInterceptor** (`AuthInterceptor.kt:16`) — Reads DataStore on the main thread with `runBlocking`. If DataStore read is slow (first access involves disk I/O), this causes ANR.
 
-**🔴 High: OAuth client secret in mobile app** — `GITHUB_CLIENT_SECRET` in a mobile APK is inherently insecure. Any decompilation reveals it. Should use PKCE flow instead.
+**✅ Resolved (was 🔴 High): OAuth client secret in mobile app** — the original
+finding assumed `GITHUB_CLIENT_SECRET` reached `BuildConfig`. It does not: no
+`buildConfigField` and no Kotlin reference for it exists, so it never ships. If
+GitHub OAuth is added to the app later, use PKCE and keep the secret server-side.
 
-**⚠️ Medium: Unused CAMERA permission** — Declared but never used. Should be removed from manifest.
+**✅ Resolved (was ⚠️ Medium): Unused CAMERA permission** — not declared in the
+source manifest and not present in the merged release manifest.
 
-**⚠️ Low: BuildConfig secrets** — All 5 secrets in BuildConfig are extractable from APK. Standard for Android but worth noting.
+**🔴 New (2026-10-25): Ad identifiers ship via Firebase Analytics.** The merged
+release manifest declares `com.google.android.gms.permission.AD_ID`,
+`ACCESS_ADSERVICES_AD_ID` and `ACCESS_ADSERVICES_ATTRIBUTION`, all pulled in
+transitively by the Firebase Analytics registrars (`app/src/main/AndroidManifest.xml`
+asks only for `INTERNET`, `ACCESS_NETWORK_STATE`, `POST_NOTIFICATIONS`). Nothing in
+`app/build.gradle.kts` excludes them. Consequences, none of which are code:
+Google Play **Data Safety** must declare advertising-ID collection, the form must
+answer the Ads-SDK questions truthfully, and the policy for a studentaudience app
+with advertising identifiers needs review. Either accept and disclose it, or add
+the `androidx.ads`/`AD_ID` removal + a consent gate before upload. Decide before
+the first internal track, because retro-fixing a published Data Safety form is a
+policy risk.
+
+**📦 Verified (2026-10-25): baseline-profile machinery is in the shipped artifact.**
+The merged release manifest contains
+`androidx.profileinstaller.ProfileInstallerInitializer`, which is what applies
+`assets/dexopt/baseline.prof` at install time — the profile and its consumer are
+both present, not just the file in `src`.
+
+**✅ Reclassified (was ⚠️ Low): BuildConfig secrets** — there are three
+`BuildConfig` string fields in the entire project (`GOOGLE_WEB_CLIENT_ID`,
+`AI_PROXY_URL`, `OPENROUTER_API_KEY`), not five. The first two are non-secret by
+design. The third is now empty in every release variant.
 
 ### 15.4 Data Protection
 

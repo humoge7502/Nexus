@@ -13,13 +13,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material.icons.filled.BrightnessMedium
-import androidx.compose.material.icons.filled.ColorLens
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Shield
@@ -36,24 +37,27 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
     onGoPro: () -> Unit = {},
+    viewModel: SettingsViewModel = hiltViewModel(),
 ) {
-    var isDarkMode by remember { mutableStateOf(true) }
-    var notificationsEnabled by remember { mutableStateOf(true) }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isDarkMode = uiState.themeMode == "DARK"
+    val isAmoled = uiState.amoledEnabled && isDarkMode
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
@@ -103,7 +107,27 @@ fun SettingsScreen(
                 trailing = {
                     Switch(
                         checked = isDarkMode,
-                        onCheckedChange = { isDarkMode = it },
+                        onCheckedChange = { viewModel.setDarkMode(it) },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                }
+            )
+
+            SettingsItem(
+                icon = Icons.Default.DarkMode,
+                title = "AMOLED Black",
+                subtitle = if (isDarkMode) {
+                    "True-black surfaces that save battery"
+                } else {
+                    "Available when dark mode is on"
+                },
+                trailing = {
+                    Switch(
+                        checked = isAmoled,
+                        enabled = isDarkMode,
+                        onCheckedChange = { viewModel.setAmoled(it) },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = MaterialTheme.colorScheme.primary
                         )
@@ -114,17 +138,26 @@ fun SettingsScreen(
             SettingsItem(
                 icon = Icons.Default.Palette,
                 title = "Accent Color",
-                subtitle = "Indigo (Default)",
+                subtitle = uiState.accentColor.lowercase().replaceFirstChar { it.uppercase() },
                 trailing = {
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(
-                            0xFF6366F1, 0xFF06B6D4, 0xFF10B981,
-                            0xFFF59E0B, 0xFFF43F5E
-                        ).forEach { color ->
+                            "INDIGO" to 0xFF6366F1,
+                            "CYAN" to 0xFF06B6D4,
+                            "EMERALD" to 0xFF10B981,
+                            "AMBER" to 0xFFF59E0B,
+                            "ROSE" to 0xFFF43F5E,
+                        ).forEach { (name, color) ->
                             Surface(
-                                modifier = Modifier.size(24.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                color = Color(color)
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                                    .clickable { viewModel.setAccentColor(name) },
+                                shape = CircleShape,
+                                color = Color(color),
+                                border = if (uiState.accentColor == name) {
+                                    androidx.compose.foundation.BorderStroke(2.dp, Color.White)
+                                } else null,
                             ) {}
                         }
                     }
@@ -146,8 +179,8 @@ fun SettingsScreen(
                 subtitle = "Internship alerts, deadline reminders",
                 trailing = {
                     Switch(
-                        checked = notificationsEnabled,
-                        onCheckedChange = { notificationsEnabled = it },
+                        checked = uiState.notificationsEnabled,
+                        onCheckedChange = { viewModel.setNotificationsEnabled(it) },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = MaterialTheme.colorScheme.primary
                         )

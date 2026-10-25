@@ -1,33 +1,23 @@
 import * as functions from "firebase-functions";
-import * as admin from "firebase-admin";
 
+/**
+ * Callable functions already receive a verified Firebase ID token in
+ * `context.auth`; the SDK validates signature, audience and expiry. An extra
+ * Admin SDK `getUser` round-trip added latency to every request without
+ * adding security.
+ */
 export async function requireAuth(context: functions.https.CallableContext): Promise<string> {
-  if (!context.auth) {
+  if (!context.auth?.uid) {
     throw new functions.https.HttpsError(
       "unauthenticated",
       "Authentication required. Send a valid Firebase ID token."
     );
   }
-
-  try {
-    const uid = context.auth.uid;
-    await admin.auth().getUser(uid);
-    return uid;
-  } catch (error) {
-    throw new functions.https.HttpsError(
-      "unauthenticated",
-      "Invalid or expired Firebase ID token."
-    );
-  }
+  return context.auth.uid;
 }
 
 export async function maybeAuth(
   context: functions.https.CallableContext
 ): Promise<string | null> {
-  if (!context.auth) return null;
-  try {
-    return context.auth.uid;
-  } catch {
-    return null;
-  }
+  return context.auth?.uid ?? null;
 }

@@ -1,6 +1,8 @@
 package com.nexus.data.di
 
 import com.nexus.data.repository.*
+import com.nexus.domain.repository.ICohortRepository
+import com.nexus.domain.repository.IScoreSnapshotRepository
 import com.nexus.domain.repository.ISkillGraphRepository
 import com.nexus.database.dao.*
 import com.nexus.network.api.NexusApiService
@@ -16,6 +18,12 @@ object RepositoryModule {
 
     @Provides @Singleton
     fun provideSkillGraphRepository(impl: SkillGraphRepository): ISkillGraphRepository = impl
+
+    @Provides @Singleton
+    fun provideScoreSnapshotRepository(impl: ScoreSnapshotRepository): IScoreSnapshotRepository = impl
+
+    @Provides @Singleton
+    fun provideCohortRepository(impl: CohortIntelligenceRepository): ICohortRepository = impl
 
     @Provides @Singleton
     fun provideInternshipRepository(api: NexusApiService, dao: InternshipDao): InternshipRepository =

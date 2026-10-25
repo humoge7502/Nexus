@@ -73,8 +73,10 @@ class SkillGraphRepository @Inject constructor(
     fun getUserSkillCount(): kotlinx.coroutines.flow.Flow<Int> = skillGraphDao.getUserSkillCount()
 
     private fun SkillNodeEntity.toDomain() = Skill(
+        id = skillId,
         name = displayName,
-        category = try { SkillCategory.valueOf(category) } catch (e: Exception) { SkillCategory.GENERAL }
+        category = try { SkillCategory.valueOf(category) } catch (e: Exception) { SkillCategory.GENERAL },
+        proficiency = userProficiency.coerceIn(0, 3),
     )
 
     private fun SkillNodeDto.toEntity() = SkillNodeEntity(

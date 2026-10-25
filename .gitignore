@@ -50,3 +50,12 @@ check_file.ps1
 /backend/functions/node_modules/
 /backend/functions/lib/
 /backend/functions/.runtimeconfig.json
+
+# Firebase emulator + Python test artifacts
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+database-debug.log
+pubsub-debug.log
+__pycache__/
+*.pyc

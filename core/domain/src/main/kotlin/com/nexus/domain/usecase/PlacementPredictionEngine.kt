@@ -37,6 +37,7 @@ class PlacementPredictionEngine @Inject constructor(
     )
     const val NATIONAL_AVG_PLACEMENT = 0.65f
     const val PROB_CAP = 95
+    const val THIRTY_DAYS_MS = 30L * 24 * 60 * 60 * 1000
   }
 
   suspend fun generateForecasts(
@@ -44,6 +45,7 @@ class PlacementPredictionEngine @Inject constructor(
     currentScore: Int,
     collegeId: String,
     semester: String,
+    extraFactors: List<String> = emptyList(),
   ): List<Forecast> {
     val snapshots = scoreSnapshotRepo.getRecentSnapshots(userId, limit = 60).first()
     val velocity = computeVelocity(snapshots)
@@ -82,7 +84,7 @@ class PlacementPredictionEngine @Inject constructor(
         companyTier = tier,
         probabilityPct = probability,
         scoreGap = gap,
-        gapItems = gapItems,
+        gapItems = (gapItems + extraFactors).distinct(),
         velocityTrend = velocity.trend,
         cohortBenchmark = peerStr,
         coachMessage = when {
@@ -100,12 +102,15 @@ class PlacementPredictionEngine @Inject constructor(
     if (snapshots.size < 2) {
       return VelocityResult("unknown", 0, 0f)
     }
-    val latest = snapshots.last().score
-    val prev30d = snapshots.filter { it.recordedAt <= snapshots.last().recordedAt - 30 * 86400000L }
-    val baseline = if (prev30d.isNotEmpty()) prev30d.last().score else snapshots.first().score
-    val delta = latest - baseline
-    val slope = if (snapshots.size >= 3) {
-      val points = snapshots.takeLast(5).mapIndexed { i, s -> i.toFloat() to s.score.toFloat() }
+    // The DAO returns newest-first; order explicitly so "latest" is correct
+    // regardless of the data source.
+    val ordered = snapshots.sortedBy { it.recordedAt }
+    val latest = ordered.last()
+    val cutoff = latest.recordedAt - THIRTY_DAYS_MS
+    val baseline = ordered.lastOrNull { it.recordedAt <= cutoff }?.score ?: ordered.first().score
+    val delta = latest.score - baseline
+    val slope = if (ordered.size >= 3) {
+      val points = ordered.takeLast(5).mapIndexed { i, s -> i.toFloat() to s.score.toFloat() }
       val n = points.size.toFloat()
       val sumX = points.sumOf { it.first.toDouble() }.toFloat()
       val sumY = points.sumOf { it.second.toDouble() }.toFloat()
@@ -115,15 +120,12 @@ class PlacementPredictionEngine @Inject constructor(
       if (denom != 0f) (n * sumXY - sumX * sumY) / denom else 0f
     } else 0f
 
-    return VelocityResult(
-      trend = when {
-        delta > 30 -> "rising"
-        delta < -15 -> "declining"
-        delta in -15..30 -> "flat"
-        else -> "stable"
-      },
-      delta30d = delta,
-      slope = slope,
-    )
+    val trend = when {
+      delta > 30 -> "rising"
+      delta < -15 -> "declining"
+      else -> "flat"
+    }
+
+    return VelocityResult(trend = trend, delta30d = delta, slope = slope)
   }
 }

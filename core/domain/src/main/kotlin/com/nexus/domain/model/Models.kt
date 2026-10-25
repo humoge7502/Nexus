@@ -64,6 +64,8 @@ data class Skill(
     val name: String,
     val category: SkillCategory = SkillCategory.GENERAL,
     val iconUrl: String? = null,
+    /** Self-reported proficiency on a 0..3 scale; 0 means not rated. */
+    val proficiency: Int = 0,
 )
 
 enum class SkillCategory {

@@ -72,13 +72,23 @@ private val LightColorScheme = lightColorScheme(
 
 enum class ThemeMode { LIGHT, DARK, SYSTEM, AMOLED }
 
+private fun accentColor(name: String): Color = when (name.uppercase()) {
+    "CYAN" -> NexusColors.Cyan500
+    "EMERALD" -> NexusColors.Emerald500
+    "AMBER" -> Color(0xFFF59E0B)
+    "ROSE" -> Color(0xFFF43F5E)
+    else -> NexusColors.Indigo500
+}
+
 @Composable
 fun NexusTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
+    amoled: Boolean = false,
+    accent: String = "INDIGO",
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
+    val baseScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= 31 -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context)
@@ -86,6 +96,19 @@ fun NexusTheme(
         }
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
+    }
+    val accentColor = accentColor(accent)
+    val colorScheme = baseScheme.copy(
+        primary = accentColor,
+        primaryContainer = accentColor.copy(alpha = if (darkTheme) 0.18f else 0.12f),
+    ).let { scheme ->
+        if (darkTheme && amoled) {
+            scheme.copy(
+                background = Color(0xFF000000),
+                surface = Color(0xFF050508),
+                surfaceVariant = Color(0xFF121216),
+            )
+        } else scheme
     }
 
     val view = LocalView.current

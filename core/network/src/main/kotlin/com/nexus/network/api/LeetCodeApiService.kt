@@ -15,7 +15,7 @@ interface LeetCodeApiService {
     @GET("{username}/solved")
     suspend fun getSolvedProblems(@Path("username") username: String): Response<List<LeetCodeProblemDto>>
 
-    @GET("dailyQuestion")
+    @GET("daily")
     suspend fun getDailyChallenge(): Response<LeetCodeDailyDto>
 
     @GET("problems")

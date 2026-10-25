@@ -8,6 +8,14 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * Collects a baseline profile for NEXUS.
+ *
+ * The app has no stable testTag hooks yet, so this walks the real UI using
+ * the visible bottom-navigation labels. Every lookup is optional: profile
+ * collection should still succeed if a screen renders slower than the wait
+ * window instead of failing the whole run.
+ */
 @RunWith(AndroidJUnit4::class)
 class NexusBaselineProfile {
 
@@ -16,34 +24,34 @@ class NexusBaselineProfile {
 
     @Test
     fun generate() = rule.collect(
-        packageName = "com.nexus.careerOS",
+        packageName = "com.nexus.app",
         profileBlock = {
             pressHome()
             startActivityAndWait()
-            device.wait(Until.hasObject(By.desc("nexus_home_content")), 5_000)
 
-            device.findObject(By.desc("Explore"))?.click()
-            device.wait(Until.hasObject(By.res("explore_screen")), 3_000)
-            repeat(3) {
-                device.swipe(540, 1200, 540, 400, 10)
-                Thread.sleep(500)
+            // Fresh installs start on auth/onboarding; skip both if present.
+            repeat(2) {
+                device.wait(Until.hasObject(By.text("Skip")), 3_000)
+                    ?.let { device.findObject(By.text("Skip"))?.click() }
+                device.waitForIdle()
             }
-            device.findObjects(By.res("opportunity_card")).firstOrNull()?.click()
-            device.wait(Until.hasObject(By.res("apply_button")), 3_000)
-            device.pressBack()
 
-            device.findObject(By.desc("AI"))?.click()
-            device.wait(Until.hasObject(By.res("ai_hub_screen")), 3_000)
-            device.findObject(By.text("AI Mentor"))?.click()
-            device.wait(Until.hasObject(By.res("ai_chat_input")), 3_000)
-            device.pressBack()
+            device.wait(Until.hasObject(By.text("Home")), 10_000)
 
-            device.findObject(By.desc("Growth"))?.click()
-            device.wait(Until.hasObject(By.res("growth_dashboard")), 3_000)
-            device.swipe(540, 1200, 540, 400, 10)
+            fun openTab(label: String) {
+                device.findObject(By.text(label))?.click()
+                device.waitForIdle()
+                repeat(2) {
+                    device.swipe(540, 1500, 540, 600, 8)
+                    device.waitForIdle()
+                }
+            }
 
-            device.findObject(By.desc("Me"))?.click()
-            device.wait(Until.hasObject(By.res("profile_screen")), 3_000)
+            openTab("Home")
+            openTab("Explore")
+            openTab("AI")
+            openTab("Growth")
+            openTab("Me")
         }
     )
 }

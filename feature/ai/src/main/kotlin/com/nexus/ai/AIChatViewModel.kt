@@ -168,7 +168,11 @@ private val skillGraphRepository: ISkillGraphRepository,
                     interests = userInterests.toImmutableList(),
                 )
 
-                val historyMessages = _uiState.value.messages.filter { it.id != "ai_0" }.map { msg ->
+                // The pending user turn is passed separately; including it here
+                // would send the same message twice to the model.
+                val historyMessages = _uiState.value.messages
+                    .filter { it.id != "ai_0" && it.id != userMessage.id }
+                    .map { msg ->
                     AIMessage(
                         id = msg.id,
                         role = if (msg.isUser) AiMessageRole.USER else AiMessageRole.ASSISTANT,

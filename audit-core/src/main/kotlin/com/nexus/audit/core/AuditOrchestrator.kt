@@ -108,7 +108,7 @@ class AuditOrchestrator(
         val estimatedDays = (criticalCount * 3.0) + (highCount * 2.0) + (mediumCount * 1.0)
         val complexity = when {
             criticalCount > 5 -> Complexity.VERY_COMPLEX
-            criticalCount > 2 -> Complexity.COMPLEX
+            criticalCount >= 2 -> Complexity.COMPLEX
             highCount > 10 -> Complexity.COMPLEX
             highCount > 5 -> Complexity.MODERATE
             mediumCount > 10 -> Complexity.MODERATE
