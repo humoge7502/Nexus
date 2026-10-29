@@ -48,22 +48,30 @@ class AIRequestRouterTest {
   @Test
   fun `buildAuthHeader falls back to direct key in debug when not authenticated`() {
     `when`(firebaseAuth.currentUser).thenReturn(null)
-    // In unit tests BuildConfig.DEBUG is true and AI_PROXY_URL is blank, so the
-    // router takes the direct path (proxy only activates with a configured URL).
-    val result = runCatching { kotlinx.coroutines.runBlocking { router.buildAuthHeader() } }
-    assertTrue(
-        "expected either a bearer token (direct/debug) or an auth failure (proxy)",
-        result.isSuccess || result.isFailure,
-    )
-    if (result.isSuccess) assertTrue(result.getOrNull()!!.startsWith("Bearer "))
+    if (router.useProxy) {
+      // Release/proxy mode must refuse to build a header without a user token.
+      assertThrows(IllegalStateException::class.java) {
+        kotlinx.coroutines.runBlocking { router.buildAuthHeader() }
+      }
+    } else {
+      // In unit tests BuildConfig.DEBUG is true and AI_PROXY_URL is blank, so the
+      // router takes the direct path (key is empty in CI, but the format holds).
+      val header = kotlinx.coroutines.runBlocking { router.buildAuthHeader() }
+      assertTrue(header.startsWith("Bearer "))
+    }
   }
 
   @Test
-  fun `getEndpoint returns proxy URL when useProxy is true`() {
+  fun `getEndpoint never exposes the direct OpenRouter URL in proxy mode`() {
     if (router.useProxy) {
       val endpoint = router.getEndpoint()
-      assertFalse(endpoint.isEmpty())
-      assertFalse(endpoint.contains("openrouter"))
+      // AI_PROXY_URL is a deploy-time setting; it may be blank until the
+      // backend is deployed. What must never happen is leaking the direct
+      // OpenRouter endpoint (or a key) into the proxy path.
+      assertFalse("proxy endpoint must not be the direct OpenRouter URL", endpoint.contains("openrouter"))
+      if (com.nexus.network.BuildConfig.AI_PROXY_URL.isNotBlank()) {
+        assertTrue(endpoint.startsWith("https://"))
+      }
     }
   }
 

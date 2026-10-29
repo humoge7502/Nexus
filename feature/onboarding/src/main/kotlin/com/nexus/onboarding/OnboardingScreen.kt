@@ -1,5 +1,8 @@
 package com.nexus.onboarding
 
+import androidx.compose.ui.res.stringResource
+import com.nexus.onboarding.R
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
@@ -16,16 +19,23 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.RocketLaunch
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -37,38 +47,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 data class OnboardingPage(
-    val emoji: String,
+    val icon: ImageVector,
     val title: String,
     val subtitle: String,
-    val gradient: List<Color>,
-)
-
-private val pages = listOf(
-    OnboardingPage(
-        emoji = "🚀",
-        title = "Track Your\nCareer Journey",
-        subtitle = "Monitor internship applications, certifications, and skill growth in one place.",
-        gradient = listOf(Color(0xFF6366F1), Color(0xFF8B5CF6)),
-    ),
-    OnboardingPage(
-        emoji = "🎯",
-        title = "Smart\nProductivity",
-        subtitle = "AI-powered study plans, deadline reminders, and progress analytics made for CSE students.",
-        gradient = listOf(Color(0xFF06B6D4), Color(0xFF3B82F6)),
-    ),
-    OnboardingPage(
-        emoji = "🏆",
-        title = "Stand Out\nFrom The Crowd",
-        subtitle = "Build your portfolio, earn certifications, connect with opportunities matching your skills.",
-        gradient = listOf(Color(0xFFF59E0B), Color(0xFFEF4444)),
-    ),
 )
 
 private const val SETUP_PAGE_INDEX = 3
@@ -79,22 +67,31 @@ fun OnboardingScreen(
     onComplete: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsState()
+    val pages = listOf(
+        OnboardingPage(
+            icon = Icons.Default.RocketLaunch,
+            title = stringResource(R.string.onboarding_track_career_title),
+            subtitle = stringResource(R.string.onboarding_track_career_subtitle),
+        ),
+        OnboardingPage(
+            icon = Icons.Default.Bolt,
+            title = stringResource(R.string.onboarding_smart_productivity_title),
+            subtitle = stringResource(R.string.onboarding_smart_productivity_subtitle),
+        ),
+        OnboardingPage(
+            icon = Icons.Default.WorkspacePremium,
+            title = stringResource(R.string.onboarding_stand_out_title),
+            subtitle = stringResource(R.string.onboarding_stand_out_subtitle),
+        ),
+    )
     val pagerState = rememberPagerState(pageCount = { pages.size + 1 })
     val scope = rememberCoroutineScope()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        val currentPage = pagerState.currentPage
-        val accent = pages.getOrNull(currentPage)?.gradient?.first()
-            ?: Color(0xFF6366F1)
-        val bgColor by animateColorAsState(
-            targetValue = accent.copy(alpha = 0.08f),
-            label = "bg",
-        )
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(bgColor),
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.04f)),
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -105,8 +102,7 @@ fun OnboardingScreen(
                 horizontalArrangement = Arrangement.End,
             ) {
                 TextButton(onClick = { viewModel.skipAndComplete(onComplete) }) {
-                    Text(
-                        "Skip",
+                    Text(stringResource(R.string.onboarding_skip),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -126,37 +122,15 @@ fun OnboardingScreen(
             }
 
             Column(
-                modifier = Modifier.padding(24.dp),
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    repeat(pages.size + 1) { index ->
-                        val width by animateDpAsState(
-                            targetValue = if (index == pagerState.currentPage) 32.dp else 8.dp,
-                            animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-                            label = "dotWidth",
-                        )
-                        val dotColor by animateColorAsState(
-                            targetValue = if (index == pagerState.currentPage) {
-                                pages.getOrNull(pagerState.currentPage)?.gradient?.first()
-                                    ?: Color(0xFF6366F1)
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                            },
-                            label = "dotColor",
-                        )
-                        Box(
-                            modifier = Modifier
-                                .height(8.dp)
-                                .width(width)
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(dotColor),
-                        )
-                    }
-                }
+                PageIndicator(
+                    pageCount = pages.size + 1,
+                    currentPage = pagerState.currentPage,
+                )
 
                 Spacer(modifier = Modifier.height(32.dp))
 
@@ -175,17 +149,17 @@ fun OnboardingScreen(
                         .fillMaxWidth()
                         .height(56.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = pages.getOrNull(pagerState.currentPage)
-                            ?.gradient?.first() ?: Color(0xFF6366F1),
-                    ),
                 ) {
                     AnimatedContent(
                         targetState = isLastPage,
                         label = "buttonText",
                     ) { last ->
                         Text(
-                            text = if (last) "Finish setup" else "Continue",
+                            text = if (last) {
+                                stringResource(R.string.onboarding_finish_setup)
+                            } else {
+                                stringResource(R.string.onboarding_continue)
+                            },
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                         )
@@ -199,6 +173,37 @@ fun OnboardingScreen(
 }
 
 @Composable
+private fun PageIndicator(pageCount: Int, currentPage: Int) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        repeat(pageCount) { index ->
+            val width by animateDpAsState(
+                targetValue = if (index == currentPage) 32.dp else 8.dp,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+                label = "dotWidth",
+            )
+            val dotColor by animateColorAsState(
+                targetValue = if (index == currentPage) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                },
+                label = "dotColor",
+            )
+            Box(
+                modifier = Modifier
+                    .height(8.dp)
+                    .width(width)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(dotColor),
+            )
+        }
+    }
+}
+
+@Composable
 private fun OnboardingPageContent(page: OnboardingPage) {
     Column(
         modifier = Modifier
@@ -207,13 +212,21 @@ private fun OnboardingPageContent(page: OnboardingPage) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Text(
-            text = page.emoji,
-            style = MaterialTheme.typography.displayLarge.copy(
-                fontSize = MaterialTheme.typography.displayLarge.fontSize * 2,
-            ),
-        )
-        Spacer(modifier = Modifier.height(32.dp))
+        Box(
+            modifier = Modifier
+                .size(104.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = page.icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(52.dp),
+            )
+        }
+        Spacer(modifier = Modifier.height(36.dp))
         Text(
             text = page.title,
             style = MaterialTheme.typography.headlineLarge,
@@ -244,13 +257,11 @@ private fun ProfileSetupPage(
             .padding(horizontal = 24.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text(
-            text = "Make it yours",
+        Text(text = stringResource(R.string.text_make_it_yours),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
         )
-        Text(
-            text = "Your matches, forecasts, and AI answers are personalized from this profile. It stays on your device.",
+        Text(text = stringResource(R.string.text_your_matches_forecasts_and_ai_answers_are),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -258,19 +269,19 @@ private fun ProfileSetupPage(
         OutlinedTextField(
             value = state.userName,
             onValueChange = viewModel::updateName,
-            label = { Text("Your name") },
+            label = { Text(stringResource(R.string.onboarding_your_name)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
         OutlinedTextField(
             value = state.college,
             onValueChange = viewModel::updateCollege,
-            label = { Text("College") },
+            label = { Text(stringResource(R.string.onboarding_college)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
 
-        SectionLabel("Year of study")
+        SectionLabel(stringResource(R.string.onboarding_year_of_study))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             yearOptions.forEach { year ->
                 FilterChip(
@@ -281,7 +292,7 @@ private fun ProfileSetupPage(
             }
         }
 
-        SectionLabel("Skills (pick up to 5)")
+        SectionLabel(stringResource(R.string.onboarding_skills_pick_up_to_five))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             skillOptions.forEach { skill ->
                 val selected = skill in state.skills
@@ -294,7 +305,7 @@ private fun ProfileSetupPage(
             }
         }
 
-        SectionLabel("What are you looking for?")
+        SectionLabel(stringResource(R.string.onboarding_what_are_you_looking_for))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             interestOptions.forEach { interest ->
                 FilterChip(
@@ -308,8 +319,8 @@ private fun ProfileSetupPage(
         OutlinedTextField(
             value = state.careerGoal,
             onValueChange = viewModel::updateCareerGoal,
-            label = { Text("Career goal (optional)") },
-            placeholder = { Text("e.g. SDE internship at a product company") },
+            label = { Text(stringResource(R.string.onboarding_career_goal_optional)) },
+            placeholder = { Text(stringResource(R.string.onboarding_e_g_sde_internship_at_a)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )

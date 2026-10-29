@@ -26,7 +26,6 @@ OPTIONAL_KEYS[STORE_PASSWORD]=""
 OPTIONAL_KEYS[KEY_ALIAS]=""
 OPTIONAL_KEYS[KEY_PASSWORD]=""
 OPTIONAL_KEYS[NEXUS_BACKEND_URL]="https://api.nexusapp.in/v1"
-OPTIONAL_KEYS[LEETCODE_API_URL]="https://alfa-leetcode-api.onrender.com/"
 
 if [ -f "$PROPERTIES_FILE" ]; then
   echo "Found existing local.properties. Checking for missing keys..."

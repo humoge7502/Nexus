@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cohortintelligence_cohort_intelligence">Cohort Intelligence</string>
+    <string name="cohortintelligence_college">College: %1$s</string>
+    <string name="cohortintelligence_estimated_placement_rate">Estimated Placement Rate: %1$s%%</string>
+    <string name="cohortintelligence_placed_students">Placed students: %1$d / %2$d</string>
+    <string name="cohortintelligence_semester">Semester: %1$s</string>
+    <string name="cohortintelligence_tier">Tier: %1$s</string>
+    <string name="cd_back">Back</string>
+</resources>

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,7 +38,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.theme.NexusAnimation
 import com.nexus.designsystem.theme.NexusColors
-import com.nexus.designsystem.theme.NexusGradients
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -90,11 +90,11 @@ fun AchievementSupernova(
     modifier: Modifier = Modifier,
     particleCount: Int = 60,
     particleColors: List<Color> = listOf(
-        NexusColors.StellarPink,
-        NexusColors.PlasmaOrange,
+        NexusColors.Rose400,
+        NexusColors.Amber400,
         NexusColors.AuroraGreen,
         NexusColors.NexusBlue,
-        Color(0xFFFBBF24),
+        NexusColors.Cyan400,
     ),
 ) {
     val transition = rememberInfiniteTransition(label = "supernova")
@@ -166,7 +166,7 @@ fun IntelligencePulse(
                     .scale(scale)
                     .alpha(alpha)
                     .clip(CircleShape)
-                    .background(Brush.linearGradient(NexusGradients.Nexus)),
+                    .background(MaterialTheme.colorScheme.primary),
             )
         }
 
@@ -174,7 +174,7 @@ fun IntelligencePulse(
             modifier = Modifier
                 .size(8.dp)
                 .clip(CircleShape)
-                .background(Brush.linearGradient(NexusGradients.Nexus)),
+                .background(MaterialTheme.colorScheme.primary),
         )
     }
 }

@@ -113,6 +113,38 @@ test("publicProfiles rejects client-injected ranking fields", async () => {
   );
 });
 
+test("public profile publishes leaderboard fields but nothing else", async () => {
+  const alice = db("alice");
+  await assertSucceeds(
+    setDoc(doc(alice, "publicProfiles/alice"), {
+      displayName: "Alice",
+      college: "IIT Bombay",
+      totalXP: 1200,
+      streak: 4,
+    })
+  );
+  await assertSucceeds(getDoc(doc(db("bob"), "publicProfiles/alice")));
+  await assertFails(
+    setDoc(doc(alice, "publicProfiles/alice"), {
+      displayName: "Alice",
+      totalXP: "9999",
+    })
+  );
+  await assertFails(
+    setDoc(doc(db("bob"), "publicProfiles/alice"), {
+      displayName: "Bob",
+      totalXP: 9999,
+    })
+  );
+  await assertFails(
+    updateDoc(doc(alice, "publicProfiles/alice"), { fcmToken: "secret" })
+  );
+  await assertSucceeds(
+    updateDoc(doc(alice, "publicProfiles/alice"), { totalXP: 1300 })
+  );
+  await assertSucceeds(deleteDoc(doc(alice, "publicProfiles/alice")));
+});
+
 test("ai_usage counters are server-only", async () => {
   await seed("ai_usage/alice", { uid: "alice", used: 5 });
   const alice = db("alice");
@@ -171,4 +203,16 @@ test("unknown collections are denied by the catch-all", async () => {
     setDoc(doc(alice, "arbitrary/thing"), { hello: "world" })
   );
   await assertFails(getDoc(doc(anon(), "arbitrary/thing")));
+});
+
+test("leetcode stats cache is server-only", async () => {
+  await seed("leetcode_stats/tourist", {
+    username: "tourist",
+    stats: { totalSolved: 1 },
+    fetchedAt: 0,
+  });
+  await assertFails(getDoc(doc(db("alice"), "leetcode_stats/tourist")));
+  await assertFails(
+    setDoc(doc(db("alice"), "leetcode_stats/tourist"), { username: "spoof" })
+  );
 });

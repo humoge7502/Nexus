@@ -137,3 +137,26 @@ fun DrawScope.arcGlow(
         )
     }
 }
+
+/** Faint vertical rules across a surface, like the graticule on a screen.
+ *  Use on one signature surface per screen; keep [alpha] at or below 0.06. */
+fun Modifier.instrumentGrid(
+    spacingDp: Float = 26f,
+    alpha: Float = 0.05f,
+    color: Color = Color.White,
+): Modifier = composed {
+    val spacing = with(LocalDensity.current) { spacingDp.dp.toPx() }
+    drawWithContent {
+        drawContent()
+        var x = spacing
+        while (x < size.width) {
+            drawLine(
+                color = color.copy(alpha = alpha),
+                start = Offset(x, 0f),
+                end = Offset(x, size.height),
+                strokeWidth = 1f,
+            )
+            x += spacing
+        }
+    }
+}

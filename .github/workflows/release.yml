@@ -27,7 +27,6 @@ jobs:
           GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}
           GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }}
           NEXUS_BACKEND_URL=${{ secrets.NEXUS_BACKEND_URL }}
-          LEETCODE_API_URL=https://alfa-leetcode-api.onrender.com/
           OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}
           AI_PROXY_URL=${{ secrets.AI_PROXY_URL }}
           KEYSTORE_PATH=${{ github.workspace }}/keystore.jks

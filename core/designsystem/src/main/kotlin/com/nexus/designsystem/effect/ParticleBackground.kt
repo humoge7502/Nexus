@@ -28,7 +28,7 @@ private data class BgParticle(
 fun ParticleBackground(
     particleCount: Int = 30,
     modifier: Modifier = Modifier,
-    color: Color = Color(0xFF6366F1),
+    color: Color = Color(0xFF4F8EF7),
 ) {
     val particles = remember {
         List(particleCount) {

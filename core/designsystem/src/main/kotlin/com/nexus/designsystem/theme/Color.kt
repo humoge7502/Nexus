@@ -2,26 +2,35 @@ package com.nexus.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 
+/**
+ * NEXUS signal system.
+ *
+ * One brand accent (azure) carries navigation, primary actions and progress.
+ * Mint, amber and rose are semantic signals only — success/growth, attention,
+ * and error. Everything else in the product is ink and paper; surfaces are
+ * separated by tone and a hairline, not by a different hue per feature.
+ */
 object NexusColors {
-    // Dark Theme Backgrounds
-    val VoidBlack = Color(0xFF080B14)
-    val DeepSpace = Color(0xFF0D1117)
-    val Carbon = Color(0xFF161B27)
-    val Graphite = Color(0xFF1E2536)
-    val Slate = Color(0xFF252D40)
+    // Grounds — blue-graphite ink
+    val VoidBlack = Color(0xFF06090F)
+    val DeepSpace = Color(0xFF0B1018)
+    val Carbon = Color(0xFF121824)
+    val Graphite = Color(0xFF19202F)
+    val Slate = Color(0xFF212A3C)
 
-    // Light Theme Backgrounds
-    val PearlWhite = Color(0xFFF8FAFF)
+    // Paper
+    val PearlWhite = Color(0xFFF6F8FD)
     val Cloud = Color(0xFFFFFFFF)
-    val Mist = Color(0xFFF1F4FD)
-    val Silver = Color(0xFFE8ECF6)
-    val LavenderSmoke = Color(0xFFD4DAF0)
+    val Mist = Color(0xFFF0F3FA)
+    val Silver = Color(0xFFE6EAF4)
+    val LavenderSmoke = Color(0xFFD6DCEB)
 
-    // Accent System - "Signal" Colors
+    // Brand — signal azure
     val NexusBlue = Color(0xFF4F8EF7)
-    val NexusBlueDark = Color(0xFF3B7DE8)
-    val ElectricIndigo = Color(0xFF7B5EA7)
-    val ElectricIndigoDark = Color(0xFF6B4FA0)
+    val NexusBlueDark = Color(0xFF2F6BE0)
+    val NexusBlueDeep = Color(0xFF1B3F8F)
+
+    // Secondary signals
     val AuroraGreen = Color(0xFF00D9A3)
     val AuroraGreenDark = Color(0xFF00B88A)
     val PlasmaOrange = Color(0xFFFF6B35)
@@ -29,9 +38,13 @@ object NexusColors {
     val StellarPink = Color(0xFFF72585)
     val StellarPinkDark = Color(0xFFE01E75)
     val QuantumWhite = Color(0xFFE8EDFB)
-    val Ink = Color(0xFF0A0F1E)
+    val Ink = Color(0xFF060A12)
 
-    // Legacy colors (keep for backward compatibility)
+    // Supporting deep blue (formerly a violet-leaning indigo)
+    val ElectricIndigo = Color(0xFF4C5FA8)
+    val ElectricIndigoDark = Color(0xFF3E4F8F)
+
+    // Legacy indigo ramp (kept for existing references; no longer the primary)
     val Indigo50 = Color(0xFFEEF2FF)
     val Indigo100 = Color(0xFFE0E7FF)
     val Indigo200 = Color(0xFFC7D2FE)
@@ -68,39 +81,42 @@ object NexusColors {
     val Error = Rose500
     val Info = NexusBlue
 
-    // Neutrals
-    val Neutral950 = Color(0xFF0A0A0F)
-    val Neutral900 = Color(0xFF111118)
-    val Neutral850 = Color(0xFF18181F)
-    val Neutral800 = Color(0xFF1F1F28)
-    val Neutral750 = Color(0xFF26263A)
-    val Neutral700 = Color(0xFF2E2E42)
-    val Neutral600 = Color(0xFF3F3F56)
-    val Neutral500 = Color(0xFF5A5A76)
-    val Neutral400 = Color(0xFF7A7A96)
-    val Neutral300 = Color(0xFFA0A0B8)
-    val Neutral200 = Color(0xFFC8C8D8)
-    val Neutral100 = Color(0xFFE8E8F0)
-    val Neutral50 = Color(0xFFF5F5FA)
+    // Neutrals — cool graphite
+    val Neutral950 = Color(0xFF070A11)
+    val Neutral900 = Color(0xFF0D111A)
+    val Neutral850 = Color(0xFF131926)
+    val Neutral800 = Color(0xFF1A2130)
+    val Neutral750 = Color(0xFF222A3B)
+    val Neutral700 = Color(0xFF2C3549)
+    val Neutral600 = Color(0xFF3E4862)
+    val Neutral500 = Color(0xFF5C6683)
+    val Neutral400 = Color(0xFF8A93AC)
+    val Neutral300 = Color(0xFFB3BBD0)
+    val Neutral200 = Color(0xFFD2D8E6)
+    val Neutral100 = Color(0xFFE8ECF5)
+    val Neutral50 = Color(0xFFF4F6FB)
     val Neutral0 = Color(0xFFFFFFFF)
 
     val LinkedInBlue = Color(0xFF0A66C2)
     val GitHubDark = Color(0xFF24292F)
 }
 
+/**
+ * Gradients are reserved for signature surfaces — at most one per screen.
+ * The brand sweep moves from deep azure to light azure, never indigo-violet.
+ */
 object NexusGradients {
-    val Nexus = listOf(NexusColors.NexusBlue, NexusColors.ElectricIndigo)
+    val Nexus = listOf(NexusColors.NexusBlue, NexusColors.Cyan400)
     val Aurora = listOf(NexusColors.AuroraGreen, NexusColors.NexusBlue)
     val Stellar = listOf(NexusColors.StellarPink, NexusColors.PlasmaOrange)
     val Cosmic = listOf(NexusColors.VoidBlack, NexusColors.Carbon)
-    val Primary = listOf(NexusColors.Indigo500, NexusColors.Indigo400)
-    val PrimaryDeep = listOf(NexusColors.Indigo600, NexusColors.Indigo500)
+    val Primary = listOf(NexusColors.NexusBlueDark, NexusColors.NexusBlue)
+    val PrimaryDeep = listOf(NexusColors.NexusBlueDeep, NexusColors.NexusBlueDark)
     val Success = listOf(NexusColors.Emerald500, NexusColors.Emerald400)
     val Warning = listOf(NexusColors.Amber500, NexusColors.Amber400)
     val Error = listOf(NexusColors.Rose500, NexusColors.Rose400)
     val Ocean = listOf(NexusColors.Cyan500, NexusColors.Blue500)
     val Sunset = listOf(NexusColors.Amber500, NexusColors.Rose500)
-    val Purple = listOf(NexusColors.Indigo500, NexusColors.Cyan500)
     val Glass = listOf(
         NexusColors.Neutral0.copy(alpha = 0.1f),
         NexusColors.Neutral0.copy(alpha = 0.05f)

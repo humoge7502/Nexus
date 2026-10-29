@@ -26,7 +26,7 @@ fun AchievementParticleBurst(
     val colors = remember {
         listOf(
             Color(0xFF4F8EF7), Color(0xFF00D9A3), Color(0xFFF72585),
-            Color(0xFF7B5EA7), Color(0xFFFF6B35), Color(0xFFE8EDFB),
+            Color(0xFF06B6D4), Color(0xFFFF6B35), Color(0xFFE8EDFB),
         )
     }
     LaunchedEffect(trigger) {

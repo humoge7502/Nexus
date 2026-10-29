@@ -1,7 +1,16 @@
 package com.nexus.applications
 
+import androidx.compose.ui.res.stringResource
+import com.nexus.applications.R
+
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,22 +25,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BusinessCenter
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.HourglassEmpty
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -39,20 +39,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.nexus.domain.repository.ApplicationCounts
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.TelemetryItem
+import com.nexus.designsystem.component.TelemetryStrip
+import com.nexus.designsystem.component.hairline
+import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusTypography
 import com.nexus.domain.model.Application
 import com.nexus.domain.model.ApplicationStatus
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ApplicationsScreen(
   viewModel: ApplicationsViewModel = hiltViewModel(),
@@ -63,43 +64,40 @@ fun ApplicationsScreen(
 
   Scaffold(
     topBar = {
-      TopAppBar(
-        title = { Text("My Applications") },
-        navigationIcon = {
-          IconButton(onClick = onNavigateBack) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Navigate back")
-          }
-        },
+      NexusTopBar(
+        title = stringResource(R.string.applications_my_applications),
+        onBack = onNavigateBack,
       )
     }
   ) { padding ->
     Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-      StatsSummary(counts = uiState.counts)
+      TelemetryStrip(
+        items = listOf(
+          TelemetryItem(stringResource(R.string.applications_stat_applied), uiState.counts.applied),
+          TelemetryItem(
+            stringResource(R.string.applications_stat_interviewing),
+            uiState.counts.interviewing,
+            accent = NexusColors.Amber400,
+          ),
+          TelemetryItem(
+            stringResource(R.string.applications_stat_offered),
+            uiState.counts.offered,
+            accent = NexusColors.Emerald400,
+          ),
+        ),
+        modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 12.dp),
+      )
 
-      TabRow(selectedTabIndex = uiState.selectedTab.ordinal) {
-        ApplicationTab.entries.forEach { tab ->
-          Tab(
-            selected = uiState.selectedTab == tab,
-            onClick = { viewModel.selectTab(tab) },
-            text = {
-              Text(
-                when (tab) {
-                  ApplicationTab.ALL -> "All"
-                  ApplicationTab.APPLIED -> "Applied"
-                  ApplicationTab.INTERVIEWING -> "Interviews"
-                  ApplicationTab.OUTCOMES -> "Outcomes"
-                }
-              )
-            },
-          )
-        }
-      }
+      ApplicationTabs(
+        selected = uiState.selectedTab,
+        onSelect = viewModel::selectTab,
+      )
 
       if (uiState.applications.isEmpty()) {
         EmptyApplicationsState(selectedTab = uiState.selectedTab)
       } else {
         LazyColumn(
-          contentPadding = PaddingValues(16.dp),
+          contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp, bottom = 24.dp),
           verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
           items(
@@ -121,40 +119,59 @@ fun ApplicationsScreen(
 }
 
 @Composable
-private fun StatsSummary(counts: ApplicationCounts) {
+private fun ApplicationTabs(
+  selected: ApplicationTab,
+  onSelect: (ApplicationTab) -> Unit,
+) {
+  val haptic = LocalHapticFeedback.current
+  val shape = RoundedCornerShape(16.dp)
   Row(
     modifier = Modifier
       .fillMaxWidth()
-      .padding(horizontal = 16.dp, vertical = 12.dp),
-    horizontalArrangement = Arrangement.SpaceEvenly,
+      .padding(horizontal = 24.dp, vertical = 14.dp)
+      .clip(shape)
+      .background(MaterialTheme.colorScheme.surfaceContainerLow)
+      .hairline(
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f),
+        cornerRadiusDp = 16f,
+      )
+      .padding(4.dp),
+    horizontalArrangement = Arrangement.spacedBy(4.dp),
   ) {
-    StatChip("Applied", counts.applied, Icons.Filled.HourglassEmpty, NexusColors.Blue400)
-    StatChip("Interviewing", counts.interviewing, Icons.Filled.Mic, NexusColors.Warning)
-    StatChip("Offered", counts.offered, Icons.Filled.CheckCircle, NexusColors.Success)
-  }
-}
-
-@Composable
-private fun StatChip(label: String, count: Int, icon: ImageVector, color: Color) {
-  Column(horizontalAlignment = Alignment.CenterHorizontally) {
-    Icon(
-      imageVector = icon,
-      contentDescription = null,
-      tint = color,
-      modifier = Modifier.size(24.dp),
-    )
-    Spacer(Modifier.height(4.dp))
-    Text(
-      text = count.toString(),
-      style = MaterialTheme.typography.titleMedium,
-      fontWeight = FontWeight.Bold,
-      color = color,
-    )
-    Text(
-      text = label,
-      style = MaterialTheme.typography.labelMedium,
-      color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
+    ApplicationTab.entries.forEach { tab ->
+      val isSelected = tab == selected
+      Box(
+        modifier = Modifier
+          .weight(1f)
+          .clip(RoundedCornerShape(11.dp))
+          .background(
+            if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+            else Color.Transparent
+          )
+          .clickable(role = Role.Tab) {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            onSelect(tab)
+          }
+          .padding(vertical = 8.dp),
+        contentAlignment = Alignment.Center,
+      ) {
+        Text(
+          text = stringResource(
+            when (tab) {
+              ApplicationTab.ALL -> R.string.applications_tab_all
+              ApplicationTab.APPLIED -> R.string.applications_tab_applied
+              ApplicationTab.INTERVIEWING -> R.string.applications_tab_interviews
+              ApplicationTab.OUTCOMES -> R.string.applications_tab_outcomes
+            }
+          ),
+          style = MaterialTheme.typography.labelMedium,
+          fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+          color = if (isSelected) MaterialTheme.colorScheme.primary
+          else MaterialTheme.colorScheme.onSurfaceVariant,
+          maxLines = 1,
+        )
+      }
+    }
   }
 }
 
@@ -190,7 +207,10 @@ private fun ApplicationCard(
       Spacer(Modifier.height(12.dp))
       Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-          text = "${(application.matchScore * 100).toInt()}% match",
+          text = stringResource(
+            R.string.applications_match_percent,
+            (application.matchScore * 100).toInt(),
+          ),
           style = MaterialTheme.typography.labelMedium,
           color = NexusColors.Neutral400,
         )
@@ -199,11 +219,11 @@ private fun ApplicationCard(
           progress = { application.matchScore },
           modifier = Modifier.weight(1f).height(4.dp).clip(RoundedCornerShape(2.dp)),
           color = when {
-            application.matchScore > 0.8f -> NexusColors.Success
-            application.matchScore > 0.5f -> NexusColors.Warning
+            application.matchScore > 0.8f -> NexusColors.Emerald400
+            application.matchScore > 0.5f -> NexusColors.Amber400
             else -> NexusColors.Neutral400
           },
-          trackColor = MaterialTheme.colorScheme.surfaceVariant,
+          trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
           strokeCap = StrokeCap.Round,
         )
       }
@@ -221,14 +241,22 @@ private fun ApplicationCard(
 
 @Composable
 private fun StatusChip(status: ApplicationStatus) {
-  val (label, color) = when (status) {
-    ApplicationStatus.SAVED -> "Saved" to NexusColors.Neutral400
-    ApplicationStatus.APPLIED -> "Applied" to NexusColors.Blue400
-    ApplicationStatus.INTERVIEWING -> "Interviewing" to NexusColors.Warning
-    ApplicationStatus.REJECTED -> "Rejected" to NexusColors.Error
-    ApplicationStatus.OFFERED -> "Offered" to NexusColors.Success
-    ApplicationStatus.ACCEPTED -> "Accepted" to NexusColors.Success
-    else -> status.name to NexusColors.Neutral400
+  val label = when (status) {
+    ApplicationStatus.SAVED -> stringResource(R.string.applications_status_saved)
+    ApplicationStatus.APPLIED -> stringResource(R.string.applications_status_applied)
+    ApplicationStatus.INTERVIEWING -> stringResource(R.string.applications_status_interviewing)
+    ApplicationStatus.REJECTED -> stringResource(R.string.applications_status_rejected)
+    ApplicationStatus.OFFERED -> stringResource(R.string.applications_status_offered)
+    ApplicationStatus.ACCEPTED -> stringResource(R.string.applications_status_accepted)
+    else -> status.name
+  }
+  val color = when (status) {
+    ApplicationStatus.SAVED -> NexusColors.Neutral400
+    ApplicationStatus.APPLIED -> NexusColors.Blue400
+    ApplicationStatus.INTERVIEWING -> NexusColors.Amber400
+    ApplicationStatus.REJECTED -> NexusColors.Rose400
+    ApplicationStatus.OFFERED, ApplicationStatus.ACCEPTED -> NexusColors.Emerald400
+    else -> NexusColors.Neutral400
   }
   Text(
     text = label,
@@ -266,15 +294,15 @@ private fun StatusActions(
       ) {
         Text(
           text = when (status) {
-            ApplicationStatus.APPLIED -> "Mark Applied"
-            ApplicationStatus.INTERVIEWING -> "Got Interview"
-            ApplicationStatus.OFFERED -> "Got Offer!"
-            ApplicationStatus.ACCEPTED -> "Accept"
-            ApplicationStatus.REJECTED -> "Rejected"
+            ApplicationStatus.APPLIED -> stringResource(R.string.applications_action_mark_applied)
+            ApplicationStatus.INTERVIEWING -> stringResource(R.string.applications_action_got_interview)
+            ApplicationStatus.OFFERED -> stringResource(R.string.applications_action_got_offer)
+            ApplicationStatus.ACCEPTED -> stringResource(R.string.applications_action_accept)
+            ApplicationStatus.REJECTED -> stringResource(R.string.applications_action_reject)
             else -> status.name
           },
           style = MaterialTheme.typography.labelMedium,
-          color = if (isPositive) NexusColors.Success else NexusColors.Error,
+          color = if (isPositive) NexusColors.Emerald400 else NexusColors.Rose400,
         )
       }
     }
@@ -293,25 +321,26 @@ private fun EmptyApplicationsState(selectedTab: ApplicationTab) {
     Icon(
       imageVector = Icons.Filled.BusinessCenter,
       contentDescription = null,
-      modifier = Modifier.size(64.dp),
-      tint = NexusColors.Neutral400,
+      modifier = Modifier.size(40.dp),
+      tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
     )
-    Spacer(Modifier.height(16.dp))
+    Spacer(Modifier.height(14.dp))
     Text(
       text = when (selectedTab) {
-        ApplicationTab.ALL -> "No applications tracked yet"
-        ApplicationTab.APPLIED -> "No applications submitted"
-        ApplicationTab.INTERVIEWING -> "No interviews scheduled"
-        ApplicationTab.OUTCOMES -> "No outcomes yet"
+        ApplicationTab.ALL -> stringResource(R.string.applications_empty_all)
+        ApplicationTab.APPLIED -> stringResource(R.string.applications_empty_applied)
+        ApplicationTab.INTERVIEWING -> stringResource(R.string.applications_empty_interviewing)
+        ApplicationTab.OUTCOMES -> stringResource(R.string.applications_empty_outcomes)
       },
       style = MaterialTheme.typography.titleMedium,
-      color = NexusColors.Neutral400,
+      fontWeight = FontWeight.SemiBold,
+      color = MaterialTheme.colorScheme.onSurface,
+      textAlign = TextAlign.Center,
     )
-    Spacer(Modifier.height(8.dp))
-    Text(
-      text = "Save an opportunity and track your progress here",
+    Spacer(Modifier.height(6.dp))
+    Text(text = stringResource(R.string.text_save_an_opportunity_and_track_your_progress_here),
       style = MaterialTheme.typography.bodyMedium,
-      color = NexusColors.Neutral400,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
       textAlign = TextAlign.Center,
     )
   }

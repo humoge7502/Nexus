@@ -1,5 +1,8 @@
 package com.nexus.growth
 
+import androidx.compose.ui.res.stringResource
+import com.nexus.growth.R
+
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
@@ -20,12 +23,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -33,8 +34,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.domain.model.UiState
@@ -52,6 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.component.AnimatedStatCard
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
@@ -67,12 +67,11 @@ data class DSAProblemDisplay(
 
 
 private val difficultyColors = mapOf(
-    "Easy" to NexusGradients.Success[0],
+    "Easy" to NexusColors.Emerald400,
     "Medium" to NexusColors.Amber400,
-    "Hard" to Color(0xFFEF4444),
+    "Hard" to NexusColors.Rose400,
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DSATrackerScreen(
     onBack: () -> Unit = {},
@@ -99,14 +98,9 @@ fun DSATrackerScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
-            title = { Text("DSA Tracker", fontWeight = FontWeight.Bold) },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+        NexusTopBar(
+            title = stringResource(R.string.growth_dsa_tracker),
+            onBack = onBack,
         )
 
         LazyColumn(
@@ -115,19 +109,19 @@ fun DSATrackerScreen(
         ) {
             item {
                 NexusCard(
-                    gradient = NexusGradients.Nexus,
+                    gradient = NexusGradients.PrimaryDeep,
                     shape = NexusShapes.lg,
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("DSA Progress",
+                        Text(stringResource(R.string.growth_dsa_progress),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.White.copy(alpha = 0.9f))
                         Spacer(Modifier.height(8.dp))
-                        Text("$solvedCount / $totalCount",
+                        Text(stringResource(R.string.growth_solvedcount_totalcount, solvedCount, totalCount),
                             style = MaterialTheme.typography.displayMedium,
                             fontWeight = FontWeight.ExtraBold, color = Color.White)
-                        Text("Problems Solved",
+                        Text(stringResource(R.string.growth_problems_solved),
                             style = MaterialTheme.typography.labelLarge,
                             color = Color.White.copy(alpha = 0.7f))
                         Spacer(Modifier.height(12.dp))
@@ -147,12 +141,12 @@ fun DSATrackerScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    AnimatedStatCard(value = solvedCount, label = "Solved",
-                        gradient = NexusGradients.Success, modifier = Modifier.weight(1f))
-                    AnimatedStatCard(value = totalCount - solvedCount, label = "Remaining",
-                        gradient = NexusGradients.Warning, modifier = Modifier.weight(1f))
-                    AnimatedStatCard(value = 5, label = "Day Streak",
-                        gradient = NexusGradients.Ocean, modifier = Modifier.weight(1f))
+                    AnimatedStatCard(value = solvedCount, label = stringResource(R.string.dsa_solved),
+                        modifier = Modifier.weight(1f))
+                    AnimatedStatCard(value = totalCount - solvedCount, label = stringResource(R.string.dsa_remaining),
+                        modifier = Modifier.weight(1f))
+                    AnimatedStatCard(value = 5, label = stringResource(R.string.dsa_day_streak),
+                        modifier = Modifier.weight(1f))
                 }
             }
 
@@ -167,8 +161,8 @@ fun DSATrackerScreen(
                             onClick = { selectedFilter = filter },
                             label = { Text(filter, style = MaterialTheme.typography.labelMedium) },
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = NexusColors.NexusBlue.copy(alpha = 0.15f),
-                                selectedLabelColor = NexusColors.NexusBlue,
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
                             ),
                         )
                     }
@@ -199,15 +193,14 @@ private fun DSAProblemCard(
     NexusCard(
         modifier = Modifier.fillMaxWidth(),
         shape = NexusShapes.sm,
-        glassEffect = problem.isSolved,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onToggleSolved) {
                 Icon(
                     if (problem.isSolved) Icons.Default.CheckCircle
                     else Icons.Default.RadioButtonUnchecked,
-                    contentDescription = "Toggle solved",
-                    tint = if (problem.isSolved) NexusGradients.Success[0]
+                    contentDescription = stringResource(R.string.cd_toggle_solved),
+                    tint = if (problem.isSolved) NexusColors.Emerald400
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -225,7 +218,7 @@ private fun DSAProblemCard(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(problem.category, style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("\u00B7", style = MaterialTheme.typography.labelSmall,
+                    Text(stringResource(R.string.growth_u00b7), style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(problem.platform, style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)

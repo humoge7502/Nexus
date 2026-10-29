@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_back">Back</string>
+    <string name="community_college">College: %1$s</string>
+    <string name="community_college_missing">Add your college in onboarding to see who else is preparing around you.</string>
+    <string name="community_community">Community</string>
+    <string name="community_dates">%1$s – %2$s</string>
+    <string name="community_find_teammates">Find teammates</string>
+    <string name="community_live">Live</string>
+    <string name="community_mentor_discovery_peer_accountability_and_study">Mentor discovery, peer accountability, and study groups are on the way.</string>
+    <string name="community_no_open_hackathons">No open hackathons right now. Refresh to pull the latest opportunities.</string>
+    <string name="community_open_cohort">Open cohort intelligence</string>
+    <string name="community_open_tribe">Open Tribe</string>
+    <string name="community_organizer">by %1$s</string>
+    <string name="community_peer_accountability">Peer accountability</string>
+    <string name="community_peer_accountability_body">Join a Tribe to get matched with peers, share progress, and keep each other accountable.</string>
+    <string name="community_prize">Prize pool: %1$s</string>
+    <string name="community_refresh">Refresh</string>
+    <string name="community_team_size">Team size: %1$d–%2$d</string>
+    <string name="community_view_details">View details</string>
+    <string name="community_your_batch">Your batch</string>
+</resources>

@@ -5,6 +5,8 @@ import com.nexus.database.dao.InternshipDao
 import com.nexus.database.entity.InternshipEntity
 import com.nexus.domain.model.*
 import com.nexus.network.api.NexusApiService
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -70,9 +72,15 @@ class InternshipRepository @Inject constructor(
         location = Location(location),
         stipend = stipendAmount?.let { Stipend(it, stipendCurrency) },
         duration = Duration(durationMonths),
-        deadline = java.time.LocalDate.ofEpochDay(deadline),
+        deadline = deadlineDate(),
         applyUrl = applyUrl, description = description,
         isRemote = isRemote, isSaved = isSaved,
         postedAt = java.time.Instant.ofEpochMilli(postedAt),
+        tags = skillNames(),
+        requiredSkills = skillNames().map { Skill(name = it) }.toImmutableList(),
     )
+
+    private fun InternshipEntity.skillNames() =
+        if (skills.isBlank()) persistentListOf()
+        else skills.split(",").map { it.trim() }.filter { it.isNotBlank() }.toImmutableList()
 }

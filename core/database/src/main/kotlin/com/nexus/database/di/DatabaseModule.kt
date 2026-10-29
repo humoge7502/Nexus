@@ -9,6 +9,7 @@ import com.nexus.database.dao.ApplicationDao
 import com.nexus.database.dao.CareerMemoryDao
 import com.nexus.database.dao.CareerMirrorDao
 import com.nexus.database.dao.CertificationDao
+import com.nexus.database.dao.CertificationProgressDao
 import com.nexus.database.dao.CohortIntelligenceDao
 import com.nexus.database.dao.ConfidenceAssessmentDao
 import com.nexus.database.dao.DSAProblemDao
@@ -54,6 +55,7 @@ object DatabaseModule {
 
     @Provides fun provideInternshipDao(db: NexusDatabase): InternshipDao = db.internshipDao()
     @Provides fun provideCertificationDao(db: NexusDatabase): CertificationDao = db.certificationDao()
+    @Provides fun provideCertificationProgressDao(db: NexusDatabase): CertificationProgressDao = db.certificationProgressDao()
     @Provides fun provideApplicationDao(db: NexusDatabase): ApplicationDao = db.applicationDao()
     @Provides fun provideStudySessionDao(db: NexusDatabase): StudySessionDao = db.studySessionDao()
     @Provides fun provideAchievementDao(db: NexusDatabase): AchievementDao = db.achievementDao()

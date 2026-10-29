@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tribe_accountability_pods_of_57_students_from">Accountability pods of 5–7 students from your college with shared placement goals.</string>
+    <string name="tribe_campus_cohort">Campus Cohort</string>
+    <string name="tribe_cancel">Cancel</string>
+    <string name="tribe_college_name">College name</string>
+    <string name="tribe_create_or_join_tribe">Create or Join Tribe</string>
+    <string name="tribe_create_tribe">Create Tribe</string>
+    <string name="tribe_join_your_campus_tribe">Join your Campus Tribe</string>
+    <string name="tribe_leave_tribe">Leave Tribe</string>
+    <string name="tribe_my_tribe">My Tribe</string>
+    <string name="tribe_pod_size_37">Pod size (3–7)</string>
+    <string name="tribe_set_up_your_tribe">Set Up Your Tribe</string>
+    <string name="tribe_shared_placement_goal">Shared placement goal</string>
+    <string name="tribe_your_tribe">Your Tribe</string>
+    <string name="tribe_goal">Goal: %1$s</string>
+    <string name="tribe_peer_benchmarks_for_appear_once_enough">Peer benchmarks for %1$s appear once enough students from your college are on NEXUS. We never invent member counts.</string>
+    <string name="tribe_pod_size">Pod size: %1$s</string>
+    <string name="tribe_top_skills">Top skills: %1$s</string>
+</resources>

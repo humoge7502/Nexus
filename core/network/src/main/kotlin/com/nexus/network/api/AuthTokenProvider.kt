@@ -96,7 +96,7 @@ class AuthTokenProvider @Inject constructor(
      * Blocking refresh for OkHttp's synchronous Authenticator. Bounded so a
      * stalled network call cannot hold an OkHttp thread indefinitely.
      */
-    fun refreshBlocking(timeoutMs: Long = REFRESH_TIMEOUT_MS): String? = runBlocking {
+    fun refreshBlocking(timeoutMs: Long = REFRESH_TIMEOUT_MS): String? = runBlocking { // audit-allow: ARCH-003 (OkHttp Authenticator is blocking by contract)
         withTimeoutOrNull(timeoutMs) { refresh(force = true) }
     }
 

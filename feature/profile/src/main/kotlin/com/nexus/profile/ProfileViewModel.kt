@@ -4,11 +4,15 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nexus.common.Constants
+import com.nexus.data.repository.AchievementRepository
 import com.nexus.data.repository.ApplicationRepository
-import com.nexus.data.repository.CertificationRepository
+import com.nexus.data.repository.GoalRepository
 import com.nexus.data.repository.GitHubRepository
+import com.nexus.data.repository.StreakRepository
 import com.nexus.data.repository.UserXpRepository
 import com.nexus.datastore.UserPreferences
+import com.nexus.domain.model.Achievement
+import com.nexus.domain.model.GoalCategory
 import com.nexus.domain.model.Skill
 import com.nexus.domain.repository.ISkillGraphRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,6 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -39,6 +44,7 @@ data class ProfileUiState(
     val offersCount: Int = 0,
     val certificationsCount: Int = 0,
     val skills: List<Skill> = emptyList(),
+    val achievements: List<Achievement> = emptyList(),
     val githubUsername: String? = null,
     val linkedinUrl: String? = null,
     val referralCode: String = "",
@@ -54,8 +60,10 @@ class ProfileViewModel @Inject constructor(
     private val xpRepository: UserXpRepository,
     private val gitHubRepository: GitHubRepository,
     private val applicationRepository: ApplicationRepository,
-    private val certificationRepository: CertificationRepository,
+    private val goalRepository: GoalRepository,
     private val skillGraphRepository: ISkillGraphRepository,
+    private val streakRepository: StreakRepository,
+    private val achievementRepository: AchievementRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -84,7 +92,7 @@ class ProfileViewModel @Inject constructor(
                 xpRepository.totalXP,
                 xpRepository.currentLevel,
                 xpRepository.xpToNextLevel,
-                userPreferences.studyStreak,
+                streakRepository.currentStreak.map { it.currentStreak },
                 userPreferences.isPro,
             ) { totalXP, level, xpToNext, streak, isPro ->
                 Progression(totalXP, level, xpToNext, streak, isPro)
@@ -92,13 +100,28 @@ class ProfileViewModel @Inject constructor(
 
             val activity = combine(
                 applicationRepository.getApplicationCounts(),
-                certificationRepository.getAllCertifications().map { it.size },
+                // Completed certification goals are the user's own progress;
+                // catalog size would show 57 "certs" for a brand-new account.
+                goalRepository.getAllGoals().map { goals ->
+                    goals.count { it.category == GoalCategory.CERTIFICATION && it.isCompleted }
+                },
                 userSkillsFlow(),
             ) { counts, certifications, skills ->
                 Activity(counts.total, counts.interviewing, counts.offered, certifications, skills)
             }
 
-            combine(identity, progression, activity) { id, prog, act ->
+            val badges = achievementRepository.getAll()
+                .map { achievements ->
+                    achievements.sortedWith(
+                        compareByDescending<Achievement> { it.isUnlocked }
+                            .thenByDescending {
+                                if (it.maxProgress > 0f) it.progress / it.maxProgress else 0f
+                            }
+                    ).take(3)
+                }
+                .catch { emit(emptyList()) }
+
+            combine(identity, progression, activity, badges) { id, prog, act, badges ->
                 val referralCode = id.userId.takeLast(8).uppercase()
                 ProfileUiState(
                     isLoading = false,
@@ -115,6 +138,7 @@ class ProfileViewModel @Inject constructor(
                     offersCount = act.offers,
                     certificationsCount = act.certifications,
                     skills = act.skills,
+                    achievements = badges,
                     isPro = prog.isPro,
                     referralCode = referralCode,
                     referralLink = "https://nexusapp.in/referral/$referralCode",

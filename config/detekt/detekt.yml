@@ -1,0 +1,70 @@
+# Detekt configuration for NEXUS.
+#
+# Run via ./scripts/detekt.sh (CI: "Static Analysis (detekt)" job).
+# The script uses --build-upon-default-config, so this file only overrides
+# rules that need project-specific tuning.
+
+complexity:
+  LongMethod:
+    threshold: 120
+  LongParameterList:
+    functionThreshold: 10
+    constructorThreshold: 10
+  TooManyFunctions:
+    thresholdInFiles: 45
+    thresholdInClasses: 35
+    thresholdInInterfaces: 25
+    thresholdInObjects: 25
+  CyclomaticComplexMethod:
+    threshold: 20
+  NestedBlockDepth:
+    threshold: 5
+
+style:
+  MaxLineLength:
+    maxLineLength: 140
+    excludeCommentStatements: true
+  MagicNumber:
+    active: false
+  WildcardImport:
+    active: true
+  ReturnCount:
+    max: 6
+  UnusedPrivateMember:
+    active: true
+  UnusedParameter:
+    active: true
+  ForbiddenComment:
+    active: false
+  MaxChainedCallsOnSameLine:
+    active: false
+  DataClassContainsFunctions:
+    active: false
+
+naming:
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][_A-Za-z0-9]*'
+  MatchingDeclarationName:
+    active: false
+
+exceptions:
+  TooGenericExceptionCaught:
+    active: false
+  TooGenericExceptionThrown:
+    active: false
+  SwallowedException:
+    active: true
+
+coroutines:
+  GlobalCoroutineUsage:
+    active: true
+  InjectDispatcher:
+    active: false
+
+potential-bugs:
+  LateinitUsage:
+    active: false
+  UnsafeCallOnNullableType:
+    active: true

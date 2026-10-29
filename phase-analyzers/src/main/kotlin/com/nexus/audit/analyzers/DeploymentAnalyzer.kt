@@ -61,7 +61,8 @@ class DeploymentAnalyzer : PhaseAnalyzer {
                     )
                 )
             }
-            if (!t.contains("minifyEnabled") || !t.contains("true")) {
+            val minifyOn = Regex("""(isMinifyEnabled|minifyEnabled)\s*=?\s*true""").containsMatchIn(t)
+            if (!minifyOn) {
                 findings.add(
                     ScanUtil.finding(
                         severity = Severity.MEDIUM,

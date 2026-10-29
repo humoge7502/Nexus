@@ -12,5 +12,9 @@
     <issue id="ExportedReceiver" severity="error" />
     <issue id="WorldReadableFiles" severity="error" />
     <issue id="OldTargetApi" severity="ignore" />
+    <!-- Advisory only, and it needs network to know what upstream has released.
+         Kept silent for the same reason as OldTargetApi: a new AGP release should
+         not show up as a regression in this project's own quality gate. -->
+    <issue id="AndroidGradlePluginVersion" severity="ignore" />
     <issue id="MissingPermission" severity="warning" />
 </lint>

@@ -41,7 +41,8 @@ class TooltipManager {
             setBalloonAnimation(BalloonAnimation.FADE)
             setPadding(12)
             if (title != null) {
-                setText("$title\n$text")
+                val body = "$title\n$text"
+                setText(body)
             } else {
                 setText(text)
             }

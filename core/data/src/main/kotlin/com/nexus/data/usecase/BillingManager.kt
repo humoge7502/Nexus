@@ -44,6 +44,8 @@ class BillingManager @Inject constructor(
     )
 
     override suspend fun initialize() {
+        if (billingClient?.isReady == true) return
+
         val client = BillingClient.newBuilder(context)
             .setListener { billingResult, purchases ->
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {

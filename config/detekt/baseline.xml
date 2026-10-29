@@ -1,0 +1,269 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:CertificationDetailScreen.kt$@Composable fun CertificationDetailScreen( certId: String, onBack: () -&gt; Unit, viewModel: CertificationViewModel = hiltViewModel(), )</ID>
+    <ID>CyclomaticComplexMethod:GamificationValidator.kt$GamificationValidator$fun validateXpAward(xpAmount: Int, action: String): Boolean</ID>
+    <ID>CyclomaticComplexMethod:NexusAIService.kt$NexusAIService$suspend fun streamChat( message: String, history: List&lt;AIMessage&gt;, userProfile: UserProfile? = null, ): Flow&lt;String&gt;</ID>
+    <ID>CyclomaticComplexMethod:NexusDeepLinks.kt$NexusDeepLinks$private fun resolveRoute(head: String, id: String?): NexusDestination?</ID>
+    <ID>CyclomaticComplexMethod:PlacementReadinessCalculator.kt$PlacementReadinessCalculator$suspend fun calculate(): PlacementReadiness</ID>
+    <ID>CyclomaticComplexMethod:ProactiveInsightEngine.kt$ProactiveInsightEngine$suspend fun generateDailyInsight(): ProactiveInsight?</ID>
+    <ID>CyclomaticComplexMethod:WeeklyNarrativeGenerator.kt$WeeklyNarrativeGenerator$suspend fun generate(): WeeklyNarrative</ID>
+    <ID>FunctionOnlyReturningConstant:AppModule.kt$AppModule$@Provides @Named("github_token") @Singleton fun provideGithubToken(): String</ID>
+    <ID>InstanceOfCheckForException:AIOpenRouterService.kt$AIOpenRouterService$e is AIServiceException</ID>
+    <ID>InstanceOfCheckForException:AccountDeletionViewModel.kt$AccountDeletionViewModel$e is FirebaseAuthRecentLoginRequiredException</ID>
+    <ID>LongMethod:AIChatScreen.kt$@Composable fun AIChatScreen( onBack: () -&gt; Unit = {}, viewModel: AIChatViewModel = hiltViewModel(), )</ID>
+    <ID>LongMethod:CareerMirrorScreen.kt$@Composable fun CareerMirrorContent( uiState: CareerMirrorUiState, onBack: () -&gt; Unit, )</ID>
+    <ID>LongMethod:CertificationDetailScreen.kt$@Composable fun CertificationDetailScreen( certId: String, onBack: () -&gt; Unit, viewModel: CertificationViewModel = hiltViewModel(), )</ID>
+    <ID>LongMethod:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$private fun loadHardcodedHits()</ID>
+    <ID>LongMethod:HackathonDetailScreen.kt$@Composable fun HackathonDetailScreen( hackathonId: String, onBack: () -&gt; Unit = {}, viewModel: HackathonDetailViewModel = hiltViewModel(), )</ID>
+    <ID>LongMethod:InternshipDetailScreen.kt$@Composable fun InternshipDetailScreen( internshipId: String, onBack: () -&gt; Unit, viewModel: InternshipViewModel = hiltViewModel(), )</ID>
+    <ID>LongMethod:MainActivity.kt$@Composable fun NexusMainScaffold( pendingDestination: NexusDestination? = null, onDestinationConsumed: () -&gt; Unit = {}, )</ID>
+    <ID>LongMethod:PaywallScreen.kt$@Composable fun PaywallScreen( onDismiss: () -&gt; Unit, onPurchased: () -&gt; Unit, viewModel: PaywallViewModel = hiltViewModel(), )</ID>
+    <ID>LongMethod:ProductivityScreen.kt$@Composable fun ProductivityScreen( onBack: () -&gt; Unit, )</ID>
+    <ID>LongMethod:SettingsScreen.kt$@Composable fun SettingsScreen( onBack: () -&gt; Unit, onGoPro: () -&gt; Unit = {}, viewModel: SettingsViewModel = hiltViewModel(), )</ID>
+    <ID>LongParameterList:AIChatViewModel.kt$AIChatViewModel$( private val repository: AIConversationRepository, private val nexusAIService: NexusAIService, private val rateLimiter: AIRateLimiter, private val userPreferences: UserPreferences, private val xpRepository: UserXpRepository, private val analyticsTracker: AnalyticsTracker, private val memoryManager: ConversationMemoryManager, private val aiResponseValidator: AIResponseValidator, private val careerMemoryManager: CareerMemoryManager, private val skillGraphRepository: ISkillGraphRepository, )</ID>
+    <ID>LongParameterList:FirestoreSync.kt$FirestoreSync$( @ApplicationContext private val context: Context, private val firestore: FirebaseFirestore, private val internshipRepository: InternshipRepository, private val hackathonRepository: HackathonRepository, private val certificationRepository: CertificationRepository, private val goalRepository: GoalRepository, private val networkMonitor: NetworkMonitor, private val internshipDao: InternshipDao, private val hackathonDao: HackathonDao, private val certificationDao: CertificationDao, private val goalDao: GoalDao, )</ID>
+    <ID>LongParameterList:GrowthViewModel.kt$GrowthViewModel$( private val problemRepository: DSAProblemRepository, private val goalRepository: GoalRepository, private val streakRepository: StreakRepository, private val xpRepository: UserXpRepository, private val analyticsTracker: AnalyticsTracker, private val portfolioRepository: PortfolioRepository, private val careerScoreCalculator: CareerScoreCalculator, private val achievementRepository: AchievementRepository, private val placementCalculator: PlacementReadinessCalculator, private val skillGraphRepository: SkillGraphRepository, )</ID>
+    <ID>LongParameterList:PlacementForecastViewModel.kt$PlacementForecastViewModel$( private val repository: PlacementForecastRepository, private val scoreRepository: ScoreSnapshotRepository, private val predictionEngine: PlacementPredictionEngine, private val dsaRepository: DSAProblemRepository, private val applicationRepository: ApplicationRepository, private val certificationRepository: CertificationRepository, private val portfolioRepository: PortfolioRepository, private val interviewReportRepository: InterviewReportRepository, private val streakRepository: StreakRepository, private val userPrefs: UserPreferences, )</ID>
+    <ID>LongParameterList:ProfileScreen.kt$( onBack: () -&gt; Unit, onSettings: () -&gt; Unit, onAchievements: () -&gt; Unit = {}, onLeaderboard: () -&gt; Unit = {}, onGoPro: () -&gt; Unit = {}, onApplications: () -&gt; Unit = {}, onPlacementForecast: () -&gt; Unit = {}, onCareerMirror: () -&gt; Unit = {}, onCohort: () -&gt; Unit = {}, onInterviewLog: () -&gt; Unit = {}, onPortfolio: () -&gt; Unit = {}, onSearch: () -&gt; Unit = {}, onCommunity: () -&gt; Unit = {}, onTribe: () -&gt; Unit = {}, showBackArrow: Boolean = true, viewModel: ProfileViewModel = androidx.hilt.navigation.compose.hiltViewModel(), )</ID>
+    <ID>LoopWithTooManyJumpStatements:NexusAIService.kt$NexusAIService$for</ID>
+    <ID>MaxLineLength:AIOpenRouterService.kt$AIOpenRouterService$put("content", "You are NEXUS AI, a career assistant for CSE students. Help with internships, certifications, DSA, career advice, skill development, and interview prep. Be concise, practical, and encouraging.")</ID>
+    <ID>MaxLineLength:AIRequestRouterTest.kt$AIRequestRouterTest$`when`(functionsService.proxyAI(any&lt;AIProxyRequest&gt;())).thenReturn(Result.success(AIProxyResult(id = "", content = "", finishReason = "stop")))</ID>
+    <ID>MaxLineLength:AIResponseValidator.kt$AIResponseValidator$"""\b(Google|Microsoft|Amazon|Meta|Apple|Flipkart|Infosys|TCS|Wipro|HCL)\s+(always|never|only\s+hires?|requires?|doesn't|won't)\b"""</ID>
+    <ID>MaxLineLength:AIResponseValidator.kt$AIResponseValidator$Regex("""\b(medication|medicine|dosage|prescription|diagnos[ei]s|treat\s+your\s+condition|stop\s+taking)\b""", RegexOption.IGNORE_CASE)</ID>
+    <ID>MaxLineLength:ApplicationRepository.kt$ApplicationRepository$outcomeDate = if (status in listOf(ApplicationStatus.OFFERED, ApplicationStatus.REJECTED, ApplicationStatus.ACCEPTED)) now else entity.outcomeDate</ID>
+    <ID>MaxLineLength:AuthTokenProvider.kt$AuthTokenProvider$fun</ID>
+    <ID>MaxLineLength:CareerInsightsScreen.kt$CareerInsightsViewModel$_uiState.value = _uiState.value.copy(rateLimited = true, error = "Daily AI limit reached. Upgrade to Pro for unlimited access.")</ID>
+    <ID>MaxLineLength:CareerInsightsScreen.kt$CareerInsightsViewModel$val prompt = "Provide 5 actionable career insights for CS students in $currentYear. Cover: trending skills, job market, certifications, internships, networking. Numbered sections with headings."</ID>
+    <ID>MaxLineLength:CareerMemoryManager.kt$CareerMemoryManager$"(?i)\\b(Google|Microsoft|Amazon|Meta|Apple|Netflix|Flipkart|Swiggy|Zomato|Razorpay|CRED|Zepto|Meesho|PhonePe|Paytm|Ola|Uber|Atlassian|Adobe|Oracle|SAP|Salesforce|Infosys|TCS|Wipro|HCL|Cognizant)\\b"</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"1. Define state (dp[i] = ...). 2. Find recurrence relation. 3. Identify base cases. 4. Decide top-down vs bottom-up. 5. Optimize space if possible."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"25 min focus, 5 min break. After 4 cycles, take a 15-30 min break. This boosts deep work and prevents burnout during long coding sessions."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"A strong GitHub profile with real projects often matters more than a perfect GPA. Employers want to see what you can build, not just what you studied."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Always negotiate. Research salary ranges on Glassdoor. Say 'I'm excited about this role, but I have another offer. Can you match this?' Companies expect it."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Bad: 'Improved app performance'. Good: 'Reduced app launch time by 40% by implementing lazy loading and image caching.' Numbers grab attention."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Before drawing boxes, clarify: functional requirements, non-functional requirements, scale estimates. A good design without requirements is just art."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Block 2-hour slots for focused coding. Turn off notifications. Shallow work (emails, Slack) can wait. Deep work is what actually moves your career forward."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Coding for 30 minutes daily beats 5 hours once a week. Use the streak system to build momentum. Small daily wins compound massively."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"DFS: when you need to explore all paths (maze, permutations). BFS: shortest path in unweighted graph, level-order traversal. Know the trade-offs."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Document everything you learn on GitHub or a personal wiki. Future employers will see your growth. Plus, you'll have a reference for your own use."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Don't grind randomly. Focus on one pattern per week (Sliding Window, DP, Graphs). Master 10 patterns to solve 80% of interview problems."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Don't just put 'Student'. Use: 'CSE @ University | Building [project] | Passionate about [field]'. Recruiters search by keywords."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Even for personal projects, write 3 things daily: what you did yesterday, what you'll do today, blockers. This builds accountability and momentum."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Focus on certifications that employers actually recognize: AWS, Google Cloud, Meta. One high-value cert &gt; five low-value ones."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"For subarray/substring problems, think sliding window. Expand the right pointer, shrink the left. Maintain a window of valid state. Key for array problems."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Hi [Name], I'm a [year] student at [college] and I admire your work at [company]. Would you be open to a 15-minute chat about your career journey?"</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Instead of 'What's the culture like?', ask 'What does a typical day look like for this role?' or 'What challenges is the team facing right now?'"</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Instead of TODO apps, build something people actually need. A project that helps 10 real users is worth more than 10 projects on GitHub."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Instead of jumping between React, Angular, Vue, and Svelte, master one framework deeply. Deep knowledge of one is better than surface knowledge of many."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Join Discord servers, Reddit communities, or local tech meetups. Surround yourself with motivated people. Your network is your net worth in tech."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Know by heart: Dijkstra (shortest path), Union-Find (connectivity), Topological Sort (dependency resolution), Kruskal's (MST). These appear constantly."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Learn branching strategies, rebase vs merge, interactive rebase, cherry-pick, and bisect. These skills separate juniors from seniors in real projects."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Perfect for sorted arrays and linked list problems. One pointer starts at the beginning, one at the end. Move them based on conditions. O(n) time, O(1) space."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Practice with friends or platforms like Pramp. The first mock interview is always terrible. By the 5th one, you'll be confident. Start before you feel ready."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Read open-source projects on GitHub. Pick a library you use, read 1 file per day. You'll learn patterns that take years to discover alone."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Recruiters spend 5-7 seconds scanning your resume. Make sure your most impressive achievement is at the top. Use bold for key numbers and roles."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Referrals are 5x more effective than cold applying. Connect with alumni on LinkedI engage with their posts, and ask for 15-min coffee chats."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Situation, Task, Action, Result. Structure every interview answer this way. It makes your responses clear, concise, and memorable."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Start with 'good first issue' labels. Fix documentation or small bugs. It teaches collaboration, code review, and looks great on your resume."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Structure: Current (year/college) + Past (key project/experience) + Future (what you're looking for). Keep it under 60 seconds. Practice until natural."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Take a concept, explain it in plain English to a 12-year-old. If you can't simplify it, you don't understand it well enough. Great for system design prep."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Use a spreadsheet to track: company, role, date applied, status, follow-up date. Follow up after 7 days of no response. Persistence pays off."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Use standard section headers, avoid tables/columns, include keywords from the job description. Most resumes are filtered by bots before humans see them."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Write about what you learn on Hashnode or Dev.to. One article per week. It documents your journey, helps others, and impresses recruiters."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Write blog posts or make videos about what you learn. Teaching solidifies concepts and builds your personal brand. Start with one post this week."</ID>
+    <ID>MaxLineLength:DailyCareerHitGenerator.kt$DailyCareerHitGenerator$"Your own domain &gt; LinkedIn. Showcase projects, blog posts, resume, and contact. It takes 2 hours to set up with GitHub Pages or Vercel. Do it this week."</ID>
+    <ID>MaxLineLength:DeploymentAnalyzer.kt$DeploymentAnalyzer$val ciFiles = if (ciDir.exists()) ciDir.listFiles()?.filter { it.extension == "yml" || it.extension == "yaml" } ?: emptyList() else emptyList()</ID>
+    <ID>MaxLineLength:GrowthViewModel.kt$GrowthViewModel$val achievements = try { achievementRepository.getUnlocked().first() } catch (_: Exception) { emptyList&lt;com.nexus.domain.model.Achievement&gt;() }</ID>
+    <ID>MaxLineLength:InterviewCoachScreen.kt$InterviewCoachViewModel$val prompt = "Interview question: $question\n\nCandidate's answer: $answer\n\nProvide constructive feedback. Rate out of 10. Suggest improvements and give a model answer."</ID>
+    <ID>MaxLineLength:LinkedInPostScreen.kt$LinkedInPostViewModel$_uiState.value = _uiState.value.copy(rateLimited = true, error = "Daily AI limit reached. Upgrade to Pro for unlimited access.")</ID>
+    <ID>MaxLineLength:LinkedInPostScreen.kt$LinkedInPostViewModel$val prompt = "Write a LinkedIn post in a $tone tone about this achievement: $achievement. Include relevant hashtags. Keep it under 300 words. Format the post with proper line breaks."</ID>
+    <ID>MaxLineLength:Migration.kt$&lt;no name provided&gt;$"CREATE UNIQUE INDEX IF NOT EXISTS `index_opportunity_embeddings_opportunityId_opportunityType` ON `opportunity_embeddings` (`opportunityId`, `opportunityType`)"</ID>
+    <ID>MaxLineLength:MigrationTest.kt$MigrationTest$db.execSQL("INSERT INTO certification_progress (certification_id, completed_modules, total_modules, study_hours_logged) VALUES ('cert_1', 2, 8, 5)")</ID>
+    <ID>MaxLineLength:MigrationTest.kt$MigrationTest$execSQL("INSERT INTO applications (id, internship_id, status, applied_at, last_updated, notes) VALUES ('1', 'int_1', 'APPLIED', 1000, 1000, 'test')")</ID>
+    <ID>MaxLineLength:MigrationTest.kt$MigrationTest$execSQL("INSERT INTO internships (id, title, company_name, location, is_remote, stipend_currency, duration_months, skills, deadline, apply_url, description, posted_at, is_saved, cached_at) VALUES ('1', 'Test', 'Test Corp', 'Remote', 0, 'INR', 3, '[]', 0, 'https://apply', 'desc', 0, 0, 0)")</ID>
+    <ID>MaxLineLength:NexusAIService.kt$NexusAIService$}</ID>
+    <ID>MaxLineLength:NexusOracleViewModel.kt$NexusOracleViewModel$IntelligenceCardDefaults.momentumCard("Your last 5 coding sessions were above average. This is the time to tackle your hardest goal.")</ID>
+    <ID>MaxLineLength:NexusOracleViewModel.kt$NexusOracleViewModel$IntelligenceCardDefaults.oracleCard("If you study System Design for 2 hours today, you'll be interview-ready for Amazon in 23 days vs. 41 days at current pace.")</ID>
+    <ID>MaxLineLength:NexusOracleViewModel.kt$NexusOracleViewModel$if</ID>
+    <ID>MaxLineLength:NexusOracleViewModel.kt$NexusOracleViewModel$if (cardLines.size &gt; 1) IntelligenceCardDefaults.signalCard(cardLines[1], 85) else IntelligenceCardDefaults.signalCard("", 85)</ID>
+    <ID>MaxLineLength:NexusOracleViewModel.kt$NexusOracleViewModel$if (cardLines.size &gt; 3) IntelligenceCardDefaults.momentumCard(cardLines[3]) else IntelligenceCardDefaults.momentumCard("")</ID>
+    <ID>MaxLineLength:NexusOracleViewModel.kt$NexusOracleViewModel$val cardsPrompt = "Generate 4 short actionable career oracle insights for a CS student. Each on a new line. Cover: study recommendation, opportunity alert, skill gap warning, and motivation."</ID>
+    <ID>MaxLineLength:NexusOracleViewModel.kt$NexusOracleViewModel$val forecastPrompt = "Give me a career forecast for a CS student. Format: 30DAY_CURRENT|30DAY_PROJECTED|30DAY_NOTE|90DAY_CURRENT|90DAY_PROJECTED|90DAY_NOTE. Use realistic numbers."</ID>
+    <ID>MaxLineLength:NexusOracleViewModel.kt$NexusOracleViewModel$val oppPrompt = "Generate a short opportunity alert for a CS student. Format: Title|Body|Call to action. Make it specific and timely."</ID>
+    <ID>MaxLineLength:NexusOracleViewModel.kt$NexusOracleViewModel$val pathsPrompt = "List 4 career paths for a CS student with probability percentages. Format as: Path|percentage on each line. Use realistic numbers that sum to ~100."</ID>
+    <ID>MaxLineLength:NexusOracleViewModel.kt$NexusOracleViewModel$val skillsPrompt = "List 5 tech skills for a CS student with current proficiency (0-100) and projected proficiency (0-100). Format as: Skill|current|projected on each line."</ID>
+    <ID>MaxLineLength:NexusSearchEngine.kt$NexusSearchEngine$val text = "${internship.title} ${internship.company.name} ${internship.tags.joinToString(" ") { it.replace("_", " ") }}".lowercase()</ID>
+    <ID>MaxLineLength:OnboardingViewModel.kt$val interestOptions = listOf("Internships", "Full-Time Jobs", "Hackathons", "Research", "Open Source", "Freelancing", "Higher Studies", "Entrepreneurship")</ID>
+    <ID>MaxLineLength:OnboardingViewModel.kt$val skillOptions = listOf("Python", "Java", "JavaScript", "Kotlin", "C++", "SQL", "React", "Android", "Machine Learning", "Data Science", "Cloud Computing", "DevOps", "UI/UX", "Blockchain")</ID>
+    <ID>MaxLineLength:PlacementProbabilityEngine.kt$PlacementProbabilityEngine$val dsaScore = when { totalDSA &gt;= 200 -&gt; 1f; totalDSA &gt;= 150 -&gt; 0.85f; totalDSA &gt;= 100 -&gt; 0.65f; totalDSA &gt;= 50 -&gt; 0.40f; else -&gt; totalDSA / 50f * 0.35f }</ID>
+    <ID>MaxLineLength:PlacementProbabilityEngine.kt$PlacementProbabilityEngine$val probability = ((dsaScore * 0.45f + topicScore * 0.25f + skillScore * 0.15f + consistencyScore * 0.15f) * 85f).toInt().coerceIn(2, 85)</ID>
+    <ID>MaxLineLength:PlacementReadinessCalculator.kt$PlacementReadinessCalculator$actionItems.add(PlacementAction(priority = 1, title = "Solve more DSA problems", description = "You need ${maxOf(0, 50 - dsaSolved)} more problems for basic placement readiness", impact = "HIGH", category = "DSA"))</ID>
+    <ID>MaxLineLength:PlacementReadinessCalculator.kt$PlacementReadinessCalculator$actionItems.add(PlacementAction(priority = 2, title = "Add more skills", description = "Add ${maxOf(0, 5 - userSkillCount)} more skills to your profile", impact = "MEDIUM", category = "SKILLS"))</ID>
+    <ID>MaxLineLength:PlacementReadinessCalculator.kt$PlacementReadinessCalculator$actionItems.add(PlacementAction(priority = 3, title = "Build a daily streak", description = "A 7-day streak significantly increases your readiness score", impact = "HIGH", category = "CONSISTENCY"))</ID>
+    <ID>MaxLineLength:PlacementReadinessCalculator.kt$PlacementReadinessCalculator$actionItems.add(PlacementAction(priority = 4, title = "Apply to more opportunities", description = "Track at least 5 applications to show active job search", impact = "MEDIUM", category = "APPLICATIONS"))</ID>
+    <ID>MaxLineLength:PlacementReadinessModel.kt$PlacementReadinessModel$private val MEANS = floatArrayOf(2.33642476f, 0.23426341f, 0.36428480f, 1.87927319f, 0.26621211f, 0.15513641f, 0.73904587f, 0.98072545f, 2.09755342f, 0.31692187f, 1.16661480f, 0.49828192f, 0.62384115f, 2.74710768f)</ID>
+    <ID>MaxLineLength:PlacementReadinessModel.kt$PlacementReadinessModel$private val SCALES = floatArrayOf(0.93244380f, 0.14049215f, 0.23127653f, 0.55125868f, 0.29335786f, 0.23734161f, 0.54497585f, 0.62818118f, 0.76336797f, 0.19037683f, 0.61510093f, 0.12319263f, 0.27954103f, 0.65211610f)</ID>
+    <ID>MaxLineLength:PlacementReadinessModel.kt$PlacementReadinessModel$private val WEIGHTS = floatArrayOf(0.10408635f, 0.14698341f, 0.00911159f, -0.06849068f, 0.28839256f, 0.14847510f, -0.03756948f, -0.01714499f, -0.02719990f, -0.04497105f, 0.27077245f, 1.44594510f, 0.12194810f, 0.04862957f)</ID>
+    <ID>MaxLineLength:PlacementReadinessModel.kt$PlacementReadinessModel.Features$dsaSolvedLog</ID>
+    <ID>MaxLineLength:ProactiveInsightEngineTest.kt$ProactiveInsightEngineTest$assertTrue(insight!!.category in listOf(InsightCategory.GROWTH, InsightCategory.APPLICATION, InsightCategory.GOAL, InsightCategory.LEARNING))</ID>
+    <ID>MaxLineLength:RoadmapGeneratorScreen.kt$RoadmapViewModel$val prompt = "Create a detailed career roadmap for becoming a $role. Include phases with timeline, skills to learn, projects to build, certifications to get, and resources. Format with clear sections."</ID>
+    <ID>MaxLineLength:SecurityAnalyzer.kt$SecurityAnalyzer$"""setHostnameVerifier\s*\(|ALLOW_ALL_HOSTNAME_VERIFIER|checkClientTrusted\s*\(.*\)\s*\{\s*\}|TrustManager\s*\{[\s\S]*?void\s+check"""</ID>
+    <ID>MaxLineLength:SkillGapScreen.kt$SkillGapViewModel$_uiState.value = _uiState.value.copy(rateLimited = true, error = "Daily AI limit reached. Upgrade to Pro for unlimited access.")</ID>
+    <ID>MaxLineLength:SkillGapScreen.kt$SkillGapViewModel$val prompt = "Analyze the skill gap between current skills ($skills) and requirements for a $role. List: 1. Skills I already have. 2. Skills I need to learn (prioritized). 3. Recommended resources. 4. Estimated timeline."</ID>
+    <ID>MaxLineLength:SkillGraphRepository.kt$SkillGraphRepository$Timber.w("Failed to fetch skill graph from API, using seed data. Nodes: ${SkillGraphSeedData.nodes.size}, Edges: ${SkillGraphSeedData.edges.size}")</ID>
+    <ID>MaxLineLength:SystemPromptBuilder.kt$SystemPromptBuilder$if ("startup" in lower || "product" in lower || lower.contains("start-up")) companies.addAll(listOf("Top Product-Based Startups", "Unicorns"))</ID>
+    <ID>MaxLineLength:build.gradle.kts$plugins { alias(libs.plugins.android.library); alias(libs.plugins.kotlin.android); alias(libs.plugins.kotlin.compose); alias(libs.plugins.hilt); alias(libs.plugins.ksp) }</ID>
+    <ID>MayBeConst:Animation.kt$NexusAnimation.Duration$val dramatic = 1000</ID>
+    <ID>MayBeConst:Animation.kt$NexusAnimation.Duration$val emphasized = 500</ID>
+    <ID>MayBeConst:Animation.kt$NexusAnimation.Duration$val fast = 200</ID>
+    <ID>MayBeConst:Animation.kt$NexusAnimation.Duration$val instant = 0</ID>
+    <ID>MayBeConst:Animation.kt$NexusAnimation.Duration$val long = 700</ID>
+    <ID>MayBeConst:Animation.kt$NexusAnimation.Duration$val micro = 100</ID>
+    <ID>MayBeConst:Animation.kt$NexusAnimation.Duration$val standard = 300</ID>
+    <ID>NewLineAtEndOfFile:DailyCareerHitGenerator.kt$com.nexus.domain.usecase.DailyCareerHitGenerator.kt</ID>
+    <ID>NewLineAtEndOfFile:EmbeddingService.kt$com.nexus.network.service.EmbeddingService.kt</ID>
+    <ID>NewLineAtEndOfFile:PortfolioRepository.kt$com.nexus.data.repository.PortfolioRepository.kt</ID>
+    <ID>NewLineAtEndOfFile:ProactiveInsightWorker.kt$com.nexus.sync.ProactiveInsightWorker.kt</ID>
+    <ID>NewLineAtEndOfFile:SkillGraphRepository.kt$com.nexus.data.repository.SkillGraphRepository.kt</ID>
+    <ID>NewLineAtEndOfFile:WeeklyRetentionWorker.kt$com.nexus.sync.WeeklyRetentionWorker.kt</ID>
+    <ID>SpreadOperator:DatabaseModule.kt$DatabaseModule$(*MigrationRegistry.ALL_MIGRATIONS)</ID>
+    <ID>SwallowedException:ConfidenceRepository.kt$ConfidenceRepository$e: Exception</ID>
+    <ID>SwallowedException:FileSystemScanner.kt$DefaultFileSystemScanner$e: Exception</ID>
+    <ID>SwallowedException:RetentionTracker.kt$RetentionTracker$e: Exception</ID>
+    <ID>SwallowedException:RoadmapParser.kt$RoadmapParser$e: Exception</ID>
+    <ID>SwallowedException:SearchViewModel.kt$SearchViewModel$e: Exception</ID>
+    <ID>SwallowedException:SkillGraphRepository.kt$SkillGraphRepository$e: Exception</ID>
+    <ID>ThrowsCount:NexusAIService.kt$NexusAIService$suspend fun streamChat( message: String, history: List&lt;AIMessage&gt;, userProfile: UserProfile? = null, ): Flow&lt;String&gt;</ID>
+    <ID>TooManyFunctions:DatabaseModule.kt$DatabaseModule</ID>
+    <ID>UnusedParameter:AchievementsScreen.kt$onLeaderboard: () -&gt; Unit = {}</ID>
+    <ID>UnusedParameter:AchievementsViewModel.kt$AchievementsViewModel$id: String</ID>
+    <ID>UnusedParameter:ApplicationsScreen.kt$onApplicationClick: (String) -&gt; Unit = {}</ID>
+    <ID>UnusedParameter:AuditOrchestrator.kt$AuditOrchestrator$thresholds: ThresholdConfig</ID>
+    <ID>UnusedParameter:CareerMemoryManager.kt$CareerMemoryManager$aiResponse: String</ID>
+    <ID>UnusedParameter:GlassCard.kt$borderColor: Color = Color.White.copy(alpha = 0.1f)</ID>
+    <ID>UnusedParameter:GoalsScreen.kt$onDelete: () -&gt; Unit</ID>
+    <ID>UnusedParameter:HomeScreen.kt$onCertificationClick: (String) -&gt; Unit = {}</ID>
+    <ID>UnusedParameter:HomeScreen.kt$onNavigateToProductivity: () -&gt; Unit = {}</ID>
+    <ID>UnusedParameter:HomeScreen.kt$onNavigateToProfile: () -&gt; Unit = {}</ID>
+    <ID>UnusedParameter:IntelligenceCard.kt$onDismiss: () -&gt; Unit = {}</ID>
+    <ID>UnusedParameter:InternshipRepository.kt$InternshipRepository$loadSize: Int</ID>
+    <ID>UnusedParameter:InternshipRepository.kt$InternshipRepository$page: Int</ID>
+    <ID>UnusedParameter:InterviewIntelligenceProvider.kt$InterviewIntelligenceProvider$role: String</ID>
+    <ID>UnusedParameter:NexusCharts.kt$labels: List&lt;String&gt; = emptyList()</ID>
+    <ID>UnusedParameter:NexusMotion.kt$onSwipeLeft: () -&gt; Unit = {}</ID>
+    <ID>UnusedParameter:NexusMotion.kt$onSwipeRight: () -&gt; Unit = {}</ID>
+    <ID>UnusedParameter:PlacementPredictionEngine.kt$PlacementPredictionEngine$semester: String</ID>
+    <ID>UnusedParameter:PlacementProbabilityEngine.kt$PlacementProbabilityEngine$xp: Int</ID>
+    <ID>UnusedParameter:ScorePulseAnimation.kt$onOverlayComplete: (() -&gt; Unit)? = null</ID>
+    <ID>UnusedParameter:ScorePulseAnimation.kt$overlayText: String? = null</ID>
+    <ID>UnusedParameter:SharedElementTransition.kt$animatedVisibilityScope: AnimatedVisibilityScope? = null</ID>
+    <ID>UnusedParameter:SharedElementTransition.kt$key: SharedTransitionKey</ID>
+    <ID>UnusedParameter:SharedElementTransition.kt$modifier: Modifier = Modifier</ID>
+    <ID>UnusedParameter:SharedElementTransition.kt$sharedTransitionScope: Any</ID>
+    <ID>UnusedParameter:UserPreferences.kt$UserPreferences$actionText: String? = null</ID>
+    <ID>UnusedParameter:UserPreferences.kt$UserPreferences$category: String</ID>
+    <ID>UnusedParameter:VariableRewardManager.kt$VariableRewardManager$baseXP: Int</ID>
+    <ID>UnusedPrivateProperty:AIChatViewModel.kt$AIChatViewModel$private val xpRepository: UserXpRepository</ID>
+    <ID>UnusedPrivateProperty:DailyBriefingWorker.kt$DailyBriefingWorker$private val streakRepository: StreakRepository</ID>
+    <ID>UnusedPrivateProperty:DeadlineAlertWorker.kt$DeadlineAlertWorker$private val certificationDao: CertificationDao</ID>
+    <ID>UnusedPrivateProperty:EveningReviewWorker.kt$EveningReviewWorker$private val streakRepository: StreakRepository</ID>
+    <ID>UnusedPrivateProperty:FirestoreSync.kt$FirestoreSync$private val goalDao: GoalDao</ID>
+    <ID>UnusedPrivateProperty:HomeViewModel.kt$HomeViewModel$val result = repository.refreshInternships()</ID>
+    <ID>UnusedPrivateProperty:NexusAIService.kt$NexusAIService$private val careerMemoryManager: CareerMemoryManager</ID>
+    <ID>UnusedPrivateProperty:NexusMotion.kt$val anim = spring&lt;Float&gt;( dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow, )</ID>
+    <ID>UnusedPrivateProperty:NexusMotion.kt$val rotation = (offsetX / threshold).coerceIn(-1f, 1f) * 5f</ID>
+    <ID>UnusedPrivateProperty:PlacementProbabilityEngine.kt$PlacementProbabilityEngine$private val userPrefs: UserPreferences</ID>
+    <ID>UnusedPrivateProperty:PlacementProbabilityEngine.kt$PlacementProbabilityEngine$val interviews = appRepo.getByStatus(com.nexus.domain.model.ApplicationStatus.INTERVIEWING).first().size</ID>
+    <ID>UnusedPrivateProperty:PlacementProbabilityEngine.kt$PlacementProbabilityEngine$val offers = appRepo.getByStatus(com.nexus.domain.model.ApplicationStatus.OFFERED).first().size</ID>
+    <ID>UnusedPrivateProperty:PlacementStateEngine.kt$PlacementStateEngine$private val streakRepository: IStreakRepository</ID>
+    <ID>UnusedPrivateProperty:PlacementStateEngine.kt$PlacementStateEngine$val collegeFlow = userPreferences.userCollege</ID>
+    <ID>UnusedPrivateProperty:PlacementStateEngine.kt$PlacementStateEngine$val currentUser = userPreferences.userId.first()</ID>
+    <ID>UnusedPrivateProperty:PlacementStateEngine.kt$PlacementStateEngine$val currentYear = now.year</ID>
+    <ID>UnusedPrivateProperty:ProfileViewModel.kt$ProfileViewModel$private val gitHubRepository: GitHubRepository</ID>
+    <ID>UnusedPrivateProperty:RAGRepositoryTest.kt$RAGRepositoryTest$val entity = OpportunityEmbeddingEntity( opportunityId = "opp-1", opportunityType = "INTERNSHIP", embedding = byteArrayOf(1, 2, 3), modelVersion = "nexus-hash-v1", )</ID>
+    <ID>UnusedPrivateProperty:RoadmapGeneratorScreen.kt$RoadmapViewModel$val limitResult = rateLimiter.canMakeCall(isPro)</ID>
+    <ID>UnusedPrivateProperty:ScorePulseGenerator.kt$ScorePulseGenerator$private val userPrefs: UserPreferences</ID>
+    <ID>UnusedPrivateProperty:SkillGraphRepository.kt$SkillGraphRepository$private val analyticsTracker: AnalyticsTracker</ID>
+    <ID>UnusedPrivateProperty:SmartNotificationContentBuilder.kt$SmartNotificationContentBuilder$private val analyticsTracker: AnalyticsTracker</ID>
+    <ID>UnusedPrivateProperty:StreakRepository.kt$StreakRepository.Companion$private val STREAK_30_BONUS_AWARDED = booleanPreferencesKey("streak_30_bonus_awarded")</ID>
+    <ID>UnusedPrivateProperty:StreakRepository.kt$StreakRepository.Companion$private val STREAK_7_BONUS_AWARDED = booleanPreferencesKey("streak_7_bonus_awarded")</ID>
+    <ID>UnusedPrivateProperty:StreakWorker.kt$StreakWorker$private val xpRepository: UserXpRepository</ID>
+    <ID>UnusedPrivateProperty:SyncScheduler.kt$SyncScheduler$private val careerMemoryManager: CareerMemoryManager</ID>
+    <ID>UnusedPrivateProperty:WeeklyNarrativeGenerator.kt$WeeklyNarrativeGenerator$private val userPreferences: UserPreferences</ID>
+    <ID>UseCheckOrError:AIRequestRouter.kt$AIRequestRouter$throw IllegalStateException("User not authenticated for proxy")</ID>
+    <ID>UseCheckOrError:AccountDeletionViewModel.kt$AccountDeletionViewModel$throw IllegalStateException("Not authenticated")</ID>
+    <ID>UseCheckOrError:AuditOrchestrator.kt$AuditOrchestrator$throw IllegalStateException("No analyzer found for phase $phaseNumber")</ID>
+    <ID>UseCheckOrError:FirebaseFunctionsAIService.kt$FirebaseFunctionsAIService$throw IllegalStateException("Empty research response")</ID>
+    <ID>UseCheckOrError:FirebaseFunctionsAIService.kt$FirebaseFunctionsAIService$throw IllegalStateException("Sign in to use Deep Research")</ID>
+    <ID>UseCheckOrError:FirebaseFunctionsAIService.kt$FirebaseFunctionsAIService$throw IllegalStateException("Unexpected cohort response")</ID>
+    <ID>UseCheckOrError:FirebaseFunctionsAIService.kt$FirebaseFunctionsAIService$throw IllegalStateException("Unexpected feed response")</ID>
+    <ID>UseCheckOrError:FirebaseFunctionsAIService.kt$FirebaseFunctionsAIService$throw IllegalStateException("Unexpected health check response")</ID>
+    <ID>UseCheckOrError:FirebaseFunctionsAIService.kt$FirebaseFunctionsAIService$throw IllegalStateException("Unexpected outcomes response")</ID>
+    <ID>UseCheckOrError:FirebaseFunctionsAIService.kt$FirebaseFunctionsAIService$throw IllegalStateException("Unexpected proxy AI response")</ID>
+    <ID>UseCheckOrError:FirebaseFunctionsAIService.kt$FirebaseFunctionsAIService$throw IllegalStateException("User must be authenticated for AI proxy")</ID>
+    <ID>UseCheckOrError:MigrationRegistry.kt$MigrationRegistry$throw IllegalStateException("No migrations registered")</ID>
+    <ID>UseCheckOrError:UserPreferences.kt$UserPreferences$throw IllegalStateException("Unable to encrypt auth token")</ID>
+    <ID>VariableNaming:MigrationTest.kt$MigrationTest$private val TEST_DB = "migration-test"</ID>
+    <ID>WildcardImport:AIRequestRouterTest.kt$import org.junit.Assert.*</ID>
+    <ID>WildcardImport:AchievementParticleBurst.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:ApiIntegrationAnalyzer.kt$import com.nexus.audit.core.types.*</ID>
+    <ID>WildcardImport:ArchitectureAnalyzer.kt$import com.nexus.audit.core.types.*</ID>
+    <ID>WildcardImport:AuditCLI.kt$import com.nexus.audit.core.types.*</ID>
+    <ID>WildcardImport:AuditOrchestrator.kt$import com.nexus.audit.core.types.*</ID>
+    <ID>WildcardImport:AuditOrchestratorTest.kt$import com.nexus.audit.core.types.*</ID>
+    <ID>WildcardImport:AuditOrchestratorTest.kt$import org.junit.Assert.*</ID>
+    <ID>WildcardImport:AuditReporter.kt$import com.nexus.audit.core.types.*</ID>
+    <ID>WildcardImport:CareerInsightsScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:CareerInsightsScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:CareerInsightsScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:CareerScoreCalculatorTest.kt$import org.junit.Assert.*</ID>
+    <ID>WildcardImport:CertificationRepository.kt$import com.nexus.domain.model.*</ID>
+    <ID>WildcardImport:DailyBriefingWorker.kt$import androidx.work.*</ID>
+    <ID>WildcardImport:DataExporter.kt$import com.nexus.database.dao.*</ID>
+    <ID>WildcardImport:DeploymentAnalyzer.kt$import com.nexus.audit.core.types.*</ID>
+    <ID>WildcardImport:EmbeddingServiceTest.kt$import org.junit.Assert.*</ID>
+    <ID>WildcardImport:EveningReviewWorker.kt$import androidx.work.*</ID>
+    <ID>WildcardImport:GitHubContributionHeatmap.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:InternshipRepository.kt$import com.nexus.domain.model.*</ID>
+    <ID>WildcardImport:InternshipRepositoryTest.kt$import io.mockk.*</ID>
+    <ID>WildcardImport:InterviewCoachScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:InterviewCoachScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:InterviewCoachScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:LeetCodeSyncWorker.kt$import androidx.work.*</ID>
+    <ID>WildcardImport:LinkedInPostScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:LinkedInPostScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:LinkedInPostScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:NewDaos.kt$import com.nexus.database.entity.*</ID>
+    <ID>WildcardImport:NexusApiService.kt$import com.nexus.network.dto.*</ID>
+    <ID>WildcardImport:NexusApiService.kt$import retrofit2.http.*</ID>
+    <ID>WildcardImport:OpportunityMatchingEngineTest.kt$import com.nexus.domain.model.*</ID>
+    <ID>WildcardImport:OpportunityMatchingEngineTest.kt$import org.junit.Assert.*</ID>
+    <ID>WildcardImport:PerformanceAnalyzer.kt$import com.nexus.audit.core.types.*</ID>
+    <ID>WildcardImport:PlacementStateComponents.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:PortfolioScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:PortfolioScreen.kt$import androidx.compose.material.icons.filled.*</ID>
+    <ID>WildcardImport:PortfolioScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:PortfolioScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:ProactiveInsightEngineTest.kt$import io.mockk.*</ID>
+    <ID>WildcardImport:ProactiveInsightEngineTest.kt$import org.junit.Assert.*</ID>
+    <ID>WildcardImport:RAGRepositoryTest.kt$import io.mockk.*</ID>
+    <ID>WildcardImport:RAGRepositoryTest.kt$import org.junit.Assert.*</ID>
+    <ID>WildcardImport:RealDataAnalyzer.kt$import com.nexus.audit.core.types.*</ID>
+    <ID>WildcardImport:RepositoryModule.kt$import com.nexus.data.repository.*</ID>
+    <ID>WildcardImport:RepositoryModule.kt$import com.nexus.database.dao.*</ID>
+    <ID>WildcardImport:RoadmapGeneratorScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:RoadmapGeneratorScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:RoadmapGeneratorScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:SecurityAnalyzer.kt$import com.nexus.audit.core.types.*</ID>
+    <ID>WildcardImport:SkillGapScreen.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:SkillGapScreen.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:SkillGapScreen.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:StartupQualityAnalyzer.kt$import com.nexus.audit.core.types.*</ID>
+    <ID>WildcardImport:StreakCalculatorTest.kt$import org.junit.Assert.*</ID>
+    <ID>WildcardImport:StreamingAIResponse.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:SwipeableOpportunityCard.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:UiUxAnalyzer.kt$import com.nexus.audit.core.types.*</ID>
+    <ID>WildcardImport:VectorSimilarityEngineTest.kt$import org.junit.Assert.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

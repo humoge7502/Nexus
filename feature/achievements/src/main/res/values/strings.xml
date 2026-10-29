@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="achievements_achievements">Achievements</string>
+    <string name="achievements_leaderboard">Leaderboard</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_settings">Settings</string>
+    <string name="text_badges">Badges</string>
+    <string name="text_badges_unlock_as_you_apply_learn_and_keep_your">Badges unlock as you apply, learn and keep your streak.</string>
+    <string name="text_locked">Locked</string>
+    <string name="text_nexus">NEXUS</string>
+    <string name="text_nexus_score">NEXUS Score</string>
+    <string name="text_recent_unlocks">Recent Unlocks</string>
+    <string name="text_ud83d_ude80">\uD83D\uDE80</string>
+    <string name="achievements_level_title">L%1$d %2$s</string>
+    <string name="achievements_top_percentile">Top %1$d%% of public profiles</string>
+    <string name="achievements_percentile_unavailable">Join NEXUS Arena to see your percentile</string>
+    <string name="achievements_week_up">↑ +%1$d this week</string>
+    <string name="achievements_week_down">↓ %1$d this week</string>
+    <string name="achievements_week_none">No change this week</string>
+    <string name="achievements_xp_progress">%1$d / %2$d XP</string>
+    <string name="achievements_xp_to_next">%1$d XP to next level</string>
+    <string name="achievements_xp_earned">XP Earned</string>
+    <string name="achievements_day_streak">Day Streak</string>
+    <string name="leaderboard_rank">Rank #%1$d</string>
+    <string name="leaderboard_xp">XP earned</string>
+    <string name="leaderboard_tab_global">Global</string>
+    <string name="leaderboard_tab_college">College</string>
+    <string name="leaderboard_tab_friends">Friends</string>
+    <string name="leaderboard_tab_domain_dsa">Domain: DSA</string>
+    <string name="leaderboard_empty">No public profiles yet. Join from NEXUS Arena to appear here.</string>
+    <string name="leaderboard_open_arena">Open NEXUS Arena</string>
+</resources>

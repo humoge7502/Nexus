@@ -1,7 +1,11 @@
 package com.nexus.productivity
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.semantics
+import com.nexus.productivity.R
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,26 +18,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.SkipNext
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,22 +46,23 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusColors
 import kotlinx.coroutines.delay
-import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductivityScreen(
     onBack: () -> Unit,
 ) {
     var isRunning by remember { mutableStateOf(false) }
     var secondsRemaining by remember { mutableStateOf(25 * 60) }
-    var sessionType by remember { mutableStateOf("Focus") }
     var pomodorosCompleted by remember { mutableStateOf(0) }
 
     val progress = 1f - (secondsRemaining.toFloat() / (25 * 60))
     val formattedTime = "${(secondsRemaining / 60).toString().padStart(2, '0')}:${(secondsRemaining % 60).toString().padStart(2, '0')}"
+    val trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
+    val accent = MaterialTheme.colorScheme.primary
+    val dotCore = MaterialTheme.colorScheme.surfaceContainerLow
 
     LaunchedEffect(isRunning) {
         if (!isRunning) return@LaunchedEffect
@@ -82,10 +78,9 @@ fun ProductivityScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
-            title = { Text("Focus", fontWeight = FontWeight.Bold) },
-            navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Back") } },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+        NexusTopBar(
+            title = stringResource(R.string.productivity_focus),
+            onBack = onBack,
         )
 
         Column(
@@ -94,7 +89,14 @@ fun ProductivityScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(260.dp)) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(260.dp)
+                    .semantics {
+                        progressBarRangeInfo = ProgressBarRangeInfo(progress, 0f..1f)
+                    },
+            ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val strokeWidth = 16.dp.toPx()
                     val arcSize = size.copy(
@@ -104,7 +106,7 @@ fun ProductivityScreen(
                     val topLeft = Offset(strokeWidth / 2, strokeWidth / 2)
 
                     drawArc(
-                        color = Color(0xFF6366F1).copy(alpha = 0.1f),
+                        color = trackColor,
                         startAngle = -90f, sweepAngle = 360f,
                         useCenter = false,
                         style = Stroke(strokeWidth, cap = StrokeCap.Round),
@@ -113,7 +115,7 @@ fun ProductivityScreen(
 
                     drawArc(
                         brush = Brush.sweepGradient(
-                            listOf(Color(0xFF6366F1).copy(alpha = 0.5f), Color(0xFF6366F1), Color(0xFF8B5CF6)),
+                            listOf(accent.copy(alpha = 0.55f), accent, NexusColors.Cyan400),
                             center = center
                         ),
                         startAngle = -90f, sweepAngle = 360f * progress,
@@ -129,8 +131,8 @@ fun ProductivityScreen(
                             center.x + r * kotlin.math.cos(angle).toFloat(),
                             center.y + r * kotlin.math.sin(angle).toFloat()
                         )
-                        drawCircle(color = Color(0xFF6366F1), radius = strokeWidth / 2 + 2.dp.toPx(), center = dotCenter)
-                        drawCircle(color = Color.White, radius = strokeWidth / 4, center = dotCenter)
+                        drawCircle(color = accent, radius = strokeWidth / 2 + 2.dp.toPx(), center = dotCenter)
+                        drawCircle(color = dotCore, radius = strokeWidth / 4, center = dotCenter)
                     }
                 }
 
@@ -143,9 +145,9 @@ fun ProductivityScreen(
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
-                        text = sessionType,
+                        text = stringResource(R.string.productivity_focus),
                         style = MaterialTheme.typography.labelLarge,
-                        color = Color(0xFF6366F1)
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -155,58 +157,97 @@ fun ProductivityScreen(
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 IconButton(
                     onClick = { isRunning = false; secondsRemaining = 25 * 60 },
-                    modifier = Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant)
+                    modifier = Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHighest)
                 ) {
-                    Icon(Icons.Default.Replay, contentDescription = "Reset", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(
+                        Icons.Default.Replay,
+                        contentDescription = stringResource(R.string.cd_reset),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
 
                 Button(
                     onClick = { isRunning = !isRunning },
                     modifier = Modifier.size(72.dp),
                     shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6366F1))
                 ) {
                     Icon(
                         imageVector = if (isRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (isRunning) "Pause" else "Start",
+                        contentDescription = stringResource(
+                            if (isRunning) R.string.productivity_pause else R.string.productivity_start,
+                        ),
                         modifier = Modifier.size(32.dp),
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
 
                 IconButton(
                     onClick = { pomodorosCompleted++ },
-                    modifier = Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant)
+                    modifier = Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHighest)
                 ) {
-                    Icon(Icons.Default.SkipNext, contentDescription = "Skip", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(
+                        Icons.Default.SkipNext,
+                        contentDescription = stringResource(R.string.cd_skip),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            NexusCard(modifier = Modifier.fillMaxWidth(), glassEffect = true) {
+            NexusCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Today's Progress", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        stringResource(R.string.productivity_today_s_progress),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("$pomodorosCompleted", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold, color = Color(0xFF6366F1))
-                            Text("Pomodoros", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("${pomodorosCompleted * 25}", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold, color = Color(0xFF10B981))
-                            Text("Minutes", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("12", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold, color = Color(0xFFF59E0B))
-                            Text("Streak", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
+                        TodayStat(
+                            value = stringResource(
+                                R.string.productivity_pomodoroscompleted,
+                                pomodorosCompleted,
+                            ),
+                            label = stringResource(R.string.productivity_pomodoros),
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        TodayStat(
+                            value = stringResource(
+                                R.string.productivity_label,
+                                pomodorosCompleted * 25,
+                            ),
+                            label = stringResource(R.string.productivity_minutes),
+                            color = NexusColors.Emerald400,
+                        )
+                        TodayStat(
+                            value = stringResource(R.string.productivity_12),
+                            label = stringResource(R.string.productivity_streak),
+                            color = NexusColors.Amber400,
+                        )
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun TodayStat(value: String, label: String, color: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = value,
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
+            color = color,
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }

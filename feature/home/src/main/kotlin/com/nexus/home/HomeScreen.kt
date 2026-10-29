@@ -1,18 +1,13 @@
 package com.nexus.home
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,51 +19,48 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.TrendingUp
-import androidx.compose.material.icons.filled.Work
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.nexus.designsystem.component.AnimatedStatCard
+import com.nexus.designsystem.component.InstrumentGauge
+import com.nexus.designsystem.component.SectionHeader
+import com.nexus.designsystem.component.SignalField
+import com.nexus.designsystem.component.TelemetryItem
+import com.nexus.designsystem.component.TelemetryStrip
 import com.nexus.designsystem.component.hairline
+import com.nexus.designsystem.component.instrumentGrid
 import com.nexus.designsystem.component.sheen
-import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.effect.RevealOnLoad
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
-import com.nexus.domain.model.Internship
+import com.nexus.designsystem.theme.NexusTypography
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
+import java.util.Locale
 
 @Composable
 fun HomeScreen(
@@ -78,89 +70,158 @@ fun HomeScreen(
     onViewAllInternships: () -> Unit = {},
     onNavigateToProductivity: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
+    onNavigateToNotifications: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 16.dp),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 100.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
-        item {
-            GreetingSection(
-                userName = uiState.userName,
-                streakDays = uiState.streakDays,
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
-        }
+    Box(modifier = Modifier.fillMaxSize()) {
+        SignalField(modifier = Modifier.fillMaxSize())
 
-        item {
-            CareerReadinessCard(
-                score = uiState.stats.careerReadinessScore,
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
-        }
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 16.dp),
+            contentPadding = PaddingValues(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            item {
+                GreetingSection(
+                    userName = uiState.userName,
+                    streakDays = uiState.streakDays,
+                    onNavigateToNotifications = onNavigateToNotifications,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
+            }
 
-        item {
-            QuickStatsRow(
-                applications = uiState.stats.totalApplications,
-                certifications = uiState.stats.completedCerts,
-                streak = uiState.stats.currentStreak,
-                interviews = uiState.stats.interviewsScheduled,
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
-        }
+            item {
+                RevealOnLoad(delayMillis = 40) {
+                    CareerReadinessCard(
+                        score = uiState.stats.careerReadinessScore,
+                        caption = uiState.careerNextStep,
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                }
+            }
 
-        item {
-            SectionHeader(
-                title = "Today's Opportunities",
-                actionText = "View All",
-                onAction = onViewAllInternships,
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
-        }
+            item {
+                HomeTelemetry(
+                    applications = uiState.stats.totalApplications,
+                    certs = uiState.stats.completedCerts,
+                    streak = uiState.stats.currentStreak,
+                    interviews = uiState.stats.interviewsScheduled,
+                )
+            }
 
-        item {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 24.dp)
-            ) {
-                items(uiState.todayOpportunities) { internship ->
-                    OpportunityCard(
-                        internship = internship,
-                        onClick = { onInternshipClick(internship.id) }
+            item {
+                SectionHeader(
+                    title = stringResource(R.string.home_today_s_opportunities),
+                    index = "01",
+                    actionText = stringResource(R.string.home_view_all),
+                    onAction = onViewAllInternships,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
+            }
+
+            item {
+                when {
+                    uiState.todayOpportunities.isNotEmpty() -> LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        contentPadding = PaddingValues(horizontal = 24.dp)
+                    ) {
+                        items(uiState.todayOpportunities) { internship ->
+                            OpportunityCard(
+                                internship = internship,
+                                onClick = { onInternshipClick(internship.id) }
+                            )
+                        }
+                    }
+
+                    uiState.isOpportunitiesLoading -> OpportunitySkeletonRow()
+
+                    uiState.opportunitiesError != null -> OpportunityInlineState(
+                        icon = Icons.Default.WifiOff,
+                        title = stringResource(R.string.home_opportunities_offline),
+                        message = uiState.opportunitiesError.orEmpty(),
+                        actionLabel = stringResource(R.string.home_try_again),
+                        onAction = viewModel::retryOpportunities,
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+
+                    else -> OpportunityInlineState(
+                        icon = Icons.Default.Search,
+                        title = stringResource(R.string.home_no_opportunities_yet),
+                        message = stringResource(R.string.home_no_opportunities_message),
+                        actionLabel = stringResource(R.string.home_browse_all),
+                        onAction = onViewAllInternships,
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                }
+            }
+
+            if (uiState.activeApplications.isNotEmpty()) {
+                item {
+                    SectionHeader(
+                        title = stringResource(R.string.home_your_applications),
+                        index = "02",
+                        actionText = stringResource(R.string.home_track),
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                }
+
+                items(uiState.activeApplications) { application ->
+                    ApplicationSummaryCard(
+                        application = application,
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                }
+            }
+
+            uiState.dailyQuote?.let { quote ->
+                item {
+                    MotivationalQuoteCard(
+                        quote = quote,
+                        modifier = Modifier.padding(horizontal = 24.dp)
                     )
                 }
             }
         }
 
-        if (uiState.activeApplications.isNotEmpty()) {
-            item {
-                SectionHeader(
-                    title = "Your Applications",
-                    actionText = "Track",
-                    modifier = Modifier.padding(horizontal = 24.dp)
-                )
-            }
-
-            items(uiState.activeApplications) { application ->
-                ApplicationSummaryCard(
-                    application = application,
-                    modifier = Modifier.padding(horizontal = 24.dp)
-                )
-            }
+        if (!uiState.tourCompleted) {
+            TourOverlay(onFinish = { viewModel.completeTour() })
         }
+    }
+}
 
-        uiState.dailyQuote?.let { quote ->
-            item {
-                MotivationalQuoteCard(
-                    quote = quote,
-                    modifier = Modifier.padding(horizontal = 24.dp)
-                )
-            }
-        }
+@Composable
+private fun HomeTelemetry(
+    applications: Int,
+    certs: Int,
+    streak: Int,
+    interviews: Int,
+) {
+    RevealOnLoad(delayMillis = 110) {
+        TelemetryStrip(
+            items = listOf(
+                TelemetryItem(
+                    label = stringResource(R.string.home_applications),
+                    value = applications,
+                ),
+                TelemetryItem(
+                    label = stringResource(R.string.home_certs),
+                    value = certs,
+                ),
+                TelemetryItem(
+                    label = stringResource(R.string.home_day_streak),
+                    value = streak,
+                    accent = NexusColors.Amber400,
+                ),
+                TelemetryItem(
+                    label = stringResource(R.string.home_interviews),
+                    value = interviews,
+                ),
+            ),
+            modifier = Modifier.padding(horizontal = 24.dp)
+        )
     }
 }
 
@@ -168,46 +229,70 @@ fun HomeScreen(
 private fun GreetingSection(
     userName: String,
     streakDays: Int,
+    onNavigateToNotifications: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val currentHour = remember { Calendar.getInstance().get(Calendar.HOUR_OF_DAY) }
-    val greeting = when (currentHour) {
-        in 5..11 -> "Good Morning"
-        in 12..16 -> "Good Afternoon"
-        in 17..20 -> "Good Evening"
-        else -> "Good Night"
+    val greetingRes = when (currentHour) {
+        in 5..11 -> R.string.home_greeting_morning
+        in 12..16 -> R.string.home_greeting_afternoon
+        in 17..20 -> R.string.home_greeting_evening
+        else -> R.string.home_greeting_night
     }
-    val emoji = when (currentHour) {
-        in 5..11 -> "☀️"
-        in 12..16 -> "🌤️"
-        in 17..20 -> "🌅"
-        else -> "🌙"
+    val greeting = stringResource(greetingRes)
+    val dateLabel = remember {
+        LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM", Locale.getDefault()))
     }
 
     Column(modifier = modifier) {
-        Text(
-            text = "$greeting $emoji",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(4.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = greeting,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                text = dateLabel,
+                style = NexusTypography.TelemetryMicro,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+            )
+            IconButton(
+                onClick = onNavigateToNotifications,
+                modifier = Modifier.padding(start = 4.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = stringResource(R.string.home_cd_notifications),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = userName,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onBackground
         )
         if (streakDays > 0) {
+            Spacer(modifier = Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "🔥",
-                    fontSize = MaterialTheme.typography.titleSmall.fontSize
+                Icon(
+                    imageVector = Icons.Default.LocalFireDepartment,
+                    contentDescription = null,
+                    tint = NexusColors.Amber400,
+                    modifier = Modifier.size(14.dp)
                 )
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(5.dp))
                 Text(
-                    text = "$streakDays day streak",
+                    text = pluralStringResource(R.plurals.home_streak_days, streakDays, streakDays),
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -217,6 +302,7 @@ private fun GreetingSection(
 @Composable
 private fun CareerReadinessCard(
     score: Float,
+    caption: String,
     modifier: Modifier = Modifier,
 ) {
     val animatedScore by animateFloatAsState(
@@ -224,351 +310,85 @@ private fun CareerReadinessCard(
         animationSpec = tween(1500, easing = FastOutSlowInEasing),
         label = "score"
     )
+    val readinessCaption = stringResource(R.string.home_readiness_caption)
+    val shape = RoundedCornerShape(28.dp)
 
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(
+                brush = Brush.linearGradient(NexusGradients.PrimaryDeep),
+                shape = shape
+            )
+            .instrumentGrid(spacingDp = 30f, alpha = 0.045f)
+            .hairline(
+                color = Color.White.copy(alpha = 0.16f),
+                cornerRadiusDp = 28f
+            )
+            .sheen(alpha = 0.07f)
+            .padding(horizontal = 22.dp, vertical = 20.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    brush = Brush.linearGradient(NexusGradients.Primary),
-                    shape = RoundedCornerShape(24.dp)
-                )
-                .hairline(cornerRadiusDp = 24f)
-                .sheen()
-                .padding(24.dp)
-        ) {
+        Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Career Readiness",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.White.copy(alpha = 0.9f)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "${(animatedScore * 100).toInt()}%",
-                        style = MaterialTheme.typography.displayLarge,
-                        color = Color.White,
-                        fontWeight = FontWeight.ExtraBold
+                        text = stringResource(R.string.text_career_readiness),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Color.White.copy(alpha = 0.70f)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Complete 2 more certifications to reach 85%",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.7f)
-                    )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Box(contentAlignment = Alignment.Center) {
-                    androidx.compose.foundation.Canvas(modifier = Modifier.size(80.dp)) {
-                        drawArc(
-                            color = Color.White.copy(alpha = 0.2f),
-                            startAngle = -90f,
-                            sweepAngle = 360f,
-                            useCenter = false,
-                            style = androidx.compose.ui.graphics.drawscope.Stroke(
-                                width = 8.dp.toPx(),
-                                cap = androidx.compose.ui.graphics.StrokeCap.Round
-                            )
-                        )
-                        drawArc(
-                            color = Color.White,
-                            startAngle = -90f,
-                            sweepAngle = 360f * animatedScore,
-                            useCenter = false,
-                            style = androidx.compose.ui.graphics.drawscope.Stroke(
-                                width = 8.dp.toPx(),
-                                cap = androidx.compose.ui.graphics.StrokeCap.Round
-                            )
-                        )
-                    }
-                    Text(
-                        text = "🚀",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun QuickStatsRow(
-    applications: Int,
-    certifications: Int,
-    streak: Int,
-    interviews: Int,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            AnimatedStatCard(
-                value = applications,
-                label = "Applications",
-                icon = Icons.Default.Send,
-                gradient = listOf(Color(0xFF6366F1), Color(0xFF8B5CF6)),
-                modifier = Modifier.weight(1f)
-            )
-            AnimatedStatCard(
-                value = certifications,
-                label = "Certs",
-                icon = Icons.Default.EmojiEvents,
-                gradient = listOf(Color(0xFFF59E0B), Color(0xFFFBBF24)),
-                modifier = Modifier.weight(1f)
-            )
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            AnimatedStatCard(
-                value = streak,
-                label = "Day Streak",
-                suffix = "🔥",
-                gradient = listOf(Color(0xFFEF4444), Color(0xFFF97316)),
-                modifier = Modifier.weight(1f)
-            )
-            AnimatedStatCard(
-                value = interviews,
-                label = "Interviews",
-                icon = Icons.Default.Groups,
-                gradient = listOf(Color(0xFF10B981), Color(0xFF06B6D4)),
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
-
-@Composable
-private fun SectionHeader(
-    title: String,
-    actionText: String? = null,
-    onAction: (() -> Unit)? = null,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold
-        )
-        if (actionText != null && onAction != null) {
-            Text(
-                text = actionText,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable { onAction() }
-            )
-        }
-    }
-}
-
-@Composable
-private fun OpportunityCard(
-    internship: Internship,
-    onClick: () -> Unit,
-) {
-    val haptic = LocalHapticFeedback.current
-    var visible by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        visible = true
-    }
-
-    AnimatedVisibility(
-        visible = visible,
-        enter = fadeIn(tween(300)) + slideInHorizontally(
-            initialOffsetX = { it / 3 },
-            animationSpec = tween(400, easing = FastOutSlowInEasing)
-        )
-    ) {
-        Card(
-            onClick = onClick,
-            modifier = Modifier.width(280.dp),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-            )
-        ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surface),
-                        contentAlignment = Alignment.Center
-                    ) {
+                    Row(verticalAlignment = Alignment.Bottom) {
                         Text(
-                            text = internship.company.name.take(2),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            text = "${(animatedScore * 100).toInt()}",
+                            style = NexusTypography.TelemetryDisplay.copy(
+                                fontSize = 54.sp,
+                                lineHeight = 56.sp,
+                            ),
+                            color = Color.White,
+                        )
+                        Text(
+                            text = "%",
+                            style = NexusTypography.TelemetryLarge,
+                            color = Color.White.copy(alpha = 0.62f),
+                            modifier = Modifier.padding(start = 4.dp, bottom = 7.dp)
                         )
                     }
-                    com.nexus.designsystem.component.NexusChip(
-                        text = if (internship.isRemote) "Remote" else "On-site",
-                        isSelected = internship.isRemote,
-                        onToggle = { },
-                        modifier = Modifier
-                    )
                 }
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = internship.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                Spacer(modifier = Modifier.width(12.dp))
+                InstrumentGauge(
+                    progress = score,
+                    modifier = Modifier.size(112.dp),
+                    accent = NexusColors.Cyan400,
+                    trackColor = Color.White.copy(alpha = 0.15f),
+                    tickColor = Color.White.copy(alpha = 0.32f),
+                    stroke = 8.dp,
                 )
-                Text(
-                    text = internship.company.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                internship.stipend?.let {
-                    Text(
-                        text = it.formatted(),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "${internship.duration.formatted()} · ${internship.location.city}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Row(
-                    modifier = Modifier.padding(top = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    for (tag in internship.tags.take(2)) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = tag,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                }
             }
-        }
-    }
-}
 
-@Composable
-private fun ApplicationSummaryCard(
-    application: Internship,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+            Spacer(modifier = Modifier.height(18.dp))
             Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.Work,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = application.title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(Color.White.copy(alpha = 0.14f))
+            )
+            Spacer(modifier = Modifier.height(13.dp))
+            Row(verticalAlignment = Alignment.Top) {
+                Box(
+                    modifier = Modifier
+                        .padding(top = 6.dp, end = 10.dp)
+                        .size(5.dp)
+                        .clip(CircleShape)
+                        .background(NexusColors.Cyan400)
                 )
                 Text(
-                    text = application.company.name,
+                    text = caption.ifBlank { readinessCaption },
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFFF59E0B).copy(alpha = 0.15f))
-                    .padding(horizontal = 10.dp, vertical = 4.dp)
-            ) {
-                Text(
-                    text = "In Review",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFFF59E0B)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun MotivationalQuoteCard(
-    quote: com.nexus.domain.model.DailyQuote,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f)
-        )
-    ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            Text(text = "💡", style = MaterialTheme.typography.headlineMedium)
-            Spacer(modifier = Modifier.width(12.dp))
-            Column {
-                Text(
-                    text = "\"${quote.text}\"",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "— ${quote.author}",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color.White.copy(alpha = 0.92f)
                 )
             }
         }

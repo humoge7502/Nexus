@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="certifications_certifications">Certifications</string>
+    <string name="certifications_retry">Retry</string>
+    <string name="certifications_h">%1$sh</string>
+    <string name="certifications_hours">%1$d hours</string>
+    <string name="certifications_hours_price">%1$d hours · %2$s</string>
+    <string name="certifications_new">New</string>
+    <string name="certifications_label">%1$s</string>
+    <string name="certifications_all_certifications">All Certifications · %1$d</string>
+    <string name="certifications_rating">Rating</string>
+    <string name="certifications_duration">Duration</string>
+    <string name="certifications_level">Level</string>
+    <string name="certifications_provider">Provider</string>
+    <string name="certifications_category">Category</string>
+    <string name="certifications_price">Price</string>
+    <string name="certifications_estimated_time">Estimated time</string>
+    <string name="certifications_completed">Completed</string>
+    <string name="certifications_your_progress">Your Progress</string>
+    <string name="certifications_modules_done">%1$d of %2$d modules done</string>
+    <string name="certifications_review_course">Review course</string>
+    <string name="certifications_continue_course">Continue course</string>
+    <string name="certifications_start_course">Start course</string>
+    <string name="certifications_no_certifications_available_yet">No certifications available yet.</string>
+    <string name="certifications_this_certification_is_no_longer_available">This certification is no longer available.</string>
+    <string name="cd_back">Back</string>
+    <string name="text_featured">Featured</string>
+    <string name="text_mark_done">Mark done</string>
+    <string name="text_skills_you_ll_gain">Skills You\'ll Gain</string>
+</resources>

@@ -15,13 +15,11 @@ class StartupQualityAnalyzer : PhaseAnalyzer {
     override val phaseName = "Startup Quality"
 
     override suspend fun analyze(context: AuditContext): PhaseResult {
-        val files = ScanUtil.productionFiles(context.sourceFiles)
+        val files = ScanUtil.productionSources(context.sourceFiles)
         val findings = mutableListOf<Finding>()
 
-        val appClasses = files.filter {
-            ScanUtil.readQuietly(it).contains("class") && ScanUtil.readQuietly(it)
-                .contains(Regex("""(:\s*Application|extends Application|Application\(\))\b"""))
-        }
+        val applicationSubclass = Regex("""class\s+\w+\s*:\s*Application\s*\(""")
+        val appClasses = files.filter { applicationSubclass.containsMatchIn(ScanUtil.readQuietly(it)) }
 
         for (ac in appClasses) {
             val text = ScanUtil.readQuietly(ac)
@@ -29,7 +27,7 @@ class StartupQualityAnalyzer : PhaseAnalyzer {
             val onCreateIdx = text.indexOf("onCreate")
             val tail = if (onCreateIdx >= 0) text.drop(onCreateIdx).take(2000) else text
             val heavy = listOf("runBlocking", "Thread.sleep", "File(", "SQLite", "URL(", "HttpURLConnection",
-                "createDatabase", "Room.databaseBuilder", "StrictMode")
+                "createDatabase", "Room.databaseBuilder")
             val offenders = heavy.filter { tail.contains(it) }
             if (offenders.isNotEmpty()) {
                 findings.add(

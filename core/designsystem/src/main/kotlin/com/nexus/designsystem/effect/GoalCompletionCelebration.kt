@@ -23,7 +23,7 @@ fun GoalCompletionCelebration(
                     0xFF4F8EF7.toInt(),
                     0xFF00D9A3.toInt(),
                     0xFFF72585.toInt(),
-                    0xFF7B5EA7.toInt(),
+                    0xFF4F8EF7.toInt(),
                     0xFFFF6B35.toInt(),
                 ),
                 emitter = Emitter(duration = Constants.ANIMATION_DURATION_FAST.toLong(), TimeUnit.MILLISECONDS).max(100),

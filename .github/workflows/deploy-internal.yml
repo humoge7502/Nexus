@@ -24,7 +24,6 @@ jobs:
           GITHUB_CLIENT_SECRET=ci-placeholder
           GOOGLE_WEB_CLIENT_ID=ci-placeholder.apps.googleusercontent.com
           NEXUS_BACKEND_URL=https://api.nexusapp.in/v1
-          LEETCODE_API_URL=https://alfa-leetcode-api.onrender.com/
           OPENROUTER_API_KEY=
           AI_PROXY_URL=
           sdk.dir=$ANDROID_HOME
@@ -63,7 +62,6 @@ jobs:
           GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}
           GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }}
           NEXUS_BACKEND_URL=${{ secrets.NEXUS_BACKEND_URL }}
-          LEETCODE_API_URL=https://alfa-leetcode-api.onrender.com/
           AI_PROXY_URL=${{ secrets.AI_PROXY_URL }}
           KEYSTORE_PATH=keystore.jks
           KEY_ALIAS=${{ secrets.KEY_ALIAS }}

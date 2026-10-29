@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="interviewlog_company_count_interviews">%1$s: %2$d interviews</string>
+    <string name="interviewlog_interview_log">Interview Log</string>
+    <string name="interviewlog_statistics">Statistics</string>
+    <string name="interviewlog_result">Result: %1$s</string>
+    <string name="interviewlog_role">Role: %1$s</string>
+    <string name="interviewlog_round">Round: %1$s</string>
+    <string name="cd_back">Back</string>
+</resources>

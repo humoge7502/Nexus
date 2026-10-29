@@ -7,6 +7,11 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import com.nexus.ui.R
+import kotlin.math.roundToInt
 
 data class DSACounts(
     val easySolved: Float,
@@ -27,7 +32,15 @@ fun NexusDSAProgressChart(
     modifier: Modifier = Modifier,
 ) {
     val maxTotal = maxOf(counts.easyTotal, counts.mediumTotal, counts.hardTotal, 1f)
-    Canvas(modifier = modifier) {
+    val description = stringResource(
+        R.string.cd_dsa_progress_chart,
+        counts.easySolved.roundToInt(), counts.easyTotal.roundToInt(),
+        counts.mediumSolved.roundToInt(), counts.mediumTotal.roundToInt(),
+        counts.hardSolved.roundToInt(), counts.hardTotal.roundToInt(),
+    )
+    Canvas(
+        modifier = modifier.clearAndSetSemantics { contentDescription = description },
+    ) {
         val barWidth = size.width / 6f * 0.7f
         val groupGap = size.width / 6f * 0.3f
 

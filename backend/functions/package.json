@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "node --test test/validation.test.js",
+    "test": "node --test test/validation.test.js test/leetcode.test.js test/stream.test.js",
     "test:rules": "firebase emulators:exec --config ../firebase.json --project demo-nexus --only firestore \"node --test test/rules.emulator.js\"",
     "test:emulator": "npm run build && cross-env FUNCTIONS_DISCOVERY_TIMEOUT=30 firebase emulators:exec --config ../firebase.json --project demo-nexus --only firestore,functions,auth \"node --test test/emulator.integration.js\"",
     "serve": "npm run build && firebase emulators:start --only functions",

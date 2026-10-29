@@ -1,18 +1,19 @@
 package com.nexus.ai
 
+import androidx.compose.ui.res.stringResource
+import com.nexus.ai.R
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -23,6 +24,8 @@ import com.nexus.common.RateLimitResult
 import com.nexus.datastore.UserPreferences
 import com.nexus.designsystem.component.LoadingState
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.network.ai.AIOpenRouterService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -82,7 +85,6 @@ class LinkedInPostViewModel @Inject constructor(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LinkedInPostScreen(
     onBack: () -> Unit = {},
@@ -93,14 +95,9 @@ fun LinkedInPostScreen(
     val tones = listOf("Professional", "Casual", "Inspiring", "Humorous", "Thankful")
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
-            title = { Text("LinkedIn Post Generator", fontWeight = FontWeight.Bold) },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
+        NexusTopBar(
+            title = stringResource(R.string.ai_linkedin_post_generator),
+            onBack = onBack,
         )
 
         Column(
@@ -112,14 +109,14 @@ fun LinkedInPostScreen(
             OutlinedTextField(
                 value = uiState.achievement,
                 onValueChange = { viewModel.updateAchievement(it) },
-                label = { Text("Describe your achievement") },
-                placeholder = { Text("e.g., Won a hackathon, completed a certification, built a project") },
+                label = { Text(stringResource(R.string.ai_describe_your_achievement)) },
+                placeholder = { Text(stringResource(R.string.ai_e_g_won_a_hackathon_completed)) },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3,
                 maxLines = 6,
             )
             Spacer(Modifier.height(12.dp))
-            Text("Tone:", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.ai_tone), style = MaterialTheme.typography.labelLarge)
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 tones.forEach { tone ->
@@ -160,7 +157,7 @@ fun LinkedInPostScreen(
                     ) {
                         Icon(Icons.Default.ContentCopy, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
-                        Text("Copy to Clipboard")
+                        Text(stringResource(R.string.ai_copy_to_clipboard))
                     }
                 }
             }

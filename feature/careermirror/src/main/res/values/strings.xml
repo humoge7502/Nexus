@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="careermirror_career_mirror">Career Mirror</string>
+    <string name="careermirror_generating_your_career_mirror">Generating your Career Mirror...</string>
+    <string name="careermirror_key_insights">Key Insights</string>
+    <string name="careermirror_next_quarter_actions">Next Quarter Actions</string>
+    <string name="careermirror_not_enough_data_yet">Not enough data yet</string>
+    <string name="careermirror_use_nexus_for_90_days_to">Use NEXUS for 90 days to generate your first mirror</string>
+    <string name="careermirror_score_with_delta">Score: %1$d (%2$s)</string>
+    <string name="cd_back">Back</string>
+</resources>

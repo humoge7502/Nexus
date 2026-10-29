@@ -44,6 +44,9 @@ interface InternshipDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(internships: List<InternshipEntity>)
 
+    @Query("SELECT COUNT(*) FROM internships")
+    suspend fun countAll(): Int
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(internship: InternshipEntity)
 

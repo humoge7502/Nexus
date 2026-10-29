@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.nexus.data.repository.StreakRepository
 import com.nexus.data.usecase.RetentionTracker
-import com.nexus.datastore.UserPreferences
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
@@ -16,12 +16,12 @@ class WeeklyRetentionWorker @AssistedInject constructor(
   @Assisted private val context: Context,
   @Assisted params: WorkerParameters,
   private val retentionTracker: RetentionTracker,
-  private val userPreferences: UserPreferences,
+  private val streakRepository: StreakRepository,
 ) : CoroutineWorker(context, params) {
 
   override suspend fun doWork(): Result {
     return try {
-      val sessionCount = userPreferences.studyStreak.first()
+      val sessionCount = streakRepository.currentStreak.first().currentStreak
       val featuresUsed = listOf("home", "explore", "ai", "growth")
       retentionTracker.recordWeeklyActivity(sessionCount, featuresUsed)
       Timber.d("WeeklyRetentionWorker complete")

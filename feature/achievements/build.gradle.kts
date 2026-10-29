@@ -19,4 +19,5 @@ dependencies {
     implementation(libs.kotlinx.collections)
 
     implementation(libs.lifecycle.runtime.compose)
+    testImplementation(libs.junit)
 }

@@ -19,9 +19,9 @@ import androidx.compose.ui.graphics.Color
 fun MeshGradientBackground(
     modifier: Modifier = Modifier,
     colors: List<Color> = listOf(
-        Color(0xFF6366F1).copy(alpha = 0.6f),
-        Color(0xFF06B6D4).copy(alpha = 0.4f),
-        Color(0xFF8B5CF6).copy(alpha = 0.3f),
+        Color(0xFF4F8EF7).copy(alpha = 0.5f),
+        Color(0xFF06B6D4).copy(alpha = 0.32f),
+        Color(0xFF1B3F8F).copy(alpha = 0.25f),
     )
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "mesh")

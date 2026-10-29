@@ -16,7 +16,7 @@ class ArchitectureAnalyzer : PhaseAnalyzer {
     override val phaseName = "Architecture & Layering"
 
     override suspend fun analyze(context: AuditContext): PhaseResult {
-        val files = ScanUtil.productionFiles(context.sourceFiles)
+        val files = ScanUtil.productionSources(context.sourceFiles)
         val findings = mutableListOf<Finding>()
 
         // 1) Feature→feature dependency detection from build files
@@ -27,6 +27,10 @@ class ArchitectureAnalyzer : PhaseAnalyzer {
         for (build in buildFiles) {
             val text = ScanUtil.readQuietly(build)
             val moduleName = build.parentFile.name
+            // Only modules that themselves live under feature/ can violate the rule;
+            // app -> feature wiring is the intended composition root.
+            val declaredInFeature = build.parentFile.parentFile?.name == "feature"
+            if (!declaredInFeature) continue
             projectDep.findAll(text).forEach { m ->
                 val dep = m.groupValues[1].removePrefix(":")
                 if (dep.startsWith("feature") && dep != moduleName) {
@@ -55,7 +59,7 @@ class ArchitectureAnalyzer : PhaseAnalyzer {
                     severity = Severity.MEDIUM,
                     category = "Architecture",
                     title = "Oversized source file",
-                    description = "'${f.relativePath(context.projectRoot)}' has ${ScanUtil.lineCount(f)} lines, " +
+                    description = "'${ScanUtil.relativePath(f, context.projectRoot)}' has ${ScanUtil.lineCount(f)} lines, " +
                         "above the 600-line maintainability threshold.",
                     recommendation = ArchitectureRules.OVERSIZED_FILE.remediation +
                         " Rule ${RuleCatalog["ARCH-002"].id}.",
@@ -65,8 +69,9 @@ class ArchitectureAnalyzer : PhaseAnalyzer {
             )
         }
 
-        // 3) runBlocking in production
-        val rb = ScanUtil.grep(files.filterNot { ScanUtil.isTestFile(it) }, Regex("""runBlocking\s*\{"""))
+        // 3) runBlocking in production (audit-allow comments mark contract-mandated uses)
+        val rb = ScanUtil.grep(ScanUtil.productionSources(context.sourceFiles), Regex("""runBlocking\s*\{"""))
+            .filterNot { it.text.contains("audit-allow: ARCH-003") }
         rb.forEach { hit ->
             findings.add(
                 ScanUtil.finding(

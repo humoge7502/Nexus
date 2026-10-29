@@ -160,7 +160,7 @@ export function usageDocId(uid: string, now: Date): string {
  * Reserves one request in a transaction before the upstream call. A
  * read-then-call check allowed N parallel requests to all pass the quota.
  */
-async function reserveQuota(uid: string): Promise<string> {
+export async function reserveQuota(uid: string): Promise<string> {
   const db = admin.firestore();
   const docId = usageDocId(uid, new Date());
   const ref = db.collection("ai_usage").doc(docId);
@@ -199,7 +199,7 @@ async function reserveQuota(uid: string): Promise<string> {
   return docId;
 }
 
-async function recordTokens(docId: string, totalTokens: number): Promise<void> {
+export async function recordTokens(docId: string, totalTokens: number): Promise<void> {
   if (totalTokens <= 0) return;
   await admin
     .firestore()

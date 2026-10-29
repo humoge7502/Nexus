@@ -27,4 +27,6 @@ dependencies {
     implementation(libs.timber)
 
     implementation(libs.hilt.navigation.compose)
+
+    testImplementation(libs.junit)
 }

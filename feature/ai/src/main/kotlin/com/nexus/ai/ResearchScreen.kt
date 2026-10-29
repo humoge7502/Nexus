@@ -1,5 +1,8 @@
 package com.nexus.ai
 
+import androidx.compose.ui.res.stringResource
+import com.nexus.ai.R
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,14 +13,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +27,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusGradients
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -52,7 +54,6 @@ import javax.inject.Inject
  * The agent-search loop (search -> summarize -> auto-generated next
  * questions) reimagined as a career-intelligence experience.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResearchScreen(
     onBack: () -> Unit = {},
@@ -67,13 +68,9 @@ fun ResearchScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Deep Research", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
+            NexusTopBar(
+                title = stringResource(R.string.ai_deep_research),
+                onBack = onBack,
             )
         },
     ) { padding ->
@@ -88,7 +85,7 @@ fun ResearchScreen(
                     onValueChange = { question = it },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = {
-                        Text("Ask anything about your career…\ne.g. What do fintech companies look for in fresher engineers?")
+                        Text(stringResource(R.string.ai_ask_anything_about_your_career_ne))
                     },
                     minLines = 2,
                     shape = RoundedCornerShape(16.dp),
@@ -97,7 +94,7 @@ fun ResearchScreen(
                             CircularProgressIndicator(modifier = Modifier.padding(8.dp).width(20.dp).height(20.dp))
                         } else {
                             IconButton(onClick = { run(question) }, enabled = question.isNotBlank() && !ui.isLoading) {
-                                Icon(Icons.Default.Search, contentDescription = "Research")
+                                Icon(Icons.Default.Search, contentDescription = stringResource(R.string.cd_research))
                             }
                         }
                     },
@@ -110,70 +107,87 @@ fun ResearchScreen(
                 }
             }
 
-            ui.result?.let { res ->
-                item {
-                    NexusCard(gradient = NexusGradients.PrimaryDeep) {
-                        Column(Modifier.padding(16.dp)) {
-                            Text(
-                                res.question,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = androidx.compose.ui.graphics.Color.White,
-                            )
-                            if (res.usedLiveSearch) {
-                                Spacer(Modifier.height(4.dp))
-                                Text(
-                                    "Live search grounded",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.7f),
-                                )
-                            }
-                        }
-                    }
-                }
-                item {
-                    Text(res.answer, style = MaterialTheme.typography.bodyLarge)
-                }
-                if (res.sources.isNotEmpty()) {
-                    item {
-                        Text("Sources", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                    }
-                    items(res.sources, key = { it.title }) { src ->
-                        Column(Modifier.padding(vertical = 4.dp)) {
-                            Text(src.title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-                            src.url?.let {
-                                Text(
-                                    it,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.primary,
-                                )
-                            }
-                        }
-                    }
-                }
-                if (res.followUps.isNotEmpty()) {
-                    item {
-                        Text("Go deeper", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                    }
-                    item {
-                        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            res.followUps.forEach { fq ->
-                                AssistChip(
-                                    onClick = { run(fq) },
-                                    label = { Text(fq, style = MaterialTheme.typography.bodySmall) },
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+            ui.result?.let { res -> researchResult(res) { run(it) } }
 
             if (ui.history.size > 1) {
                 item {
-                    Text("Recent research", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        stringResource(R.string.ai_recent_research),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
                 }
                 items(ui.history.drop(1), key = { it.question + it.hashCode() }) { h ->
                     TextButton(onClick = { run(h.question) }) { Text(h.question, maxLines = 1) }
+                }
+            }
+        }
+    }
+}
+
+private fun LazyListScope.researchResult(
+    res: ResearchResult,
+    onFollowUp: (String) -> Unit,
+) {
+    item {
+        NexusCard(gradient = NexusGradients.PrimaryDeep) {
+            Column(Modifier.padding(16.dp)) {
+                Text(
+                    res.question,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = androidx.compose.ui.graphics.Color.White,
+                )
+                if (res.usedLiveSearch) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        stringResource(R.string.ai_live_search_grounded),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.7f),
+                    )
+                }
+            }
+        }
+    }
+    item {
+        Text(res.answer, style = MaterialTheme.typography.bodyLarge)
+    }
+    if (res.sources.isNotEmpty()) {
+        item {
+            Text(
+                stringResource(R.string.ai_sources),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+        items(res.sources, key = { it.title }) { src ->
+            Column(Modifier.padding(vertical = 4.dp)) {
+                Text(src.title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                src.url?.let {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+        }
+    }
+    if (res.followUps.isNotEmpty()) {
+        item {
+            Text(
+                stringResource(R.string.ai_go_deeper),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+        item {
+            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                res.followUps.forEach { fq ->
+                    AssistChip(
+                        onClick = { onFollowUp(fq) },
+                        label = { Text(fq, style = MaterialTheme.typography.bodySmall) },
+                    )
                 }
             }
         }

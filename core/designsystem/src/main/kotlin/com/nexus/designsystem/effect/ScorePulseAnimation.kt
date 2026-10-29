@@ -99,7 +99,7 @@ fun ScorePulseAnimation(
             )
             drawArc(
                 brush = androidx.compose.ui.graphics.Brush.sweepGradient(
-                    colors = listOf(Color(0xFF6366F1), Color(0xFF8B5CF6)),
+                    colors = listOf(Color(0xFF4F8EF7), Color(0xFF06B6D4)),
                     center = center,
                 ),
                 startAngle = -90f, sweepAngle = 360f * progress, useCenter = false,
@@ -111,7 +111,7 @@ fun ScorePulseAnimation(
         androidx.compose.material3.Text(
             text = currentScore.toString(),
             style = TextStyle(fontSize = 32.sp, fontWeight = FontWeight.ExtraBold),
-            color = Color(0xFF6366F1),
+            color = Color(0xFF4F8EF7),
         )
     }
 }

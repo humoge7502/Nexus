@@ -1,5 +1,8 @@
 package com.nexus.auth
 
+import androidx.compose.ui.res.stringResource
+import com.nexus.auth.R
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
@@ -12,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -83,6 +87,7 @@ fun AuthScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
+                .navigationBarsPadding()
                 .padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -91,7 +96,7 @@ fun AuthScreen(
                 modifier = Modifier
                     .size(80.dp)
                     .clip(CircleShape)
-                    .background(brush = Brush.linearGradient(NexusGradients.Nexus)),
+                    .background(brush = Brush.linearGradient(NexusGradients.PrimaryDeep)),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
@@ -104,17 +109,16 @@ fun AuthScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Text(
-                text = "Engineer Your Future",
+            Text(text = stringResource(R.string.text_engineer_your_future),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = "Your AI-powered career co-pilot",
+            Text(text = stringResource(R.string.text_your_ai_powered_career_co_pilot),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -126,10 +130,12 @@ fun AuthScreen(
                 onClick = onGoogleSignIn,
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4285F4)),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ),
             ) {
-                Text(
-                    text = "Continue with Google",
+                Text(text = stringResource(R.string.auth_google),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -144,8 +150,7 @@ fun AuthScreen(
             ) {
                 Icon(Icons.Default.Code, contentDescription = null, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Continue with GitHub",
+                Text(text = stringResource(R.string.auth_github),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -160,8 +165,7 @@ fun AuthScreen(
             ) {
                 Icon(Icons.Default.Email, contentDescription = null, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Continue with Email",
+                Text(text = stringResource(R.string.auth_email),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -169,16 +173,14 @@ fun AuthScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text(
-                text = "or",
+            Text(text = stringResource(R.string.text_or),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text(
-                text = "Skip for now",
+            Text(text = stringResource(R.string.text_skip_for_now),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.clickable { onSkip() },
@@ -227,11 +229,11 @@ private fun EmailSignInDialog(
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it.trim() },
-                    label = { Text("College email") },
+                    label = { Text(stringResource(R.string.auth_college_email)) },
                     singleLine = true,
                     isError = emailError,
                     supportingText = if (emailError) {
-                        { Text("Enter a valid email address") }
+                        { Text(stringResource(R.string.auth_enter_a_valid_email_address)) }
                     } else null,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier.fillMaxWidth(),
@@ -239,11 +241,11 @@ private fun EmailSignInDialog(
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Password (min 8 characters)") },
+                    label = { Text(stringResource(R.string.auth_password_min_8_characters)) },
                     singleLine = true,
                     isError = passwordError,
                     supportingText = if (passwordError) {
-                        { Text("Use at least 8 characters") }
+                        { Text(stringResource(R.string.auth_use_at_least_8_characters)) }
                     } else null,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -288,7 +290,7 @@ private fun EmailSignInDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss, enabled = !isLoading) { Text("Cancel") }
+            TextButton(onClick = onDismiss, enabled = !isLoading) { Text(stringResource(R.string.auth_cancel)) }
         },
     )
 }

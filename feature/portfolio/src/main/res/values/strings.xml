@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="portfolio_my_projects">My Projects</string>
+    <string name="portfolio_portfolio">Portfolio</string>
+    <string name="portfolio_signature_caption">Every project you ship, ready to export and share</string>
+    <string name="portfolio_add">Add</string>
+    <string name="portfolio_add_project">Add project</string>
+    <string name="portfolio_share">Share portfolio</string>
+    <string name="portfolio_share_title">Share portfolio</string>
+    <string name="portfolio_add_first">Add your first project</string>
+    <string name="portfolio_empty_title">No projects yet</string>
+    <string name="portfolio_empty_body">Add your shipped work to build a portfolio you can share</string>
+    <string name="portfolio_new_project">New project</string>
+    <string name="portfolio_project_title">Project title</string>
+    <string name="portfolio_project_description">What it does (optional)</string>
+    <string name="portfolio_project_code_link">Code link (optional)</string>
+    <string name="portfolio_project_live_link">Live link (optional)</string>
+    <string name="portfolio_cancel">Cancel</string>
+    <plurals name="portfolio_project_noun">
+        <item quantity="one">project</item>
+        <item quantity="other">projects</item>
+    </plurals>
+    <string name="cd_back">Back</string>
+    <string name="cd_featured">Featured</string>
+</resources>

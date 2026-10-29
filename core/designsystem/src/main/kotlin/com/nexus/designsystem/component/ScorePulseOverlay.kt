@@ -42,7 +42,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.nexus.designsystem.theme.NexusGradients
+import com.nexus.designsystem.theme.NexusColors
 import com.nexus.domain.model.ScorePulseEvent
 import kotlinx.coroutines.delay
 
@@ -82,7 +82,9 @@ fun ScorePulseOverlay(
         modifier = Modifier
           .fillMaxWidth()
           .background(
-            brush = Brush.horizontalGradient(NexusGradients.Nexus),
+            brush = Brush.horizontalGradient(
+              listOf(NexusColors.NexusBlueDeep, NexusColors.NexusBlueDark)
+            ),
             shape = RoundedCornerShape(16.dp),
           )
           .padding(16.dp),

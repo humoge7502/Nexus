@@ -57,6 +57,19 @@ data class CertificationEntity(
     @ColumnInfo(name = "employer_recognition") val employerRecognition: Int = 0,
 )
 
+@Entity(tableName = "certification_progress")
+data class CertificationProgressEntity(
+    @PrimaryKey
+    @ColumnInfo(name = "certification_id") val certificationId: String,
+    @ColumnInfo(name = "enrolled_at") val enrolledAt: Long? = null,
+    @ColumnInfo(name = "target_completion_date") val targetCompletionDate: String? = null,
+    @ColumnInfo(name = "completed_modules") val completedModules: Int = 0,
+    @ColumnInfo(name = "total_modules") val totalModules: Int = 0,
+    @ColumnInfo(name = "study_hours_logged") val studyHoursLogged: Int = 0,
+    @ColumnInfo(name = "completed_at") val completedAt: Long? = null,
+    @ColumnInfo(name = "certificate_url") val certificateUrl: String? = null,
+)
+
 @Entity(
     tableName = "applications",
     indices = [Index("status"), Index("company"), Index("opportunity_id")],

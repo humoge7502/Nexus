@@ -2,10 +2,7 @@ package com.nexus.network.di
 
 import com.nexus.network.BuildConfig
 import com.nexus.network.api.AuthInterceptor
-import com.nexus.network.api.LeetCodeApiService
 import com.nexus.network.api.NexusApiService
-import com.nexus.common.Constants.BASE_URL
-import com.nexus.common.Constants.LEETCODE_BASE_URL
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -51,7 +48,7 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(client: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(BuildConfig.NEXUS_API_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -61,16 +58,5 @@ object NetworkModule {
     @Singleton
     fun provideNexusApiService(retrofit: Retrofit): NexusApiService {
         return retrofit.create(NexusApiService::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun provideLeetCodeApiService(client: OkHttpClient): LeetCodeApiService {
-        return Retrofit.Builder()
-            .baseUrl(LEETCODE_BASE_URL)
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(LeetCodeApiService::class.java)
     }
 }

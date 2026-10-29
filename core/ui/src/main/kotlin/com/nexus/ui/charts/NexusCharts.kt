@@ -27,10 +27,15 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
+import com.nexus.ui.R
+import kotlin.math.roundToInt
 
-private val nexusPrimary = Color(0xFF6366F1)
-private val nexusSecondary = Color(0xFF8B5CF6)
+private val nexusPrimary = Color(0xFF4F8EF7)
+private val nexusSecondary = Color(0xFF06B6D4)
 private val nexusAccent = Color(0xFF06B6D4)
 
 @Composable
@@ -41,7 +46,17 @@ fun NexusLineChart(
     modifier: Modifier = Modifier,
 ) {
     val maxVal = remember(data) { data.maxOrNull()?.coerceAtLeast(1f) ?: 1f }
-    Canvas(modifier = modifier.fillMaxWidth().height(200.dp)) {
+    val description = if (data.isEmpty()) {
+        stringResource(R.string.cd_line_chart, 0, 0f, 0f)
+    } else {
+        stringResource(R.string.cd_line_chart, data.size, data.last(), data.max())
+    }
+    Canvas(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(200.dp)
+            .clearAndSetSemantics { contentDescription = description }
+    ) {
         if (data.isEmpty()) return@Canvas
         val stepX = size.width / (data.size - 1).coerceAtLeast(1)
         val path = Path()
@@ -66,7 +81,17 @@ fun NexusBarChart(
     modifier: Modifier = Modifier,
 ) {
     val maxVal = remember(data) { data.maxOrNull()?.coerceAtLeast(1f) ?: 1f }
-    Canvas(modifier = modifier.fillMaxWidth().height(200.dp)) {
+    val barDescription = if (data.isEmpty()) {
+        stringResource(R.string.cd_bar_chart, 0, 0f)
+    } else {
+        stringResource(R.string.cd_bar_chart, data.size, data.max())
+    }
+    Canvas(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(200.dp)
+            .clearAndSetSemantics { contentDescription = barDescription }
+    ) {
         if (data.isEmpty()) return@Canvas
         val barWidth = size.width / data.size * 0.6f
         val gap = size.width / data.size * 0.4f
@@ -100,13 +125,22 @@ fun NexusDonutChart(
     val total = slices.sumOf { it.value.toDouble() }.toFloat()
     val colors = listOf(nexusPrimary, nexusSecondary, nexusAccent,
         Color(0xFFF59E0B), Color(0xFF10B981), Color(0xFFEC4899))
+    val sliceDescriptions = slices.map { slice ->
+        stringResource(R.string.chart_slice_label, slice.label, percentOf(slice.value, total))
+    }
+    val description = stringResource(R.string.cd_donut_chart, sliceDescriptions.joinToString(", "))
 
-    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clearAndSetSemantics { contentDescription = description },
+        contentAlignment = Alignment.Center,
+    ) {
         Canvas(modifier = Modifier.size(200.dp)) {
             val stroke = Stroke(width = strokeWidth, cap = StrokeCap.Butt)
             var startAngle = -90f
             slices.forEachIndexed { index, slice ->
-                val sweep = (slice.value / total) * 360f
+                val sweep = if (total > 0f) (slice.value / total) * 360f else 0f
                 drawArc(
                     color = if (index < colors.size) colors[index] else slice.color,
                     startAngle = startAngle,
@@ -142,7 +176,11 @@ fun NexusDonutChart(
                 ) {}
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "${slice.label} (${((slice.value / total) * 100).toInt()}%)",
+                    text = stringResource(
+                        R.string.chart_slice_label,
+                        slice.label,
+                        percentOf(slice.value, total),
+                    ),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                     maxLines = 1,
@@ -152,3 +190,6 @@ fun NexusDonutChart(
         }
     }
 }
+
+private fun percentOf(value: Float, total: Float): Int =
+    if (total <= 0f) 0 else ((value / total) * 100).roundToInt()

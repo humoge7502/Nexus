@@ -17,4 +17,21 @@
     <string name="delete_confirm_keyword">DELETE</string>
     <string name="delete_button">Delete Forever</string>
     <string name="delete_cancel">Cancel</string>
+    <string name="settings_this_will_permanently_delete">This will permanently delete:</string>
+    <string name="settings_upgrade">Upgrade</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_warning">Warning</string>
+    <string name="text_appearance">Appearance</string>
+    <string name="settings_pro_title">NEXUS Pro</string>
+    <string name="settings_pro_subtitle">AI Interview Coach, Oracle, Arena and more</string>
+    <string name="settings_dark_mode_subtitle">Use dark theme</string>
+    <string name="settings_amoled_title">AMOLED Black</string>
+    <string name="settings_amoled_on_subtitle">True-black surfaces that save battery</string>
+    <string name="settings_amoled_off_subtitle">Available when dark mode is on</string>
+    <string name="settings_accent_color">Accent color</string>
+    <string name="settings_accent_dynamic">Dynamic, follows your wallpaper</string>
+    <string name="settings_push_notifications">Push Notifications</string>
+    <string name="settings_push_notifications_subtitle">Internship alerts, deadline reminders</string>
+    <string name="settings_privacy_title">Privacy</string>
+    <string name="settings_privacy_subtitle">Manage your data and privacy settings</string>
 </resources>

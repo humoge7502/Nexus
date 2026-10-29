@@ -80,11 +80,17 @@ service cloud.firestore {
       allow create: if isOwner(userId)
         && request.resource.data.keys().hasOnly([
              'displayName', 'college', 'avatarUrl', 'bio', 'githubUsername',
-             'linkedinUrl', 'skills', 'streak', 'updatedAt'
-           ]);
+             'linkedinUrl', 'skills', 'streak', 'domain', 'totalXP', 'updatedAt'
+           ])
+        && (!('totalXP' in request.resource.data) || request.resource.data.totalXP is int)
+        && (!('streak' in request.resource.data) || request.resource.data.streak is int);
       allow update: if isOwner(userId)
-        && !request.resource.data.diff(resource.data).affectedKeys()
-              .hasAny(['nexusScore', 'xp', 'level', 'rank']);
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+             'displayName', 'college', 'avatarUrl', 'bio', 'githubUsername',
+             'linkedinUrl', 'skills', 'streak', 'domain', 'totalXP', 'updatedAt'
+           ])
+        && (!('totalXP' in request.resource.data) || request.resource.data.totalXP is int)
+        && (!('streak' in request.resource.data) || request.resource.data.streak is int);
       allow delete: if isOwner(userId) || isAdmin();
     }
 

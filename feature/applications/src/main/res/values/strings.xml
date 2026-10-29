@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="applications_my_applications">My Applications</string>
+    <string name="applications_tab_all">All</string>
+    <string name="applications_tab_applied">Applied</string>
+    <string name="applications_tab_interviews">Interviews</string>
+    <string name="applications_tab_outcomes">Outcomes</string>
+    <string name="applications_stat_applied">Applied</string>
+    <string name="applications_stat_interviewing">Interviewing</string>
+    <string name="applications_stat_offered">Offered</string>
+    <string name="applications_match_percent">%1$d%% match</string>
+    <string name="applications_status_saved">Saved</string>
+    <string name="applications_status_applied">Applied</string>
+    <string name="applications_status_interviewing">Interviewing</string>
+    <string name="applications_status_rejected">Rejected</string>
+    <string name="applications_status_offered">Offered</string>
+    <string name="applications_status_accepted">Accepted</string>
+    <string name="applications_action_mark_applied">Mark Applied</string>
+    <string name="applications_action_got_interview">Got Interview</string>
+    <string name="applications_action_got_offer">Got Offer!</string>
+    <string name="applications_action_accept">Accept</string>
+    <string name="applications_action_reject">Reject</string>
+    <string name="applications_empty_all">No applications tracked yet</string>
+    <string name="applications_empty_applied">No applications submitted</string>
+    <string name="applications_empty_interviewing">No interviews scheduled</string>
+    <string name="applications_empty_outcomes">No outcomes yet</string>
+    <string name="cd_navigate_back">Navigate back</string>
+    <string name="text_save_an_opportunity_and_track_your_progress_here">Save an opportunity and track your progress here</string>
+</resources>

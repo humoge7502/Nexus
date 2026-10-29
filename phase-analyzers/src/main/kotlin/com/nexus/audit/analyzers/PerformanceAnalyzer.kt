@@ -14,8 +14,7 @@ class PerformanceAnalyzer : PhaseAnalyzer {
     override val phaseName = "Performance"
 
     override suspend fun analyze(context: AuditContext): PhaseResult {
-        val files = ScanUtil.productionFiles(context.sourceFiles)
-            .filterNot { ScanUtil.isTestFile(it) }
+        val files = ScanUtil.productionSources(context.sourceFiles)
         val findings = mutableListOf<Finding>()
 
         // synchronized / blocking IO on main

@@ -14,14 +14,14 @@ class RealDataAnalyzer : PhaseAnalyzer {
     override val phaseName = "Real Data Verification"
 
     private val mockPatterns = listOf(
-        "MockData object" to """(object|class)\s+Mock[A-Za-z]*|val\s+mock[A-Za-z]*\s*[:=]""",
+        "MockData object" to """(object|class)\s+Mock[A-Za-z0-9_]*|val\s+mock[A-Za-z0-9_]*\s*(?::[^=]+)?=\s*(Mock|Fake|mockk|fake|dummy)""",
         "Fake generator" to """Faker\s*\(|fake\s*\(|FakeDataGenerator|dummyData|placeholderData|fakeResponse|mockResponse""",
         "Demo flag" to """DEMO_MODE|isDemo\s*=\s*true|"demo"|"sample"|sampleResponse"""
     )
 
     override suspend fun analyze(context: AuditContext): PhaseResult {
-        val files = ScanUtil.productionFiles(context.sourceFiles)
-        val prod = files.filterNot { ScanUtil.isTestFile(it) }
+        val files = ScanUtil.productionSources(context.sourceFiles)
+        val prod = files
         val findings = mutableListOf<Finding>()
 
         for ((label, pattern) in mockPatterns) {

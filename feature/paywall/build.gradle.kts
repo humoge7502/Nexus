@@ -19,4 +19,10 @@ dependencies {
     implementation(libs.billing)
 
     implementation(libs.lifecycle.runtime.compose)
+
+    // Unit tests
+    testImplementation(libs.junit)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
 }

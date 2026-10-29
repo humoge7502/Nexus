@@ -1,5 +1,8 @@
 package com.nexus.ai
 
+import androidx.compose.ui.res.stringResource
+import com.nexus.ai.R
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
@@ -8,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,9 +28,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,8 +39,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,19 +48,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.effect.IntelligencePulse
-import com.nexus.designsystem.theme.NexusColors
-import com.nexus.designsystem.theme.NexusGradients
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AIChatScreen(
     onBack: () -> Unit = {},
@@ -98,37 +96,35 @@ fun AIChatScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-            TopAppBar(
+            NexusTopBar(
+                onBack = onBack,
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier.size(32.dp).clip(CircleShape)
-                                .background(Brush.linearGradient(NexusGradients.Nexus)),
+                                .background(MaterialTheme.colorScheme.primaryContainer),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("\u2728", style = MaterialTheme.typography.titleSmall)
+                            Icon(
+                                Icons.Default.AutoAwesome,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp),
+                            )
                         }
                         Spacer(Modifier.width(8.dp))
                         Column {
-                            Text(
-                                "NEXUS AI Mentor",
+                            Text(stringResource(R.string.ai_nexus_ai_mentor),
                                 fontWeight = FontWeight.Bold,
                                 style = MaterialTheme.typography.titleSmall,
                             )
-                            Text(
-                                "Personalized to your career profile",
+                            Text(stringResource(R.string.ai_personalized_to_your_career_profile),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }
                 },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             )
 
             LazyColumn(
@@ -150,7 +146,7 @@ fun AIChatScreen(
                         Row {
                             Box(
                                 modifier = Modifier.size(28.dp).clip(CircleShape)
-                                    .background(Brush.linearGradient(NexusGradients.Nexus)),
+                                    .background(MaterialTheme.colorScheme.primaryContainer),
                                 contentAlignment = Alignment.Center
                             ) {
                                 IntelligencePulse(isThinking = true, modifier = Modifier.size(16.dp))
@@ -158,11 +154,10 @@ fun AIChatScreen(
                             Spacer(Modifier.width(8.dp))
                             Box(
                                 Modifier.clip(RoundedCornerShape(16.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                                     .padding(14.dp)
                             ) {
-                                Text(
-                                    "Thinking...",
+                                Text(stringResource(R.string.ai_thinking),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
@@ -180,7 +175,7 @@ fun AIChatScreen(
                     value = inputText,
                     onValueChange = { inputText = it },
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Ask NEXUS anything...") },
+                    placeholder = { Text(stringResource(R.string.ai_ask_nexus_anything)) },
                     shape = RoundedCornerShape(24.dp),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
@@ -194,32 +189,33 @@ fun AIChatScreen(
                     onClick = { sendMessage(inputText) },
                     enabled = !uiState.isThinking,
                     modifier = Modifier.size(48.dp).clip(CircleShape)
-                        .background(Brush.linearGradient(NexusGradients.Nexus)),
+                        .background(MaterialTheme.colorScheme.primary),
                 ) {
                     Icon(
                         Icons.Default.Send,
-                        contentDescription = "Send",
-                        tint = Color.White,
+                        contentDescription = stringResource(R.string.cd_send),
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(20.dp),
                     )
                 }
             }
 
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 listOf("Review my resume", "Best certs for me", "Mock interview", "Improve LinkedIn").forEach { prompt ->
                     Box(
                         modifier = Modifier.clip(RoundedCornerShape(12.dp))
-                            .background(NexusColors.Indigo500.copy(alpha = 0.1f))
+                            .background(MaterialTheme.colorScheme.primaryContainer)
                             .clickable(enabled = !uiState.isThinking) { sendMessage(prompt) }
                             .padding(horizontal = 10.dp, vertical = 6.dp)
                     ) {
                         Text(
                             prompt,
                             style = MaterialTheme.typography.labelSmall,
-                            color = NexusColors.Indigo400,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
                         )
                     }
                 }
@@ -243,10 +239,15 @@ private fun MessageBubble(message: ChatMessage) {
             if (!message.isUser) {
                 Box(
                     modifier = Modifier.size(28.dp).clip(CircleShape)
-                        .background(Brush.linearGradient(NexusGradients.Nexus)),
+                        .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("\u2728", style = MaterialTheme.typography.labelSmall)
+                    Icon(
+                        Icons.Default.AutoAwesome,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(14.dp),
+                    )
                 }
                 Spacer(Modifier.width(8.dp))
             }
@@ -264,7 +265,7 @@ private fun MessageBubble(message: ChatMessage) {
                         when {
                             message.isUser -> MaterialTheme.colorScheme.primary
                             message.isError -> MaterialTheme.colorScheme.errorContainer
-                            else -> MaterialTheme.colorScheme.surfaceVariant
+                            else -> MaterialTheme.colorScheme.surfaceContainerHighest
                         }
                     )
                     .padding(14.dp)
@@ -273,7 +274,7 @@ private fun MessageBubble(message: ChatMessage) {
                     message.text,
                     style = MaterialTheme.typography.bodyMedium,
                     color = when {
-                        message.isUser -> Color.White
+                        message.isUser -> MaterialTheme.colorScheme.onPrimary
                         message.isError -> MaterialTheme.colorScheme.onErrorContainer
                         else -> MaterialTheme.colorScheme.onSurface
                     },
@@ -286,7 +287,12 @@ private fun MessageBubble(message: ChatMessage) {
                         .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("U", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                    Icon(
+                        Icons.Default.Person,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp),
+                    )
                 }
             }
         }

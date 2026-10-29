@@ -1,5 +1,8 @@
 package com.nexus.notifications
 
+import androidx.compose.ui.res.stringResource
+import com.nexus.feature.notifications.R
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,35 +20,40 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.filled.RocketLaunch
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.nexus.designsystem.theme.NexusColors
-import com.nexus.designsystem.theme.NexusGradients
+import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.hairline
+import com.nexus.designsystem.theme.NexusTypography
 import com.nexus.domain.model.UiState
 
 data class NotificationDisplay(
     val id: String,
-    val emoji: String,
+    val icon: ImageVector,
     val title: String,
     val body: String,
     val time: String,
@@ -53,7 +61,6 @@ data class NotificationDisplay(
     val isRead: Boolean,
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationsScreen(
     onBack: () -> Unit = {},
@@ -67,37 +74,33 @@ fun NotificationsScreen(
     val unreadCount = notifications.count { !it.isRead }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
+        NexusTopBar(
+            onBack = onBack,
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Notifications", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.notifications_notifications), fontWeight = FontWeight.Bold)
                     if (unreadCount > 0) {
                         Spacer(Modifier.width(8.dp))
                         Box(
                             modifier = Modifier.size(20.dp).clip(CircleShape)
-                                .background(NexusGradients.Error[0]),
+                                .background(MaterialTheme.colorScheme.error),
                             contentAlignment = Alignment.Center,
                         ) {
-                            Text("$unreadCount",
+                            Text(stringResource(R.string.notifications_unreadcount, unreadCount),
                                 style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold, color = Color.White)
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onError)
                         }
                     }
-                }
-            },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                 }
             },
             actions = {
                 if (notifications.any { !it.isRead }) {
                     TextButton(onClick = { viewModel.markAllAsRead() }) {
-                        Text("Mark all read", style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.notifications_mark_all_read), style = MaterialTheme.typography.labelMedium)
                     }
                 }
             },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
         )
 
         if (notifications.isEmpty()) {
@@ -108,26 +111,29 @@ fun NotificationsScreen(
             ) {
                 Icon(
                     Icons.Default.Notifications, contentDescription = null,
-                    modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(44.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
                 )
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(14.dp))
                 Text(
-                    "No notifications yet",
+                    stringResource(R.string.notifications_no_notifications_yet),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(6.dp))
                 Text(
-                    "We'll notify you about new opportunities, deadlines, and achievements.",
+                    stringResource(R.string.notifications_we_ll_notify_you_about_new),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                 )
             }
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 10.dp, bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 items(notifications, key = { it.id }) { notification ->
                     NotificationCard(
@@ -145,50 +151,65 @@ private fun NotificationCard(
     notification: NotificationDisplay,
     onRead: () -> Unit,
 ) {
+    val unread = !notification.isRead
+    val shape = RoundedCornerShape(16.dp)
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(shape)
             .background(
-                if (notification.isRead) Color.Transparent
-                else NexusColors.Indigo500.copy(alpha = 0.08f),
-                shape = MaterialTheme.shapes.medium,
+                if (unread) MaterialTheme.colorScheme.primary.copy(alpha = 0.06f)
+                else MaterialTheme.colorScheme.surfaceContainerLow,
+            )
+            .hairline(
+                color = MaterialTheme.colorScheme.outlineVariant.copy(
+                    alpha = if (unread) 0.9f else 0.55f,
+                ),
+                cornerRadiusDp = 16f,
             )
             .clickable(onClick = onRead)
-            .padding(12.dp),
+            .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.Top,
     ) {
-        Box(
-            modifier = Modifier.size(40.dp).clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(notification.emoji, fontSize = 18.sp)
-        }
+        Icon(
+            imageVector = notification.icon,
+            contentDescription = null,
+            tint = if (unread) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f)
+            },
+            modifier = Modifier.padding(top = 2.dp).size(18.dp),
+        )
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 notification.title,
                 style = MaterialTheme.typography.titleSmall,
-                fontWeight = if (notification.isRead) FontWeight.Normal else FontWeight.SemiBold,
+                fontWeight = if (unread) FontWeight.SemiBold else FontWeight.Normal,
+                color = MaterialTheme.colorScheme.onSurface,
             )
-            Spacer(Modifier.height(2.dp))
+            Spacer(Modifier.height(3.dp))
             Text(
                 notification.body,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(6.dp))
             Text(
                 notification.time,
-                style = MaterialTheme.typography.labelSmall,
+                style = NexusTypography.TelemetryMicro,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             )
         }
-        if (!notification.isRead) {
+        if (unread) {
             Spacer(Modifier.width(8.dp))
             Box(
-                modifier = Modifier.size(8.dp).clip(CircleShape)
-                    .background(NexusColors.Indigo400),
+                modifier = Modifier
+                    .padding(top = 5.dp)
+                    .size(5.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary),
             )
         }
     }
@@ -196,15 +217,15 @@ private fun NotificationCard(
 
 private fun com.nexus.domain.model.NotificationItem.toDisplay() = NotificationDisplay(
     id = id,
-    emoji = when (type) {
-        com.nexus.domain.model.NotificationType.OPPORTUNITY_ALERT -> "🚀"
-        com.nexus.domain.model.NotificationType.DEADLINE_REMINDER -> "⏰"
-        com.nexus.domain.model.NotificationType.ACHIEVEMENT_UNLOCKED -> "🏆"
-        com.nexus.domain.model.NotificationType.STREAK_REMINDER -> "🔥"
-        com.nexus.domain.model.NotificationType.AI_INSIGHT -> "🧠"
-        com.nexus.domain.model.NotificationType.LEVEL_UP -> "📈"
-        com.nexus.domain.model.NotificationType.WEEKLY_REPORT -> "📊"
-        com.nexus.domain.model.NotificationType.SYSTEM -> "⚙"
+    icon = when (type) {
+        com.nexus.domain.model.NotificationType.OPPORTUNITY_ALERT -> Icons.Default.RocketLaunch
+        com.nexus.domain.model.NotificationType.DEADLINE_REMINDER -> Icons.Default.Schedule
+        com.nexus.domain.model.NotificationType.ACHIEVEMENT_UNLOCKED -> Icons.Default.EmojiEvents
+        com.nexus.domain.model.NotificationType.STREAK_REMINDER -> Icons.Default.LocalFireDepartment
+        com.nexus.domain.model.NotificationType.AI_INSIGHT -> Icons.Default.AutoAwesome
+        com.nexus.domain.model.NotificationType.LEVEL_UP -> Icons.Default.TrendingUp
+        com.nexus.domain.model.NotificationType.WEEKLY_REPORT -> Icons.Default.BarChart
+        com.nexus.domain.model.NotificationType.SYSTEM -> Icons.Default.Settings
     },
     title = title,
     body = body,

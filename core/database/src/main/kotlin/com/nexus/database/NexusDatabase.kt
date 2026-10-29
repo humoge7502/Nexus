@@ -8,6 +8,7 @@ import com.nexus.database.dao.ApplicationDao
 import com.nexus.database.dao.CareerMemoryDao
 import com.nexus.database.dao.CareerMirrorDao
 import com.nexus.database.dao.CertificationDao
+import com.nexus.database.dao.CertificationProgressDao
 import com.nexus.database.dao.CohortIntelligenceDao
 import com.nexus.database.dao.ConfidenceAssessmentDao
 import com.nexus.database.dao.DSAProblemDao
@@ -33,6 +34,7 @@ import com.nexus.database.entity.ApplicationEntity
 import com.nexus.database.entity.CareerMemoryEntity
 import com.nexus.database.entity.CareerMirrorEntity
 import com.nexus.database.entity.CertificationEntity
+import com.nexus.database.entity.CertificationProgressEntity
 import com.nexus.database.entity.CohortIntelligenceEntity
 import com.nexus.database.entity.ConfidenceSelfAssessmentEntity
 import com.nexus.database.entity.DSAProblemEntity
@@ -58,6 +60,7 @@ import com.nexus.database.entity.UserSurveyEntity
     entities = [
         InternshipEntity::class,
         CertificationEntity::class,
+        CertificationProgressEntity::class,
         ApplicationEntity::class,
         StudySessionEntity::class,
         AchievementEntity::class,
@@ -83,12 +86,13 @@ import com.nexus.database.entity.UserSurveyEntity
         SkillVelocitySnapshotEntity::class,
         InterviewReportEntity::class,
     ],
-    version = 9,
+    version = 10,
     exportSchema = true
 )
 abstract class NexusDatabase : RoomDatabase() {
     abstract fun internshipDao(): InternshipDao
     abstract fun certificationDao(): CertificationDao
+    abstract fun certificationProgressDao(): CertificationProgressDao
     abstract fun applicationDao(): ApplicationDao
     abstract fun studySessionDao(): StudySessionDao
     abstract fun achievementDao(): AchievementDao

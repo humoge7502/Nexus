@@ -16,12 +16,21 @@ val localProps = Properties().apply {
 android {
     namespace = "com.nexus.network"
     compileSdk = 36
-    defaultConfig { minSdk = 26 }
+    defaultConfig {
+        minSdk = 26
+        // Environment-switchable without a rebuild; CI/local can override via local.properties.
+        buildConfigField(
+            "String",
+            "NEXUS_API_URL",
+            "\"${localProps.getProperty("NEXUS_API_URL") ?: "https://api.nexus.app/"}\""
+        )
+    }
     buildFeatures {
         buildConfig = true
     }
     buildTypes {
         debug {
+            enableUnitTestCoverage = true
             buildConfigField(
                 "String",
                 "OPENROUTER_API_KEY",

@@ -27,9 +27,8 @@ override suspend fun doWork(): Result {
   }
   return try {
     val statsResult = leetCodeRepository.getStats(username)
-    val problemsResult = leetCodeRepository.syncSolvedProblems(username)
-    Timber.d("LeetCode sync: stats=${statsResult.isSuccess}, problems=${problemsResult.isSuccess}")
-    if (statsResult.isSuccess || problemsResult.isSuccess) Result.success()
+    Timber.d("LeetCode sync: stats=${statsResult.isSuccess}")
+    if (statsResult.isSuccess) Result.success()
     else if (runAttemptCount < Constants.MAX_RETRY_ATTEMPTS) Result.retry()
     else Result.failure()
   } catch (e: Exception) {

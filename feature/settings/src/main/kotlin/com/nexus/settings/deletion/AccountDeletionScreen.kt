@@ -29,14 +29,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.NexusCard
-import com.nexus.designsystem.theme.NexusColors
 import com.nexus.settings.R
 
 @Composable
@@ -63,22 +61,21 @@ fun AccountDeletionScreen(
     ) {
         Icon(
             imageVector = Icons.Filled.Warning,
-            contentDescription = "Warning",
-            tint = NexusColors.PlasmaOrange,
+            contentDescription = stringResource(R.string.cd_warning),
+            tint = MaterialTheme.colorScheme.error,
             modifier = Modifier.size(48.dp)
         )
 
         Text(
             stringResource(R.string.delete_title),
             style = MaterialTheme.typography.headlineMedium,
-            color = NexusColors.PlasmaOrange,
+            color = MaterialTheme.colorScheme.error,
             fontWeight = FontWeight.Bold,
         )
 
-        NexusCard(glassEffect = true) {
+        NexusCard {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    "This will permanently delete:",
+                Text(stringResource(R.string.settings_this_will_permanently_delete),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -97,7 +94,7 @@ fun AccountDeletionScreen(
                         Icon(
                             Icons.Filled.Close,
                             contentDescription = null,
-                            tint = NexusColors.Error,
+                            tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(Modifier.width(8.dp))
@@ -111,7 +108,7 @@ fun AccountDeletionScreen(
         Text(
             stringResource(R.string.delete_warning),
             style = MaterialTheme.typography.bodyMedium,
-            color = NexusColors.PlasmaOrange,
+            color = MaterialTheme.colorScheme.error,
         )
 
         OutlinedTextField(
@@ -123,7 +120,7 @@ fun AccountDeletionScreen(
         )
 
         uiState.error?.let { error ->
-            Text(text = error, style = MaterialTheme.typography.bodySmall, color = NexusColors.Error)
+            Text(text = error, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
         }
 
         Spacer(Modifier.weight(1f))
@@ -139,13 +136,16 @@ fun AccountDeletionScreen(
             Button(
                 onClick = { viewModel.confirmDeletion() },
                 enabled = confirmText == "DELETE" && !uiState.isDeleting,
-                colors = ButtonDefaults.buttonColors(containerColor = NexusColors.Error),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError,
+                ),
                 modifier = Modifier.weight(1f),
             ) {
                 if (uiState.isDeleting) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onError,
                         strokeWidth = 2.dp,
                     )
                 } else {

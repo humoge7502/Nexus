@@ -112,3 +112,79 @@ test("opportunity feed returns a bounded page for authenticated users", async ()
   assert.ok(Array.isArray(body.result?.results), "missing results array");
   assert.ok(body.result.results.length <= 50);
 });
+
+test("leetcodeStats requires authentication", async () => {
+  const { status, body } = await callable("leetcodeStats", { username: "tourist" });
+  assert.ok(
+    status === 401 || body.error?.status === "UNAUTHENTICATED",
+    `expected unauthenticated, got ${status} ${JSON.stringify(body)}`
+  );
+});
+
+test("leetcodeStats rejects malformed usernames before any upstream call", async () => {
+  const token = await signUp("leetcode");
+  const { body } = await callable(
+    "leetcodeStats",
+    { username: "not a handle!" },
+    token
+  );
+  assert.equal(body.error?.status, "INVALID_ARGUMENT");
+});
+
+const STREAM_URL = `${BASE}/streamAI`;
+
+async function streamRequest(body, token) {
+  const response = await fetch(STREAM_URL, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      ...(token ? { authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(body),
+  });
+  const text = await response.text();
+  return { status: response.status, headers: response.headers, text };
+}
+
+test("aiStream rejects non-POST requests", async () => {
+  const response = await fetch(STREAM_URL);
+  assert.equal(response.status, 405);
+  assert.equal(response.headers.get("allow"), "POST");
+  const body = await response.json();
+  assert.equal(body.error?.status, "METHOD_NOT_ALLOWED");
+});
+
+test("aiStream rejects anonymous callers before touching the model", async () => {
+  const { status, text } = await streamRequest({
+    messages: [{ role: "user", content: "hello" }],
+  });
+  assert.equal(status, 401, text);
+  assert.equal(JSON.parse(text).error?.status, "UNAUTHENTICATED");
+});
+
+test("aiStream authenticates, validates input and fails closed without a server key", async () => {
+  const token = await signUp("stream");
+
+  const invalid = await streamRequest({ messages: [] }, token);
+  assert.equal(invalid.status, 400);
+  assert.equal(JSON.parse(invalid.text).error?.status, "INVALID_ARGUMENT");
+
+  const blockedModel = await streamRequest(
+    {
+      model: "openai/gpt-5-unlisted",
+      messages: [{ role: "user", content: "hi" }],
+    },
+    token
+  );
+  assert.equal(blockedModel.status, 400);
+
+  // The emulator has no OPENROUTER_API_KEY configured; the handler must
+  // fail closed with a precondition error instead of leaking configuration.
+  const noKey = await streamRequest(
+    { messages: [{ role: "user", content: "hi" }] },
+    token
+  );
+  assert.equal(noKey.status, 503, noKey.text);
+  assert.equal(JSON.parse(noKey.text).error?.status, "FAILED_PRECONDITION");
+});
+

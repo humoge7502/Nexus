@@ -2,10 +2,10 @@ package com.nexus.growth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nexus.ai.AIOpenRouterService
 import com.nexus.analytics.AnalyticsTracker
 import com.nexus.designsystem.component.IntelligenceCardData
 import com.nexus.designsystem.component.IntelligenceCardDefaults
+import com.nexus.network.ai.AIOpenRouterService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

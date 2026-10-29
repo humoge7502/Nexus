@@ -1,9 +1,13 @@
 package com.nexus.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.AggregateSource
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.SetOptions
 import com.nexus.domain.model.LeaderboardEntry
+import com.nexus.domain.repository.GlobalRanking
 import com.nexus.domain.repository.ILeaderboardRepository
 import com.nexus.domain.repository.LeaderboardTab
 import kotlinx.coroutines.tasks.await
@@ -16,15 +20,19 @@ class LeaderboardRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val firebaseAuth: FirebaseAuth,
 ) : ILeaderboardRepository {
-    override suspend fun getLeaderboard(tab: LeaderboardTab): List<LeaderboardEntry> {
-        return try {
-            val currentUserId = firebaseAuth.currentUser?.uid ?: return emptyList()
-            val currentUserDoc = firestore.collection("users").document(currentUserId).get().await()
-            val userCollege = currentUserDoc.getString("college") ?: ""
-            val friendIds: List<String> = (currentUserDoc.get("friendIds") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
 
-            val baseQuery = firestore.collection("users")
-                .whereEqualTo("isLeaderboardPublic", true)
+    private val currentUid: String?
+        get() = firebaseAuth.currentUser?.uid
+
+    override suspend fun getLeaderboard(tab: LeaderboardTab): List<LeaderboardEntry> {
+        val currentUserId = currentUid ?: return emptyList()
+        return try {
+            val userDoc = firestore.collection("users").document(currentUserId).get().await()
+            val userCollege = userDoc.getString("college") ?: ""
+            val friendIds: List<String> =
+                (userDoc.get("friendIds") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
+
+            val baseQuery = firestore.collection("publicProfiles")
                 .orderBy("totalXP", Query.Direction.DESCENDING)
                 .limit(100)
 
@@ -35,35 +43,23 @@ class LeaderboardRepository @Inject constructor(
                     baseQuery.whereEqualTo("college", userCollege).get().await()
                 }
                 LeaderboardTab.FRIENDS -> baseQuery.get().await()
-                LeaderboardTab.DOMAIN_DSA -> {
-                    baseQuery.whereEqualTo("domain", "DSA").get().await()
-                }
-            }
-
-            val domainDsaFilter: (Map<String?, Any?>) -> Boolean = { data ->
-                tab != LeaderboardTab.DOMAIN_DSA || data["domain"]?.toString()?.equals("DSA", ignoreCase = true) == true
-            }
-
-            val collegeFilter: (Map<String?, Any?>) -> Boolean = { data ->
-                tab != LeaderboardTab.COLLEGE || data["college"]?.toString().equals(userCollege, ignoreCase = true) == true
-            }
-
-            val friendsFilter: (Map<String?, Any?>) -> Boolean = { data ->
-                tab != LeaderboardTab.FRIENDS || friendIds.contains(data["userId"]) || data["userId"] == currentUserId
+                LeaderboardTab.DOMAIN_DSA -> baseQuery.whereEqualTo("domain", "DSA").get().await()
             }
 
             snapshot.documents
                 .filter { doc ->
-                    val data = doc.data
-                    data != null && domainDsaFilter(data) && collegeFilter(data) && friendsFilter(data)
+                    tab != LeaderboardTab.FRIENDS ||
+                        friendIds.contains(doc.id) ||
+                        doc.id == currentUserId
                 }
                 .take(50)
                 .mapIndexed { index, doc ->
                     LeaderboardEntry(
                         userId = doc.id,
-                        userName = doc.getString("name")
-                            ?: doc.getString("displayName")
+                        userName = doc.getString("displayName")
+                            ?: doc.getString("name")
                             ?: "Anonymous",
+                        avatarUrl = doc.getString("avatarUrl"),
                         score = doc.getLong("totalXP")?.toInt() ?: 0,
                         rank = index + 1,
                         isCurrentUser = doc.id == currentUserId,
@@ -71,23 +67,64 @@ class LeaderboardRepository @Inject constructor(
                     )
                 }
         } catch (e: Exception) {
-            Timber.e(e, "Failed to load leaderboard from Firestore")
+            Timber.e(e, "Failed to load leaderboard from public profiles")
             emptyList()
         }
     }
 
-    override suspend fun getCurrentUserEntry(tab: LeaderboardTab): LeaderboardEntry? {
-        val all = getLeaderboard(tab)
-        return all.find { it.isCurrentUser }
+    override suspend fun getCurrentUserEntry(tab: LeaderboardTab): LeaderboardEntry? =
+        getLeaderboard(tab).find { it.isCurrentUser }
+
+    override suspend fun isPublicProfilePublished(): Boolean {
+        val userId = currentUid ?: return false
+        return try {
+            firestore.collection("publicProfiles").document(userId).get().await().exists()
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to read public profile state")
+            false
+        }
     }
 
-    override suspend fun togglePublicVisibility(isPublic: Boolean) {
-        val userId = firebaseAuth.currentUser?.uid ?: return
-        firestore.collection("users").document(userId)
-            .update("isLeaderboardPublic", isPublic)
+    override suspend fun getGlobalRanking(): GlobalRanking? {
+        val userId = currentUid ?: return null
+        return try {
+            val profiles = firestore.collection("publicProfiles")
+            val myXp = profiles.document(userId).get().await().getLong("totalXP")?.toInt()
+                ?: return null
+            val total = profiles.count().get(AggregateSource.SERVER).await().count.toInt()
+            val above = profiles.whereGreaterThan("totalXP", myXp)
+                .count().get(AggregateSource.SERVER).await().count.toInt()
+            val rank = above + 1
+            GlobalRanking(rank = rank, total = maxOf(total, rank))
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to compute global ranking")
+            null
+        }
+    }
+
+    override suspend fun publishProfile(
+        displayName: String,
+        college: String,
+        totalXp: Int,
+        streakDays: Int,
+    ) {
+        val userId = currentUid ?: error("Sign-in required to publish a public profile")
+        firestore.collection("publicProfiles").document(userId)
+            .set(
+                mapOf(
+                    "displayName" to displayName.trim().ifBlank { "Anonymous" },
+                    "college" to college.trim(),
+                    "totalXP" to totalXp.coerceAtLeast(0),
+                    "streak" to streakDays.coerceAtLeast(0),
+                    "updatedAt" to FieldValue.serverTimestamp(),
+                ),
+                SetOptions.merge(),
+            )
             .await()
     }
+
+    override suspend fun removePublicProfile() {
+        val userId = currentUid ?: error("Sign-in required to remove a public profile")
+        firestore.collection("publicProfiles").document(userId).delete().await()
+    }
 }
-
-// Removed local LeaderboardTab enum as it exists in ILeaderboardRepository.kt
-

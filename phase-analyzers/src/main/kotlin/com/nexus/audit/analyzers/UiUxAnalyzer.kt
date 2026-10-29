@@ -14,12 +14,12 @@ class UiUxAnalyzer : PhaseAnalyzer {
     override val phaseName = "UI/UX Quality"
 
     override suspend fun analyze(context: AuditContext): PhaseResult {
-        val files = ScanUtil.productionFiles(context.sourceFiles)
+        val files = ScanUtil.productionSources(context.sourceFiles)
             .filter { it.extension == "kt" }
         val findings = mutableListOf<Finding>()
 
         // Compose Image without contentDescription
-        val imageNoDesc = ScanUtil.grep(files.filterNot { ScanUtil.isTestFile(it) },
+        val imageNoDesc = ScanUtil.grep(files,
             Regex("""Image\s*\(\s*(painter|imageVector|bitmap)\s*=.*\)"""))
             .filter { hit -> !ScanUtil.readQuietly(hit.file).lineSequence()
                 .drop(hit.line - 1).take(6)
@@ -40,7 +40,7 @@ class UiUxAnalyzer : PhaseAnalyzer {
         }
 
         // Hardcoded strings in composables
-        val hardcoded = ScanUtil.grep(files.filterNot { ScanUtil.isTestFile(it) },
+        val hardcoded = ScanUtil.grep(files,
             Regex("""Text\s*\(\s*"[^"]{3,}"""))
         if (hardcoded.size > 20) {
             findings.add(
@@ -57,7 +57,7 @@ class UiUxAnalyzer : PhaseAnalyzer {
         }
 
         // Theming check
-        val hasTheme = ScanUtil.grep(files, Regex("""MaterialTheme|NexusTheme|dynamicColor|isSystemInDarkTheme"))
+        val hasTheme = ScanUtil.grep(files, Regex("""MaterialTheme|NexusTheme|dynamicColor|isSystemInDarkTheme"""))
         if (hasTheme.isEmpty()) {
             findings.add(
                 ScanUtil.finding(

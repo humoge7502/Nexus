@@ -100,6 +100,8 @@ data class Certification(
     val completionRate: Float = 0f,
     val employerRecognition: Int = 0,
     val userProgress: CertProgress? = null,
+    /** Raw provider label from the source feed; [provider] is the nearest known enum value. */
+    val providerName: String = "",
 )
 
 data class CertProgress(

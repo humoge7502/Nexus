@@ -20,4 +20,7 @@ dependencies {
     implementation(libs.coil)
 
     implementation(libs.lifecycle.runtime.compose)
+
+    // Unit tests
+    testImplementation(libs.junit)
 }

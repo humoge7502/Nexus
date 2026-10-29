@@ -17,16 +17,16 @@ class SecurityAnalyzer : PhaseAnalyzer {
 
     private val secretPattern = Regex(
         """(api[_-]?key|secret|token|password|passwd|client[_-]?secret|access[_-]?key)\s*[:=]\s*["']([A-Za-z0-9_\-]{16,})["']""",
-        RegexOption.IGNORECASE
+        RegexOption.IGNORE_CASE
     )
     private val sslBypass = Regex(
         """setHostnameVerifier\s*\(|ALLOW_ALL_HOSTNAME_VERIFIER|checkClientTrusted\s*\(.*\)\s*\{\s*\}|TrustManager\s*\{[\s\S]*?void\s+check""",
-        RegexOption.IGNORECASE
+        RegexOption.IGNORE_CASE
     )
     private val httpEndpoint = Regex("""https?://[a-zA-Z0-9.\-]+\.[a-z]{2,}""")
 
     override suspend fun analyze(context: AuditContext): PhaseResult {
-        val files = (ScanUtil.productionFiles(context.sourceFiles) +
+        val files = (ScanUtil.productionSources(context.sourceFiles) +
             context.buildFiles.filter { !it.absolutePath.contains("/build/") })
             .distinctBy { it.absolutePath }
         val findings = mutableListOf<Finding>()

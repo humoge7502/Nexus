@@ -1,5 +1,6 @@
 package com.nexus.paywall
 
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,28 +16,40 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import android.app.Activity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexus.designsystem.component.NexusButton
+import com.nexus.designsystem.component.SectionHeader
+import com.nexus.designsystem.component.hairline
+import com.nexus.designsystem.component.instrumentGrid
+import com.nexus.designsystem.component.sheen
+import com.nexus.designsystem.theme.NexusColors
+import com.nexus.designsystem.theme.NexusGradients
+import com.nexus.designsystem.theme.NexusTypography
 
 @Composable
 fun PaywallScreen(
@@ -52,184 +65,275 @@ fun PaywallScreen(
         return
     }
 
+    val features = listOf(
+        stringResource(R.string.paywall_feature_unlimited_ai_chat),
+        stringResource(R.string.paywall_feature_priority_tracking),
+        stringResource(R.string.paywall_feature_advanced_insights),
+        stringResource(R.string.paywall_feature_resume_optimization),
+        stringResource(R.string.paywall_feature_skill_gap),
+        stringResource(R.string.paywall_feature_ad_free),
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .background(MaterialTheme.colorScheme.surface)
+            .background(MaterialTheme.colorScheme.surface),
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    brush = androidx.compose.ui.graphics.Brush.verticalGradient(
-                        colors = listOf(Color(0xFF6366F1), Color(0xFF8B5CF6))
-                    )
-                )
-                .padding(32.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Spacer(Modifier.height(48.dp))
-                Text(
-                    text = "Unlock NEXUS Pro",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = "Supercharge your career journey with premium features",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White.copy(alpha = 0.85f),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(Modifier.height(32.dp))
-            }
-        }
+        PaywallHero(onDismiss = onDismiss)
 
         Column(
-            modifier = Modifier.padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
         ) {
-            Text(
-                text = "Pro Features",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+            SectionHeader(
+                title = stringResource(R.string.text_pro_features),
+                index = "01",
+                meta = features.size.toString().padStart(2, '0'),
             )
-
-            listOf(
-                "Unlimited AI chat sessions",
-                "Priority application tracking",
-                "Advanced career insights & analytics",
-                "Resume optimization with AI",
-                "Custom skill gap analysis",
-                "Ad-free experience",
-            ).forEach { feature ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "\u2705", style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.width(12.dp))
-                    Text(text = feature, style = MaterialTheme.typography.bodyLarge)
+            Spacer(modifier = Modifier.height(8.dp))
+            features.forEachIndexed { index, feature ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 11.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = (index + 1).toString().padStart(2, '0'),
+                        style = NexusTypography.TelemetryMicro,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+                        modifier = Modifier.width(22.dp),
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = feature,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        tint = NexusColors.AuroraGreen,
+                        modifier = Modifier.size(15.dp),
+                    )
+                }
+                if (index != features.lastIndex) {
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+                    )
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(26.dp))
+
+            SectionHeader(
+                title = stringResource(R.string.paywall_choose_plan),
+                index = "02",
+            )
+            Spacer(modifier = Modifier.height(14.dp))
 
             if (uiState.isLoading) {
                 Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 32.dp),
+                    contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()
                 }
             } else {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFF6366F1).copy(alpha = 0.1f)
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    PlanCard(
+                        index = "01",
+                        price = uiState.yearlyPrice.ifBlank { "$49.99/yr" },
+                        badge = stringResource(R.string.paywall_save_percent, 58),
+                        actionLabel = stringResource(R.string.paywall_subscribe_yearly),
+                        onAction = { viewModel.purchaseYearly(activity) },
+                        featured = true,
                     )
-                ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = uiState.monthlyPrice.ifBlank { "$9.99/mo" },
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Button(
-                            onClick = { viewModel.purchaseMonthly(activity) },
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF6366F1)
-                            )
-                        ) {
-                            Text("Subscribe Monthly", fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFF059669).copy(alpha = 0.1f)
+                    PlanCard(
+                        index = "02",
+                        price = uiState.monthlyPrice.ifBlank { "$9.99/mo" },
+                        actionLabel = stringResource(R.string.paywall_subscribe_monthly),
+                        onAction = { viewModel.purchaseMonthly(activity) },
                     )
-                ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = uiState.yearlyPrice.ifBlank { "$49.99/yr" },
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                text = "Save 58%",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = Color(0xFF059669),
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Spacer(Modifier.height(8.dp))
-                        Button(
-                            onClick = { viewModel.purchaseYearly(activity) },
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF059669)
-                            )
-                        ) {
-                            Text("Subscribe Yearly", fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = uiState.lifetimePrice.ifBlank { "$99.99" },
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        OutlinedButton(
-                            onClick = { viewModel.purchaseLifetime(activity) },
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Text("Lifetime Access", fontWeight = FontWeight.Bold)
-                        }
-                    }
+                    PlanCard(
+                        index = "03",
+                        price = uiState.lifetimePrice.ifBlank { "$99.99" },
+                        caption = stringResource(R.string.paywall_one_time),
+                        actionLabel = stringResource(R.string.paywall_lifetime_access),
+                        onAction = { viewModel.purchaseLifetime(activity) },
+                    )
                 }
             }
 
+            Spacer(modifier = Modifier.height(10.dp))
+
             TextButton(
                 onClick = viewModel::restorePurchases,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Restore Purchases")
+                Text(stringResource(R.string.paywall_restore_purchases))
             }
 
             TextButton(
                 onClick = onDismiss,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Maybe Later")
+                Text(
+                    text = stringResource(R.string.paywall_maybe_later),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PaywallHero(onDismiss: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(brush = Brush.verticalGradient(NexusGradients.PrimaryDeep))
+            .instrumentGrid(spacingDp = 28f, alpha = 0.05f)
+            .sheen(alpha = 0.06f)
+            .padding(start = 24.dp, end = 12.dp, top = 12.dp, bottom = 30.dp),
+    ) {
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.WorkspacePremium,
+                        contentDescription = null,
+                        tint = NexusColors.Amber400,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.paywall_pro_label),
+                        style = NexusTypography.Telemetry.copy(letterSpacing = 1.2.sp),
+                        color = Color.White.copy(alpha = 0.92f),
+                    )
+                }
+                IconButton(onClick = onDismiss) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(R.string.paywall_maybe_later),
+                        tint = Color.White.copy(alpha = 0.85f),
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(22.dp))
+            Text(
+                text = stringResource(R.string.text_unlock_nexus_pro),
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.text_supercharge_your_career_journey_with_premium),
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.84f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun PlanCard(
+    index: String,
+    price: String,
+    actionLabel: String,
+    onAction: () -> Unit,
+    featured: Boolean = false,
+    badge: String? = null,
+    caption: String? = null,
+) {
+    val shape = RoundedCornerShape(22.dp)
+    val borderColor = if (featured) {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
+    } else {
+        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .hairline(color = borderColor, cornerRadiusDp = 22f)
+            .padding(18.dp),
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = index,
+                    style = NexusTypography.TelemetryMicro,
+                    color = if (featured) {
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = price,
+                        style = NexusTypography.Stat.copy(fontSize = 26.sp, lineHeight = 30.sp),
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    if (caption != null) {
+                        Text(
+                            text = caption,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                if (badge != null) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f))
+                            .padding(horizontal = 9.dp, vertical = 5.dp),
+                    ) {
+                        Text(
+                            text = badge,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (featured) {
+                NexusButton(
+                    text = actionLabel,
+                    onClick = onAction,
+                    gradient = NexusGradients.PrimaryDeep,
+                )
+            } else {
+                OutlinedButton(
+                    onClick = onAction,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(14.dp),
+                ) {
+                    Text(actionLabel, fontWeight = FontWeight.SemiBold)
+                }
             }
         }
     }

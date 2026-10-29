@@ -1,5 +1,8 @@
 package com.nexus.onboarding
 
+import androidx.compose.ui.res.stringResource
+import com.nexus.onboarding.R
+
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -15,8 +18,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +37,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.nexus.designsystem.theme.NexusColors
+import com.nexus.designsystem.theme.NexusGradients
 
 @Composable
 fun AhaMomentScreen(
@@ -51,9 +59,7 @@ fun AhaMomentScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Brush.verticalGradient(
-                    colors = listOf(Color(0xFF6366F1), Color(0xFF8B5CF6))
-                )
+                Brush.verticalGradient(NexusGradients.PrimaryDeep)
             )
     ) {
         Column(
@@ -71,16 +77,17 @@ fun AhaMomentScreen(
                     .background(Color.White.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "\u2728",
-                    style = MaterialTheme.typography.displayLarge
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(56.dp),
                 )
             }
 
             Spacer(Modifier.height(32.dp))
 
-            Text(
-                text = "Welcome to NEXUS!",
+            Text(text = stringResource(R.string.text_welcome_to_nexus),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -90,7 +97,7 @@ fun AhaMomentScreen(
             Spacer(Modifier.height(16.dp))
 
             Text(
-                text = "Your career dashboard is ready, $displayName",
+                text = stringResource(R.string.aha_dashboard_ready, displayName),
                 style = MaterialTheme.typography.titleMedium,
                 color = Color.White.copy(alpha = 0.85f),
                 textAlign = TextAlign.Center
@@ -106,14 +113,13 @@ fun AhaMomentScreen(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "+$xpAwarded XP",
+                        text = stringResource(R.string.aha_xp_awarded, xpAwarded),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                     Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = "Awarded for completing your profile",
+                    Text(text = stringResource(R.string.text_awarded_for_completing_your_profile),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.7f)
                     )
@@ -122,8 +128,7 @@ fun AhaMomentScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            Text(
-                text = "Start tracking internships, earning certifications,\nand growing your career with AI-powered tools.",
+            Text(text = stringResource(R.string.text_start_tracking_internships_earning),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center
@@ -139,11 +144,10 @@ fun AhaMomentScreen(
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,
-                    contentColor = Color(0xFF6366F1)
+                    contentColor = NexusColors.NexusBlueDeep
                 )
             ) {
-                Text(
-                    "Start Exploring",
+                Text(stringResource(R.string.onboarding_start_exploring),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )

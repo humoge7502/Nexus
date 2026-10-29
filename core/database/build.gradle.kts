@@ -25,7 +25,11 @@ android {
 dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    implementation(libs.bundles.room)
+    // NexusDatabase is public API and extends RoomDatabase, so consumers
+    // (e.g. the app's DataSeeder) need Room's runtime on their compile
+    // classpath. Gradle's implementation scope does not leak it.
+    api(libs.room.runtime)
+    implementation(libs.room.ktx)
     ksp(libs.room.compiler)
     implementation(libs.kotlinx.serialization)
 

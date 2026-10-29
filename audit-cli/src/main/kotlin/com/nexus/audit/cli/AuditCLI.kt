@@ -4,6 +4,7 @@ import com.nexus.audit.analyzers.PhaseAnalyzerRegistry
 import com.nexus.audit.core.AuditOrchestrator
 import com.nexus.audit.core.types.*
 import com.nexus.audit.reporting.AuditReporter
+import kotlinx.coroutines.runBlocking
 import java.io.File
 
 /**
@@ -40,7 +41,7 @@ fun main(args: Array<String>) {
 
     println("Nexus Audit → scanning ${root.absolutePath}")
     val orchestrator = AuditOrchestrator(PhaseAnalyzerRegistry.all())
-    val result = orchestrator.runFullAudit(config)
+    val result = runBlocking { orchestrator.runFullAudit(config) }
 
     val files = AuditReporter.writeReports(config, result)
     println("Deployment recommendation: ${result.deploymentDecision.recommendation}")

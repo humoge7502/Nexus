@@ -1,5 +1,8 @@
 package com.nexus.internships
 
+import androidx.compose.ui.res.stringResource
+import com.nexus.internships.R
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -23,11 +26,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,8 +36,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.text.style.TextAlign
@@ -50,17 +49,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import com.nexus.designsystem.component.NexusChip
+import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.domain.model.Internship
 import com.nexus.domain.model.Location
 import com.nexus.domain.model.Stipend
 import com.nexus.domain.model.Company
 import com.nexus.domain.model.Duration
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun InternshipListScreen(
     onInternshipClick: (String) -> Unit,
@@ -81,16 +80,9 @@ fun InternshipListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Internships", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                )
+            NexusTopBar(
+                title = stringResource(R.string.internships_internships),
+                onBack = onBack,
             )
         }
     ) { padding ->
@@ -105,7 +97,7 @@ fun InternshipListScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                placeholder = { Text("Search internships...") },
+                placeholder = { Text(stringResource(R.string.internships_search_internships)) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -134,8 +126,7 @@ fun InternshipListScreen(
             }
 
             when {
-                uiState is UiState.Loading -> Text(
-                    "Loading internships...",
+                uiState is UiState.Loading -> Text(stringResource(R.string.internships_loading_internships),
                     modifier = Modifier.fillMaxWidth().padding(32.dp),
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -229,7 +220,7 @@ private fun InternshipListItem(
         IconButton(onClick = { isSaved = !isSaved }) {
             Icon(
                 imageVector = if (isSaved) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                contentDescription = "Save",
+                contentDescription = stringResource(R.string.cd_save),
                 tint = if (isSaved) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onSurfaceVariant
             )

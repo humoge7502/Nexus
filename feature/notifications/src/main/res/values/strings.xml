@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notifications_mark_all_read">Mark all read</string>
+    <string name="notifications_notifications">Notifications</string>
+    <string name="notifications_unreadcount">%1$d</string>
+    <string name="notifications_no_notifications_yet">No notifications yet</string>
+    <string name="notifications_we_ll_notify_you_about_new">We\'ll notify you about new opportunities, deadlines, and achievements.</string>
+    <string name="cd_back">Back</string>
+</resources>

@@ -1,5 +1,8 @@
 package com.nexus.ai
 
+import androidx.compose.ui.res.stringResource
+import com.nexus.ai.R
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,16 +21,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.UploadFile
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,11 +34,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
@@ -53,14 +51,13 @@ data class SectionAnalysis(
 )
 
 private val sectionAnalyses = listOf(
-    SectionAnalysis("Contact Info", 95, "Excellent", NexusColors.AuroraGreen),
+    SectionAnalysis("Contact Info", 95, "Excellent", NexusColors.Emerald400),
     SectionAnalysis("Skills Section", 82, "Strong", NexusColors.NexusBlue),
-    SectionAnalysis("Experience", 55, "Needs Work", NexusColors.PlasmaOrange),
-    SectionAnalysis("Quantified Results", 20, "Missing", Color(0xFFEF4444)),
+    SectionAnalysis("Experience", 55, "Needs Work", NexusColors.Amber400),
+    SectionAnalysis("Quantified Results", 20, "Missing", NexusColors.Rose400),
     SectionAnalysis("Keywords", 65, "Partial Match", NexusColors.Amber400),
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AIResumeAnalyzerScreen(
     onBack: () -> Unit = {},
@@ -70,14 +67,9 @@ fun AIResumeAnalyzerScreen(
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
     ) {
-        TopAppBar(
-            title = { Text("Resume Analyzer", fontWeight = FontWeight.Bold) },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+        NexusTopBar(
+            title = stringResource(R.string.ai_resume_analyzer),
+            onBack = onBack,
         )
 
         if (!hasAnalyzed) {
@@ -93,14 +85,14 @@ private fun ResultsSection() {
     Column(modifier = Modifier.padding(16.dp)) {
         NexusCard(gradient = NexusGradients.Primary) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("ATS Score", color = Color.White.copy(alpha = 0.8f))
-                Text("68", style = MaterialTheme.typography.displayLarge,
+                Text(stringResource(R.string.ai_ats_score), color = Color.White.copy(alpha = 0.8f))
+                Text(stringResource(R.string.ai_68), style = MaterialTheme.typography.displayLarge,
                     fontWeight = FontWeight.Bold, color = Color.White)
-                Text("Needs Improvement", color = Color.White.copy(alpha = 0.8f))
+                Text(stringResource(R.string.ai_needs_improvement), color = Color.White.copy(alpha = 0.8f))
             }
         }
         Spacer(Modifier.height(24.dp))
-        Text("Detailed Analysis", style = MaterialTheme.typography.titleMedium,
+        Text(stringResource(R.string.ai_detailed_analysis), style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.height(12.dp))
         for (analysis in sectionAnalyses) {
@@ -111,7 +103,7 @@ private fun ResultsSection() {
                         horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(analysis.name, style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium)
-                        Text("${analysis.score}%", style = MaterialTheme.typography.labelSmall,
+                        Text(stringResource(R.string.ai_score_percent, analysis.score), style = MaterialTheme.typography.labelSmall,
                             color = analysis.color, fontWeight = FontWeight.Bold)
                     }
                     Spacer(Modifier.height(4.dp))
@@ -119,7 +111,7 @@ private fun ResultsSection() {
                         progress = { analysis.score / 100f },
                         modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape),
                         color = analysis.color,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                     )
                 }
             }
@@ -136,7 +128,6 @@ private fun UploadSection(onAnalyze: () -> Unit) {
     ) {
         NexusCard(
             modifier = Modifier.fillMaxWidth(),
-            glassEffect = true,
             shape = NexusShapes.lg,
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -149,25 +140,25 @@ private fun UploadSection(onAnalyze: () -> Unit) {
                         modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.primary)
                 }
                 Spacer(Modifier.height(16.dp))
-                Text("Upload Your Resume", style = MaterialTheme.typography.titleLarge,
+                Text(stringResource(R.string.ai_upload_your_resume), style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(8.dp))
-                Text("PDF format supported", style = MaterialTheme.typography.bodyMedium,
+                Text(stringResource(R.string.ai_pdf_format_supported), style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(24.dp))
                 Box(
                     modifier = Modifier.fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Brush.linearGradient(NexusGradients.Nexus))
+                        .background(MaterialTheme.colorScheme.primary)
                         .clickable { onAnalyze() }
                         .padding(vertical = 14.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text("Choose File", style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.SemiBold, color = Color.White)
+                    Text(stringResource(R.string.ai_choose_file), style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onPrimary)
                 }
                 Spacer(Modifier.height(12.dp))
-                Text("or paste your resume text below",
+                Text(stringResource(R.string.ai_or_paste_your_resume_text_below),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }

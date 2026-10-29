@@ -2,14 +2,12 @@ package com.nexus.common
 
 object Constants {
     const val APP_NAME = "NEXUS"
-    const val BASE_URL = "https://api.nexus.app/"
-    const val LEETCODE_BASE_URL = "https://alfa-leetcode-api.onrender.com/"
     const val DB_NAME = "nexus.db"
     const val DATASTORE_NAME = "nexus_prefs"
 
     const val MIN_SDK = 26
-    const val COMPILE_SDK = 35
-    const val TARGET_SDK = 35
+    const val COMPILE_SDK = 36
+    const val TARGET_SDK = 36
 
     const val STREAK_GRACE_FREEZES = 2
     const val MAX_RETRY_ATTEMPTS = 5

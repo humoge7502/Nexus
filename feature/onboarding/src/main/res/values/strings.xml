@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_career_goal_optional">Career goal (optional)</string>
+    <string name="onboarding_college">College</string>
+    <string name="onboarding_e_g_sde_internship_at_a">e.g. SDE internship at a product company</string>
+    <string name="onboarding_your_name">Your name</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_start_exploring">Start Exploring</string>
+    <string name="text_awarded_for_completing_your_profile">Awarded for completing your profile</string>
+    <string name="text_make_it_yours">Make it yours</string>
+    <string name="text_start_tracking_internships_earning">Start tracking internships, earning certifications,\nand growing your career with AI-powered tools.</string>
+    <string name="text_welcome_to_nexus">Welcome to NEXUS!</string>
+    <string name="text_your_matches_forecasts_and_ai_answers_are">Your matches, forecasts, and AI answers are personalized from this profile. It stays on your device.</string>
+    <string name="onboarding_track_career_title">Track Your\nCareer Journey</string>
+    <string name="onboarding_track_career_subtitle">Monitor internship applications, certifications, and skill growth in one place.</string>
+    <string name="onboarding_smart_productivity_title">Smart\nProductivity</string>
+    <string name="onboarding_smart_productivity_subtitle">AI-powered study plans, deadline reminders, and progress analytics made for CSE students.</string>
+    <string name="onboarding_stand_out_title">Stand Out\nFrom The Crowd</string>
+    <string name="onboarding_stand_out_subtitle">Build your portfolio, earn certifications, connect with opportunities matching your skills.</string>
+    <string name="onboarding_continue">Continue</string>
+    <string name="onboarding_finish_setup">Finish setup</string>
+    <string name="onboarding_year_of_study">Year of study</string>
+    <string name="onboarding_skills_pick_up_to_five">Skills (pick up to 5)</string>
+    <string name="onboarding_what_are_you_looking_for">What are you looking for?</string>
+    <string name="aha_dashboard_ready">Your career dashboard is ready, %1$s</string>
+    <string name="aha_xp_awarded">+%1$d XP</string>
+</resources>

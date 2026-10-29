@@ -69,24 +69,24 @@ fun ShimmerCard(
                 .fillMaxWidth()
                 .height(24.dp)
                 .width(120.dp)
-                .shimmer()
                 .clip(RoundedCornerShape(4.dp))
+                .shimmer()
         )
         Spacer(modifier = Modifier.height(12.dp))
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(16.dp)
-                .shimmer()
                 .clip(RoundedCornerShape(4.dp))
+                .shimmer()
         )
         Spacer(modifier = Modifier.height(8.dp))
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.6f)
                 .height(16.dp)
-                .shimmer()
                 .clip(RoundedCornerShape(4.dp))
+                .shimmer()
         )
         Spacer(modifier = Modifier.height(16.dp))
     }

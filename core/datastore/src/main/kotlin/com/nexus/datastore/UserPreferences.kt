@@ -28,8 +28,6 @@ class UserPreferences @Inject constructor(
         val AMOLED_ENABLED = booleanPreferencesKey("amoled_enabled")
         val ACCENT_COLOR = stringPreferencesKey("accent_color")
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
-        val STUDY_STREAK = intPreferencesKey("study_streak")
-        val LAST_STUDY_DATE = stringPreferencesKey("last_study_date")
         val USER_ID = stringPreferencesKey("user_id")
         val DISPLAY_NAME = stringPreferencesKey("display_name")
         val EMAIL = stringPreferencesKey("email")
@@ -43,6 +41,7 @@ class UserPreferences @Inject constructor(
         val CAREER_GOAL = stringPreferencesKey("career_goal")
         val LAST_LOGIN_DATE = stringPreferencesKey("last_login_date")
         val COLLEGE_TIER = stringPreferencesKey("college_tier")
+        val TOUR_COMPLETED = booleanPreferencesKey("tour_completed")
         val LEETCODE_USERNAME = stringPreferencesKey("leetcode_username")
         val LATEST_INSIGHT_TITLE = stringPreferencesKey("latest_insight_title")
         val LATEST_INSIGHT_BODY = stringPreferencesKey("latest_insight_body")
@@ -69,15 +68,11 @@ class UserPreferences @Inject constructor(
     }
 
     val accentColor: Flow<String> = context.dataStore.data.map { prefs ->
-        prefs[ACCENT_COLOR] ?: "INDIGO"
+        prefs[ACCENT_COLOR] ?: "DEFAULT"
     }
 
     val notificationsEnabled: Flow<Boolean> = context.dataStore.data.map { prefs ->
         prefs[NOTIFICATIONS_ENABLED] ?: true
-    }
-
-    val studyStreak: Flow<Int> = context.dataStore.data.map { prefs ->
-        prefs[STUDY_STREAK] ?: 0
     }
 
     suspend fun setOnboardingCompleted() {
@@ -115,12 +110,6 @@ class UserPreferences @Inject constructor(
     }
 
     suspend fun saveNotificationsEnabled(enabled: Boolean) = setNotificationsEnabled(enabled)
-
-    suspend fun updateStreak(days: Int) {
-        context.dataStore.edit { prefs ->
-            prefs[STUDY_STREAK] = days
-        }
-    }
 
     val authToken: Flow<String?> = context.dataStore.data.map { prefs ->
         prefs[AUTH_TOKEN]?.let { TokenCipher.decrypt(it) }
@@ -184,6 +173,14 @@ class UserPreferences @Inject constructor(
 
     val userTribeId: Flow<String> = context.dataStore.data.map { prefs ->
         prefs[USER_TRIBE_ID] ?: ""
+    }
+
+    val tourCompleted: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[TOUR_COMPLETED] ?: false
+    }
+
+    suspend fun setTourCompleted() {
+        context.dataStore.edit { prefs -> prefs[TOUR_COMPLETED] = true }
     }
 
     val tribeGoal: Flow<String> = context.dataStore.data.map { prefs ->

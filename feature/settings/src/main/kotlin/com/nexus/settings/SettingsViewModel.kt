@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 data class SettingsUiState(
     val themeMode: String = "SYSTEM",
     val amoledEnabled: Boolean = false,
-    val accentColor: String = "INDIGO",
+    val accentColor: String = "DEFAULT",
     val notificationsEnabled: Boolean = true,
     val leetcodeUsername: String = "",
     val githubUsername: String = "",

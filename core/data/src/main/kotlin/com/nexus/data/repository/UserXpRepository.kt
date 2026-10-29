@@ -20,7 +20,10 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import java.time.LocalDate
+import java.time.ZoneId
+import java.util.UUID
 import timber.log.Timber
 
 @Singleton
@@ -87,7 +90,7 @@ class UserXpRepository @Inject constructor(
             analyticsTracker.track("level_up", mapOf("level" to newLevel, "total_xp" to newXP))
         }
 
-        syncXPToFirestore(newXP, newLevel)
+        syncXPToFirestore(newXP)
         return XPAwardResult(amount, newXP, leveledUp, newLevel, source)
     }
 
@@ -119,13 +122,38 @@ class UserXpRepository @Inject constructor(
         else -> Int.MAX_VALUE
     }
 
-private fun syncXPToFirestore(xp: Int, level: Int) {
+private fun syncXPToFirestore(xp: Int) {
         val userId = firebaseAuth.currentUser?.uid ?: return
         firestore.collection("users").document(userId)
-            .update(mapOf("totalXP" to xp, "level" to level, "lastXPSync" to System.currentTimeMillis()))
+            .set(
+                mapOf("totalXP" to xp, "lastXPSync" to System.currentTimeMillis()),
+                SetOptions.merge(),            )
             .addOnFailureListener { Timber.e(it, "Failed to sync XP to Firestore") }
     }
     
+    /** Records at most one NEXUS-score snapshot per calendar day so trends and
+     * weekly deltas are backed by real history rather than placeholders. */
+    suspend fun recordScoreSnapshot(score: Int) {
+        val userId = firebaseAuth.currentUser?.uid ?: return
+        val latest = scoreSnapshotDao.getLatestSnapshot(userId)
+        val startOfDay = LocalDate.now()
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+        if (latest != null && latest.recordedAt >= startOfDay) return
+        val clamped = score.coerceIn(0, 1000)
+        scoreSnapshotDao.insert(
+            ScoreSnapshotEntity(
+                id = UUID.randomUUID().toString(),
+                userId = userId,
+                score = clamped,
+                components = "",
+                delta = latest?.let { clamped - it.score } ?: 0,
+                recordedAt = System.currentTimeMillis(),
+            )
+        )
+    }
+
     override fun getSnapshotsForUser(): Flow<List<ScoreSnapshot>> {
         val userId = firebaseAuth.currentUser?.uid ?: return flowOf(emptyList())
         return scoreSnapshotDao.getHistoryForUser(userId).map { entities ->

@@ -1,25 +1,63 @@
 """
-NEXUS LeetCode Sync - Fetches problem data via alfa-leetcode-api
-Outputs JSON ready for Firestore ingestion
+NEXUS LeetCode Sync - fetches problem metadata from LeetCode's public GraphQL API.
+Outputs JSON ready for Firestore ingestion.
+
+Run manually when refreshing the problem catalog:
+    python scripts/leetcode_sync.py
 """
 
 import json
 from datetime import datetime
-from typing import Optional
+
 import requests
 
-ALFA_LEETCODE_API = "https://alfa-leetcode-api.onrender.com"
+LEETCODE_GRAPHQL = "https://leetcode.com/graphql"
+
+PROBLEMS_QUERY = """
+query problemsetQuestionList($categorySlug: String, $limit: Int, $skip: Int) {
+  questionList(
+    categorySlug: $categorySlug
+    limit: $limit
+    skip: $skip
+    filters: {}
+  ) {
+    totalNum
+    data {
+      questionFrontendId
+      title
+      titleSlug
+      difficulty
+      isPaidOnly
+      acRate
+      topicTags { name }
+    }
+  }
+}
+"""
 
 
 def fetch_problems(limit: int = 50, skip: int = 0) -> list[dict]:
-    """Fetch problems from alfa-leetcode-api."""
-    url = f"{ALFA_LEETCODE_API}/problems"
-    params = {"limit": limit, "skip": skip}
+    """Fetch one page of problems from LeetCode GraphQL."""
     try:
-        resp = requests.get(url, params=params, timeout=15)
+        resp = requests.post(
+            LEETCODE_GRAPHQL,
+            json={
+                "query": PROBLEMS_QUERY,
+                "variables": {"categorySlug": "", "limit": limit, "skip": skip},
+                "operationName": "problemsetQuestionList",
+            },
+            headers={
+                "Content-Type": "application/json",
+                "Referer": "https://leetcode.com",
+            },
+            timeout=15,
+        )
         resp.raise_for_status()
-        data = resp.json()
-        return data.get("problemsetQuestionList", [])
+        payload = resp.json()
+        if payload.get("errors"):
+            print(f"GraphQL error: {payload['errors']}")
+            return []
+        return payload.get("data", {}).get("questionList", {}).get("data", []) or []
     except Exception as e:
         print(f"Failed to fetch problems: {e}")
         return []
@@ -27,30 +65,23 @@ def fetch_problems(limit: int = 50, skip: int = 0) -> list[dict]:
 
 def normalize_problem(raw: dict) -> dict:
     """Normalize a LeetCode problem into NEXUS Firestore format."""
+    tags = raw.get("topicTags") or []
     return {
         "id": raw.get("questionFrontendId", ""),
         "title": raw.get("title", ""),
         "titleSlug": raw.get("titleSlug", ""),
-        "difficulty": raw.get("difficulty", "MEDIUM"),
+        "difficulty": (raw.get("difficulty") or "MEDIUM").upper(),
         "platform": "LeetCode",
         "url": f"https://leetcode.com/problems/{raw.get('titleSlug', '')}/",
-        "topics": [
-            tag.strip() for tag in raw.get("topicTags", "").split(",") if tag.strip()
-        ]
-        if isinstance(raw.get("topicTags"), str)
-        else [
-            t.get("name", "") for t in raw.get("topicTags", []) if isinstance(t, dict)
-        ],
-        "is_premium": raw.get("isPaidOnly", False),
+        "topics": [t.get("name", "") for t in tags if isinstance(t, dict)],
+        "is_premium": bool(raw.get("isPaidOnly", False)),
         "ac_rate": raw.get("acRate", 0),
-        "total_accepted": raw.get("totalAccepted", 0),
-        "total_submissions": raw.get("totalSubmissions", 0),
         "sync_timestamp": datetime.now().isoformat(),
     }
 
 
 def sync_all(max_problems: int = 200) -> list[dict]:
-    """Fetch and normalize all problems, return as Firestore-ready list."""
+    """Fetch and normalize problems, returning a Firestore-ready list."""
     all_normalized = []
     skip = 0
     batch_size = 50

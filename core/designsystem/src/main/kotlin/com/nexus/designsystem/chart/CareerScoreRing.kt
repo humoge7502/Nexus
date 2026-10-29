@@ -17,8 +17,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Box
+import com.nexus.designsystem.R
 
 @Composable
 fun CareerScoreRing(
@@ -33,7 +39,19 @@ fun CareerScoreRing(
         label = "scoreProgress",
     )
     val backgroundColor = MaterialTheme.colorScheme.surfaceVariant
-    Box(modifier = modifier.size(size.dp), contentAlignment = Alignment.Center) {
+    val description = stringResource(R.string.cd_score_ring, score, maxScore)
+    Box(
+        modifier = modifier
+            .size(size.dp)
+            .clearAndSetSemantics {
+                contentDescription = description
+                progressBarRangeInfo = ProgressBarRangeInfo(
+                    current = score.toFloat(),
+                    range = 0f..maxScore.toFloat(),
+                )
+            },
+        contentAlignment = Alignment.Center,
+    ) {
         Canvas(modifier = Modifier.size(size.dp)) {
             val strokeWidth = 16.dp.toPx()
             val canvasSize = this.size
@@ -47,7 +65,7 @@ fun CareerScoreRing(
                 style = Stroke(strokeWidth, cap = StrokeCap.Round),
             )
             val gradient = Brush.sweepGradient(
-                colors = listOf(Color(0xFF4F8EF7), Color(0xFF7B5EA7), Color(0xFF00D9A3)),
+                colors = listOf(Color(0xFF4F8EF7), Color(0xFF06B6D4), Color(0xFF00D9A3)),
             )
             drawArc(
                 brush = gradient,

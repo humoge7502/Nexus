@@ -10,17 +10,21 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    function isValidScore(score) {
-      return score is int && score >= 0 && score <= 1000;
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
     }
 
+    // User profiles: owner only. Server-computed fields (nexusScore, isPro,
+    // level, xp) can only be written by the Admin SDK / admin tokens — a
+    // client must never be able to grant itself Pro or inflate its score.
     match /users/{userId} {
       allow read: if isOwner(userId);
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId)
-        && (!request.resource.data.diff(resource.data).affectedKeys()
-            .hasAny(['nexusScore', 'isPro', 'level']))
-        || request.auth.token.admin == true;
+      allow create: if isOwner(userId)
+        && !request.resource.data.keys().hasAny(['nexusScore', 'isPro', 'level', 'xp', 'xpTotal']);
+      allow update: if (isOwner(userId)
+        && !request.resource.data.diff(resource.data).affectedKeys()
+              .hasAny(['nexusScore', 'isPro', 'level', 'xp', 'xpTotal']))
+        || isAdmin();
       allow delete: if isOwner(userId);
 
       match /goals/{goalId} {
@@ -28,7 +32,7 @@ service cloud.firestore {
       }
       match /achievements/{achievementId} {
         allow read: if isOwner(userId);
-        allow write: if request.auth.token.admin == true;
+        allow write: if isAdmin();
       }
       match /applications/{applicationId} {
         allow read, write: if isOwner(userId);
@@ -38,39 +42,96 @@ service cloud.firestore {
       }
     }
 
+    // User preferences: owner only
+    match /user_preferences/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Catalog collections: readable by authenticated users, writable by admins
     match /opportunities/{opportunityId} {
       allow read: if isAuthenticated();
-      allow write: if request.auth.token.admin == true;
+      allow write: if isAdmin();
     }
-
     match /hackathons/{hackathonId} {
       allow read: if isAuthenticated();
-      allow write: if request.auth.token.admin == true;
+      allow write: if isAdmin();
     }
-
     match /certifications/{certificationId} {
       allow read: if isAuthenticated();
-      allow write: if request.auth.token.admin == true;
+      allow write: if isAdmin();
     }
-
     match /dsaProblems/{problemId} {
       allow read: if isAuthenticated();
-      allow write: if request.auth.token.admin == true;
+      allow write: if isAdmin();
     }
-
     match /roadmaps/{roadmapId} {
       allow read: if isAuthenticated();
-      allow write: if request.auth.token.admin == true;
+      allow write: if isAdmin();
     }
-
-    match /publicProfiles/{userId} {
-      allow read: if true;
-      allow write: if isOwner(userId);
-    }
-
     match /leaderboard/{entry} {
       allow read: if isAuthenticated();
-      allow write: if request.auth.token.admin == true;
+      allow write: if isAdmin();
+    }
+
+    // Public leaderboard profiles: world-readable, owner-writable. Ranking
+    // fields are server-computed so a client cannot promote itself.
+    match /publicProfiles/{userId} {
+      allow read: if true;
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasOnly([
+             'displayName', 'college', 'avatarUrl', 'bio', 'githubUsername',
+             'linkedinUrl', 'skills', 'streak', 'domain', 'totalXP', 'updatedAt'
+           ])
+        && (!('totalXP' in request.resource.data) || request.resource.data.totalXP is int)
+        && (!('streak' in request.resource.data) || request.resource.data.streak is int);
+      allow update: if isOwner(userId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+             'displayName', 'college', 'avatarUrl', 'bio', 'githubUsername',
+             'linkedinUrl', 'skills', 'streak', 'domain', 'totalXP', 'updatedAt'
+           ])
+        && (!('totalXP' in request.resource.data) || request.resource.data.totalXP is int)
+        && (!('streak' in request.resource.data) || request.resource.data.streak is int);
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
+    // Interview outcomes: only anonymized docs are ever readable; creates must
+    // be anonymized and owned by the reporter.
+    match /interview_outcomes/{outcomeId} {
+      allow read: if isAuthenticated() && resource.data.isAnonymized == true;
+      allow create: if isAuthenticated()
+        && request.resource.data.isAnonymized == true
+        && request.resource.data.reporterId == request.auth.uid;
+      allow update: if isAuthenticated()
+        && request.auth.uid == resource.data.reporterId
+        && request.resource.data.isAnonymized == true;
+      allow delete: if isAuthenticated()
+        && request.auth.uid == resource.data.reporterId;
+    }
+
+    // Cohort intelligence: read-only for users, system-written
+    match /cohort_intelligence/{entryId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // AI proxy logs: written only by the Admin SDK; readable by owner/admin.
+    // Client creates are denied so usage accounting cannot be forged.
+    match /ai_proxy_logs/{logId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.uid || isAdmin()
+      );
+      allow write: if false;
+    }
+
+    // Daily quota counters: server-only, so clients cannot reset usage.
+    match /ai_usage/{usageId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow write: if false;
+    }
+
+    // Deny everything else
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

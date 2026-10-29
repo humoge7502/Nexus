@@ -5,11 +5,14 @@ import com.nexus.domain.model.UserProfile
 import com.nexus.domain.usecase.ConversationMemoryManager
 import com.nexus.data.usecase.CareerMemoryManager
 import com.nexus.network.service.AIRequestRouter
+import com.nexus.network.service.AIStreamClient
+import com.nexus.network.service.AIStreamEvent
 import com.nexus.network.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -28,6 +31,7 @@ class NexusAIService @Inject constructor(
     private val okHttpClient: OkHttpClient,
     private val careerMemoryManager: CareerMemoryManager,
     private val aiRequestRouter: AIRequestRouter,
+    private val aiStreamClient: AIStreamClient,
 ) {
     private val jsonMediaType = "application/json".toMediaType()
 
@@ -57,16 +61,20 @@ class NexusAIService @Inject constructor(
             add(ChatMessage("user", message))
         }
 
-        // The proxy is a callable function, not an OpenAI-compatible SSE endpoint.
+        // The proxy is a callable function; the streaming variant is the
+        // authenticated SSE bridge, so tokens render as they arrive.
         if (aiRequestRouter.useProxy) {
-            return flow {
-                val result = aiRequestRouter.chat(
-                    messages.map { mapOf("role" to it.role, "content" to it.content) }
-                )
-                result.fold(
-                    onSuccess = { emit(it) },
-                    onFailure = { throw IllegalStateException("NEXUS AI backend request failed", it) },
-                )
+            return aiStreamClient.stream(
+                messages = messages.map { mapOf("role" to it.role, "content" to it.content) },
+            ).transformWhile { event ->
+                when (event) {
+                    is AIStreamEvent.Delta -> {
+                        emit(event.text)
+                        true
+                    }
+                    is AIStreamEvent.Completed -> false
+                    is AIStreamEvent.Failed -> throw IllegalStateException(event.message)
+                }
             }
         }
         if (!BuildConfig.DEBUG) {

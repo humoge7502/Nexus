@@ -1,12 +1,8 @@
 package com.nexus.growth
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
+import androidx.compose.ui.res.stringResource
+import com.nexus.growth.R
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,42 +17,31 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.nexus.designsystem.component.AnimatedStatCard
 import com.nexus.designsystem.component.IntelligenceCard
-import com.nexus.designsystem.component.IntelligenceCardData
 import com.nexus.designsystem.component.IntelligenceCardDefaults
-import com.nexus.designsystem.component.IntelligenceCardType
 import com.nexus.designsystem.component.NexusCard
-import com.nexus.designsystem.effect.IntelligencePulse
+import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.hairline
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusSpacing
-import androidx.compose.ui.unit.sp
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NexusOracleScreen(onBack: () -> Unit = {}) {
     LazyColumn(
@@ -65,26 +50,20 @@ fun NexusOracleScreen(onBack: () -> Unit = {}) {
         verticalArrangement = Arrangement.spacedBy(NexusSpacing.md),
     ) {
         item {
-            TopAppBar(
+            NexusTopBar(
+                onBack = onBack,
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier.size(28.dp).clip(CircleShape)
-                                .background(Brush.linearGradient(NexusGradients.Purple)),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Text("\uD83D\uDD2E", style = MaterialTheme.typography.labelMedium)
-                        }
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp),
+                        )
                         Spacer(Modifier.width(8.dp))
-                        Text("NEXUS Oracle", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.growth_nexus_oracle), fontWeight = FontWeight.SemiBold)
                     }
                 },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             )
         }
 
@@ -100,21 +79,28 @@ fun NexusOracleScreen(onBack: () -> Unit = {}) {
 
 @Composable
 private fun CareerForecastCard() {
-    NexusCard(
-        gradient = NexusGradients.Purple,
-        shape = NexusShapes.lg,
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(NexusShapes.lg)
+            .background(Brush.linearGradient(NexusGradients.PrimaryDeep), NexusShapes.lg)
+            .hairline(color = Color.White.copy(alpha = 0.14f), cornerRadiusDp = 24f)
+            .padding(horizontal = 20.dp, vertical = 20.dp),
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("YOUR CAREER FORECAST", style = MaterialTheme.typography.labelMedium,
-                color = Color.White.copy(alpha = 0.7f), letterSpacing = 2.sp)
-            Spacer(Modifier.height(NexusSpacing.sm))
+            Text(
+                stringResource(R.string.growth_your_career_forecast),
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White.copy(alpha = 0.72f),
+            )
+            Spacer(Modifier.height(NexusSpacing.md))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
-                ForecastColumn("30 Day", "847", "\u2192 ~890", "+27 projected")
-                ForecastColumn("90 Day", "890", "\u2192 ~945", "Top 5% batch")
+                ForecastColumn("30 day", "847", "\u2192 ~890", "+27 projected")
+                ForecastColumn("90 day", "890", "\u2192 ~945", "Top 5% batch")
             }
         }
     }
@@ -123,13 +109,21 @@ private fun CareerForecastCard() {
 @Composable
 private fun ForecastColumn(label: String, current: String, projected: String, note: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(label, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.6f))
+        Text(label, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.62f))
         Spacer(Modifier.height(4.dp))
-        Text(current, style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.ExtraBold,
-            color = Color.White)
-        Text(projected, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold,
-            color = NexusColors.Amber400)
-        Text(note, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.6f))
+        Text(
+            current,
+            style = MaterialTheme.typography.displayMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+        )
+        Text(
+            projected,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = NexusColors.Cyan400,
+        )
+        Text(note, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.62f))
     }
 }
 
@@ -161,7 +155,7 @@ private fun OracleIntelligenceCards() {
 @Composable
 private fun SkillTrajectoryCard() {
     NexusCard(shape = NexusShapes.lg) {
-        Text("Skill Trajectory", style = MaterialTheme.typography.titleMedium,
+        Text(stringResource(R.string.growth_skill_trajectory), style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.height(NexusSpacing.md))
 
@@ -182,27 +176,22 @@ private fun SkillTrajectoryCard() {
                 Text(name, modifier = Modifier.width(100.dp),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Column(modifier = Modifier.weight(1f)) {
-                    LinearProgressIndicator(
-                        progress = { current },
-                        modifier = Modifier.fillMaxWidth().height(6.dp)
-                            .clip(RoundedCornerShape(3.dp)),
-                        color = NexusColors.Indigo400,
-                        trackColor = NexusColors.Neutral700.copy(alpha = 0.3f),
-                    )
-                    Spacer(Modifier.height(2.dp))
-                    LinearProgressIndicator(
-                        progress = { projected },
-                        modifier = Modifier.fillMaxWidth().height(6.dp)
-                            .clip(RoundedCornerShape(3.dp)),
-                        color = NexusColors.Cyan400.copy(alpha = 0.6f),
-                        trackColor = Color.Transparent,
+                Box(
+                    modifier = Modifier.weight(1f).height(8.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)),
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(current).height(8.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(MaterialTheme.colorScheme.primary),
                     )
                 }
                 Spacer(Modifier.width(NexusSpacing.sm))
-                Text("${(current * 100).toInt()}% \u2192 ${(projected * 100).toInt()}%",
+                Text(stringResource(R.string.growth_projected_range,
+                    (current * 100).toInt(), (projected * 100).toInt()),
                     style = MaterialTheme.typography.labelSmall,
-                    color = NexusColors.Cyan400, fontWeight = FontWeight.SemiBold)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.SemiBold)
             }
         }
     }
@@ -211,7 +200,7 @@ private fun SkillTrajectoryCard() {
 @Composable
 private fun CareerPathProbabilities() {
     NexusCard(shape = NexusShapes.lg) {
-        Text("Career Path Probability", style = MaterialTheme.typography.titleMedium,
+        Text(stringResource(R.string.growth_career_path_probability), style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.height(NexusSpacing.md))
 
@@ -223,7 +212,6 @@ private fun CareerPathProbabilities() {
         )
 
         paths.forEach { (path, prob) ->
-            val barWidth = prob
             Row(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -234,21 +222,19 @@ private fun CareerPathProbabilities() {
                 Box(
                     modifier = Modifier.width(120.dp).height(8.dp)
                         .clip(RoundedCornerShape(4.dp))
-                        .background(NexusColors.Neutral700.copy(alpha = 0.3f)),
+                        .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxWidth(barWidth).height(8.dp)
+                        modifier = Modifier.fillMaxWidth(prob).height(8.dp)
                             .clip(RoundedCornerShape(4.dp))
-                            .background(
-                                Brush.horizontalGradient(listOf(NexusColors.Indigo500, NexusColors.Cyan400))
-                            ),
+                            .background(MaterialTheme.colorScheme.primary),
                     )
                 }
                 Spacer(Modifier.width(NexusSpacing.sm))
-                Text("${(prob * 100).toInt()}%",
+                Text(stringResource(R.string.growth_progress_percent, (prob * 100).toInt()),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.SemiBold,
-                    color = NexusColors.Indigo400)
+                    color = MaterialTheme.colorScheme.onSurface)
             }
         }
     }
@@ -256,20 +242,25 @@ private fun CareerPathProbabilities() {
 
 @Composable
 private fun OpportunityInsightsCard() {
-    NexusCard(
-        gradient = listOf(NexusColors.AuroraGreen.copy(alpha = 0.1f), Color.Transparent),
-        glassEffect = true,
-        shape = NexusShapes.lg,
-    ) {
-        Text("Opportunity Intel", style = MaterialTheme.typography.titleMedium,
+    NexusCard(shape = NexusShapes.lg) {
+        Text(stringResource(R.string.growth_opportunity_intel), style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.height(NexusSpacing.sm))
-        Text("\uD83C\uDF1F Google STEP applications just opened. You're in the top 12% of applicants in your college.",
+        Text(stringResource(R.string.growth_opportunity_google_step),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f))
-        Spacer(Modifier.height(NexusSpacing.sm))
-        Text("Apply in next 48 hours \u2014 applications drop 40% in quality after 72 hours.",
-            style = MaterialTheme.typography.bodySmall,
-            color = NexusColors.Amber400)
+            color = MaterialTheme.colorScheme.onSurface)
+        Spacer(Modifier.height(NexusSpacing.md))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.Timer,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.size(16.dp),
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(stringResource(R.string.growth_apply_in_next_48_hours_u2014),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.tertiary)
+        }
     }
 }

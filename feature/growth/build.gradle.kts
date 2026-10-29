@@ -10,9 +10,10 @@ dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:analytics"))
     implementation(project(":core:domain"))
+    implementation(project(":core:datastore"))
     implementation(project(":core:data"))
     implementation(project(":core:common"))
-    implementation(project(":feature:ai"))
+    implementation(project(":core:network"))
     implementation(platform(libs.compose.bom))
     implementation(libs.bundles.compose)
     implementation(libs.hilt.android)
@@ -26,4 +27,6 @@ dependencies {
     implementation(libs.timber)
 
     implementation(libs.hilt.navigation.compose)
+
+    testImplementation(libs.junit)
 }

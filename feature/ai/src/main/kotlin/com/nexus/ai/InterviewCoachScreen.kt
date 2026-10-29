@@ -1,10 +1,11 @@
 package com.nexus.ai
 
+import androidx.compose.ui.res.stringResource
+import com.nexus.ai.R
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -19,7 +20,9 @@ import com.nexus.common.RateLimitResult
 import com.nexus.datastore.UserPreferences
 import com.nexus.designsystem.component.LoadingState
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.domain.usecase.InterviewIntelligenceEngine
+import com.nexus.network.ai.AIOpenRouterService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -134,7 +137,6 @@ class InterviewCoachViewModel @Inject constructor(
   }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InterviewCoachScreen(
   onBack: () -> Unit = {},
@@ -144,14 +146,9 @@ fun InterviewCoachScreen(
   val questionTypes = listOf("Technical", "Behavioral", "System Design", "HR", "Problem Solving")
 
   Column(modifier = Modifier.fillMaxSize()) {
-    TopAppBar(
-      title = { Text("Interview Coach", fontWeight = FontWeight.Bold) },
-      navigationIcon = {
-        IconButton(onClick = onBack) {
-          Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-        }
-      },
-      colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface),
+    NexusTopBar(
+      title = stringResource(R.string.ai_interview_coach),
+      onBack = onBack,
     )
 
     Column(
@@ -163,8 +160,8 @@ fun InterviewCoachScreen(
       OutlinedTextField(
         value = uiState.targetRole,
         onValueChange = { viewModel.updateTargetRole(it) },
-        label = { Text("Target Role") },
-        placeholder = { Text("e.g., Android Developer, Data Analyst") },
+        label = { Text(stringResource(R.string.ai_target_role)) },
+        placeholder = { Text(stringResource(R.string.ai_e_g_android_developer_data_analyst)) },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
       )
@@ -172,8 +169,8 @@ fun InterviewCoachScreen(
       OutlinedTextField(
         value = uiState.targetCompany,
         onValueChange = viewModel::updateTargetCompany,
-        label = { Text("Target Company (optional)") },
-        placeholder = { Text("e.g., Google, Razorpay") },
+        label = { Text(stringResource(R.string.ai_target_company_optional)) },
+        placeholder = { Text(stringResource(R.string.ai_e_g_google_razorpay)) },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
       )
@@ -197,7 +194,7 @@ fun InterviewCoachScreen(
         }
       }
       Spacer(Modifier.height(12.dp))
-      Text("Question Type:", style = MaterialTheme.typography.labelLarge)
+      Text(stringResource(R.string.ai_question_type), style = MaterialTheme.typography.labelLarge)
       Spacer(Modifier.height(8.dp))
       Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         questionTypes.forEach { type ->
@@ -238,7 +235,7 @@ fun InterviewCoachScreen(
         OutlinedTextField(
           value = uiState.userAnswer,
           onValueChange = { viewModel.updateAnswer(it) },
-          label = { Text("Your Answer") },
+          label = { Text(stringResource(R.string.ai_your_answer)) },
           modifier = Modifier.fillMaxWidth(),
           minLines = 3,
           maxLines = 6,
@@ -249,7 +246,7 @@ fun InterviewCoachScreen(
           modifier = Modifier.fillMaxWidth(),
           enabled = uiState.userAnswer.isNotBlank() && !uiState.isLoading,
         ) {
-          Text("Get Feedback")
+          Text(stringResource(R.string.ai_get_feedback))
         }
       }
 

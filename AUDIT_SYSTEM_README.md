@@ -45,14 +45,14 @@ Audit Pipeline:
 **Purpose**: Implementation of all 8 audit phases  
 **Dependencies**: audit-core, audit-scanner, audit-rules  
 **Key Components**:
-- `RealDataValidator` (Phase 1)
-- `APIIntegrationAuditor` (Phase 2)
+- `RealDataAnalyzer` (Phase 1)
+- `ApiIntegrationAnalyzer` (Phase 2)
 - `ArchitectureAnalyzer` (Phase 3)
-- `UIUXValidator` (Phase 4)
-- `PerformanceProfiler` (Phase 5)
-- `SecurityAuditor` (Phase 6)
-- `DeploymentChecker` (Phase 7)
-- `StartupQualityEvaluator` (Phase 8)
+- `UiUxAnalyzer` (Phase 4)
+- `PerformanceAnalyzer` (Phase 5)
+- `SecurityAnalyzer` (Phase 6)
+- `DeploymentAnalyzer` (Phase 7)
+- `StartupQualityAnalyzer` (Phase 8)
 
 ### audit-rules
 **Purpose**: Rule definitions and validators  
@@ -91,28 +91,27 @@ Audit Pipeline:
 
 ## Running the Audit
 
-### Gradle Task (Planned)
 ```bash
-./gradlew runProductionAudit
+# Preferred: Gradle task (working directory pinned to the repo root)
+./gradlew runAudit
+# or target the module directly with a custom output directory
+./gradlew :audit-cli:runProductionAudit -PauditOut=/tmp/nexus-audit
+
+# Raw CLI (equivalent)
+./gradlew :audit-cli:run --args="--root . --out build/audit --format md,json,html"
 ```
 
-### CLI (Planned)
-```bash
-./audit-cli --project-root . --output-dir ./audit-reports --format markdown,json,html
-```
+Exit code is `2` when the verdict is `NOT_READY` and `0` for
+`READY_WITH_RISKS` / `READY`. CI runs this in the `audit` job and uploads
+`build/audit/**`; the job fails only on `NOT_READY`.
 
 ## Output Reports
 
-The system generates multiple reports:
+Reports are written to `build/audit/`:
 
-1. **Full Production-Readiness Report**: Consolidated findings from all 8 phases
-2. **Real-Data Validation Report**: Feature-by-feature production data status
-3. **API Integration Audit**: External service dependencies and health
-4. **Architecture Stability Report**: Code quality and maintainability
-5. **UI/UX Readiness Report**: User experience findings
-6. **Performance Bottleneck Analysis**: Optimization priorities
-7. **Security Vulnerability Report**: Risk-rated security findings
-8. **Deployment-Blocker Checklist**: Critical fixes before launch
+1. `audit-report.md` — findings by phase, scores, deployment decision
+2. `audit-report.json` — machine-readable results for dashboards
+3. `audit-report.html` — styled report with charts (when `html` is requested)
 
 ## Scoring System
 
@@ -150,14 +149,28 @@ This system validates requirements:
 
 ## Project Status
 
-✅ **Completed**: Task 1 - Project structure and core type definitions  
-⏳ **Pending**: Tasks 2-13 (scanner implementation, phase analyzers, report generation, CLI)
+✅ All six modules implemented: `audit-core`, `audit-scanner`, `audit-rules`,
+`phase-analyzers`, `audit-reporting`, `audit-cli`. The 38 JVM audit tests are
+green and the toolkit is part of CI.
 
-## Next Steps
+**Current verdict on this repository:** `READY` — launch readiness
+**10.0/10**, startup quality 10.0/10, all eight phases at 10.0 and **no
+CRITICAL/HIGH/MEDIUM/LOW findings** (6 INFO notes only).
 
-1. Implement codebase scanner utilities (Task 2)
-2. Implement Phase 1-4 analyzers (Tasks 3-6)
-3. Implement Phase 5-8 analyzers (Tasks 7-10)
-4. Implement report generation system (Task 11)
-5. Implement CLI interface (Task 12)
-6. Write integration tests (Task 13)
+The last LOW (182 hardcoded Compose string literals) was cleared by
+externalizing every `Text("...")` literal into per-module `strings.xml`
+resources (182 literals across 25 modules, including `%1$s`-templated copy).
+
+The former HIGH (Render-hosted LeetCode mirror) is gone: stats now come from
+the `leetcodeStats` callable, which queries LeetCode GraphQL directly with
+username validation, an 8s upstream timeout, and a Firestore TTL cache.
+
+## Analysis rules
+
+- Test source sets (`/test/`, `/androidTest/`, `*Test.kt`) and the audit
+  toolkit's own modules are excluded from scans.
+- Architecture rule ARCH-001 only flags declaring modules under `feature/`;
+  `app → feature` wiring is the intended composition root.
+- A line ending in `audit-allow: ARCH-003` documents a contract-mandated
+  `runBlocking` (used once, in OkHttp's blocking `Authenticator`, bounded to
+  5 seconds).

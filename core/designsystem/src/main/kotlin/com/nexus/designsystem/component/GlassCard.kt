@@ -1,6 +1,6 @@
 package com.nexus.designsystem.component
 
-import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -13,7 +13,7 @@ fun GlassCard(
     modifier: Modifier = Modifier,
     borderColor: Color = Color.White.copy(alpha = 0.1f),
     shape: Shape = NexusShapes.md,
-    content: @Composable BoxScope.() -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
 ) = NexusCard(
     onClick = onClick,
     modifier = modifier,

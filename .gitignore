@@ -46,6 +46,18 @@ build_err.txt
 # Stray local tooling
 check_file.ps1
 
+# Detekt CLI jar downloaded on demand by scripts/detekt.sh
+/detekt-cli-*.jar
+
+# Local run logs
+/*.log
+
+# UI verification screenshots (regenerated locally)
+/screenshots/
+
+# WorkBuddy AI tool state
+/.workbuddy-ai/
+
 # Backend
 /backend/functions/node_modules/
 /backend/functions/lib/

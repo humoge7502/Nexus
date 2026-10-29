@@ -17,9 +17,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -33,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -186,21 +190,36 @@ fun NexusApp(
     ) { step ->
         when (step) {
             "loading" -> { /* splash screen visible */ }
-            "auth" -> AuthScreen(
-                onGoogleSignIn = {
-                    val act = activity ?: return@AuthScreen
-                    authViewModel.initGoogleSignIn(act)
-                    authViewModel.getGoogleSignInIntent()?.let { intent ->
-                        googleSignInLauncher.launch(intent)
-                    }
-                },
-                onGitHubSignIn = { currentStep = "onboarding" },
-                onSkip = { currentStep = "onboarding" }
-            )
-            "onboarding" -> OnboardingScreen(
-                viewModel = onboardingViewModel,
-                onComplete = { currentStep = "main" },
-            )
+            // Auth and onboarding draw their own decorative layers but no
+            // surface, so without this they render on the splash window's
+            // black background and light-theme text turns invisible.
+            "auth" -> Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
+            ) {
+                AuthScreen(
+                    onGoogleSignIn = {
+                        val act = activity ?: return@AuthScreen
+                        authViewModel.initGoogleSignIn(act)
+                        authViewModel.getGoogleSignInIntent()?.let { intent ->
+                            googleSignInLauncher.launch(intent)
+                        }
+                    },
+                    onGitHubSignIn = { currentStep = "onboarding" },
+                    onSkip = { currentStep = "onboarding" }
+                )
+            }
+            "onboarding" -> Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
+            ) {
+                OnboardingScreen(
+                    viewModel = onboardingViewModel,
+                    onComplete = { currentStep = "main" },
+                )
+            }
             "main" -> NexusMainScaffold(
                 pendingDestination = pendingDestination,
                 onDestinationConsumed = onDestinationConsumed,
@@ -216,7 +235,6 @@ fun NexusMainScaffold(
 ) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = backStackEntry?.destination?.route ?: ""
 
     LaunchedEffect(pendingDestination) {
         val destination = pendingDestination ?: return@LaunchedEffect
@@ -224,21 +242,33 @@ fun NexusMainScaffold(
         onDestinationConsumed()
     }
 
-    val topLevelRoutes = setOfNotNull(
-        NexusDestination.Home::class.qualifiedName,
-        NexusDestination.Explore::class.qualifiedName,
-        NexusDestination.AIHub::class.qualifiedName,
-        NexusDestination.Growth::class.qualifiedName,
-        NexusDestination.Profile::class.qualifiedName,
+    // Compare destinations by route class, never by qualifiedName: R8 renames
+    // classes in release builds, so string-based matching silently hides the bar.
+    val topLevelDestinations = listOf(
+        NexusDestination.Home,
+        NexusDestination.Explore,
+        NexusDestination.AIHub,
+        NexusDestination.Growth,
+        NexusDestination.Profile,
     )
+    val topLevelRoutes = listOf(
+        NexusDestination.Home::class,
+        NexusDestination.Explore::class,
+        NexusDestination.AIHub::class,
+        NexusDestination.Growth::class,
+        NexusDestination.Profile::class,
+    )
+    val selectedTab = topLevelRoutes.indexOfFirst { route ->
+        backStackEntry?.destination?.hasRoute(route) == true
+    }
 
     Scaffold(
         bottomBar = {
-            if (currentRoute in topLevelRoutes) {
+            if (selectedTab >= 0) {
                 NexusBottomBar(
-                    currentRoute = currentRoute,
-                    onNavigate = { route ->
-                        navController.navigate(route) {
+                    selectedIndex = selectedTab,
+                    onNavigate = { index ->
+                        navController.navigate(topLevelDestinations[index]) {
                             popUpTo(NexusDestination.Home) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
@@ -273,7 +303,8 @@ fun NexusMainScaffold(
                         onCertificationClick = { id -> navController.navigate(NexusDestination.CertificationDetail(id)) },
                         onViewAllInternships = { navController.navigate(NexusDestination.InternshipList) },
                         onNavigateToProductivity = { navController.navigate(NexusDestination.Productivity) },
-                        onNavigateToProfile = { navController.navigate(NexusDestination.Profile) }
+                        onNavigateToProfile = { navController.navigate(NexusDestination.Profile) },
+                        onNavigateToNotifications = { navController.navigate(NexusDestination.Notifications) }
                     )
                 }
 
@@ -283,7 +314,7 @@ fun NexusMainScaffold(
                         onInternshipClick = { id -> navController.navigate(NexusDestination.InternshipDetail(id)) },
                         onHackathonClick = { id -> navController.navigate(NexusDestination.HackathonDetail(id)) },
                         onCertificationClick = { id -> navController.navigate(NexusDestination.CertificationDetail(id)) },
-                        onBack = { navController.popBackStack() }
+                        showBackArrow = false,
                     )
                 }
                 composable<NexusDestination.HackathonDetail> { entry ->
@@ -297,7 +328,7 @@ fun NexusMainScaffold(
                         onChatClick = { navController.navigate(NexusDestination.AIChat) },
                         onResumeAnalyzer = { navController.navigate(NexusDestination.AIResumeAnalyzer) },
                         onResearchClick = { navController.navigate(NexusDestination.Research) },
-                        onBack = { navController.popBackStack() }
+                        showBackArrow = false,
                     )
                 }
                 composable<NexusDestination.AIChat> {
@@ -314,7 +345,7 @@ fun NexusMainScaffold(
                         onGoals = { navController.navigate(NexusDestination.Goals) },
                         onOracle = { navController.navigate(NexusDestination.Oracle) },
                         onArena = { navController.navigate(NexusDestination.Arena) },
-                        onBack = { navController.popBackStack() }
+                        showBackArrow = false,
                     )
                 }
                 composable<NexusDestination.DSATracker> {
@@ -357,6 +388,7 @@ fun NexusMainScaffold(
                         onSearch = { navController.navigate(NexusDestination.Search) },
                         onCommunity = { navController.navigate(NexusDestination.Community) },
                         onTribe = { navController.navigate(NexusDestination.Tribe) },
+                        showBackArrow = false,
                     )
                 }
                 composable<NexusDestination.Research> {
@@ -369,10 +401,16 @@ fun NexusMainScaffold(
                     )
                 }
                 composable<NexusDestination.Achievements> {
-                    AchievementsScreen(onBack = { navController.popBackStack() })
+                    AchievementsScreen(
+                        onBack = { navController.popBackStack() },
+                        onSettings = { navController.navigate(NexusDestination.Settings) },
+                    )
                 }
                 composable<NexusDestination.Leaderboard> {
-                    LeaderboardScreen(onBack = { navController.popBackStack() })
+                    LeaderboardScreen(
+                        onBack = { navController.popBackStack() },
+                        onOpenArena = { navController.navigate(NexusDestination.Arena) },
+                    )
                 }
                 composable<NexusDestination.Notifications> {
                     NotificationsScreen(onBack = { navController.popBackStack() })
@@ -387,7 +425,10 @@ fun NexusMainScaffold(
                     ProductivityScreen(onBack = { navController.popBackStack() })
                 }
                 composable<NexusDestination.Settings> {
-                    SettingsScreen(onBack = { navController.popBackStack() })
+                    SettingsScreen(
+                        onBack = { navController.popBackStack() },
+                        onGoPro = { navController.navigate(NexusDestination.Paywall) },
+                    )
                 }
                 composable<NexusDestination.CertificationDetail> { entry ->
                     val dest = entry.toRoute<NexusDestination.CertificationDetail>()
@@ -405,7 +446,14 @@ fun NexusMainScaffold(
                     CohortIntelligenceScreen(onBack = { navController.popBackStack() })
                 }
                 composable<NexusDestination.Community> {
-                    CommunityScreen(onBack = { navController.popBackStack() })
+                    CommunityScreen(
+                        onBack = { navController.popBackStack() },
+                        onOpenCohort = { navController.navigate(NexusDestination.CohortIntelligence) },
+                        onOpenTribe = { navController.navigate(NexusDestination.Tribe) },
+                        onOpenHackathon = { hackathonId ->
+                            navController.navigate(NexusDestination.HackathonDetail(hackathonId))
+                        },
+                    )
                 }
                 composable<NexusDestination.InterviewLog> {
                     InterviewLogScreen(onBack = { navController.popBackStack() })

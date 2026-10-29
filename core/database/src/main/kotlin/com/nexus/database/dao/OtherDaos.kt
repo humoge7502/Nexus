@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.nexus.database.entity.CertificationEntity
+import com.nexus.database.entity.CertificationProgressEntity
 import com.nexus.database.entity.StudySessionEntity
 import com.nexus.database.entity.AchievementEntity
 import com.nexus.database.entity.ApplicationEntity
@@ -17,6 +18,27 @@ interface CertificationDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(certs: List<CertificationEntity>)
+
+    @Query("SELECT COUNT(*) FROM certifications")
+    suspend fun countAllCertifications(): Int
+}
+
+@Dao
+interface CertificationProgressDao {
+    @Query("SELECT * FROM certification_progress")
+    fun getAll(): Flow<List<CertificationProgressEntity>>
+
+    @Query("SELECT * FROM certification_progress WHERE certification_id = :certificationId")
+    suspend fun getFor(certificationId: String): CertificationProgressEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(progress: CertificationProgressEntity)
+
+    @Query("SELECT COUNT(*) FROM certification_progress WHERE completed_at IS NOT NULL")
+    fun getCompletedCount(): Flow<Int>
+
+    @Query("DELETE FROM certification_progress WHERE certification_id = :certificationId")
+    suspend fun delete(certificationId: String)
 }
 
 @Dao

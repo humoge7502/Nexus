@@ -8,9 +8,11 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.nexus.analytics.AnalyticsTracker
 import com.nexus.common.Constants
+import com.nexus.data.repository.CertificationRepository
 import com.nexus.data.repository.HackathonRepository
 import com.nexus.data.repository.InternshipRepository
 import com.nexus.data.repository.UserXpRepository
+import com.nexus.domain.model.Certification
 import com.nexus.domain.model.Hackathon
 import com.nexus.domain.model.Internship
 import com.nexus.domain.model.UiState
@@ -32,16 +34,22 @@ import javax.inject.Inject
 data class ExploreUiState(
   val internships: UiState<List<Internship>> = UiState.Loading,
   val hackathons: UiState<List<Hackathon>> = UiState.Loading,
+  val certifications: UiState<List<Certification>> = UiState.Loading,
   val filteredInternships: List<Internship> = emptyList(),
   val filteredHackathons: List<Hackathon> = emptyList(),
+  val filteredCertifications: List<Certification> = emptyList(),
   val searchQuery: String = "",
   val selectedFilters: Set<String> = emptySet(),
-)
+  val selectedCategory: String = CATEGORY_INTERNSHIPS,
+) {
+  val hasActiveSearch: Boolean get() = searchQuery.isNotBlank() || selectedFilters.isNotEmpty()
+}
 
 @HiltViewModel
 class ExploreViewModel @Inject constructor(
   private val internshipRepository: InternshipRepository,
   private val hackathonRepository: HackathonRepository,
+  private val certificationRepository: CertificationRepository,
   private val xpRepository: UserXpRepository,
   private val analyticsTracker: AnalyticsTracker,
 ) : ViewModel() {
@@ -64,6 +72,7 @@ class ExploreViewModel @Inject constructor(
     analyticsTracker.track("screen_view", mapOf("screen" to "explore"))
     loadInternships()
     loadHackathons()
+    loadCertifications()
   }
 
   private fun loadInternships() {
@@ -90,41 +99,37 @@ class ExploreViewModel @Inject constructor(
     }
   }
 
+  private fun loadCertifications() {
+    viewModelScope.launch {
+      certificationRepository.getAllCertifications()
+        .map<List<Certification>, UiState<List<Certification>>> { UiState.Success(it) }
+        .catch { e -> emit(UiState.Error(e.message ?: "Failed to load certifications")) }
+        .collect { state ->
+          _uiState.value = _uiState.value.copy(certifications = state)
+          applyFilters()
+        }
+    }
+  }
+
   private fun applyFilters() {
     val state = _uiState.value
-    val query = state.searchQuery.lowercase()
-
-    val filteredInternships = when (val internships = state.internships) {
-      is UiState.Success -> internships.data.filter { internship ->
-        val matchesQuery = query.isBlank() ||
-          internship.title.contains(query, ignoreCase = true) ||
-          internship.company.name.contains(query, ignoreCase = true) ||
-          internship.tags.any { it.contains(query, ignoreCase = true) }
-        val matchesFilters = state.selectedFilters.isEmpty() ||
-          state.selectedFilters.all { filter ->
-            when (filter) {
-              "remote" -> internship.isRemote
-              "stipend" -> (internship.stipend?.amount ?: 0) > 0
-              else -> true
-            }
-          }
-        matchesQuery && matchesFilters
-      }
-      else -> emptyList()
-    }
-
-    val filteredHackathons = when (val hackathons = state.hackathons) {
-      is UiState.Success -> hackathons.data.filter { hackathon ->
-        query.isBlank() ||
-          hackathon.title.contains(query, ignoreCase = true) ||
-          hackathon.organizer.contains(query, ignoreCase = true)
-      }
-      else -> emptyList()
-    }
+    val query = state.searchQuery
+    val filters = state.selectedFilters
+    val category = state.selectedCategory
 
     _uiState.value = state.copy(
-      filteredInternships = filteredInternships,
-      filteredHackathons = filteredHackathons,
+      filteredInternships = when (val internships = state.internships) {
+        is UiState.Success -> internships.data.filterInternshipsForExplore(query, filters, category)
+        else -> emptyList()
+      },
+      filteredHackathons = when (val hackathons = state.hackathons) {
+        is UiState.Success -> hackathons.data.filterHackathonsForExplore(query, filters, category)
+        else -> emptyList()
+      },
+      filteredCertifications = when (val certifications = state.certifications) {
+        is UiState.Success -> certifications.data.filterCertificationsForExplore(query, filters, category)
+        else -> emptyList()
+      },
     )
   }
 
@@ -132,9 +137,17 @@ class ExploreViewModel @Inject constructor(
     _uiState.value = _uiState.value.copy(
       internships = UiState.Loading,
       hackathons = UiState.Loading,
+      certifications = UiState.Loading,
     )
     loadInternships()
     loadHackathons()
+    loadCertifications()
+  }
+
+  fun selectCategory(category: String) {
+    _uiState.value = _uiState.value.copy(selectedCategory = category)
+    applyFilters()
+    analyticsTracker.track("explore_category_selected", mapOf("category" to category))
   }
 
   fun updateSearchQuery(query: String) {
@@ -153,6 +166,14 @@ class ExploreViewModel @Inject constructor(
     val current = _uiState.value.selectedFilters
     _uiState.value = _uiState.value.copy(
       selectedFilters = if (filter in current) current - filter else current + filter,
+    )
+    applyFilters()
+  }
+
+  fun clearSearchAndFilters() {
+    _uiState.value = _uiState.value.copy(
+      searchQuery = "",
+      selectedFilters = emptySet(),
     )
     applyFilters()
   }

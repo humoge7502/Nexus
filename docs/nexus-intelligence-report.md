@@ -164,7 +164,7 @@ AnimatedContent(bootFlow) {
 | Module | File | Bindings |
 |--------|------|----------|
 | `AppModule` | `app/.../di/AppModule.kt` | `FirebaseAuth`, `FirebaseFirestore`, `FirebaseStorage`, `@Named("googleWebClientId")` |
-| `NetworkModule` | `core/network/.../di/NetworkModule.kt` | `OkHttpClient`, `@NexusApi Retrofit`, `NexusApiService`, `@LeetCodeApi Retrofit`, `LeetCodeApiService` |
+| `NetworkModule` | `core/network/.../di/NetworkModule.kt` | `OkHttpClient`, `@NexusApi Retrofit`, `NexusApiService` |
 | `RepositoryModule` | `core/data/.../di/RepositoryModule.kt` | 7 repositories (Internship, Certification, Hackathon, Goal, DSAProblem, Achievement, AIConversation) |
 | `DatabaseModule` | `core/database/.../di/DatabaseModule.kt` | `NexusDatabase` + 11 DAOs |
 | `DataStoreModule` | `core/datastore/.../di/DataStoreModule.kt` | `DataStore<Preferences>` |
@@ -291,7 +291,7 @@ Additional DataStore instances:
 | `CareerHitRepository` | `core/data/.../CareerHitRepository.kt` | Context | ✅ Real (DataStore-backed) |
 | `StreakRepository` | `core/data/.../StreakRepository.kt` | Context | ✅ Real (DataStore-backed) |
 | `GitHubRepository` | `core/data/.../GitHubRepository.kt` | OkHttp, `@Named("github_token")` | ❌ Dead code, missing DI binding |
-| `LeetCodeRepository` | `core/data/.../LeetCodeRepository.kt` | LeetCodeApiService, DSAProblemDao | ✅ Real |
+| `LeetCodeRepository` | `core/data/.../LeetCodeRepository.kt` | LeetCodeFunctionsService | ✅ Real |
 | `OpportunityRepositoryImpl` | `core/data/.../OpportunityRepositoryImpl.kt` | NexusApiService, 3 DAOs, NetworkMonitor | ✅ Real |
 
 **Verdict:** ✅ Strong data layer with Room, DataStore, and Retrofit. Main gaps: `LeaderboardRepository` returns mock data, `GitHubRepository` is dead code and has missing DI binding.
@@ -307,9 +307,11 @@ Additional DataStore instances:
 - 17 endpoints across internships, certifications, hackathons, goals, DSA, achievements, leaderboard, AI chat, resume analysis, user profile
 - Auth via `AuthInterceptor` (reads token from DataStore, adds `Bearer` header)
 
-**LeetCodeApiService** (`core/network/.../api/LeetCodeApiService.kt`)
-- Base URL: `https://alfa-leetcode-api.onrender.com/`
-- 3 endpoints: user stats, daily problem, problem list
+**LeetCodeFunctionsService** (`core/network/.../service/LeetCodeFunctionsService.kt`)
+- Calls the `leetcodeStats` Firebase callable (auth required)
+- The backend queries LeetCode GraphQL directly, validates the username, enforces an
+  8s upstream timeout, and caches results in Firestore for 10 minutes
+- Client keeps a 10-minute in-memory TTL cache on top; no community mirror is involved
 
 ### 7.2 Network Configuration
 - **OkHttp**: Singleton with logging interceptor (debug), auth interceptor, retry (3 attempts)
@@ -325,7 +327,6 @@ Additional DataStore instances:
 ### 7.4 DTO Layer
 - `ApiDtos.kt` — PaginatedResponse, InternshipDto, HackathonDto, GoalDto, DSAProblemDto, AchievementDto, LeaderboardEntryDto, ChatMessageDto, ChatRequestDto, ChatResponseDto, ResumeRequestDto, ResumeAnalysisDto, UserProfileDto
 - `CertificationDto.kt`
-- `LeetCodeDtos.kt` — LeetCodeUserDto, LeetCodeProblemDto, LeetCodeDailyDto
 
 **Verdict:** ✅ Strong network layer with proper DTOs, auth interceptor, retry logic, and connectivity awareness. Two bugs: missing `ACCESS_NETWORK_STATE` permission and `runBlocking` in `AuthInterceptor`.
 
@@ -354,20 +355,20 @@ Additional DataStore instances:
   the release variant, so a release APK can never carry the upstream key.
 
 **File:** `feature/ai/.../NexusAIService.kt` (180 lines)
-- ✅ Secondary AI service. **Streaming** support (returns `Flow<String>`).
+- ✅ Streaming chat service (returns `Flow<String>`), now backed by the
+  authenticated `streamAI` SSE bridge so deltas render as they arrive.
 - Integrates `ConversationMemoryManager` and `SystemPromptBuilder`
-- **No longer orphaned** — `AIChatViewModel` injects it and routes through
-  `AIRequestRouter`, which forces the `proxyAI` Cloud Function for every non-debug
-  variant. `AIOpenRouterService` still serves the five single-shot screens
-  (Career Insights, Interview Coach, LinkedIn Post, Roadmap, Skill Gap) and
-  `NexusOracleViewModel`.
+- **No longer orphaned** — `AIChatViewModel` injects it and streams through
+  `AIStreamClient` (proxy) or the debug-only direct path. `AIOpenRouterService`
+  still serves the five single-shot screens (Career Insights, Interview Coach,
+  LinkedIn Post, Roadmap, Skill Gap) and `NexusOracleViewModel`.
 
 **File:** `feature/ai/.../SystemPromptBuilder.kt`
 - ✅ Builds personalized system prompts from `UserProfile` (name, college, skills, goals, target companies)
 
 **File:** `feature/ai/.../ConversationMemoryManager.kt` (in `core/domain/.../usecase/`)
 - ✅ Manages conversation context window: keeps last 20 messages, summarizes older ones
-- ✅ Only used by `NexusAIService` (which is orphaned)
+- ✅ Used by `NexusAIService` for the streaming chat path
 
 **File:** `core/common/.../AIRateLimiter.kt`
 - ✅ Free-tier rate limiter: 10 calls/day via DataStore. Pro users bypass.
@@ -377,7 +378,7 @@ Additional DataStore instances:
 
 | Screen | ViewModel | Service | Rate Limited? | Streaming? |
 |--------|-----------|---------|---------------|------------|
-| AIChat | `AIChatViewModel` | AIOpenRouterService | ✅ (10/day) | ❌ |
+| AIChat | `AIChatViewModel` | `NexusAIService` (SSE) | ✅ (10/day) | ✅ |
 | CareerInsights | `CareerInsightsViewModel` | AIOpenRouterService | ❌ | ❌ |
 | InterviewCoach | `InterviewCoachViewModel` | AIOpenRouterService | ❌ | ❌ |
 | LinkedInPost | `LinkedInPostViewModel` | AIOpenRouterService | ❌ | ❌ |
@@ -388,7 +389,8 @@ Additional DataStore instances:
 
 ### 8.3 AI Quality Summary
 - **6/8 screens use real AI** — good
-- **2 parallel service impls** — `AIOpenRouterService` (used) and `NexusAIService` (orphaned, but has streaming)
+- **2 parallel service impls** — `AIOpenRouterService` (single-shot screens) and
+  `NexusAIService` (streaming chat via `streamAI`)
 - **Rate limiting gated to only 1/8 screens** — free-tier abuse possible via 7 other AI screens
 - **Silent failures** — AI returns mock responses on error, user never knows
 
@@ -438,7 +440,7 @@ Additional DataStore instances:
 |--------|--------|-------------|---------|--------|
 | `SyncWorker` | 6h | Unmetered network | Syncs all API data to Room | ✅ |
 | `FirestoreSyncWorker` | 6h | Unmetered network | Syncs Firestore → Room | ✅ |
-| `LeetCodeSyncWorker` | 12h | Connected network | LeetCode stats sync | ⚠️ Uses authToken as username (🔴 bug) |
+| `LeetCodeSyncWorker` | 6h | Connected network | LeetCode stats sync | ✅ Reads `leetcodeUsername`; uses the `leetcodeStats` callable |
 | `StreakWorker` | 24h | None | Updates streak | ✅ |
 | `DeadlineAlertWorker` | 6h | Connected network | Deadline notifications | 🔴 Time unit mismatch bug |
 | `DailyBriefingWorker` | 24h | None (at 7AM) | Morning briefing notification | ✅ |
@@ -460,11 +462,11 @@ val threeDaysFromNow = now + TimeUnit.DAYS.toMillis(3)
 ```
 The comparison `entity.deadline in (now + 1)..threeDaysFromNow` compares epoch-day numbers with millisecond timestamps. This will either never trigger or trigger incorrectly.
 
-**🔴 Bug 2 — LeetCodeSyncWorker uses wrong preference** (`LeetCodeSyncWorker.kt:23`)
-```kotlin
-val username = userPreferences.authToken.first()
-```
-`authToken` stores Firebase auth token, not a LeetCode username. This will send a Firebase JWT string as the LeetCode API username, likely causing API failure.
+**✅ Resolved — LeetCodeSyncWorker wrong preference** (`LeetCodeSyncWorker.kt:23`)
+
+The worker now reads `userPreferences.leetcodeUsername` (a dedicated DataStore key),
+skips with `Result.success()` when it is blank, and refreshes stats through the
+`leetcodeStats` Cloud Function.
 
 ### 10.4 Firestore Sync
 **File:** `core/sync/.../FirestoreSync.kt`
@@ -473,7 +475,7 @@ val username = userPreferences.authToken.first()
 - ✅ Uses `whereGreaterThan("updatedAt", lastSync)` — but if Firestore documents are created without `updatedAt` field, they will never sync
 - ✅ Tracks per-collection sync timestamps in DataStore
 
-**Verdict:** ⚠️ Workers are real implementations with scheduling. Two bugs reduce reliability: time unit mismatch in DeadlineAlertWorker and wrong preference in LeetCodeSyncWorker.
+**Verdict:** ⚠️ Workers are real implementations with scheduling. One reliability bug remains: time unit mismatch in DeadlineAlertWorker. The LeetCode username bug is fixed.
 
 ---
 
@@ -901,7 +903,7 @@ design. The third is now empty in every release variant.
 | # | Bug | File:Line | Impact |
 |---|-----|-----------|--------|
 | 5 | DeadlineAlertWorker compares epoch-days vs epoch-millis | `DeadlineAlertWorker.kt:34` | Deadline notifications unreliable |
-| 6 | LeetCodeSyncWorker uses authToken as username | `LeetCodeSyncWorker.kt:23` | LeetCode sync always fails |
+| 6 | ~~LeetCodeSyncWorker uses authToken as username~~ | `LeetCodeSyncWorker.kt:23` | ✅ Fixed — reads `leetcodeUsername` |
 | 7 | AIRateLimiter only wired to AIChatViewModel | `core/common/.../AIRateLimiter.kt` | Other 6 AI screens bypass rate limits |
 | 8 | AI returns silent mock responses on failure | `AIOpenRouterService.kt:~170` | User never knows AI is down |
 | 9 | `cardFadeIn` constant name typo | `Animation.kt:58` | Should be `cardFadeIn` → `cardFadeIn` (cosmetic, already this) |
@@ -972,7 +974,7 @@ design. The third is now empty in every release variant.
 3. Add `ACCESS_NETWORK_STATE` permission to manifest
 4. Fix `signInWithGoogle()` no-op
 5. Fix `DeadlineAlertWorker` time unit mismatch
-6. Fix `LeetCodeSyncWorker` username preference
+6. ~~Fix `LeetCodeSyncWorker` username preference~~ — done
 7. Remove unused `CAMERA` permission
 8. Generate Baseline Profile via existing `macrobenchmark` module
 
@@ -1005,7 +1007,7 @@ design. The third is now empty in every release variant.
 
 A project with **exceptional foundations** — the architecture, design system, and data layer are genuinely production-grade. However, **execution is uneven**: some features (AI, navigation, auth) are well-implemented while others (gamification, community, portfolio, testing) are surface-level only. The biggest gap is the **XP/level/score system**: it has all the definitions and UI scaffolding but **no actual XP accumulation or level computation**. Fixing this single system would transform the app's retention mechanics.
 
-The **2 runtime crash bugs** (auth no-op, missing DI binding) and **2 reliability bugs** (time unit mismatch, wrong preference) should be fixed before any production release.
+The **2 runtime crash bugs** (auth no-op, missing DI binding) and the **DeadlineAlertWorker time unit mismatch** should be fixed before any production release.
 
 ---
 

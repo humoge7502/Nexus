@@ -94,7 +94,8 @@ class CareerMirrorGenerator @Inject constructor() {
     val direction = when {
       scoreDelta >= 50 -> "accelerating rapidly"
       scoreDelta >= 20 -> "making steady progress"
-      else -> "plateaued"
+      scoreDelta >= 0 -> "plateaued"
+      else -> "slipping"
     }
     val pace = when {
       input.applicationsThisPeriod >= 20 -> "actively"

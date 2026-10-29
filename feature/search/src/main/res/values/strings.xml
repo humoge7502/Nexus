@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_search">Search</string>
+    <string name="search_search_internships_skills_companies">Search internships, skills, companies...</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_clear">Clear</string>
+    <string name="text_no_results_found">No results found</string>
+    <string name="text_recent_searches">Recent Searches</string>
+    <string name="text_searching">Searching...</string>
+</resources>

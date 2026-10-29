@@ -7,6 +7,11 @@ android {
     namespace = "com.nexus.domain"
     compileSdk = 36
     defaultConfig { minSdk = 26 }
+    buildTypes {
+        debug {
+            enableUnitTestCoverage = true
+        }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -30,4 +35,5 @@ dependencies {
     // Unit tests
     testImplementation(libs.junit)
     testImplementation(libs.coroutines.test)
+    testImplementation(libs.mockk)
 }

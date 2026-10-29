@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="internships_internships">Internships</string>
+    <string name="internships_retry">Retry</string>
+    <string name="internships_search_internships">Search internships...</string>
+    <string name="internships_loading_internships">Loading internships...</string>
+    <string name="internships_this_internship_is_no_longer_available">This internship is no longer available.</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_save">Save</string>
+    <string name="cd_remove_from_saved">Remove from saved</string>
+    <string name="cd_share">Share</string>
+    <string name="internships_duration">Duration</string>
+    <string name="internships_stipend">Stipend</string>
+    <string name="internships_location">Location</string>
+    <string name="internships_unpaid">Unpaid</string>
+    <string name="internships_share_internship">Share internship</string>
+    <string name="internships_share_text">%1$s at %2$s</string>
+    <string name="text_about_this_internship">About this Internship</string>
+    <string name="text_apply_now">Apply Now</string>
+    <string name="text_skills_required">Skills Required</string>
+</resources>

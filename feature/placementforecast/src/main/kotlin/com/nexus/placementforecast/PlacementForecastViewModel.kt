@@ -9,6 +9,7 @@ import com.nexus.data.repository.InterviewReportRepository
 import com.nexus.data.repository.PlacementForecastRepository
 import com.nexus.data.repository.PortfolioRepository
 import com.nexus.data.repository.ScoreSnapshotRepository
+import com.nexus.data.repository.StreakRepository
 import com.nexus.datastore.UserPreferences
 import com.nexus.domain.model.ApplicationStatus
 import com.nexus.domain.model.DsaDifficulty
@@ -50,6 +51,7 @@ class PlacementForecastViewModel @Inject constructor(
   private val certificationRepository: CertificationRepository,
   private val portfolioRepository: PortfolioRepository,
   private val interviewReportRepository: InterviewReportRepository,
+  private val streakRepository: StreakRepository,
   private val userPrefs: UserPreferences,
 ) : ViewModel() {
 
@@ -91,7 +93,7 @@ class PlacementForecastViewModel @Inject constructor(
         val signals = coroutineScope {
           val dsaDeferred = async { dsaRepository.getAllProblems().first() }
           val appsDeferred = async { applicationRepository.getAllApplications().first() }
-          val certsDeferred = async { certificationRepository.getCertificationCount() }
+          val certsDeferred = async { certificationRepository.getCompletedCertificationCount().first() }
           val projectsDeferred = async { portfolioRepository.getProjectCount().first() }
           val mocksDeferred = async { interviewReportRepository.getTotalCount() }
 
@@ -124,7 +126,7 @@ class PlacementForecastViewModel @Inject constructor(
             },
             certifications = certsDeferred.await(),
             projects = projectsDeferred.await(),
-            streakDays = userPrefs.studyStreak.first(),
+            streakDays = streakRepository.currentStreak.first().currentStreak,
             skillCount = userPrefs.userSkills.first().size,
             mockInterviews = mocksDeferred.await(),
             collegeTier = userPrefs.collegeTier.first(),

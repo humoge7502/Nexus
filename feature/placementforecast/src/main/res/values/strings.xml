@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="placementforecast_placement_forecast">Placement Forecast</string>
+    <string name="cd_recalculate_forecast">Recalculate forecast</string>
+    <string name="text_factors">Factors:</string>
+    <string name="text_not_enough_activity_yet_solve_problems_log">Not enough activity yet. Solve problems, log applications, and refresh to build a forecast.</string>
+    <string name="text_placement_readiness">Placement readiness</string>
+    <string name="text_top_drivers">Top drivers:</string>
+    <string name="cd_back">Back</string>
+    <string name="placementforecast_current_nexus_score">Current NEXUS Score: %1$d</string>
+    <string name="placementforecast_on_device_model_note">On-device model v%1$s · explainable, no data leaves your device</string>
+    <string name="placementforecast_predicted_probability">%1$d%% predicted probability of placement this season</string>
+    <string name="placementforecast_probability">Probability: %1$d%%</string>
+    <string name="placementforecast_readiness_unchanged">Readiness stays at %1$d%%</string>
+    <string name="placementforecast_readiness_would_move">Readiness would move to %1$d%% (%2$s pts)</string>
+    <string name="placementforecast_tier">Tier: %1$s</string>
+    <string name="placementforecast_what_if_mock_interviews">What if I add %1$d mock interviews?</string>
+</resources>

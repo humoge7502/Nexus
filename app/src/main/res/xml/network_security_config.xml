@@ -4,7 +4,6 @@
         <domain includeSubdomains="true">api.nexus.app</domain>
         <domain includeSubdomains="true">api.nexusapp.in</domain>
         <domain includeSubdomains="true">openrouter.ai</domain>
-        <domain includeSubdomains="true">alfa-leetcode-api.onrender.com</domain>
         <domain includeSubdomains="true">firestore.googleapis.com</domain>
         <domain includeSubdomains="true">firebase.googleapis.com</domain>
         <domain includeSubdomains="true">googleapis.com</domain>

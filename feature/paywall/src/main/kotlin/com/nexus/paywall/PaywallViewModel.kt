@@ -8,10 +8,13 @@ import com.nexus.data.usecase.BillingManager
 import com.nexus.domain.model.BillingState
 import com.nexus.domain.model.ProductTier
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 data class PaywallUiState(
@@ -35,6 +38,7 @@ class PaywallViewModel @Inject constructor(
     init {
         analyticsTracker.track("screen_view", mapOf("screen" to "paywall"))
         observeBillingState()
+        startBilling()
     }
 
     private fun observeBillingState() {
@@ -56,6 +60,23 @@ class PaywallViewModel @Inject constructor(
                     is BillingState.Error -> _uiState.value = _uiState.value.copy(isLoading = false)
                 }
             }
+        }
+    }
+
+    private fun startBilling() {
+        viewModelScope.launch {
+            // Billing may never answer on devices without Play; the screen must still
+            // resolve so its indicative prices render instead of an endless spinner.
+            withTimeoutOrNull(BILLING_TIMEOUT_MS) {
+                try {
+                    billingManager.initialize()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    // Billing unavailable; the indicative prices stay on screen.
+                }
+            }
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
 
@@ -85,5 +106,9 @@ class PaywallViewModel @Inject constructor(
             analyticsTracker.track("paywall_restore")
             billingManager.initialize()
         }
+    }
+
+    private companion object {
+        const val BILLING_TIMEOUT_MS = 6_000L
     }
 }

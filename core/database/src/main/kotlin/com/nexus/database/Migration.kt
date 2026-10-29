@@ -447,3 +447,22 @@ val MIGRATION_8_9 = object : Migration(8, 9) {
     db.execSQL("CREATE INDEX IF NOT EXISTS index_internships_posted_at ON internships(posted_at)")
   }
 }
+
+val MIGRATION_9_10 = object : Migration(9, 10) {
+  override fun migrate(db: SupportSQLiteDatabase) {
+    db.execSQL(
+      """
+      CREATE TABLE IF NOT EXISTS certification_progress (
+        certification_id TEXT NOT NULL PRIMARY KEY,
+        enrolled_at INTEGER,
+        target_completion_date TEXT,
+        completed_modules INTEGER NOT NULL DEFAULT 0,
+        total_modules INTEGER NOT NULL DEFAULT 0,
+        study_hours_logged INTEGER NOT NULL DEFAULT 0,
+        completed_at INTEGER,
+        certificate_url TEXT
+      )
+      """.trimIndent()
+    )
+  }
+}

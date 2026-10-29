@@ -17,14 +17,19 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.sp
+import com.nexus.ui.R
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlin.math.sin
 
 data class RadarAxis(
@@ -33,7 +38,7 @@ data class RadarAxis(
 )
 
 private val nexusGradientStart = Color(0xFF4F8EF7)
-private val nexusGradientEnd = Color(0xFF7B5EA7)
+private val nexusGradientEnd = Color(0xFF06B6D4)
 private val strokeColor = Color(0xFF4F8EF7)
 
 private const val NUM_GRID_LEVELS = 4
@@ -54,7 +59,13 @@ fun NexusSkillRadarChart(
 
     val outlineVariant = MaterialTheme.colorScheme.outlineVariant
     val onSurface = MaterialTheme.colorScheme.onSurface
-    Box(modifier = modifier.aspectRatio(1f)) {
+    val axesSummary = axes.joinToString { "${it.label} ${it.value.roundToInt()}%" }
+    val description = stringResource(R.string.cd_skill_radar_chart, axes.size, axesSummary)
+    Box(
+        modifier = modifier
+            .aspectRatio(1f)
+            .clearAndSetSemantics { contentDescription = description },
+    ) {
         Canvas(modifier = Modifier.aspectRatio(1f)) {
             if (axes.isEmpty()) return@Canvas
 

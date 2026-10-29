@@ -5,9 +5,6 @@ OPENROUTER_API_KEY=sk-or-v1-your-key-here
 GITHUB_CLIENT_ID=your-github-client-id
 GITHUB_CLIENT_SECRET=your-github-client-secret
 
-# LeetCode API URL (third-party, no auth needed)
-LEETCODE_API_URL=https://alfa-leetcode-api.onrender.com/
-
 # 🔴 NEXUS Backend URL — deploy your API server here
 NEXUS_BACKEND_URL=https://api.nexusapp.in/v1
 

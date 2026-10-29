@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="productivity_12">12</string>
+    <string name="productivity_focus">Focus</string>
+    <string name="productivity_start">Start</string>
+    <string name="productivity_pause">Pause</string>
+    <string name="productivity_minutes">Minutes</string>
+    <string name="productivity_pomodoros">Pomodoros</string>
+    <string name="productivity_pomodoroscompleted">%1$d</string>
+    <string name="productivity_streak">Streak</string>
+    <string name="productivity_today_s_progress">Today\'s Progress</string>
+    <string name="productivity_label">%1$s</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_reset">Reset</string>
+    <string name="cd_skip">Skip</string>
+</resources>

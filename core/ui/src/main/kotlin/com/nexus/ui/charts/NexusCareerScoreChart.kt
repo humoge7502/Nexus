@@ -10,6 +10,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import com.nexus.ui.R
 
 private val nexusBlue = Color(0xFF4F8EF7)
 
@@ -19,7 +23,15 @@ fun NexusCareerScoreChart(
     modifier: Modifier = Modifier,
 ) {
     val maxVal = remember(scores) { scores.maxOrNull()?.coerceAtLeast(1f) ?: 1f }
-    Canvas(modifier = modifier) {
+    val description = stringResource(
+        R.string.cd_career_score_chart,
+        scores.size,
+        scores.lastOrNull() ?: 0f,
+        scores.maxOrNull() ?: 0f,
+    )
+    Canvas(
+        modifier = modifier.clearAndSetSemantics { contentDescription = description },
+    ) {
         if (scores.isEmpty()) return@Canvas
         val stepX = size.width / (scores.size - 1).coerceAtLeast(1)
         val path = Path()

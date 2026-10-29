@@ -1,5 +1,8 @@
 package com.nexus.careermirror
 
+import androidx.compose.ui.res.stringResource
+import com.nexus.careermirror.R
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,32 +16,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.NexusCard
-import com.nexus.designsystem.theme.NexusGradients
+import com.nexus.designsystem.component.NexusTopBar
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CareerMirrorScreen(
   onBack: () -> Unit,
@@ -50,21 +44,25 @@ fun CareerMirrorScreen(
     viewModel.generateMirror()
   }
 
+  CareerMirrorContent(uiState = uiState, onBack = onBack)
+}
+
+@Composable
+fun CareerMirrorContent(
+  uiState: CareerMirrorUiState,
+  onBack: () -> Unit,
+) {
   Scaffold(
     topBar = {
-      TopAppBar(
-        title = { Text("Career Mirror", fontWeight = FontWeight.SemiBold) },
-        navigationIcon = {
-          IconButton(onClick = onBack) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-          }
-        },
+      NexusTopBar(
+        title = stringResource(R.string.careermirror_career_mirror),
+        onBack = onBack,
       )
     }
   ) { padding ->
     if (uiState.isLoading) {
       Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Generating your Career Mirror...", style = MaterialTheme.typography.bodyLarge)
+        Text(stringResource(R.string.careermirror_generating_your_career_mirror), style = MaterialTheme.typography.bodyLarge)
       }
       return@Scaffold
     }
@@ -73,9 +71,9 @@ fun CareerMirrorScreen(
     if (mirror == null) {
       Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-          Text("Not enough data yet", style = MaterialTheme.typography.headlineSmall)
+          Text(stringResource(R.string.careermirror_not_enough_data_yet), style = MaterialTheme.typography.headlineSmall)
           Spacer(modifier = Modifier.height(8.dp))
-          Text("Use NEXUS for 90 days to generate your first mirror")
+          Text(stringResource(R.string.careermirror_use_nexus_for_90_days_to))
         }
       }
       return@Scaffold
@@ -104,7 +102,11 @@ fun CareerMirrorScreen(
           )
           Spacer(modifier = Modifier.height(4.dp))
           Text(
-            text = "Score: ${uiState.currentScore} (${if (uiState.scoreDelta >= 0) "+" else ""}${uiState.scoreDelta})",
+            text = stringResource(
+              R.string.careermirror_score_with_delta,
+              uiState.currentScore,
+              if (uiState.scoreDelta >= 0) "+${uiState.scoreDelta}" else uiState.scoreDelta.toString(),
+            ),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -124,7 +126,11 @@ fun CareerMirrorScreen(
       // Key Insights
       if (mirror.keyInsights.isNotEmpty()) {
         NexusCard {
-          Text("Key Insights", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+          Text(
+            stringResource(R.string.careermirror_key_insights),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+          )
           Spacer(modifier = Modifier.height(8.dp))
           mirror.keyInsights.forEach { insight ->
             Row(
@@ -137,7 +143,7 @@ fun CareerMirrorScreen(
                 modifier = Modifier
                   .size(8.dp)
                   .background(
-                    brush = Brush.linearGradient(com.nexus.designsystem.theme.NexusGradients.Nexus),
+                    color = MaterialTheme.colorScheme.primary,
                     shape = MaterialTheme.shapes.small,
                   ),
               )
@@ -154,8 +160,13 @@ fun CareerMirrorScreen(
 
       // Action Items
       if (mirror.actionItems.isNotEmpty()) {
-        NexusCard(gradient = NexusGradients.Success) {
-          Text("Next Quarter Actions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        NexusCard(containerColor = MaterialTheme.colorScheme.primaryContainer) {
+          Text(
+            stringResource(R.string.careermirror_next_quarter_actions),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+          )
           Spacer(modifier = Modifier.height(8.dp))
           mirror.actionItems.forEachIndexed { index, action ->
             Row(
@@ -167,11 +178,13 @@ fun CareerMirrorScreen(
                 text = "${index + 1}.",
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 modifier = Modifier.padding(end = 8.dp),
               )
               Text(
                 text = action,
                 style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
               )
             }
           }

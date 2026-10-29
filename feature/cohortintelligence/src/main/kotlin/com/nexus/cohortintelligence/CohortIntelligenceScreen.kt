@@ -1,5 +1,8 @@
 package com.nexus.cohortintelligence
 
+import androidx.compose.ui.res.stringResource
+import com.nexus.cohortintelligence.R
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,30 +15,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.LoadingState
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.domain.model.CohortEntry
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CohortIntelligenceScreen(
   onBack: () -> Unit,
@@ -47,15 +43,19 @@ fun CohortIntelligenceScreen(
     viewModel.loadData()
   }
 
+  CohortIntelligenceContent(uiState = uiState, onBack = onBack)
+}
+
+@Composable
+fun CohortIntelligenceContent(
+  uiState: CohortUiState,
+  onBack: () -> Unit,
+) {
   Scaffold(
     topBar = {
-      TopAppBar(
-        title = { Text("Cohort Intelligence", fontWeight = FontWeight.SemiBold) },
-        navigationIcon = {
-          IconButton(onClick = onBack) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-          }
-        },
+      NexusTopBar(
+        title = stringResource(R.string.cohortintelligence_cohort_intelligence),
+        onBack = onBack,
       )
     }
   ) { padding ->
@@ -71,9 +71,19 @@ fun CohortIntelligenceScreen(
       ) {
         item {
           NexusCard {
-            Text("College: ${uiState.collegeId}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(
+                stringResource(R.string.cohortintelligence_college, uiState.collegeId),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
             uiState.placementRate?.let { rate ->
-              Text("Estimated Placement Rate: ${(rate * 100).toInt()}%", color = MaterialTheme.colorScheme.primary)
+              Text(
+                stringResource(
+                  R.string.cohortintelligence_estimated_placement_rate,
+                  (rate * 100).toInt(),
+                ),
+                color = MaterialTheme.colorScheme.primary,
+              )
             }
           }
         }
@@ -90,9 +100,9 @@ fun CohortIntelligenceScreen(
 private fun CohortEntryRow(entry: CohortEntry) {
   NexusCard {
     Column {
-      Text(text = "Semester: ${entry.semester}", fontWeight = FontWeight.Bold)
-      Text(text = "Tier: ${entry.companyTier}")
-      Text(text = "Placed students: ${entry.placedCount} / ${entry.totalStudents}")
+      Text(text = stringResource(R.string.cohortintelligence_semester, entry.semester), fontWeight = FontWeight.Bold)
+      Text(text = stringResource(R.string.cohortintelligence_tier, entry.companyTier))
+      Text(text = stringResource(R.string.cohortintelligence_placed_students, entry.placedCount, entry.totalStudents))
     }
   }
 }

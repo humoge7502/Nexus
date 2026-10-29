@@ -1,5 +1,8 @@
 package com.nexus.ui
 
+import androidx.compose.ui.res.stringResource
+import com.nexus.ui.R
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -35,7 +38,7 @@ fun NexusSearchBar(
         trailingIcon = {
             if (query.isNotEmpty()) {
                 IconButton(onClick = { onQueryChange("") }) {
-                    Icon(Icons.Default.Clear, contentDescription = "Clear")
+                    Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.cd_clear))
                 }
             }
         },

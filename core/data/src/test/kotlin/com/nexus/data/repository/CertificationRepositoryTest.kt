@@ -2,7 +2,9 @@ package com.nexus.data.repository
 
 import com.nexus.common.ApiResult
 import com.nexus.database.dao.CertificationDao
+import com.nexus.database.dao.CertificationProgressDao
 import com.nexus.database.entity.CertificationEntity
+import com.nexus.database.entity.CertificationProgressEntity
 import com.nexus.network.api.NexusApiService
 import com.nexus.network.dto.CertificationDto
 import io.mockk.coEvery
@@ -33,11 +35,14 @@ class CertificationRepositoryTest {
     @MockK
     private lateinit var dao: CertificationDao
 
+    @MockK
+    private lateinit var progressDao: CertificationProgressDao
+
     private lateinit var repository: CertificationRepository
 
     @Before
     fun setup() {
-        repository = CertificationRepository(api, dao)
+        repository = CertificationRepository(api, dao, progressDao)
     }
 
     @Test
@@ -51,27 +56,104 @@ class CertificationRepositoryTest {
             )
         )
         every { dao.getAll() } returns flowOf(entities)
+        every { progressDao.getAll() } returns flowOf(emptyList())
 
         val result = repository.getAllCertifications().first()
         assertEquals(1, result.size)
         assertEquals("AWS Certified", result[0].title)
+        assertEquals(2, result[0].skills.size)
     }
 
     @Test
-    fun `getCertificationCount returns dao count`() = runTest {
+    fun `getAllCertifications attaches persisted progress`() = runTest {
         every { dao.getAll() } returns flowOf(
             listOf(
-                CertificationEntity(id = "1", title = "C1", provider = "P1",
+                CertificationEntity(
+                    id = "1", title = "C1", provider = "Coursera",
                     estimatedHours = 10, skills = "S1", rating = 4f,
-                    enrollmentUrl = "https://url", isTrending = false, employerRecognition = 80),
-                CertificationEntity(id = "2", title = "C2", provider = "P2",
-                    estimatedHours = 20, skills = "S2", rating = 3f,
-                    enrollmentUrl = "https://url2", isTrending = false, employerRecognition = 60),
-            )
+                    enrollmentUrl = "https://url", isTrending = false, employerRecognition = 80,
+                ),
+            ),
+        )
+        every { progressDao.getAll() } returns flowOf(
+            listOf(
+                CertificationProgressEntity(
+                    certificationId = "1",
+                    enrolledAt = 1_700_000_000_000,
+                    completedModules = 2,
+                    totalModules = 5,
+                ),
+            ),
         )
 
-        val count = repository.getCertificationCount()
-        assertEquals(2, count)
+        val result = repository.getAllCertifications().first().single()
+        assertNotNull(result.userProgress)
+        assertEquals(2, result.userProgress?.completedModules)
+        assertEquals(0.4f, result.userProgress?.progressPercent ?: 0f, 0.001f)
+    }
+
+    @Test
+    fun `getCompletedCertificationCount returns progress flow count`() = runTest {
+        every { progressDao.getCompletedCount() } returns flowOf(3)
+
+        assertEquals(3, repository.getCompletedCertificationCount().first())
+    }
+
+    @Test
+    fun `startCertification creates progress with module budget`() = runTest {
+        coEvery { progressDao.getFor("1") } returns null
+        coEvery { progressDao.upsert(any()) } just runs
+
+        repository.startCertification("1", estimatedHours = 45)
+
+        coVerify {
+            progressDao.upsert(
+                match {
+                    it.certificationId == "1" &&
+                        it.totalModules == 4 &&
+                        it.completedModules == 0 &&
+                        it.enrolledAt != null
+                },
+            )
+        }
+    }
+
+    @Test
+    fun `startCertification is idempotent when already tracked`() = runTest {
+        coEvery {
+            progressDao.getFor("1")
+        } returns CertificationProgressEntity("1", totalModules = 4)
+
+        repository.startCertification("1", estimatedHours = 40)
+
+        coVerify(exactly = 0) { progressDao.upsert(any()) }
+    }
+
+    @Test
+    fun `completeModule increments progress and marks completion`() = runTest {
+        coEvery {
+            progressDao.getFor("1")
+        } returns CertificationProgressEntity("1", completedModules = 1, totalModules = 2)
+        coEvery { progressDao.upsert(any()) } just runs
+
+        val progress = repository.completeModule("1")
+
+        assertNotNull(progress)
+        assertEquals(2, progress?.completedModules)
+        assertTrue(progress?.isCompleted == true)
+        assertNotNull(progress?.completedAt)
+    }
+
+    @Test
+    fun `completeModule returns null when certification already complete`() = runTest {
+        coEvery {
+            progressDao.getFor("1")
+        } returns CertificationProgressEntity(
+            "1", completedModules = 2, totalModules = 2, completedAt = 1_700_000_000_000,
+        )
+
+        assertEquals(null, repository.completeModule("1"))
+        coVerify(exactly = 0) { progressDao.upsert(any()) }
     }
 
     @Test
@@ -83,6 +165,7 @@ class CertificationRepositoryTest {
         )
         coEvery { api.getRecommendedCertifications(any()) } returns Response.success(dtos)
         coEvery { dao.insertAll(any()) } just runs
+        every { progressDao.getAll() } returns flowOf(emptyList())
 
         val result = repository.refreshCertifications()
         assertTrue(result is ApiResult.Success)

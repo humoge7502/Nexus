@@ -1,9 +1,13 @@
 package com.nexus.certifications
 
+import androidx.compose.ui.res.stringResource
+import com.nexus.certifications.R
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,89 +21,148 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.domain.model.CertProvider
+import com.nexus.domain.model.Certification
+import com.nexus.domain.model.Price
+import com.nexus.domain.model.SkillCategory
+import com.nexus.domain.model.UiState
 
-data class CertItem(
-    val id: String,
-    val title: String,
-    val provider: String,
-    val rating: Float,
-    val hours: Int,
-    val color: Long,
-)
+internal fun CertProvider.accentColor(): Color = when (this) {
+    CertProvider.GOOGLE -> Color(0xFF4285F4)
+    CertProvider.META -> Color(0xFF1877F2)
+    CertProvider.AWS -> Color(0xFFFF9900)
+    CertProvider.MICROSOFT -> Color(0xFF0078D4)
+    CertProvider.IBM -> Color(0xFF0F62FE)
+    CertProvider.COURSERA -> Color(0xFF0056D2)
+    CertProvider.UDEMY -> Color(0xFF5624D0)
+    CertProvider.LINKEDIN -> Color(0xFF0A66C2)
+    CertProvider.OTHER -> Color(0xFF4F8EF7)
+}
 
-val featuredCerts = listOf(
-    CertItem("1", "Android Developer", "Google", 4.8f, 120, 0xFF6366F1),
-    CertItem("2", "AWS Solutions Architect", "Amazon", 4.9f, 180, 0xFFFF9900),
-    CertItem("3", "TensorFlow Developer", "Google", 4.7f, 100, 0xFFFF6F00),
-    CertItem("4", "Meta Frontend Developer", "Meta", 4.6f, 140, 0xFF1877F2),
-    CertItem("5", "Azure AI Engineer", "Microsoft", 4.5f, 160, 0xFF0078D4),
-)
+internal fun Certification.accentColor(): Color {
+    if (provider != CertProvider.OTHER) return provider.accentColor()
+    val label = providerName.lowercase()
+    return when {
+        "google" in label -> CertProvider.GOOGLE.accentColor()
+        "meta" in label || "facebook" in label -> CertProvider.META.accentColor()
+        "aws" in label || "amazon" in label -> CertProvider.AWS.accentColor()
+        "microsoft" in label || "azure" in label -> CertProvider.MICROSOFT.accentColor()
+        "ibm" in label -> CertProvider.IBM.accentColor()
+        "coursera" in label -> CertProvider.COURSERA.accentColor()
+        "udemy" in label -> CertProvider.UDEMY.accentColor()
+        "linkedin" in label -> CertProvider.LINKEDIN.accentColor()
+        else -> CertProvider.OTHER.accentColor()
+    }
+}
 
-@OptIn(ExperimentalMaterial3Api::class)
+internal fun Certification.displayProvider(): String =
+    providerName.ifBlank { provider.displayName }
+
+internal fun Certification.priceLabel(): String = when (val p = price) {
+    is Price.Paid -> "Paid · ${p.currency} ${p.amount}"
+    Price.Free -> "Free"
+}
+
+internal fun SkillCategory.displayLabel(): String = when (this) {
+    SkillCategory.AI_ML -> "AI / ML"
+    SkillCategory.UI_UX -> "UI / UX"
+    else -> name.lowercase()
+        .split('_')
+        .joinToString(" ") { word -> word.replaceFirstChar { it.titlecase() } }
+}
+
 @Composable
 fun CertificationBrowserScreen(
     onBack: () -> Unit,
     onCertClick: (String) -> Unit,
+    viewModel: CertificationViewModel = hiltViewModel(),
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val certifications = (uiState as? UiState.Success<List<Certification>>)?.data.orEmpty()
+
     Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
-            title = { Text("Certifications", fontWeight = FontWeight.Bold) },
-            navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Back") } },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+        NexusTopBar(
+            title = stringResource(R.string.certifications_certifications),
+            onBack = onBack,
         )
 
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 24.dp, vertical = 8.dp)
-        ) {
-            item {
-                Text(
-                    text = "Featured",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    items(featuredCerts) { cert ->
-                        FeaturedCertCard(cert = cert, onClick = { onCertClick(cert.id) })
+        when {
+            certifications.isNotEmpty() -> LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+            ) {
+                val featured = certifications.sortedByDescending { it.rating }.take(6)
+                if (featured.isNotEmpty()) {
+                    item {
+                        Text(text = stringResource(R.string.text_featured),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(bottom = 12.dp),
+                        )
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                            items(featured, key = { it.id }) { cert ->
+                                FeaturedCertCard(cert = cert, onClick = { onCertClick(cert.id) })
+                            }
+                        }
                     }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.certifications_all_certifications, certifications.size),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(bottom = 12.dp, top = 8.dp),
+                    )
+                }
+
+                items(certifications, key = { it.id }) { cert ->
+                    CertListItem(cert = cert, onClick = { onCertClick(cert.id) })
                 }
             }
 
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "All Certifications",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(bottom = 12.dp, top = 8.dp)
-                )
+            uiState is UiState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
 
-            items(featuredCerts + featuredCerts) { cert ->
-                CertListItem(cert = cert, onClick = { onCertClick(cert.id) })
+            uiState is UiState.Error -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        (uiState as UiState.Error).message,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                    )
+                    TextButton(onClick = viewModel::refresh) { Text(stringResource(R.string.certifications_retry)) }
+                }
+            }
+
+            else -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(stringResource(R.string.certifications_no_certifications_available_yet),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
     }
@@ -107,19 +170,20 @@ fun CertificationBrowserScreen(
 
 @Composable
 private fun FeaturedCertCard(
-    cert: CertItem,
+    cert: Certification,
     onClick: () -> Unit,
 ) {
+    val accent = cert.accentColor()
     NexusCard(
         onClick = onClick,
         modifier = Modifier.width(240.dp),
-        gradient = listOf(Color(cert.color), Color(cert.color).copy(alpha = 0.7f)),
+        gradient = listOf(accent, accent.copy(alpha = 0.75f)),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column {
             Text(
-                text = cert.provider,
+                text = cert.displayProvider(),
                 style = MaterialTheme.typography.labelMedium,
-                color = Color.White.copy(alpha = 0.8f)
+                color = Color.White.copy(alpha = 0.85f),
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -128,42 +192,40 @@ private fun FeaturedCertCard(
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
             Spacer(modifier = Modifier.height(12.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         Icons.Default.Star,
                         contentDescription = null,
                         tint = Color(0xFFFBBF24),
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(16.dp),
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${cert.rating}",
+                        text = if (cert.rating > 0f) "${cert.rating}" else stringResource(R.string.certifications_new),
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color.White
+                        color = Color.White,
                     )
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.ArrowForward,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
+                Icon(
+                    Icons.Default.ArrowForward,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp),
+                )
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "${cert.hours} hours",
+                text = stringResource(R.string.certifications_hours_price, cert.estimatedHours, cert.priceLabel()),
                 style = MaterialTheme.typography.labelSmall,
-                color = Color.White.copy(alpha = 0.7f)
+                color = Color.White.copy(alpha = 0.8f),
             )
         }
     }
@@ -171,29 +233,30 @@ private fun FeaturedCertCard(
 
 @Composable
 private fun CertListItem(
-    cert: CertItem,
+    cert: Certification,
     onClick: () -> Unit,
 ) {
+    val accent = cert.accentColor()
     NexusCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(cert.color).copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
+                    .background(accent.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = cert.title.take(2).uppercase(),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = Color(cert.color)
+                    color = accent,
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
@@ -201,21 +264,31 @@ private fun CertListItem(
                 Text(
                     text = cert.title,
                     style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = cert.provider,
+                    text = cert.displayProvider(),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Column(horizontalAlignment = Alignment.End) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFBBF24), modifier = Modifier.size(14.dp))
-                    Spacer(modifier = Modifier.width(2.dp))
-                    Text("${cert.rating}", style = MaterialTheme.typography.labelSmall)
+                if (cert.rating > 0f) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.Star,
+                            contentDescription = null,
+                            tint = Color(0xFFFBBF24),
+                            modifier = Modifier.size(14.dp),
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(stringResource(R.string.certifications_label, cert.rating), style = MaterialTheme.typography.labelSmall)
+                    }
                 }
-                Text("${cert.hours}h", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.certifications_h, cert.estimatedHours),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
     }

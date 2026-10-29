@@ -62,7 +62,8 @@ class WeeklyNarrativeGenerator @Inject constructor(
     }
 
     val body = buildString {
-      append("This week: $weeklyXP XP, $weeklyDSA DSA problems solved. ")
+      val problemWord = if (weeklyDSA == 1) "problem" else "problems"
+      append("This week: $weeklyXP XP, $weeklyDSA DSA $problemWord solved. ")
       when {
         previousWeekXP == 0 -> append("This is your baseline.")
         weeklyXP > previousWeekXP -> append("+${weeklyXP - previousWeekXP} XP more than last week.")
@@ -89,11 +90,11 @@ class WeeklyNarrativeGenerator @Inject constructor(
   }
 
   private fun buildStreakContext(streak: Int): String = when {
-    streak >= 30 -> ". Your $streak-day streak puts you in the top 5% of NEXUS users."
-    streak >= 14 -> ". Your $streak-day streak is genuinely impressive."
-    streak >= 7 -> ". Seven days in — you're building a real habit."
-    streak > 0 -> ". Day $streak — every streak starts here."
-    else -> "."
+    streak >= 30 -> " Your $streak-day streak puts you in the top 5% of NEXUS users."
+    streak >= 14 -> " Your $streak-day streak is genuinely impressive."
+    streak >= 7 -> " Seven days in — you're building a real habit."
+    streak > 0 -> " Day $streak — every streak starts here."
+    else -> ""
   }
 }
 

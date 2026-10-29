@@ -15,7 +15,7 @@ class ApiIntegrationAnalyzer : PhaseAnalyzer {
     override val phaseName = "API Integration"
 
     override suspend fun analyze(context: AuditContext): PhaseResult {
-        val files = ScanUtil.productionFiles(context.sourceFiles)
+        val files = ScanUtil.productionSources(context.sourceFiles)
         val findings = mutableListOf<Finding>()
 
         val retrofit = ScanUtil.grep(files, Regex("""Retrofit|create\(\s*Api::class"""))

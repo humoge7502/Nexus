@@ -8,4 +8,13 @@
     <string name="auth_terms">Terms of Service</string>
     <string name="auth_privacy">Privacy Policy</string>
     <string name="auth_privacy_conjunction"> and </string>
+    <string name="auth_cancel">Cancel</string>
+    <string name="auth_college_email">College email</string>
+    <string name="auth_enter_a_valid_email_address">Enter a valid email address</string>
+    <string name="auth_password_min_8_characters">Password (min 8 characters)</string>
+    <string name="auth_use_at_least_8_characters">Use at least 8 characters</string>
+    <string name="text_engineer_your_future">Engineer Your Future</string>
+    <string name="text_or">or</string>
+    <string name="text_skip_for_now">Skip for now</string>
+    <string name="text_your_ai_powered_career_co_pilot">Your AI-powered career co-pilot</string>
 </resources>

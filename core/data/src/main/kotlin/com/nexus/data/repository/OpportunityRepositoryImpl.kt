@@ -44,6 +44,7 @@ class OpportunityRepositoryImpl @Inject constructor(
     private val certificationDao: CertificationDao,
     private val networkMonitor: NetworkMonitor,
 ) : IOpportunityRepository {
+    override fun getHackathons(): Flow<List<Hackathon>> = hackathonDao.getAll().map { it.map { e -> e.toDomain() } }
     override fun getAllInternships(): Flow<List<Internship>> = internshipDao.getAllInternships().map { it.map { e -> e.toDomain() } }
     override fun getSavedInternships(): Flow<List<Internship>> = internshipDao.getSavedInternships().map { it.map { e -> e.toDomain() } }
     override suspend fun toggleSave(internshipId: String, isSaved: Boolean) = internshipDao.updateSaveStatus(internshipId, isSaved)
@@ -162,11 +163,17 @@ private fun com.nexus.network.dto.InternshipDto.toInternshipEntity() = Internshi
         location = Location(location),
         stipend = stipendAmount?.let { Stipend(it, stipendCurrency) },
         duration = Duration(durationMonths),
-        deadline = LocalDate.ofEpochDay(deadline),
+        deadline = deadlineDate(),
         applyUrl = applyUrl, description = description,
         isRemote = isRemote, isSaved = isSaved,
         postedAt = Instant.ofEpochMilli(postedAt),
+        tags = skillNames(),
+        requiredSkills = skillNames().map { Skill(name = it) }.toImmutableList(),
     )
+
+    private fun InternshipEntity.skillNames() =
+        if (skills.isBlank()) persistentListOf()
+        else skills.split(",").map { it.trim() }.filter { it.isNotBlank() }.toImmutableList()
 
 private fun com.nexus.network.dto.HackathonDto.toHackathonEntity() = HackathonEntity(
   id = id,

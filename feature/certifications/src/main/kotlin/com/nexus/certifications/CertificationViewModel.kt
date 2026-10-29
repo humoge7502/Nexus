@@ -53,15 +53,22 @@ class CertificationViewModel @Inject constructor(
         }
     }
 
-    fun onModuleCompleted(certificationId: String) {
+    fun startCertification(certificationId: String, estimatedHours: Int) {
         viewModelScope.launch {
-            xpRepository.awardXP(Constants.XP_PER_CERT_MODULE, "cert_module_completed")
+            repository.startCertification(certificationId, estimatedHours)
+            analyticsTracker.track("certification_started", mapOf("certification_id" to certificationId))
         }
     }
 
-    fun onCertificationEarned(certificationId: String) {
+    fun completeModule(certificationId: String) {
         viewModelScope.launch {
-            xpRepository.awardXP(Constants.XP_PER_CERTIFICATION, "certification_earned")
+            val progress = repository.completeModule(certificationId) ?: return@launch
+            xpRepository.awardXP(Constants.XP_PER_CERT_MODULE, "cert_module_completed")
+            analyticsTracker.track("cert_module_completed", mapOf("certification_id" to certificationId))
+            if (progress.isCompleted) {
+                xpRepository.awardXP(Constants.XP_PER_CERTIFICATION, "certification_earned")
+                analyticsTracker.track("certification_earned", mapOf("certification_id" to certificationId))
+            }
         }
     }
 }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_clear">Clear</string>
+    <string name="cd_line_chart">Line chart with %1$d points. Latest %2$.1f, peak %3$.1f</string>
+    <string name="cd_bar_chart">Bar chart with %1$d values. Highest %2$.1f</string>
+    <string name="cd_donut_chart">Distribution chart: %1$s</string>
+    <string name="chart_slice_label">%1$s (%2$d%%)</string>
+    <string name="cd_weekly_xp_chart">Weekly XP chart over %1$d days. Today %2$.1f XP, best day %3$.1f XP</string>
+    <string name="cd_dsa_progress_chart">DSA progress. Easy %1$d of %2$d solved, medium %3$d of %4$d, hard %5$d of %6$d</string>
+    <string name="cd_skill_radar_chart">Skill radar with %1$d axes: %2$s</string>
+    <string name="cd_career_score_chart">Career score trend over %1$d snapshots. Latest %2$.1f, highest %3$.1f</string>
+</resources>

@@ -19,6 +19,8 @@ interface HackathonDao {
     suspend fun insertAll(hackathons: List<HackathonEntity>)
     @Query("UPDATE hackathons SET isSaved = :saved WHERE id = :id")
     suspend fun updateSaveStatus(id: String, saved: Boolean)
+    @Query("SELECT COUNT(*) FROM hackathons")
+    suspend fun countAll(): Int
 }
 
 @Dao
@@ -80,6 +82,9 @@ interface DSAProblemDao {
     suspend fun getDailyChallenge(): DSAProblemEntity?
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(problems: List<DSAProblemEntity>)
+
+    @Query("SELECT COUNT(*) FROM dsa_problems")
+    suspend fun countAllProblems(): Int
     @Query("UPDATE dsa_problems SET status = :status, solvedAt = :now WHERE id = :id")
     suspend fun updateStatus(id: String, status: String, now: Long = System.currentTimeMillis())
     @Query("SELECT COUNT(*) FROM dsa_problems WHERE status = 'SOLVED'")

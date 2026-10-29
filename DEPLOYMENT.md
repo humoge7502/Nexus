@@ -40,7 +40,6 @@ This creates `local.properties` with required values:
 | `KEY_ALIAS` | Key alias in keystore | For release builds |
 | `KEY_PASSWORD` | Key password | For release builds |
 | `NEXUS_BACKEND_URL` | Backend API base URL | Optional (default: `https://api.nexusapp.in/v1`) |
-| `LEETCODE_API_URL` | LeetCode API proxy URL | Optional |
 
 ### 1.3 Generate Release Keystore (if not exists)
 

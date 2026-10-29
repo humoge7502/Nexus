@@ -48,7 +48,7 @@ fun NexusChip(
     )
 
     val contentColor by animateColorAsState(
-        targetValue = if (isSelected) Color.White
+        targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimary
         else MaterialTheme.colorScheme.onSurfaceVariant,
         label = "chipContent"
     )

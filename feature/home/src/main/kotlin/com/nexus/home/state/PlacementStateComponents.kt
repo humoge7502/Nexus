@@ -1,5 +1,8 @@
 package com.nexus.home.state
 
+import androidx.compose.ui.res.stringResource
+import com.nexus.home.R
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -89,22 +92,19 @@ fun InterviewModeCard(
         tint = NexusColors.NexusBlue,
         modifier = Modifier.padding(end = 8.dp),
       )
-      Text(
-        "Interview Mode Active",
+      Text(stringResource(R.string.home_interview_mode_active),
         style = MaterialTheme.typography.labelMedium,
         color = NexusColors.NexusBlue,
         fontWeight = FontWeight.SemiBold,
       )
     }
     Spacer(Modifier.height(8.dp))
-    Text(
-      "You have active interviews at $companiesText",
+    Text(stringResource(R.string.home_you_have_active_interviews_at, companiesText),
       style = MaterialTheme.typography.titleSmall,
     )
     if (daysUntil != null && daysUntil > 0) {
       Spacer(Modifier.height(4.dp))
-      Text(
-        "Next interview in $daysUntil days",
+      Text(stringResource(R.string.home_next_interview_in_days, daysUntil),
         style = MaterialTheme.typography.bodySmall,
         color = NexusColors.Warning,
       )
@@ -114,11 +114,11 @@ fun InterviewModeCard(
       androidx.compose.material3.Button(
         onClick = onPrepClick,
         modifier = Modifier.weight(1f),
-      ) { Text("Prep Now") }
+      ) { Text(stringResource(R.string.home_prep_now)) }
       androidx.compose.material3.OutlinedButton(
         onClick = onViewApplicationsClick,
         modifier = Modifier.weight(1f),
-      ) { Text("Applications") }
+      ) { Text(stringResource(R.string.home_applications)) }
     }
   }
 }
@@ -133,14 +133,12 @@ fun PlacementSeasonCard(
   com.nexus.designsystem.component.NexusCard(
     modifier = modifier.fillMaxWidth(),
   ) {
-    Text(
-      "$daysLeft days to placement season",
+    Text(stringResource(R.string.home_days_to_placement_season, daysLeft),
       style = MaterialTheme.typography.titleMedium,
       fontWeight = FontWeight.Bold,
     )
     Spacer(Modifier.height(4.dp))
-    Text(
-      "Focus on applications and interview preparation now.",
+    Text(stringResource(R.string.home_focus_on_applications_and_interview_preparation),
       style = MaterialTheme.typography.bodySmall,
       color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
@@ -152,12 +150,12 @@ fun PlacementSeasonCard(
       ) {
         Icon(Icons.Default.Work, contentDescription = null)
         Spacer(Modifier.width(4.dp))
-        Text("Applications")
+        Text(stringResource(R.string.home_applications))
       }
       androidx.compose.material3.OutlinedButton(
         onClick = onInterviewPrepClick,
         modifier = Modifier.weight(1f),
-      ) { Text("Interview Prep") }
+      ) { Text(stringResource(R.string.home_interview_prep)) }
     }
   }
 }
@@ -172,17 +170,15 @@ fun OfferReceivedCard(
   com.nexus.designsystem.component.NexusCard(
     modifier = modifier.fillMaxWidth(),
   ) {
-    Text(
-      "Offer Received!",
+    Text(stringResource(R.string.home_offer_received),
       style = MaterialTheme.typography.titleMedium,
       fontWeight = FontWeight.Bold,
       color = NexusColors.Success,
     )
     Spacer(Modifier.height(4.dp))
-    Text("$company — $role", style = MaterialTheme.typography.bodyMedium)
+    Text(stringResource(R.string.home_company_role, company, role), style = MaterialTheme.typography.bodyMedium)
     Spacer(Modifier.height(8.dp))
-    Text(
-      "Evaluate your offer with NEXUS AI to understand market positioning.",
+    Text(stringResource(R.string.home_evaluate_your_offer_with_nexus_ai),
       style = MaterialTheme.typography.bodySmall,
       color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
@@ -190,6 +186,6 @@ fun OfferReceivedCard(
     androidx.compose.material3.Button(
       onClick = onEvaluateClick,
       modifier = Modifier.fillMaxWidth(),
-    ) { Text("Evaluate Offer") }
+    ) { Text(stringResource(R.string.home_evaluate_offer)) }
   }
 }

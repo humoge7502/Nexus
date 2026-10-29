@@ -1,5 +1,8 @@
 package com.nexus.achievements
 
+import androidx.compose.ui.res.stringResource
+import com.nexus.achievements.R
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,26 +19,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,56 +37,48 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.material3.CircularProgressIndicator
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.domain.model.LeaderboardEntry
 import com.nexus.domain.repository.LeaderboardTab
-import kotlinx.collections.immutable.persistentListOf
 
-private val tabs = persistentListOf("Global", "College", "Friends", "Domain: DSA")
-
-
-private val tabEntries = persistentListOf(
-    "Global" to LeaderboardTab.GLOBAL,
-    "College" to LeaderboardTab.COLLEGE,
-    "Friends" to LeaderboardTab.FRIENDS,
-    "Domain: DSA" to LeaderboardTab.DOMAIN_DSA,
+private val tabEntries = listOf(
+    R.string.leaderboard_tab_global to LeaderboardTab.GLOBAL,
+    R.string.leaderboard_tab_college to LeaderboardTab.COLLEGE,
+    R.string.leaderboard_tab_friends to LeaderboardTab.FRIENDS,
+    R.string.leaderboard_tab_domain_dsa to LeaderboardTab.DOMAIN_DSA,
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LeaderboardScreen(
     onBack: () -> Unit = {},
+    onOpenArena: () -> Unit = {},
     viewModel: LeaderboardViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val selectedTab = tabEntries.indexOfFirst { it.second == uiState.selectedTab }.coerceAtLeast(0)
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
-            title = { Text("Leaderboard", fontWeight = FontWeight.Bold) },
-            navigationIcon = {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+        NexusTopBar(
+            title = stringResource(R.string.achievements_leaderboard),
+            onBack = onBack,
         )
 
         ScrollableTabRow(
             selectedTabIndex = selectedTab,
             containerColor = Color.Transparent,
-            contentColor = NexusColors.Indigo400,
+            contentColor = MaterialTheme.colorScheme.primary,
             edgePadding = 20.dp,
             modifier = Modifier.padding(bottom = 8.dp),
         ) {
-            tabEntries.forEachIndexed { index, (title, tab) ->
+            tabEntries.forEachIndexed { index, (labelRes, tab) ->
                 Tab(
                     selected = selectedTab == index,
                     onClick = { viewModel.selectTab(tab) },
                     text = {
                         Text(
-                            text = title,
+                            text = stringResource(labelRes),
                             fontWeight = if (selectedTab == index) FontWeight.SemiBold else FontWeight.Normal,
                         )
                     },
@@ -100,63 +86,8 @@ fun LeaderboardScreen(
             }
         }
 
-        val currentUser = uiState.currentUser
-
-        if (currentUser != null) NexusCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            gradient = NexusGradients.PrimaryDeep,
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.2f)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = currentUser.userName.take(1),
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        fontSize = 20.sp,
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = currentUser.userName,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                    )
-                    Text(
-                        text = "Rank #${currentUser.rank}",
-                        color = Color.White.copy(alpha = 0.7f),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = "${currentUser.score}",
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        fontSize = 20.sp,
-                    )
-                    Text(
-                        text = "\u2191 +12",
-                        color = NexusColors.Emerald400,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Medium,
-                    )
-                }
-            }
+        uiState.currentUser?.let { currentUser ->
+            CurrentUserCard(currentUser)
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -166,31 +97,18 @@ fun LeaderboardScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                CircularProgressIndicator(color = NexusColors.Indigo400)
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
 
-            uiState.entries.isEmpty() -> Box(
-                modifier = Modifier.fillMaxSize().padding(32.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = "No one here yet.\nEarn XP and claim Rank #1 on this leaderboard!",
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            uiState.entries.isEmpty() -> LeaderboardEmptyState(onOpenArena)
 
             else -> LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                itemsIndexed(uiState.entries, key = { _, entry -> entry.userId }) { index, entry ->
-                    LeaderboardRow(
-                        entry = entry,
-                        isTop3 = index < 3,
-                    )
+                itemsIndexed(uiState.entries, key = { _, entry -> entry.userId }) { _, entry ->
+                    LeaderboardRow(entry = entry)
                 }
             }
         }
@@ -198,55 +116,119 @@ fun LeaderboardScreen(
 }
 
 @Composable
+private fun CurrentUserCard(currentUser: LeaderboardEntry) {
+    NexusCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        gradient = NexusGradients.PrimaryDeep,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = currentUser.userName.take(1),
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    fontSize = 20.sp,
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = currentUser.userName,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                )
+                Text(
+                    text = stringResource(R.string.leaderboard_rank, currentUser.rank),
+                    color = Color.White.copy(alpha = 0.7f),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = "${currentUser.score}",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    fontSize = 20.sp,
+                )
+                Text(
+                    text = stringResource(R.string.leaderboard_xp),
+                    color = Color.White.copy(alpha = 0.7f),
+                    style = MaterialTheme.typography.labelSmall,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LeaderboardEmptyState(onOpenArena: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = stringResource(R.string.leaderboard_empty),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = onOpenArena) {
+            Text(stringResource(R.string.leaderboard_open_arena))
+        }
+    }
+}
+
+@Composable
 private fun LeaderboardRow(
     entry: LeaderboardEntry,
-    isTop3: Boolean,
 ) {
-    val rankEmoji = when (entry.rank) {
-        1 -> "\uD83E\uDD47"
-        2 -> "\uD83E\uDD48"
-        3 -> "\uD83E\uDD49"
+    val rankColor = when (entry.rank) {
+        1 -> NexusColors.Amber400
+        2 -> NexusColors.Neutral300
+        3 -> NexusColors.Amber600
         else -> null
     }
-
-    val bgBrush = if (entry.isCurrentUser) {
-        Brush.horizontalGradient(
-            listOf(
-                NexusColors.Indigo500.copy(alpha = 0.15f),
-                Color.Transparent,
-            )
-        )
-    } else null
+    val college = entry.college
 
     NexusCard(
         modifier = Modifier.fillMaxWidth(),
-        glassEffect = !entry.isCurrentUser,
+        containerColor = if (entry.isCurrentUser) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else null,
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .then(
-                    if (bgBrush != null) Modifier.background(
-                        brush = bgBrush,
-                        shape = RoundedCornerShape(16.dp),
-                    ) else Modifier
-                ),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (rankEmoji != null) {
-                Text(text = rankEmoji, fontSize = 28.sp)
-            } else {
-                Box(
-                    modifier = Modifier.size(32.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "#${entry.rank}",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(rankColor?.copy(alpha = 0.16f) ?: Color.Transparent),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "#${entry.rank}",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = rankColor ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -255,22 +237,13 @@ private fun LeaderboardRow(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(
-                        if (isTop3) {
-                            Brush.linearGradient(
-                                listOf(
-                                    NexusColors.Amber500,
-                                    NexusColors.Amber400,
-                                )
-                            )
-                        } else SolidColor(NexusColors.Neutral700)
-                    ),
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = entry.userName.take(1),
+                    text = entry.userName.take(1).uppercase(),
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.primary,
                 )
             }
 
@@ -282,11 +255,13 @@ private fun LeaderboardRow(
                     fontWeight = FontWeight.SemiBold,
                     style = MaterialTheme.typography.bodyMedium,
                 )
-                Text(
-                    text = "NEXUS University",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                if (!college.isNullOrBlank()) {
+                    Text(
+                        text = college,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
 
             Column(horizontalAlignment = Alignment.End) {
