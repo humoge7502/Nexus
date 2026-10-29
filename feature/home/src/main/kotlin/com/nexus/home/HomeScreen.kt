@@ -104,12 +104,14 @@ fun HomeScreen(
             }
 
             item {
-                HomeTelemetry(
-                    applications = uiState.stats.totalApplications,
-                    certs = uiState.stats.completedCerts,
-                    streak = uiState.stats.currentStreak,
-                    interviews = uiState.stats.interviewsScheduled,
-                )
+                RevealOnLoad(delayMillis = 110) {
+                    HomeTelemetry(
+                        applications = uiState.stats.totalApplications,
+                        certs = uiState.stats.completedCerts,
+                        streak = uiState.stats.currentStreak,
+                        interviews = uiState.stats.interviewsScheduled,
+                    )
+                }
             }
 
             item {
@@ -123,8 +125,9 @@ fun HomeScreen(
             }
 
             item {
-                when {
-                    uiState.todayOpportunities.isNotEmpty() -> LazyRow(
+                RevealOnLoad(delayMillis = 180) {
+                    when {
+                        uiState.todayOpportunities.isNotEmpty() -> LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         contentPadding = PaddingValues(horizontal = 24.dp)
                     ) {
@@ -155,6 +158,7 @@ fun HomeScreen(
                         onAction = onViewAllInternships,
                         modifier = Modifier.padding(horizontal = 24.dp)
                     )
+                    }
                 }
             }
 

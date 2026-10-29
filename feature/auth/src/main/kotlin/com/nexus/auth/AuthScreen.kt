@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.common.ApiResult
+import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.theme.NexusGradients
 
 @Composable
@@ -126,20 +127,13 @@ fun AuthScreen(
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            Button(
+            NexusButton(
+                text = stringResource(R.string.auth_google),
                 onClick = onGoogleSignIn,
-                modifier = Modifier.fillMaxWidth().height(56.dp),
+                gradient = NexusGradients.Ascent,
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                ),
-            ) {
-                Text(text = stringResource(R.string.auth_google),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                )
-            }
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
