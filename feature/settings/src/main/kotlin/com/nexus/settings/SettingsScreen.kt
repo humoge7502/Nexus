@@ -221,7 +221,15 @@ fun SettingsScreen(
             SettingsItem(
                 icon = Icons.Default.Shield,
                 title = stringResource(R.string.settings_privacy_title),
-                subtitle = stringResource(R.string.settings_privacy_subtitle)
+                subtitle = stringResource(R.string.settings_privacy_subtitle),
+                onClick = {
+                    context.startActivity(
+                        android.content.Intent(
+                            android.content.Intent.ACTION_VIEW,
+                            android.net.Uri.parse(com.nexus.common.Constants.PRIVACY_POLICY_URL),
+                        ),
+                    )
+                },
             )
 
             SettingsItem(

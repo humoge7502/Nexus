@@ -42,6 +42,7 @@ object Constants {
     const val ANIMATION_DURATION_FAST = 300
     const val ANIMATION_DURATION_NORMAL = 600
     const val PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.nexus.app"
+    const val PRIVACY_POLICY_URL = "https://humoge7502.github.io/Nexus/privacy-policy.html"
 
 
     val LEVEL_THRESHOLDS = mapOf(
