@@ -71,3 +71,6 @@ database-debug.log
 pubsub-debug.log
 __pycache__/
 *.pyc
+
+# Security-scanner hook state (session-local, never part of the project)
+/.mimosa/
