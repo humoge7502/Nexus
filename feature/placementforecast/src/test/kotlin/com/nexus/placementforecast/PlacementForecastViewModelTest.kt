@@ -65,7 +65,7 @@ class PlacementForecastViewModelTest {
         companyTier = "TIER_1_PRODUCT",
         probabilityPct = 72,
         scoreGap = 30,
-        gapItems = listOf("NEXUS Score is 30 points below tier threshold (750)"),
+        gapItems = listOf("Ascent Score is 30 points below tier threshold (750)"),
         velocityTrend = "rising",
         cohortBenchmark = "40/100 placed (40%)",
         coachMessage = "On track but needs focused push.",

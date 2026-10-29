@@ -54,7 +54,7 @@ class NexusAIService @Inject constructor(
         val contextMessages = conversationMemoryManager.buildContext(history)
         val systemPrompt = userProfile?.let {
             systemPromptBuilder.buildSystemPrompt(it)
-        } ?: "You are NEXUS AI, a career assistant for CSE students. Help with internships, certifications, DSA, career advice, skill development, and interview prep. Be concise, practical, and encouraging."
+        } ?: "You are Ascent AI, a career assistant for CSE students. Help with internships, certifications, DSA, career advice, skill development, and interview prep. Be concise, practical, and encouraging."
         val messages = buildList {
             add(ChatMessage("system", systemPrompt))
             addAll(contextMessages.map { ChatMessage(it.role.name.lowercase(), it.content) })
@@ -102,7 +102,7 @@ class NexusAIService @Inject constructor(
             .url(aiRequestRouter.getEndpoint())
             .addHeader("Authorization", aiRequestRouter.buildAuthHeader())
             .addHeader("HTTP-Referer", "https://nexus.app")
-            .addHeader("X-Title", "NEXUS Career App")
+            .addHeader("X-Title", "Ascent Career App")
             .post(jsonBody.toString().toRequestBody(jsonMediaType))
             .build()
 

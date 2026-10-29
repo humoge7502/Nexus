@@ -71,7 +71,7 @@ data class AITool(
 
 private val aiTools = listOf(
     AITool("Deep Research", "Cited answers + smart follow-ups", Icons.Default.Search, "research"),
-    AITool("NEXUS AI Chat", "Your personal career mentor", Icons.Default.Bolt, "chat"),
+    AITool("Ascent AI Chat", "Your personal career mentor", Icons.Default.Bolt, "chat"),
     AITool("Resume Analyzer", "Get ATS score + tips", Icons.Default.Description, "resume"),
     AITool("Roadmap Generator", "Personalized learning path", Icons.Default.Map, "roadmap"),
     AITool("LinkedIn Post Gen", "Auto-craft achievements", Icons.Default.PostAdd, "linkedin"),

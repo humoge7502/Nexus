@@ -8,9 +8,9 @@
     <string name="profile_achievement_unlocked">Unlocked</string>
     <string name="profile_skills">Skills</string>
     <string name="profile_view_all">View all</string>
-    <string name="profile_nexus_toolkit">NEXUS Toolkit</string>
+    <string name="profile_nexus_toolkit">Ascent Toolkit</string>
     <string name="cd_back">Back</string>
-    <string name="cd_nexus_pro">NEXUS Pro</string>
+    <string name="cd_nexus_pro">Ascent Pro</string>
     <string name="cd_settings">Settings</string>
     <string name="profile_default_name">CSE Student</string>
     <string name="profile_year">Year %1$d</string>
@@ -43,5 +43,5 @@
     <string name="profile_tool_tribe">Tribe</string>
     <string name="profile_tool_tribe_desc">Small accountability group</string>
     <string name="profile_tool_leaderboard">Leaderboard</string>
-    <string name="profile_tool_leaderboard_desc">Compete on the NEXUS score</string>
+    <string name="profile_tool_leaderboard_desc">Compete on the Ascent score</string>
 </resources>

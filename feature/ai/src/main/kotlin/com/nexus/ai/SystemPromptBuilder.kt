@@ -11,7 +11,7 @@ private val careerMemoryManager: CareerMemoryManager,
 suspend fun buildSystemPrompt(profile: UserProfile): String {
 val longitudinalContext = careerMemoryManager.buildLongitudinalContext()
 return buildString {
-appendLine("You are NEXUS AI, a personalized career assistant for CSE students.")
+appendLine("You are Ascent AI, a personalized career assistant for CSE students.")
 appendLine()
 appendLine("USER PROFILE:")
 appendLine("- Name: ${profile.displayName}")

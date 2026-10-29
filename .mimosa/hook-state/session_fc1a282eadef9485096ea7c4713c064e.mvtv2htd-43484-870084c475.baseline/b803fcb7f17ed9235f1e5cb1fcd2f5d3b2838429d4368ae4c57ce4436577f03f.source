@@ -1,0 +1,413 @@
+name: NEXUS CI Pipeline
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  backend:
+    name: Backend Typecheck & Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/functions/package.json
+      - name: Install, build & test
+        working-directory: backend/functions
+        run: |
+          npm ci
+          npm run build
+          npm test
+
+  ml:
+    name: ML Pipeline Reproducibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Regenerate dataset and verify it is unchanged
+        working-directory: ml/placement_readiness
+        run: |
+          pip install --quiet numpy scikit-learn
+          python generate_dataset.py
+          python - <<'PY'
+          import json, pathlib
+          manifest = json.loads(pathlib.Path("datasets/placement_cohort_v1.manifest.json").read_text())
+          assert manifest["rows"] == 24000, manifest["rows"]
+          assert abs(manifest["positive_rate"] - 0.501) < 0.02, manifest["positive_rate"]
+          print("dataset reproducible:", manifest["sha256"])
+          PY
+          git diff --exit-code -- datasets/
+      - name: Training smoke test (no export)
+        working-directory: ml/placement_readiness
+        run: |
+          python - <<'PY'
+          import numpy as np
+          from sklearn.linear_model import LogisticRegression
+          from sklearn.metrics import roc_auc_score
+          from sklearn.model_selection import train_test_split
+          from sklearn.preprocessing import StandardScaler
+          data = np.loadtxt("datasets/placement_cohort_v1.csv", delimiter=",", skiprows=1)
+          x, y = data[:, :-1], data[:, -1].astype(int)
+          xtr, xte, ytr, yte = train_test_split(x, y, test_size=0.2, stratify=y, random_state=42)
+          scaler = StandardScaler().fit(xtr)
+          model = LogisticRegression(max_iter=2000, C=0.5, random_state=42).fit(scaler.transform(xtr), ytr)
+          auc = roc_auc_score(yte, model.predict_proba(scaler.transform(xte))[:, 1])
+          assert auc > 0.80, auc
+          print(f"holdout ROC-AUC {auc:.4f}")
+          PY
+
+  scraper:
+    name: Scraper Security Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install & run pytest
+        working-directory: scripts/backend
+        run: |
+          pip install --quiet -r requirements-dev.txt
+          python -m pytest -q
+
+  firebase:
+    name: Firebase Emulator Suites
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/functions/package.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Install dependencies
+        working-directory: backend/functions
+        run: npm ci
+      - name: Firestore rules tests
+        working-directory: backend/functions
+        run: npm run test:rules
+      - name: Callable functions integration tests
+        working-directory: backend/functions
+        run: npm run test:emulator
+
+  lint:
+    name: Lint Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Setup local config (no real secrets in debug path)
+        run: |
+          # Placeholder values only — debug artifacts must never contain
+          # real API keys. Real secrets are used exclusively by the
+          # release-build job below.
+          cat > local.properties <<'EOF'
+          GITHUB_CLIENT_ID=ci-placeholder
+          GITHUB_CLIENT_SECRET=ci-placeholder
+          GOOGLE_WEB_CLIENT_ID=ci-placeholder.apps.googleusercontent.com
+          NEXUS_BACKEND_URL=https://api.nexusapp.in/v1
+          OPENROUTER_API_KEY=
+          AI_PROXY_URL=
+          EOF
+          if [ ! -f app/google-services.json ]; then
+            cp app/google-services.json.template app/google-services.json
+          fi
+      - name: Run lint
+        run: ./gradlew lintDebug --no-daemon
+
+  detekt:
+    name: Static Analysis (detekt)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Cache detekt CLI
+        uses: actions/cache@v4
+        with:
+          path: detekt-cli-*-all.jar
+          key: detekt-${{ runner.os }}-1.23.8
+      - name: Run detekt (blocking)
+        run: ./scripts/detekt.sh
+      - name: Upload detekt report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: detekt-report
+          path: build/reports/detekt/**
+          retention-days: 7
+
+  test:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: [backend, lint]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Setup local config (no real secrets in debug path)
+        run: |
+          cat > local.properties <<'EOF'
+          GITHUB_CLIENT_ID=ci-placeholder
+          GITHUB_CLIENT_SECRET=ci-placeholder
+          GOOGLE_WEB_CLIENT_ID=ci-placeholder.apps.googleusercontent.com
+          NEXUS_BACKEND_URL=https://api.nexusapp.in/v1
+          OPENROUTER_API_KEY=
+          AI_PROXY_URL=
+          EOF
+          if [ ! -f app/google-services.json ]; then
+            cp app/google-services.json.template app/google-services.json
+          fi
+      - name: Run tests
+        run: ./gradlew testDebugUnitTest --no-daemon
+      - name: Enforce core coverage floors
+        run: ./gradlew coverageGate --no-daemon
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            core/*/build/reports/coverage/**
+            build/reports/coverage-gate/**
+          retention-days: 7
+
+  audit:
+    name: Production-Readiness Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Setup local config (no real secrets in debug path)
+        run: |
+          cat > local.properties <<'EOF'
+          GITHUB_CLIENT_ID=ci-placeholder
+          GITHUB_CLIENT_SECRET=ci-placeholder
+          GOOGLE_WEB_CLIENT_ID=ci-placeholder.apps.googleusercontent.com
+          NEXUS_BACKEND_URL=https://api.nexusapp.in/v1
+          OPENROUTER_API_KEY=
+          AI_PROXY_URL=
+          EOF
+          if [ ! -f app/google-services.json ]; then
+            cp app/google-services.json.template app/google-services.json
+          fi
+      - name: Run 8-phase audit (fails on NOT_READY)
+        run: ./gradlew :audit-cli:runProductionAudit -PauditOut="$PWD/build/audit" --no-daemon
+      - name: Upload audit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-readiness-audit
+          path: build/audit/**
+          retention-days: 14
+
+  instrumented:
+    name: Instrumentation Tests (API 35)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Setup local config (no real secrets in debug path)
+        run: |
+          cat > local.properties <<'EOF'
+          GITHUB_CLIENT_ID=ci-placeholder
+          GITHUB_CLIENT_SECRET=ci-placeholder
+          GOOGLE_WEB_CLIENT_ID=ci-placeholder.apps.googleusercontent.com
+          NEXUS_BACKEND_URL=https://api.nexusapp.in/v1
+          OPENROUTER_API_KEY=
+          AI_PROXY_URL=
+          EOF
+          if [ ! -f app/google-services.json ]; then
+            cp app/google-services.json.template app/google-services.json
+          fi
+      - name: Enable KVM for the emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run Room migration, Compose UI, and app boot suites
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: |
+            ./gradlew \
+              :core:database:connectedDebugAndroidTest \
+              :core:datastore:connectedDebugAndroidTest \
+              :feature:careermirror:connectedDebugAndroidTest \
+              :feature:cohortintelligence:connectedDebugAndroidTest \
+              :feature:community:connectedDebugAndroidTest \
+              :feature:interviewlog:connectedDebugAndroidTest \
+              :feature:placementforecast:connectedDebugAndroidTest \
+              :feature:tribe:connectedDebugAndroidTest \
+              :app:connectedDebugAndroidTest \
+              --no-daemon --max-workers=1
+      - name: Upload instrumentation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: instrumentation-reports
+          path: '**/build/reports/androidTests/connected/**'
+          retention-days: 7
+
+  build:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Setup local config (no real secrets in debug path)
+        run: |
+          cat > local.properties <<'EOF'
+          GITHUB_CLIENT_ID=ci-placeholder
+          GITHUB_CLIENT_SECRET=ci-placeholder
+          GOOGLE_WEB_CLIENT_ID=ci-placeholder.apps.googleusercontent.com
+          NEXUS_BACKEND_URL=https://api.nexusapp.in/v1
+          OPENROUTER_API_KEY=
+          AI_PROXY_URL=
+          EOF
+          if [ ! -f app/google-services.json ]; then
+            cp app/google-services.json.template app/google-services.json
+          fi
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nexus-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 7
+
+  security:
+    name: Secret Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release-build:
+    name: Release Build Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    needs: [test, security]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Materialize signing keystore (optional)
+        run: |
+          # When NEXUS_KEYSTORE_BASE64 is not configured the release job still
+          # builds, but produces an unsigned APK. Signing secrets are never
+          # required for build verification.
+          if [ -n "${{ secrets.NEXUS_KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.NEXUS_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/nexus-release.keystore"
+            echo "KEYSTORE_FILE=$RUNNER_TEMP/nexus-release.keystore" >> "$GITHUB_ENV"
+          else
+            echo "No signing keystore configured — release artifact will be unsigned."
+          fi
+      - name: Create local.properties
+        run: |
+          # OPENROUTER_API_KEY is intentionally absent: core:network hard-codes it
+          # empty for release variants so the upstream key can never ship.
+          cat > local.properties <<EOF
+          GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}
+          GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}
+          GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }}
+          NEXUS_BACKEND_URL=${{ secrets.NEXUS_BACKEND_URL }}
+          AI_PROXY_URL=${{ secrets.AI_PROXY_URL }}
+          KEYSTORE_PATH=${KEYSTORE_FILE:-}
+          STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS=${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}
+          EOF
+          if [ ! -f app/google-services.json ]; then
+            cp app/google-services.json.template app/google-services.json
+          fi
+      - name: Build release APK
+        run: ./gradlew assembleRelease --no-daemon
+      - name: Assert no upstream AI key in the release artifact
+        run: |
+          apk=$(ls app/build/outputs/apk/release/*.apk | head -n1)
+          unzip -p "$apk" '*.dex' 'resources.arsc' 2>/dev/null \
+            | strings -n 12 \
+            | grep -iE 'sk-or-[A-Za-z0-9_-]{20,}' \
+            && { echo "SECURITY: OpenRouter key material found in release APK"; exit 1; } \
+            || echo "Release APK clean: no sk-or-* key material."
+      - name: Assert APK size budget
+        run: |
+          apk=$(ls app/build/outputs/apk/release/*.apk | head -n1)
+          bytes=$(stat -c%s "$apk")
+          limit=$((9 * 1024 * 1024))
+          echo "Release APK: $bytes bytes (budget $limit bytes)"
+          if [ "$bytes" -gt "$limit" ]; then
+            echo "APK size budget exceeded by $((bytes - limit)) bytes"
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nexus-release-apk
+          path: app/build/outputs/apk/release/*.apk
+          retention-days: 7

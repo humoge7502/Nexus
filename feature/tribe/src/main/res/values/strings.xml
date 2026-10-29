@@ -14,7 +14,7 @@
     <string name="tribe_shared_placement_goal">Shared placement goal</string>
     <string name="tribe_your_tribe">Your Tribe</string>
     <string name="tribe_goal">Goal: %1$s</string>
-    <string name="tribe_peer_benchmarks_for_appear_once_enough">Peer benchmarks for %1$s appear once enough students from your college are on NEXUS. We never invent member counts.</string>
+    <string name="tribe_peer_benchmarks_for_appear_once_enough">Peer benchmarks for %1$s appear once enough students from your college are on Ascent. We never invent member counts.</string>
     <string name="tribe_pod_size">Pod size: %1$s</string>
     <string name="tribe_top_skills">Top skills: %1$s</string>
 </resources>

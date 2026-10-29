@@ -46,7 +46,7 @@ class ConfidenceCalibrationEngine @Inject constructor() {
           "Before each interview, do a cold self-assessment. Compare to past outcomes to recalibrate."
       biasDirection == "underconfident" && sample >= 3 ->
         "You rate yourself ${abs(avgBias).toInt()} pts below your real performance. You may be leaving opportunities on the table." to
-          "Trust your preparation data more. NEXUS Score trends show stronger readiness than you report."
+          "Trust your preparation data more. Ascent Score trends show stronger readiness than you report."
       biasDirection == "well-calibrated" ->
         "Your self-assessment is closely aligned with actual outcomes." to
           "Maintain this calibration — it's a competitive edge in interview negotiations."

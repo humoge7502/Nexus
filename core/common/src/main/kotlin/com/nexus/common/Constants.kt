@@ -1,7 +1,7 @@
 package com.nexus.common
 
 object Constants {
-    const val APP_NAME = "NEXUS"
+    const val APP_NAME = "Ascent"
     const val DB_NAME = "nexus.db"
     const val DATASTORE_NAME = "nexus_prefs"
 
@@ -50,7 +50,7 @@ object Constants {
         "Engineer" to 1501..4000,
         "Architect" to 4001..10000,
         "Pioneer" to 10001..25000,
-        "NEXUS Legend" to 25001..Int.MAX_VALUE,
+        "Ascent Legend" to 25001..Int.MAX_VALUE,
     )
 
     val BADGE_DEFINITIONS = listOf(

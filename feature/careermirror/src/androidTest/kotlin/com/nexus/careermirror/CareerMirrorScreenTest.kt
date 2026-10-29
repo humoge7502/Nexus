@@ -39,7 +39,7 @@ class CareerMirrorScreenTest {
         setContent(CareerMirrorUiState(isLoading = false))
 
         composeRule.onNodeWithText("Not enough data yet").assertIsDisplayed()
-        composeRule.onNodeWithText("Use NEXUS for 90 days to generate your first mirror")
+        composeRule.onNodeWithText("Use Ascent for 90 days to generate your first mirror")
             .assertIsDisplayed()
     }
 

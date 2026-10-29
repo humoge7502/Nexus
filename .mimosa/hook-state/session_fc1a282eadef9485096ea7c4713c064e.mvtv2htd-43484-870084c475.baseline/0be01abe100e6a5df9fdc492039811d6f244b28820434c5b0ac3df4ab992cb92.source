@@ -1,0 +1,89 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.intelligenceOutcomes = void 0;
+exports.clampOutcomeLimit = clampOutcomeLimit;
+exports.normalizeCompany = normalizeCompany;
+exports.projectOutcome = projectOutcome;
+const functions = __importStar(require("firebase-functions"));
+const admin = __importStar(require("firebase-admin"));
+const auth_1 = require("../middleware/auth");
+function clampOutcomeLimit(value) {
+    return Math.min(Math.max(Number(value) || 20, 1), 100);
+}
+function normalizeCompany(value) {
+    return typeof value === "string" && value.trim().length > 0
+        ? value.trim().slice(0, 80)
+        : undefined;
+}
+// reporterId and other internal identifiers must never leave the server,
+// even on documents marked anonymized.
+function projectOutcome(id, d) {
+    return {
+        id,
+        company: d.company ?? null,
+        role: d.role ?? null,
+        tier: d.tier ?? null,
+        rounds: Array.isArray(d.rounds) ? d.rounds : [],
+        outcome: d.outcome ?? null,
+        difficulty: d.difficulty ?? null,
+        tips: Array.isArray(d.tips) ? d.tips : [],
+        reportedAt: d.reportedAt ?? null,
+    };
+}
+exports.intelligenceOutcomes = functions.https.onCall(async (data, context) => {
+    await (0, auth_1.requireAuth)(context);
+    const limit = clampOutcomeLimit(data?.limit);
+    const company = normalizeCompany(data?.company);
+    try {
+        const db = admin.firestore();
+        let query = db
+            .collection("interview_outcomes")
+            .where("isAnonymized", "==", true)
+            .orderBy("reportedAt", "desc")
+            .limit(limit);
+        if (company) {
+            query = query.where("company", "==", company);
+        }
+        const snapshot = await query.get();
+        const results = snapshot.docs.map((doc) => projectOutcome(doc.id, doc.data()));
+        return { results, total: results.length };
+    }
+    catch (error) {
+        console.error(`getIntelligenceOutcomes failed uid=${context.auth?.uid}:`, error instanceof Error ? error.message : String(error));
+        throw new functions.https.HttpsError("internal", "Failed to fetch intelligence outcomes. Try again later.");
+    }
+});
+//# sourceMappingURL=outcomes.js.map

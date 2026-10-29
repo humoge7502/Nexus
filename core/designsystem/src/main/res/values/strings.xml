@@ -5,11 +5,11 @@
     <string name="nav_ai">AI</string>
     <string name="nav_growth">Growth</string>
     <string name="nav_profile">Me</string>
-    <string name="designsystem_nexus_mirror">NEXUS Mirror</string>
-    <string name="designsystem_nexus_momentum">NEXUS Momentum</string>
-    <string name="designsystem_nexus_oracle">NEXUS Oracle</string>
-    <string name="designsystem_nexus_signal">NEXUS Signal</string>
-    <string name="cd_score_ring">NEXUS score %1$d out of %2$d</string>
+    <string name="designsystem_nexus_mirror">Ascent Mirror</string>
+    <string name="designsystem_nexus_momentum">Ascent Momentum</string>
+    <string name="designsystem_nexus_oracle">Ascent Oracle</string>
+    <string name="designsystem_nexus_signal">Ascent Signal</string>
+    <string name="cd_score_ring">Ascent score %1$d out of %2$d</string>
     <string name="cd_contribution_heatmap">Contribution heatmap over %1$d weeks. %2$d active days, %3$d total contributions</string>
     <string name="cd_back">Back</string>
 </resources>

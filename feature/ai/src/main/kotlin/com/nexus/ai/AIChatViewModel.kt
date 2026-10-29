@@ -48,7 +48,7 @@ data class ChatMessage(
 @Stable
 data class AIChatUiState(
     val messages: List<ChatMessage> = listOf(
-        ChatMessage("ai_0", "Hey there! I'm your NEXUS AI career mentor. What would you like help with today?", false),
+        ChatMessage("ai_0", "Hey there! I'm your Ascent AI career mentor. What would you like help with today?", false),
     ),
     val isThinking: Boolean = false,
     val streamingText: String? = null,
@@ -101,7 +101,7 @@ private val skillGraphRepository: ISkillGraphRepository,
             _uiState.value = _uiState.value.copy(
                 currentConversationId = id,
                 messages = listOf(
-                    ChatMessage("ai_0", "Hey there! I'm your NEXUS AI career mentor. What would you like help with today?", false),
+                    ChatMessage("ai_0", "Hey there! I'm your Ascent AI career mentor. What would you like help with today?", false),
                 ),
             )
         }

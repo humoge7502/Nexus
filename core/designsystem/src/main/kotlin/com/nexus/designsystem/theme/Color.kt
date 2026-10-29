@@ -106,6 +106,8 @@ object NexusColors {
  * The brand sweep moves from deep azure to light azure, never indigo-violet.
  */
 object NexusGradients {
+    /** Signature Ascent ramp: pre-dawn deep azure rising to a cyan daybreak. */
+    val Ascent = listOf(NexusColors.NexusBlueDeep, NexusColors.NexusBlue, NexusColors.Cyan400)
     val Nexus = listOf(NexusColors.NexusBlue, NexusColors.Cyan400)
     val Aurora = listOf(NexusColors.AuroraGreen, NexusColors.NexusBlue)
     val Stellar = listOf(NexusColors.StellarPink, NexusColors.PlasmaOrange)

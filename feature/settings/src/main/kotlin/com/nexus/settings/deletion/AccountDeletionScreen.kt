@@ -82,7 +82,7 @@ fun AccountDeletionScreen(
                 Spacer(Modifier.height(8.dp))
 
                 listOf(
-                    "Your NEXUS profile and career score",
+                    "Your Ascent profile and career score",
                     "All saved opportunities and applications",
                     "AI chat history and conversations",
                     "Goals and progress tracking",

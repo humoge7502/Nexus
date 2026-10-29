@@ -4,7 +4,7 @@
     <string name="ai_mentor_title">AI Mentor</string>
     <string name="ai_68">68</string>
     <string name="ai_ask_anything_about_your_career_ne">Ask anything about your career…\ne.g. What do fintech companies look for in fresher engineers?</string>
-    <string name="ai_ask_nexus_anything">Ask NEXUS anything...</string>
+    <string name="ai_ask_nexus_anything">Ask Ascent anything...</string>
     <string name="ai_ats_score">ATS Score</string>
     <string name="ai_career_insights">Career Insights</string>
     <string name="ai_choose_file">Choose File</string>
@@ -40,8 +40,8 @@
     <string name="ai_your_current_skills">Your Current Skills</string>
     <string name="ai_ai_tools">AI Tools</string>
     <string name="ai_live_search_grounded">Live search grounded</string>
-    <string name="ai_nexus_ai">NEXUS AI</string>
-    <string name="ai_nexus_ai_mentor">NEXUS AI Mentor</string>
+    <string name="ai_nexus_ai">Ascent AI</string>
+    <string name="ai_nexus_ai_mentor">Ascent AI Mentor</string>
     <string name="ai_personalized_to_your_career_profile">Personalized to your career profile</string>
     <string name="ai_start_conversation_u2192">Start conversation</string>
     <string name="ai_thinking">Thinking...</string>

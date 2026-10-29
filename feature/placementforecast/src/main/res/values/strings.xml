@@ -7,7 +7,7 @@
     <string name="text_placement_readiness">Placement readiness</string>
     <string name="text_top_drivers">Top drivers:</string>
     <string name="cd_back">Back</string>
-    <string name="placementforecast_current_nexus_score">Current NEXUS Score: %1$d</string>
+    <string name="placementforecast_current_nexus_score">Current Ascent Score: %1$d</string>
     <string name="placementforecast_on_device_model_note">On-device model v%1$s · explainable, no data leaves your device</string>
     <string name="placementforecast_predicted_probability">%1$d%% predicted probability of placement this season</string>
     <string name="placementforecast_probability">Probability: %1$d%%</string>

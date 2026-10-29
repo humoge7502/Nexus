@@ -75,7 +75,7 @@ class PlacementForecastScreenTest {
             ),
         )
 
-        composeRule.onNodeWithText("Current NEXUS Score: 720").assertIsDisplayed()
+        composeRule.onNodeWithText("Current Ascent Score: 720").assertIsDisplayed()
         composeRule.onNodeWithText("Placement readiness").assertIsDisplayed()
         composeRule.onNodeWithText("68% predicted probability of placement this season")
             .assertIsDisplayed()

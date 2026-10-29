@@ -318,7 +318,7 @@ private fun CareerReadinessCard(
             .fillMaxWidth()
             .clip(shape)
             .background(
-                brush = Brush.linearGradient(NexusGradients.PrimaryDeep),
+                brush = Brush.linearGradient(NexusGradients.Ascent),
                 shape = shape
             )
             .instrumentGrid(spacingDp = 30f, alpha = 0.045f)

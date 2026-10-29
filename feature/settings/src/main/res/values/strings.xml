@@ -12,7 +12,7 @@
     <string name="settings_delete_account">Delete Account</string>
     <string name="settings_version">Version %1$s</string>
     <string name="delete_title">Delete Account</string>
-    <string name="delete_warning">This will permanently delete all your NEXUS data.</string>
+    <string name="delete_warning">This will permanently delete all your Ascent data.</string>
     <string name="delete_confirm_hint">Type DELETE to confirm</string>
     <string name="delete_confirm_keyword">DELETE</string>
     <string name="delete_button">Delete Forever</string>
@@ -22,7 +22,7 @@
     <string name="cd_back">Back</string>
     <string name="cd_warning">Warning</string>
     <string name="text_appearance">Appearance</string>
-    <string name="settings_pro_title">NEXUS Pro</string>
+    <string name="settings_pro_title">Ascent Pro</string>
     <string name="settings_pro_subtitle">AI Interview Coach, Oracle, Arena and more</string>
     <string name="settings_dark_mode_subtitle">Use dark theme</string>
     <string name="settings_amoled_title">AMOLED Black</string>

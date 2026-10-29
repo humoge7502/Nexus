@@ -96,7 +96,7 @@ class TribeScreenTest {
         composeRule.onNodeWithText("Pod size: 6").assertIsDisplayed()
         composeRule.onNodeWithText(
             "Peer benchmarks for IIT Delhi appear once enough students from your college " +
-                "are on NEXUS. We never invent member counts.",
+                "are on Ascent. We never invent member counts.",
         ).performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Leave Tribe").performScrollTo().assertIsDisplayed()
     }

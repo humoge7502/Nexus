@@ -80,7 +80,7 @@ fun AIChatScreen(
                     if (effect.isPro) {
                         "Daily AI limit reached. Please try again tomorrow."
                     } else {
-                        "Free AI limit reached (${effect.limit}/day). Upgrade to NEXUS Pro for more."
+                        "Free AI limit reached (${effect.limit}/day). Upgrade to Ascent Pro for more."
                     }
                 )
             }

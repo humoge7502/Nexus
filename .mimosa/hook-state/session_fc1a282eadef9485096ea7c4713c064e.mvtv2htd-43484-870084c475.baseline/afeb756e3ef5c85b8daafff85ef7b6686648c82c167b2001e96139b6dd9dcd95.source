@@ -1,0 +1,125 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.opportunityFeed = void 0;
+exports.clampLimit = clampLimit;
+exports.clampOffset = clampOffset;
+exports.sanitizeSkills = sanitizeSkills;
+exports.projectOpportunity = projectOpportunity;
+const functions = __importStar(require("firebase-functions"));
+const admin = __importStar(require("firebase-admin"));
+const auth_1 = require("../middleware/auth");
+const ALLOWED_TYPES = new Set([
+    "internship",
+    "certification",
+    "scholarship",
+    "hackathon",
+    "all",
+]);
+const MAX_OFFSET = 1_000;
+const MAX_LIMIT = 50;
+const MAX_SKILLS = 10;
+function clampLimit(value) {
+    return Math.min(Math.max(Number(value) || 20, 1), MAX_LIMIT);
+}
+function clampOffset(value) {
+    return Math.min(Math.max(Number(value) || 0, 0), MAX_OFFSET);
+}
+function sanitizeSkills(value) {
+    if (!Array.isArray(value))
+        return [];
+    return value
+        .filter((s) => typeof s === "string" && s.trim().length > 0)
+        .map((s) => s.trim())
+        .slice(0, MAX_SKILLS);
+}
+// Seeded documents use role/applicationUrl while the scraper writes both
+// naming conventions; project with fallbacks so neither source loses data.
+function projectOpportunity(id, d) {
+    return {
+        id,
+        type: d.type,
+        title: d.title ?? d.role ?? "",
+        role: d.role ?? d.title ?? "",
+        company: d.company ?? "",
+        location: d.location ?? "",
+        description: d.description ?? "",
+        applyUrl: d.applyUrl ?? d.applicationUrl ?? "",
+        applicationUrl: d.applicationUrl ?? d.applyUrl ?? "",
+        deadline: d.deadline ?? null,
+        stipend: d.stipend ?? "",
+        requiredSkills: d.requiredSkills ?? [],
+        tags: d.tags ?? [],
+        isActive: d.isActive ?? true,
+        createdAt: d.createdAt ?? null,
+    };
+}
+exports.opportunityFeed = functions.https.onCall(async (data, context) => {
+    await (0, auth_1.requireAuth)(context);
+    const requestedType = (data?.opportunityType || "all").toLowerCase();
+    if (!ALLOWED_TYPES.has(requestedType)) {
+        throw new functions.https.HttpsError("invalid-argument", "opportunityType is not supported.");
+    }
+    const limit = clampLimit(data?.limit);
+    const offset = clampOffset(data?.offset);
+    const opportunityType = requestedType;
+    const skills = sanitizeSkills(data?.skills);
+    try {
+        const db = admin.firestore();
+        let query = db.collection("opportunities");
+        if (opportunityType !== "all") {
+            query = query.where("type", "==", opportunityType.toUpperCase());
+        }
+        if (skills.length > 0) {
+            query = query.where("requiredSkills", "array-contains-any", skills);
+        }
+        query = query
+            .orderBy("createdAt", "desc")
+            .offset(offset)
+            .limit(limit);
+        const snapshot = await query.get();
+        const results = snapshot.docs.map((doc) => projectOpportunity(doc.id, doc.data()));
+        return {
+            results,
+            total: results.length,
+            offset: offset + results.length,
+        };
+    }
+    catch (error) {
+        console.error(`opportunityFeed failed uid=${context.auth?.uid}:`, error instanceof Error ? error.message : String(error));
+        throw new functions.https.HttpsError("internal", "Failed to fetch opportunity feed. Try again later.");
+    }
+});
+//# sourceMappingURL=feed.js.map

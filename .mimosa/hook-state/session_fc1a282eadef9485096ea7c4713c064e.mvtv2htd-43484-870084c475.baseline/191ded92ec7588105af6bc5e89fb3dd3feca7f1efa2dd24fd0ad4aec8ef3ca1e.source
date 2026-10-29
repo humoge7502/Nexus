@@ -1,0 +1,15 @@
+{
+  "name": "nexus-seed",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Firestore seed scripts for NEXUS",
+  "bin": {
+    "nexus-seed": "seed_firestore.sh"
+  },
+  "scripts": {
+    "seed": "bash seed_firestore.sh"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  }
+}

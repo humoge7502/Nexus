@@ -9,8 +9,8 @@
     <string name="growth_dsa_progress">DSA Progress</string>
     <string name="growth_dsa_tracker">DSA Tracker</string>
     <string name="growth_leaderboard">Leaderboard</string>
-    <string name="growth_nexus_arena">NEXUS Arena</string>
-    <string name="growth_nexus_oracle">NEXUS Oracle</string>
+    <string name="growth_nexus_arena">Ascent Arena</string>
+    <string name="growth_nexus_oracle">Ascent Oracle</string>
     <string name="growth_opportunity_intel">Opportunity intel</string>
     <string name="growth_oracle">Oracle</string>
     <string name="growth_problems_solved">Problems solved</string>
@@ -24,8 +24,8 @@
     <string name="growth_label">%1$s · %2$s · %3$s</string>
     <string name="growth_label_2">%1$s</string>
     <string name="growth_mark_the_skills_you_already_know">Mark the skills you already know in your profile to unlock your radar.</string>
-    <string name="growth_nexus_score">NEXUS score</string>
-    <string name="growth_live_nexus_score">Your live NEXUS score</string>
+    <string name="growth_nexus_score">Ascent score</string>
+    <string name="growth_live_nexus_score">Your live Ascent score</string>
     <string name="growth_start_earning_score">Start earning XP to build your score</string>
     <string name="growth_no_goals_yet_set_one_and">No goals yet. Set one and your progress will show up here.</string>
     <string name="growth_participants">%1$s participants</string>

@@ -5,12 +5,12 @@
     <string name="paywall_restore_purchases">Restore purchases</string>
     <string name="paywall_subscribe_monthly">Subscribe monthly</string>
     <string name="paywall_subscribe_yearly">Subscribe yearly</string>
-    <string name="paywall_pro_label">NEXUS Pro</string>
+    <string name="paywall_pro_label">Ascent Pro</string>
     <string name="paywall_choose_plan">Choose a plan</string>
     <string name="paywall_one_time">One-time purchase</string>
     <string name="text_pro_features">Pro features</string>
     <string name="text_supercharge_your_career_journey_with_premium">Supercharge your career journey with premium features</string>
-    <string name="text_unlock_nexus_pro">Unlock NEXUS Pro</string>
+    <string name="text_unlock_nexus_pro">Unlock Ascent Pro</string>
     <string name="paywall_save_percent">Save %1$d%%</string>
     <string name="paywall_feature_unlimited_ai_chat">Unlimited AI chat sessions</string>
     <string name="paywall_feature_priority_tracking">Priority application tracking</string>

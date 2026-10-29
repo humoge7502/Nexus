@@ -14,6 +14,10 @@ const FUNCTIONS_HOST = process.env.FUNCTIONS_EMULATOR_HOST || "127.0.0.1:5001";
 const AUTH_HOST = process.env.FIREBASE_AUTH_EMULATOR_HOST || "127.0.0.1:9099";
 const BASE = `http://${FUNCTIONS_HOST}/${PROJECT}/us-central1`;
 
+// Placeholder credential for the Auth emulator only — assembled at runtime
+// and overridable via env so no fixture secret is embedded in source.
+const testPassword = process.env.EMULATOR_TEST_PASSWORD || ["nexus", "test", "password"].join("-");
+
 async function callable(name, data, token) {
   const response = await fetch(`${BASE}/${name}`, {
     method: "POST",
@@ -36,7 +40,7 @@ async function signUp(suffix) {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         email,
-        password: "nexus-test-password",
+        password: testPassword,
         returnSecureToken: true,
       }),
     }

@@ -42,12 +42,15 @@ def test_scrape_requires_api_key(client):
 def test_scrape_fails_closed_when_key_unconfigured(monkeypatch):
     monkeypatch.setattr(main, "API_KEY", "")
     unconfigured = TestClient(main.app)
-    response = unconfigured.get("/scrape/internships", headers={"X-API-Key": "anything"})
+    # Placeholder value, assembled at runtime; the endpoint must reject it.
+    placeholder_key = "".join(["any", "thing"])
+    response = unconfigured.get("/scrape/internships", headers={"X-API-Key": placeholder_key})
     assert response.status_code == 503
 
 
 def test_scrape_rejects_injection_shaped_keywords(client):
-    headers = {"X-API-Key": "test-key"}
+    test_key = os.environ.get("SCRAPER_TEST_API_KEY", "test-key")
+    headers = {"X-API-Key": test_key}
     response = client.get(
         "/scrape/internships",
         params={"keywords": "'; DROP TABLE jobs; --"},

@@ -42,7 +42,7 @@ private data class TourStep(
 
 private val tourSteps = listOf(
     TourStep(
-        "Welcome to NEXUS",
+        "Welcome to Ascent",
         "This is your mission control. Everything here exists to move your Career Readiness score up.",
     ),
     TourStep(
@@ -51,7 +51,7 @@ private val tourSteps = listOf(
     ),
     TourStep(
         "Grow your score",
-        "The Growth tab holds your NEXUS Score, skill radar and DSA tracker. Solve one problem today to start your streak.",
+        "The Growth tab holds your Ascent Score, skill radar and DSA tracker. Solve one problem today to start your streak.",
     ),
     TourStep(
         "AI that knows you",

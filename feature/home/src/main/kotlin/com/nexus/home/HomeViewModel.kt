@@ -199,6 +199,6 @@ class HomeViewModel @Inject constructor(
     private companion object {
         const val DEFAULT_USER_NAME = "Future Engineer"
         const val OFFLINE_MESSAGE =
-            "Couldn't reach the Nexus network. Check your connection and try again."
+            "Couldn't reach the Ascent network. Check your connection and try again."
     }
 }

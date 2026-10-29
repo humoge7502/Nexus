@@ -109,7 +109,7 @@ class UserXpRepository @Inject constructor(
         3 -> "Engineer"
         4 -> "Architect"
         5 -> "Pioneer"
-        6 -> "NEXUS Legend"
+        6 -> "Ascent Legend"
         else -> "Rookie"
     }
 
