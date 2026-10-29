@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ascent — Privacy Policy</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: #fafbfe;
+    color: #0b1220;
+    line-height: 1.65;
+  }
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+  .mark {
+    width: 64px; height: 64px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(115deg, #16255b 0%, #2b6bff 55%, #37c6ff 100%);
+    color: #fff; font-size: 34px; font-weight: 800;
+    font-family: Georgia, serif;
+  }
+  h1 { font-size: 34px; margin: 20px 0 4px; letter-spacing: -0.02em; }
+  .updated { color: #5a6478; margin: 0 0 32px; font-size: 15px; }
+  h2 { font-size: 20px; margin: 32px 0 8px; letter-spacing: -0.01em; }
+  p, li { font-size: 16px; }
+  a { color: #2b6bff; }
+  .card {
+    background: #fff; border: 1px solid #e3e9f3; border-radius: 16px;
+    padding: 20px 24px; margin: 16px 0;
+  }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  td, th { border-bottom: 1px solid #e3e9f3; padding: 10px 12px; text-align: left; vertical-align: top; }
+  th { color: #5a6478; font-weight: 600; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #0b0f14; color: #e8ecf4; }
+    .card { background: #12161f; border-color: #232a38; }
+    td, th { border-color: #232a38; }
+    th, .updated { color: #9aa5ba; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="mark">A</div>
+  <h1>Ascent Privacy Policy</h1>
+  <p class="updated">Last updated: October 30, 2026</p>
+
+  <p>Ascent is an AI-powered career co-pilot app for Indian CSE students, published by an
+  independent developer. This policy explains, in plain language, what data the app handles
+  and why.</p>
+
+  <h2>The short version</h2>
+  <div class="card">
+    <ul>
+      <li>Your career data (profile, applications, study progress) is stored in <strong>your own</strong>
+          Firebase-backed account and is never sold or shared with advertisers.</li>
+      <li>When you use AI features, the text you send is processed by an AI provider to generate your
+          answer. Prompts are not used to advertise to you.</li>
+      <li>The app contains <strong>no third-party ad SDKs</strong>.</li>
+      <li>You can export or permanently delete all of your data from inside the app
+          (Settings → Privacy, or Settings → Delete Account).</li>
+    </ul>
+  </div>
+
+  <h2>Data we handle</h2>
+  <table>
+    <tr><th>Data</th><th>Why</th><th>Where it lives</th></tr>
+    <tr><td>Email address, display name</td><td>Account sign-in and your profile</td><td>Firebase Authentication (Google)</td></tr>
+    <tr><td>College, year, skills, career goal</td><td>Personalizing matches, forecasts and AI answers</td><td>Cloud Firestore (Google Cloud)</td></tr>
+    <tr><td>Applications, certifications, DSA progress, streaks, XP</td><td>The core career-tracking features and your readiness score</td><td>Cloud Firestore and on-device (Room)</td></tr>
+    <tr><td>AI chat messages and research questions</td><td>Producing the answers you asked for</td><td>Proxied through a Firebase Cloud Function to an AI provider; chat history stays in your account</td></tr>
+    <tr><td>Resume text you choose to analyze</td><td>ATS feedback and interview prep</td><td>Processed by the AI provider for that single request</td></tr>
+    <tr><td>Usage analytics (screens opened, features used)</td><td>Improving the app</td><td>Firebase Analytics (Google)</td></tr>
+  </table>
+
+  <h2>AI features and third parties</h2>
+  <p>AI requests are relayed by a server function controlled by the developer to an AI model
+  provider (currently OpenRouter-fronted models). Your messages are used only to produce your
+  response. We do not permit providers to train on your prompts. Resume text you submit is used
+  only for that analysis.</p>
+
+  <h2>Permissions</h2>
+  <ul>
+    <li><strong>Notifications</strong> (optional): daily career briefing, application deadline reminders and
+        streak alerts. You can turn these off any time in Settings.</li>
+    <li><strong>Internet access</strong>: required for sync and AI features.</li>
+    <li><strong>File access</strong>: only when you pick a resume PDF to analyze.</li>
+  </ul>
+
+  <h2>Children</h2>
+  <p>Ascent is intended for students aged 13 and older and is not directed at children under 13.</p>
+
+  <h2>Your choices</h2>
+  <ul>
+    <li><strong>Export</strong>: Settings → Export My Data produces a copy of your career data.</li>
+    <li><strong>Delete</strong>: Settings → Delete Account permanently removes your profile, applications,
+        chat history and every other record we hold, in line with Google's account-deletion policy.</li>
+    <li><strong>Notifications</strong>: Settings → Notifications.</li>
+  </ul>
+
+  <h2>Contact</h2>
+  <p>Questions or deletion requests: <strong>deveshtiwari1025@gmail.com</strong></p>
+
+  <h2>Changes</h2>
+  <p>If this policy changes materially, the updated version will be posted at this URL and the
+  "last updated" date above will change.</p>
+</main>
+</body>
+</html>
