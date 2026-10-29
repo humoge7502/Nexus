@@ -100,7 +100,7 @@ fun AuthScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "N",
+                    text = "A",
                     style = MaterialTheme.typography.displayLarge,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color.White,

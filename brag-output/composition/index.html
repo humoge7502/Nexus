@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Ascent — Brag</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <link href="assets/fonts/fonts.css" rel="stylesheet" />
+    <style>
+      body {
+        margin: 0;
+        background: #0b1220;
+        color: #0b1220;
+        font-family: Inter, system-ui, sans-serif;
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #fafbfe;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+      }
+      .gradient-fill {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(115deg, #16255b 0%, #2b6bff 55%, #37c6ff 100%);
+      }
+      .gradient-fill-deep {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(140deg, #101c46 0%, #1d4fd8 60%, #2fb9f0 100%);
+      }
+      .grid-texture {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        background-size: 60px 60px;
+      }
+      .display {
+        font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+      }
+      .hook-center {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+      }
+      .hook-headline {
+        margin: 0;
+        font-size: 88px;
+        font-weight: 800;
+        color: #ffffff;
+        letter-spacing: -0.02em;
+      }
+      .wordmark {
+        margin: 0;
+        font-size: 150px;
+        font-weight: 800;
+        color: #ffffff;
+        letter-spacing: -0.03em;
+        line-height: 1;
+      }
+      .tagline {
+        margin: 0;
+        font-size: 40px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.97);
+      }
+      .footnote {
+        margin: 0;
+        font-size: 26px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.88);
+      }
+      .sheen-bar {
+        position: absolute;
+        top: -10%;
+        width: 340px;
+        height: 120%;
+        transform: skewX(-18deg);
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+      }
+      .scene-row {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 90px;
+      }
+      .caption-block {
+        width: 760px;
+      }
+      .caption-chip {
+        display: inline-block;
+        padding: 12px 28px;
+        border-radius: 999px;
+        border: 1px solid rgba(43, 107, 255, 0.35);
+        background: rgba(43, 107, 255, 0.08);
+        color: #2b6bff;
+        font-size: 26px;
+        font-weight: 600;
+        margin: 0 0 26px 0;
+      }
+      .caption-title {
+        margin: 0;
+        font-size: 76px;
+        font-weight: 800;
+        color: #0b1220;
+        letter-spacing: -0.02em;
+        line-height: 1.08;
+      }
+      .caption-sub {
+        margin: 24px 0 0 0;
+        font-size: 30px;
+        font-weight: 400;
+        color: #3f4a63;
+        line-height: 1.45;
+      }
+      .phone {
+        position: relative;
+        width: 430px;
+        height: 956px;
+        border-radius: 44px;
+        border: 10px solid #0b1220;
+        background: #ffffff;
+        overflow: hidden;
+        box-shadow: 0 40px 90px rgba(11, 18, 32, 0.28);
+        flex-shrink: 0;
+      }
+      .phone img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top;
+        display: block;
+      }
+      .dot-accent {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #2b6bff;
+        margin-right: 14px;
+        vertical-align: middle;
+      }
+      .black-fade {
+        position: absolute;
+        inset: 0;
+        background: #000000;
+        opacity: 0;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="ascent-brag"
+      data-width="1920"
+      data-height="1080"
+      data-duration="20"
+    >
+      <!-- Scenes are separate clips on separate tracks; full-bleed fills live on children -->
+      <section id="s1-bg" class="clip" data-start="0" data-duration="3.8" data-track-index="1">
+        <div id="s1-grad" class="gradient-fill"></div>
+        <div id="s1-grid" class="grid-texture"></div>
+      </section>
+      <section id="s1-content" class="clip" data-start="0" data-duration="3.8" data-track-index="2">
+        <div class="hook-center">
+          <h2 id="s1-headline" class="display hook-headline">Placement season doesn't wait.</h2>
+          <h1 id="s1-wordmark" class="display wordmark">Ascent</h1>
+        </div>
+        <div id="s1-sheen" class="sheen-bar"></div>
+      </section>
+
+      <section id="s2-scene" class="clip" data-start="3.8" data-duration="4.8" data-track-index="3">
+        <div id="s2-inner" class="scene-row">
+          <div class="caption-block">
+            <span id="s2-chip" class="caption-chip">Career Readiness</span>
+            <h2 id="s2-title" class="display caption-title">Your live Career Readiness score</h2>
+            <p id="s2-sub" class="caption-sub">One number that moves as you learn, apply, and show up every day.</p>
+          </div>
+          <div id="s2-phone" class="phone">
+            <img id="s2-shot" src="assets/ui/home.png" alt="Ascent Home" />
+          </div>
+        </div>
+      </section>
+
+      <section id="s3-scene" class="clip" data-start="8.6" data-duration="3.9" data-track-index="4">
+        <div id="s3-inner" class="scene-row">
+          <div id="s3-phone" class="phone">
+            <img id="s3-shot" src="assets/ui/explore.png" alt="Ascent Explore" />
+          </div>
+          <div class="caption-block">
+            <span id="s3-chip" class="caption-chip">Explore</span>
+            <h2 id="s3-title" class="display caption-title">Real internships, matched to you</h2>
+            <p id="s3-sub" class="caption-sub">
+              <span id="s3-dot1" class="dot-accent"></span><span id="s3-dot2" class="dot-accent"></span><span
+                id="s3-dot3"
+                class="dot-accent"
+              ></span>
+              Goldman Sachs, Uber, TCS Research — fresh openings land here every morning.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="s4-scene" class="clip" data-start="12.5" data-duration="3.3" data-track-index="5">
+        <div id="s4-inner" class="scene-row">
+          <div class="caption-block">
+            <span id="s4-chip" class="caption-chip">Growth</span>
+            <h2 id="s4-title" class="display caption-title">Every action moves your score</h2>
+            <p id="s4-sub" class="caption-sub">
+              <span id="s4-dot1" class="dot-accent"></span><span id="s4-dot2" class="dot-accent"></span>
+              Skill radar, daily streaks, DSA tracker — and the Ascent Arena to compete with your college.
+            </p>
+          </div>
+          <div id="s4-phone" class="phone">
+            <img id="s4-shot" src="assets/ui/growth.png" alt="Ascent Growth" />
+          </div>
+        </div>
+      </section>
+
+      <section id="s5-scene" class="clip" data-start="15.8" data-duration="1.6" data-track-index="6">
+        <div id="s5-inner" class="scene-row">
+          <div id="s5-phone" class="phone">
+            <img id="s5-shot" src="assets/ui/aihub.png" alt="Ascent AI Hub" />
+          </div>
+          <div class="caption-block">
+            <span id="s5-chip" class="caption-chip">AI Hub</span>
+            <h2 id="s5-title" class="display caption-title">An AI mentor that knows your goals</h2>
+          </div>
+        </div>
+      </section>
+
+      <section id="s6-bg" class="clip" data-start="17.4" data-duration="2.6" data-track-index="7">
+        <div id="s6-grad" class="gradient-fill-deep"></div>
+        <div id="s6-grid" class="grid-texture"></div>
+      </section>
+      <section id="s6-content" class="clip" data-start="17.4" data-duration="2.6" data-track-index="8">
+        <div class="hook-center">
+          <h1 id="s6-wordmark" class="display wordmark">Ascent</h1>
+          <p id="s6-tagline" class="display tagline">Engineer Your Future</p>
+          <p id="s6-footnote" class="footnote">Built for Indian CSE students.</p>
+        </div>
+        <div id="s6-sheen" class="sheen-bar"></div>
+      </section>
+
+      <div id="fade-out" class="black-fade"></div>
+
+      <audio
+        id="bg-music"
+        data-start="0"
+        data-duration="20"
+        data-track-index="10"
+        data-volume="0.32"
+        src="assets/music/happy-beats-business-moves-vol-12-by-ende-dot-app.mp3"
+      ></audio>
+      <audio
+        id="sfx-drop"
+        data-start="3.72"
+        data-duration="0.11"
+        data-track-index="11"
+        data-volume="0.6"
+        src="assets/sfx/interface/drop_001.ogg"
+      ></audio>
+      <audio
+        id="sfx-card1"
+        data-start="8.74"
+        data-duration="0.46"
+        data-track-index="12"
+        data-volume="0.55"
+        src="assets/sfx/interface/card-place-2.ogg"
+      ></audio>
+      <audio
+        id="sfx-card2"
+        data-start="9.29"
+        data-duration="0.46"
+        data-track-index="13"
+        data-volume="0.45"
+        src="assets/sfx/interface/card-place-2.ogg"
+      ></audio>
+      <audio
+        id="sfx-logo"
+        data-start="17.35"
+        data-duration="0.12"
+        data-track-index="14"
+        data-volume="0.5"
+        src="assets/sfx/interface/bong_001.ogg"
+      ></audio>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Scene 1 — Hook (0 - 3.8)
+      tl.fromTo("#s1-headline", { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, 0.25);
+      tl.fromTo(
+        "#s1-wordmark",
+        { scale: 0.86, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.8, ease: "power3.out" },
+        1.55,
+      );
+      tl.fromTo(
+        "#s1-sheen",
+        { x: -500 },
+        { x: 2300, duration: 1.5, ease: "power2.inOut" },
+        1.9,
+      );
+      tl.to("#s1-content", { opacity: 0, duration: 0.45, ease: "power2.in" }, 3.3);
+      tl.to("#s1-bg", { opacity: 0, duration: 0.45, ease: "power2.in" }, 3.3);
+
+      // Scene 2 — Home reveal (3.8 - 8.6); phone entrance lands on beat 3.82
+      // beat-locked: 3.82 (minor entrance, +/-0.10s)
+      tl.fromTo(
+        "#s2-inner",
+        { y: 90, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.9, ease: "power3.out" },
+        3.75,
+      );
+      tl.fromTo("#s2-chip", { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 4.55);
+      tl.fromTo("#s2-title", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" }, 4.75);
+      tl.fromTo("#s2-sub", { y: 22, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" }, 5.05);
+      tl.to("#s2-inner", { opacity: 0, y: -30, duration: 0.4, ease: "power2.in" }, 8.25);
+
+      // Scene 3 — Explore (8.6 - 12.5)
+      // beat-locked: 8.74 (strongCue, intensity 0.99)
+      tl.fromTo(
+        "#s3-inner",
+        { x: 70, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.7, ease: "power3.out" },
+        8.74,
+      );
+      tl.fromTo("#s3-chip", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out" }, 9.0);
+      tl.fromTo("#s3-title", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power2.out" }, 9.15);
+      // beat-grid: card dots on 9.29 / 9.83 / 10.37
+      tl.fromTo("#s3-dot1", { scale: 0 }, { scale: 1, duration: 0.3, ease: "back.out(2)" }, 9.29);
+      tl.fromTo("#s3-dot2", { scale: 0 }, { scale: 1, duration: 0.3, ease: "back.out(2)" }, 9.83);
+      tl.fromTo("#s3-dot3", { scale: 0 }, { scale: 1, duration: 0.3, ease: "back.out(2)" }, 10.37);
+      tl.fromTo("#s3-sub", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power2.out" }, 10.45);
+      tl.to("#s3-inner", { opacity: 0, x: -40, duration: 0.4, ease: "power2.in" }, 12.1);
+
+      // Scene 4 — Growth (12.5 - 15.8)
+      // beat-locked: 12.55 (strongCue, intensity 0.94)
+      tl.fromTo(
+        "#s4-inner",
+        { y: 70, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" },
+        12.55,
+      );
+      tl.fromTo("#s4-chip", { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out" }, 12.85);
+      tl.fromTo("#s4-title", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power2.out" }, 13.0);
+      // beat-grid: streak dots on 13.11 / 13.64
+      tl.fromTo("#s4-dot1", { scale: 0 }, { scale: 1, duration: 0.3, ease: "back.out(2)" }, 13.11);
+      tl.fromTo("#s4-dot2", { scale: 0 }, { scale: 1, duration: 0.3, ease: "back.out(2)" }, 13.64);
+      tl.fromTo("#s4-sub", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power2.out" }, 13.75);
+      tl.to("#s4-inner", { opacity: 0, y: -30, duration: 0.35, ease: "power2.in" }, 15.45);
+
+      // Scene 5 — AI Hub (15.8 - 17.4); rides strongCue 15.84
+      // beat-locked: 15.84 (strongCue, intensity 0.96)
+      tl.fromTo(
+        "#s5-inner",
+        { scale: 0.95, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.6, ease: "power3.out" },
+        15.84,
+      );
+      tl.fromTo("#s5-chip", { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, 16.15);
+      tl.fromTo("#s5-title", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 16.3);
+      tl.to("#s5-inner", { opacity: 0, scale: 1.02, duration: 0.3, ease: "power2.in" }, 17.05);
+
+      // Scene 6 — Outro (17.4 - 20)
+      // beat-locked: 17.47 (strongCue, intensity 0.99) — wordmark landing
+      tl.fromTo(
+        "#s6-wordmark",
+        { scale: 0.88, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.75, ease: "power3.out" },
+        17.47,
+      );
+      tl.fromTo("#s6-tagline", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power2.out" }, 18.05);
+      tl.fromTo("#s6-footnote", { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, 18.5);
+      tl.fromTo("#s6-sheen", { x: -500 }, { x: 2300, duration: 1.4, ease: "power2.inOut" }, 17.7);
+      tl.to("#fade-out", { opacity: 1, duration: 0.5, ease: "power2.in" }, 19.45);
+
+      window.__timelines["ascent-brag"] = tl;
+    </script>
+  </body>
+</html>
