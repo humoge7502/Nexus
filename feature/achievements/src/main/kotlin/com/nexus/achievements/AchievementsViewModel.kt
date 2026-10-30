@@ -50,6 +50,7 @@ data class AchievementsUiState(
     val unlockedBadgeCount: Int = 0,
     val badgeCount: Int = 0,
     val streakDays: Int = 0,
+    val celebration: String? = null,
 )
 
 @Suppress("LongParameterList")
@@ -167,6 +168,9 @@ class AchievementsViewModel @Inject constructor(
                     analyticsTracker.track("badge_unlocked", mapOf("badge" to badge.name))
                     Timber.d("Badge unlocked: ${badge.name}")
                 }
+                if (newBadges.isNotEmpty()) {
+                    _uiState.update { it.copy(celebration = newBadges.first().name) }
+                }
                 val unlockedAchievements = if (newBadges.isEmpty()) unlockedBefore else {
                     repository.getUnlocked().first()
                 }
@@ -232,6 +236,10 @@ class AchievementsViewModel @Inject constructor(
 
     fun unlock(id: String) {
         viewModelScope.launch { repository.unlock(id) }
+    }
+
+    fun dismissCelebration() {
+        _uiState.update { it.copy(celebration = null) }
     }
 
     fun onAchievementShared(id: String) {

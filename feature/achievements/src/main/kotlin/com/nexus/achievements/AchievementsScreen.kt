@@ -61,6 +61,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.nexus.designsystem.component.AchievementBurst
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusColors
@@ -118,6 +119,7 @@ fun AchievementsScreen(
         label = "scoreArc",
     )
 
+    Box(modifier = Modifier.fillMaxSize()) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
@@ -174,6 +176,11 @@ fun AchievementsScreen(
 
         item {
             Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+
+        uiState.celebration?.let { name ->
+            AchievementBurst(badgeName = name, onDismiss = viewModel::dismissCelebration)
         }
     }
 }
