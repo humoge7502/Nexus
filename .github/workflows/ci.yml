@@ -151,7 +151,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - name: Cache detekt CLI
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: detekt-cli-*-all.jar
           key: detekt-${{ runner.os }}-1.23.8
