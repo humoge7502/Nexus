@@ -34,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +49,7 @@ import com.nexus.designsystem.component.sheen
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
 
 @Composable
 fun PaywallScreen(
@@ -115,7 +115,7 @@ fun PaywallScreen(
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
-                        tint = NexusColors.AuroraGreen,
+                        tint = MaterialTheme.nexus.positive,
                         modifier = Modifier.size(15.dp),
                     )
                 }
@@ -198,7 +198,7 @@ private fun PaywallHero(onDismiss: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .background(brush = Brush.verticalGradient(NexusGradients.PrimaryDeep))
-            .instrumentGrid(spacingDp = 28f, alpha = 0.05f)
+            .instrumentGrid(spacingDp = 28f, alpha = 0.06f, color = NexusColors.SignalInk)
             .sheen(alpha = 0.06f)
             .padding(start = 24.dp, end = 12.dp, top = 12.dp, bottom = 30.dp),
     ) {
@@ -212,21 +212,21 @@ private fun PaywallHero(onDismiss: () -> Unit) {
                     Icon(
                         imageVector = Icons.Default.WorkspacePremium,
                         contentDescription = null,
-                        tint = NexusColors.Amber400,
+                        tint = NexusColors.SignalInk,
                         modifier = Modifier.size(18.dp),
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = stringResource(R.string.paywall_pro_label),
-                        style = NexusTypography.Telemetry.copy(letterSpacing = 1.2.sp),
-                        color = Color.White.copy(alpha = 0.92f),
+                        style = NexusTypography.DataLabel,
+                        color = NexusColors.SignalInk.copy(alpha = 0.86f),
                     )
                 }
                 IconButton(onClick = onDismiss) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = stringResource(R.string.paywall_maybe_later),
-                        tint = Color.White.copy(alpha = 0.85f),
+                        tint = NexusColors.SignalInk.copy(alpha = 0.86f),
                         modifier = Modifier.size(20.dp),
                     )
                 }
@@ -236,13 +236,13 @@ private fun PaywallHero(onDismiss: () -> Unit) {
                 text = stringResource(R.string.text_unlock_nexus_pro),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.SemiBold,
-                color = Color.White,
+                color = NexusColors.SignalInk,
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = stringResource(R.string.text_supercharge_your_career_journey_with_premium),
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.84f),
+                color = NexusColors.SignalInk.copy(alpha = 0.86f),
             )
         }
     }

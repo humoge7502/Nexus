@@ -42,7 +42,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -58,7 +57,6 @@ import com.nexus.designsystem.component.instrumentGrid
 import com.nexus.designsystem.component.sheen
 import com.nexus.designsystem.effect.RevealOnLoad
 import com.nexus.designsystem.theme.NexusColors
-import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusTypography
 
@@ -164,11 +162,16 @@ private fun AssistantHero(
         modifier = modifier
             .clip(NexusShapes.lg)
             .background(
-                brush = Brush.linearGradient(NexusGradients.PrimaryDeep),
+                brush = Brush.linearGradient(
+                    listOf(NexusColors.Carbon, NexusColors.VoidBlack),
+                ),
                 shape = NexusShapes.lg,
             )
-            .instrumentGrid(spacingDp = 28f, alpha = 0.05f)
-            .hairline(color = Color.White.copy(alpha = 0.16f), cornerRadiusDp = 32f)
+            .instrumentGrid(spacingDp = 28f, alpha = 0.05f, color = NexusColors.Bone)
+            .hairline(
+                color = NexusColors.Bone.copy(alpha = 0.14f),
+                cornerRadiusDp = 18f,
+            )
             .sheen(alpha = 0.06f)
             .padding(20.dp)
     ) {
@@ -181,7 +184,7 @@ private fun AssistantHero(
             listOf(52f, 38f, 24f).forEachIndexed { index, radiusDp ->
                 val inset = radiusDp.dp.toPx()
                 drawArc(
-                    color = NexusColors.Cyan400.copy(alpha = 0.5f - index * 0.12f),
+                    color = NexusColors.Signal.copy(alpha = 0.5f - index * 0.12f),
                     startAngle = 180f,
                     sweepAngle = 90f,
                     useCenter = false,
@@ -191,7 +194,7 @@ private fun AssistantHero(
                 )
             }
             drawCircle(
-                color = NexusColors.Cyan400,
+                color = NexusColors.Signal,
                 radius = 2.5.dp.toPx(),
                 center = Offset(size.width - 18.dp.toPx(), 18.dp.toPx()),
             )
@@ -203,22 +206,21 @@ private fun AssistantHero(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.14f)),
+                        .background(NexusColors.Bone.copy(alpha = 0.10f)),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         imageVector = Icons.Default.Bolt,
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = NexusColors.Signal,
                         modifier = Modifier.size(20.dp),
                     )
                 }
                 Spacer(Modifier.width(10.dp))
                 Text(
-                    text = stringResource(R.string.ai_nexus_ai),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.White,
+                    text = stringResource(R.string.ai_nexus_ai).uppercase(java.util.Locale.ROOT),
+                    style = NexusTypography.DataLabel,
+                    color = NexusColors.Bone.copy(alpha = 0.62f),
                 )
             }
             Spacer(Modifier.height(16.dp))
@@ -226,15 +228,15 @@ private fun AssistantHero(
                 text = stringResource(R.string.ai_your_personal_career_mentor),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.SemiBold,
-                color = Color.White,
+                color = NexusColors.Bone,
             )
             Spacer(Modifier.height(18.dp))
             Button(
                 onClick = onChatClick,
-                shape = RoundedCornerShape(14.dp),
+                shape = NexusShapes.sm,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = NexusColors.NexusBlueDeep,
+                    containerColor = NexusColors.Signal,
+                    contentColor = NexusColors.SignalInk,
                 ),
                 contentPadding = PaddingValues(horizontal = 18.dp, vertical = 10.dp),
             ) {

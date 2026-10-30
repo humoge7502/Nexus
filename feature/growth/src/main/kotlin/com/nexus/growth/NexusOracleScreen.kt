@@ -29,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.component.IntelligenceCard
@@ -41,6 +40,8 @@ import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusSpacing
+import com.nexus.designsystem.theme.NexusTypography
+import java.util.Locale
 
 @Composable
 fun NexusOracleScreen(onBack: () -> Unit = {}) {
@@ -84,14 +85,14 @@ private fun CareerForecastCard() {
             .fillMaxWidth()
             .clip(NexusShapes.lg)
             .background(Brush.linearGradient(NexusGradients.PrimaryDeep), NexusShapes.lg)
-            .hairline(color = Color.White.copy(alpha = 0.14f), cornerRadiusDp = 24f)
+            .hairline(color = NexusColors.SignalInk.copy(alpha = 0.16f), cornerRadiusDp = 18f)
             .padding(horizontal = 20.dp, vertical = 20.dp),
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 stringResource(R.string.growth_your_career_forecast),
-                style = MaterialTheme.typography.labelMedium,
-                color = Color.White.copy(alpha = 0.72f),
+                style = NexusTypography.DataLabel,
+                color = NexusColors.SignalInk.copy(alpha = 0.86f),
             )
             Spacer(Modifier.height(NexusSpacing.md))
 
@@ -109,21 +110,29 @@ private fun CareerForecastCard() {
 @Composable
 private fun ForecastColumn(label: String, current: String, projected: String, note: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(label, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.62f))
+        Text(
+            label.uppercase(Locale.ROOT),
+            style = NexusTypography.DataLabel,
+            color = NexusColors.SignalInk.copy(alpha = 0.86f),
+        )
         Spacer(Modifier.height(4.dp))
         Text(
             current,
             style = MaterialTheme.typography.displayMedium,
             fontWeight = FontWeight.Bold,
-            color = Color.White,
+            color = NexusColors.SignalInk,
         )
         Text(
             projected,
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
-            color = NexusColors.Cyan400,
+            color = NexusColors.SignalInk.copy(alpha = 0.86f),
         )
-        Text(note, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.62f))
+        Text(
+            note,
+            style = MaterialTheme.typography.labelSmall,
+            color = NexusColors.SignalInk.copy(alpha = 0.86f),
+        )
     }
 }
 

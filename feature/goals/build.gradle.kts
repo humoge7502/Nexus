@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.coil)
+    implementation(libs.kotlinx.collections)
 
     implementation(libs.hilt.navigation.compose)
 }

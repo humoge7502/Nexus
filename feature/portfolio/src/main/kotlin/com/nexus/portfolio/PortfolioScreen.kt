@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -48,7 +47,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -72,16 +70,18 @@ import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.component.hairline
 import com.nexus.designsystem.component.instrumentGrid
-import com.nexus.designsystem.component.sheen
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
+import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
 import com.nexus.domain.model.PortfolioProject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 
@@ -222,7 +222,8 @@ private fun PortfolioSignature(
     onAdd: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val shape = RoundedCornerShape(24.dp)
+    val shape = NexusShapes.lg
+    val ink = NexusColors.SignalInk
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -231,9 +232,8 @@ private fun PortfolioSignature(
                 brush = Brush.linearGradient(NexusGradients.PrimaryDeep),
                 shape = shape,
             )
-            .instrumentGrid(spacingDp = 30f, alpha = 0.045f)
-            .hairline(color = Color.White.copy(alpha = 0.16f), cornerRadiusDp = 24f)
-            .sheen(alpha = 0.07f)
+            .instrumentGrid(color = ink, spacingDp = 30f, alpha = 0.06f)
+            .hairline(color = ink.copy(alpha = 0.16f), cornerRadiusDp = 18f)
             .padding(horizontal = 22.dp, vertical = 20.dp),
     ) {
         Column {
@@ -243,9 +243,9 @@ private fun PortfolioSignature(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(R.string.portfolio_my_projects),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = Color.White.copy(alpha = 0.70f),
+                        text = stringResource(R.string.portfolio_my_projects).uppercase(Locale.ROOT),
+                        style = NexusTypography.DataLabel,
+                        color = ink.copy(alpha = 0.62f),
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.Bottom) {
@@ -255,7 +255,7 @@ private fun PortfolioSignature(
                                 fontSize = 54.sp,
                                 lineHeight = 56.sp,
                             ),
-                            color = Color.White,
+                            color = ink,
                         )
                         Text(
                             text = pluralStringResource(
@@ -263,7 +263,7 @@ private fun PortfolioSignature(
                                 projectCount,
                             ),
                             style = NexusTypography.TelemetryLarge,
-                            color = Color.White.copy(alpha = 0.62f),
+                            color = ink.copy(alpha = 0.55f),
                             modifier = Modifier.padding(start = 6.dp, bottom = 7.dp),
                         )
                     }
@@ -275,21 +275,20 @@ private fun PortfolioSignature(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(1.dp)
-                    .background(Color.White.copy(alpha = 0.14f)),
+                    .background(ink.copy(alpha = 0.14f)),
             )
             Spacer(Modifier.height(12.dp))
             Row(verticalAlignment = Alignment.Top) {
                 Box(
                     modifier = Modifier
-                        .padding(top = 6.dp, end = 10.dp)
-                        .size(5.dp)
-                        .clip(CircleShape)
-                        .background(NexusColors.Cyan400),
+                        .padding(top = 5.dp, end = 10.dp)
+                        .size(width = 2.dp, height = 11.dp)
+                        .background(ink, NexusShapes.tag),
                 )
                 Text(
                     text = stringResource(R.string.portfolio_signature_caption),
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.92f),
+                    color = ink.copy(alpha = 0.86f),
                 )
             }
         }
@@ -302,30 +301,32 @@ private fun GlassAddButton(
     modifier: Modifier = Modifier,
 ) {
     val haptic = LocalHapticFeedback.current
-    val shape = RoundedCornerShape(50)
+    val shape = NexusShapes.sm
+    val ink = NexusColors.SignalInk
     Row(
         modifier = modifier
             .clip(shape)
-            .background(Color.White.copy(alpha = 0.16f))
-            .hairline(color = Color.White.copy(alpha = 0.28f), cornerRadiusDp = 50f)
+            .background(ink.copy(alpha = 0.10f))
+            .hairline(color = ink.copy(alpha = 0.24f), cornerRadiusDp = 10f)
             .clickable(role = Role.Button) {
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
             }
+            .heightIn(min = 44.dp)
             .padding(horizontal = 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             imageVector = Icons.Default.Add,
             contentDescription = null,
-            tint = Color.White,
+            tint = ink,
             modifier = Modifier.size(16.dp),
         )
         Spacer(Modifier.width(6.dp))
         Text(
             text = stringResource(R.string.portfolio_add),
             style = MaterialTheme.typography.labelLarge,
-            color = Color.White,
+            color = ink,
         )
     }
 }
@@ -398,7 +399,7 @@ private fun ProjectCard(
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = stringResource(R.string.cd_featured),
-                            tint = NexusColors.Amber400,
+                            tint = MaterialTheme.nexus.attention,
                             modifier = Modifier
                                 .padding(start = 8.dp)
                                 .size(16.dp),

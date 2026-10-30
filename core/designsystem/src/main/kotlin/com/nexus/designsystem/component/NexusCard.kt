@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,16 +21,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusSpacing
+import com.nexus.designsystem.theme.nexus
+import com.nexus.designsystem.theme.onAccent
 
 /**
- * The one card primitive. Separates itself from the ground with tone and a
- * hairline rather than stacked shadows, and springs under the finger when it
- * is tappable. Gradient cards are signature surfaces: use them sparingly.
+ * The one card primitive. It separates itself from the ground with tone, a
+ * hairline, and a 1dp edge-light that follows the shape — never with stacked
+ * shadows. Tappable cards acknowledge the finger in 90ms.
+ *
+ * Gradient cards are signature surfaces: when one is used, the content colour
+ * is derived from the lightest gradient stop so lime surfaces get ink text
+ * automatically instead of unreadable white.
  */
 @Composable
 fun NexusCard(
@@ -65,6 +75,7 @@ fun NexusCard(
                     }
             } else mod
         }
+        .innerLight(shape)
 
     Surface(
         modifier = cardModifier,
@@ -73,27 +84,37 @@ fun NexusCard(
         tonalElevation = 0.dp,
         shadowElevation = 0.dp,
         border = if (gradient == null) {
-            BorderStroke(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.9f),
-            )
+            BorderStroke(width = NexusSpacing.hairline, color = MaterialTheme.nexus.hairline)
         } else {
             null
         },
     ) {
-        Box(
-            modifier = Modifier
-                .then(
-                    if (gradient != null) Modifier.background(
-                        brush = Brush.linearGradient(gradient), shape = shape
-                    ) else Modifier
-                )
-                .clip(shape)
-                .padding(16.dp),
-            contentAlignment = Alignment.TopStart
+        CompositionLocalProvider(
+            LocalContentColor provides if (gradient != null) {
+                onAccent(gradient.maxByOrNull { it.luminance() } ?: gradient.last())
+            } else {
+                LocalContentColor.current
+            }
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                content()
+            Box(
+                modifier = Modifier
+                    .then(
+                        if (gradient != null) {
+                            Modifier.background(
+                                brush = Brush.linearGradient(gradient),
+                                shape = shape,
+                            )
+                        } else {
+                            Modifier
+                        }
+                    )
+                    .clip(shape)
+                    .padding(NexusSpacing.gutter),
+                contentAlignment = Alignment.TopStart
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    content()
+                }
             }
         }
     }

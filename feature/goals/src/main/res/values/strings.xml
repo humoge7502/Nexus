@@ -1,11 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="goals_active_goals">Active Goals</string>
+    <string name="goals_add_goal">Add goal</string>
+    <string name="goals_cancel">Cancel</string>
+    <string name="goals_category_certification">Certification</string>
+    <string name="goals_category_dsa">DSA</string>
+    <string name="goals_category_hackathon">Hackathon</string>
+    <string name="goals_category_internship">Internship</string>
+    <string name="goals_category_other">Other</string>
+    <string name="goals_category_placement">Placement</string>
+    <string name="goals_category_project">Project</string>
+    <string name="goals_category_skill">Skill</string>
+    <string name="goals_completed">Completed</string>
+    <string name="goals_create_goal">Create</string>
+    <string name="goals_delete_goal">Delete goal</string>
+    <string name="goals_goal_actions">Goal actions</string>
+    <string name="goals_goal_category">Category</string>
+    <string name="goals_goal_progress">%1$d%% complete</string>
+    <string name="goals_goal_title">Goal</string>
+    <string name="goals_goal_title_hint">e.g. Finish 100 DSA problems</string>
     <string name="goals_goals_habits">Goals &amp; Habits</string>
     <string name="goals_goals_u00b7_completed">%1$s goals \u00B7 %2$s completed</string>
     <string name="goals_loading_your_goals">Loading your goals...</string>
+    <string name="goals_new_goal">New goal</string>
+    <string name="goals_no_deadline">No deadline</string>
     <string name="goals_no_goals_yet">No goals yet</string>
-    <string name="goals_tap_to_set_your_first_goal">Tap + to set your first goal — certification, DSA count, anything.</string>
     <string name="goals_overall_progress">%1$s%% overall progress</string>
+    <string name="goals_tap_to_set_your_first_goal">Tap + to set your first goal — certification, DSA count, anything.</string>
     <string name="cd_back">Back</string>
 </resources>

@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -43,7 +42,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.R as DesignSystemR
+import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
+import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusTypography
 
 private data class TourStep(
     val title: String,
@@ -97,28 +99,28 @@ fun TourOverlay(onFinish: () -> Unit) {
                 .fillMaxWidth()
                 .background(
                     brush = Brush.linearGradient(NexusGradients.Primary),
-                    shape = RoundedCornerShape(24.dp),
+                    shape = NexusShapes.lg,
                 )
                 .padding(28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(stringResource(R.string.home_step_of, step + 1, tourSteps.size),
-                style = MaterialTheme.typography.labelMedium,
-                color = Color.White.copy(alpha = 0.75f),
+                style = NexusTypography.DataLabel,
+                color = NexusColors.SignalInk.copy(alpha = 0.86f),
             )
             Spacer(Modifier.height(12.dp))
             Text(
                 current.title,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = NexusColors.SignalInk,
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(10.dp))
             Text(
                 current.body,
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.9f),
+                color = NexusColors.SignalInk.copy(alpha = 0.88f),
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(20.dp))
@@ -131,7 +133,7 @@ fun TourOverlay(onFinish: () -> Unit) {
                         modifier = Modifier
                             .size(if (i == step) 10.dp else 6.dp)
                             .background(
-                                Color.White.copy(alpha = if (i == step) 1f else 0.4f),
+                                NexusColors.SignalInk.copy(alpha = if (i == step) 1f else 0.28f),
                                 CircleShape,
                             ),
                     )
@@ -141,9 +143,10 @@ fun TourOverlay(onFinish: () -> Unit) {
             Button(
                 onClick = { if (isLast) onFinish() else step++ },
                 modifier = Modifier.fillMaxWidth(),
+                shape = NexusShapes.sm,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = NexusColors.SignalInk,
+                    contentColor = NexusColors.Signal,
                 ),
             ) {
                 Text(
@@ -155,13 +158,13 @@ fun TourOverlay(onFinish: () -> Unit) {
             TextButton(onClick = { showDemo = true }) {
                 Text(
                     "▶ Watch the 20-second demo",
-                    color = Color.White,
+                    color = NexusColors.SignalInk,
                     fontWeight = FontWeight.SemiBold,
                 )
             }
             if (!isLast) {
                 TextButton(onClick = onFinish) {
-                    Text(stringResource(R.string.home_skip_tour), color = Color.White.copy(alpha = 0.7f))
+                    Text(stringResource(R.string.home_skip_tour), color = NexusColors.SignalInk.copy(alpha = 0.86f))
                 }
             }
         }

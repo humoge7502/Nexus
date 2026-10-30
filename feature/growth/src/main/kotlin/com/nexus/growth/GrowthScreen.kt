@@ -23,11 +23,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,21 +37,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.nexus.designsystem.component.CalibratedRule
 import com.nexus.designsystem.component.InstrumentGauge
-import com.nexus.designsystem.component.LeaderRule
 import com.nexus.designsystem.component.SignalField
 import com.nexus.designsystem.component.hairline
 import com.nexus.designsystem.component.instrumentGrid
 import com.nexus.designsystem.component.sheen
 import com.nexus.designsystem.effect.RevealOnLoad
 import com.nexus.designsystem.theme.NexusColors
-import com.nexus.designsystem.theme.NexusGradients
+import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
+import java.util.Locale
 
 internal data class Metric(val label: String, val progress: Float)
 
@@ -164,16 +161,20 @@ private fun NexusScoreCard(nexusScore: Int, nexusScoreFloat: Float, metrics: Lis
         animationSpec = tween(1400, easing = FastOutSlowInEasing),
         label = "score",
     )
-    val shape = RoundedCornerShape(28.dp)
+    val shape = NexusShapes.lg
+    val bone = NexusColors.Bone
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(brush = Brush.linearGradient(NexusGradients.PrimaryDeep), shape = shape)
-            .instrumentGrid(spacingDp = 30f, alpha = 0.045f)
-            .hairline(color = Color.White.copy(alpha = 0.16f), cornerRadiusDp = 28f)
-            .sheen(alpha = 0.07f)
+            .background(
+                brush = Brush.linearGradient(listOf(NexusColors.Carbon, NexusColors.VoidBlack)),
+                shape = shape,
+            )
+            .instrumentGrid(spacingDp = 30f, alpha = 0.05f, color = bone)
+            .hairline(color = bone.copy(alpha = 0.14f), cornerRadiusDp = 18f)
+            .sheen(alpha = 0.06f)
             .padding(horizontal = 22.dp, vertical = 20.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -183,11 +184,11 @@ private fun NexusScoreCard(nexusScore: Int, nexusScoreFloat: Float, metrics: Lis
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(R.string.growth_nexus_score),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = Color.White.copy(alpha = 0.70f),
+                        text = stringResource(R.string.growth_nexus_score).uppercase(Locale.ROOT),
+                        style = NexusTypography.DataLabel,
+                        color = bone.copy(alpha = 0.62f),
                     )
-                    Spacer(Modifier.height(6.dp))
+                    Spacer(Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.Bottom) {
                         Text(
                             text = animatedScore.toInt().toString(),
@@ -195,12 +196,12 @@ private fun NexusScoreCard(nexusScore: Int, nexusScoreFloat: Float, metrics: Lis
                                 fontSize = 48.sp,
                                 lineHeight = 50.sp,
                             ),
-                            color = Color.White,
+                            color = bone,
                         )
                         Text(
                             text = "/ 1000",
                             style = NexusTypography.TelemetryMicro,
-                            color = Color.White.copy(alpha = 0.62f),
+                            color = bone.copy(alpha = 0.55f),
                             modifier = Modifier.padding(start = 6.dp, bottom = 8.dp),
                         )
                     }
@@ -216,22 +217,28 @@ private fun NexusScoreCard(nexusScore: Int, nexusScoreFloat: Float, metrics: Lis
                                 0f..1000f,
                             )
                         },
-                    accent = NexusColors.Cyan400,
-                    trackColor = Color.White.copy(alpha = 0.15f),
-                    tickColor = Color.White.copy(alpha = 0.32f),
+                    accent = NexusColors.Signal,
+                    trackColor = bone.copy(alpha = 0.14f),
+                    tickColor = bone.copy(alpha = 0.26f),
                     stroke = 8.dp,
                 )
             }
 
             Spacer(Modifier.height(16.dp))
-            HorizontalDivider(thickness = 1.dp, color = Color.White.copy(alpha = 0.14f))
-            Spacer(Modifier.height(12.dp))
+            CalibratedRule(
+                progress = nexusScoreFloat.coerceIn(0f, 1f),
+                modifier = Modifier.fillMaxWidth(),
+                divisions = 20,
+                accent = NexusColors.Signal,
+                trackColor = bone.copy(alpha = 0.20f),
+                tickColor = bone.copy(alpha = 0.30f),
+            )
+            Spacer(Modifier.height(10.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(5.dp)
-                        .clip(CircleShape)
-                        .background(NexusColors.Cyan400)
+                        .size(width = 2.dp, height = 11.dp)
+                        .background(NexusColors.Signal)
                 )
                 Spacer(Modifier.width(10.dp))
                 Text(
@@ -240,7 +247,7 @@ private fun NexusScoreCard(nexusScore: Int, nexusScoreFloat: Float, metrics: Lis
                         else R.string.growth_start_earning_score,
                     ),
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.92f),
+                    color = bone.copy(alpha = 0.86f),
                 )
             }
 

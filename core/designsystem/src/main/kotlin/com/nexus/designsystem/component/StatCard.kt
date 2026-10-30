@@ -1,8 +1,7 @@
 package com.nexus.designsystem.component
 
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,14 +24,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.nexus.designsystem.theme.LocalReducedMotion
+import com.nexus.designsystem.theme.NexusAnimation
+import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
+import java.util.Locale
 
 /**
- * Quiet dashboard tile: the label reads first, the value carries the mass,
- * and an optional [accent] tints only the icon — never the whole surface.
+ * Dashboard tile built like a small instrument panel: the field label sits
+ * above a hairline, the figure carries the mass, and the [accent] tints only
+ * the icon and the label tick — never the whole surface.
+ *
+ * [NexusCard] already supplies the gutter padding, so this composable adds
+ * none; nesting padding here is what previously produced 32dp of dead space.
  */
 @Composable
 fun AnimatedStatCard(
@@ -43,13 +51,20 @@ fun AnimatedStatCard(
     suffix: String = "",
     accent: Color? = null,
 ) {
-    var animatedValue by remember { mutableIntStateOf(0) }
+    val reducedMotion = LocalReducedMotion.current
+    var animatedValue by remember { mutableIntStateOf(value) }
 
-    LaunchedEffect(value) {
+    LaunchedEffect(value, reducedMotion) {
+        if (reducedMotion) {
+            animatedValue = value
+            return@LaunchedEffect
+        }
+        // Animate from wherever the figure currently sits so a refresh
+        // nudges the number instead of resetting it to zero.
         animate(
-            initialValue = 0f,
+            initialValue = animatedValue.toFloat(),
             targetValue = value.toFloat(),
-            animationSpec = tween(1200, easing = FastOutSlowInEasing)
+            animationSpec = NexusAnimation.Tween.numberCount,
         ) { currentValue, _ ->
             animatedValue = currentValue.toInt()
         }
@@ -57,50 +72,58 @@ fun AnimatedStatCard(
 
     NexusCard(
         modifier = modifier,
-        shape = MaterialTheme.shapes.medium,
+        shape = NexusShapes.md,
     ) {
-        Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
+        Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.Top,
             ) {
                 Text(
-                    text = label,
-                    style = NexusTypography.TelemetryMicro,
+                    text = label.uppercase(Locale.ROOT),
+                    style = NexusTypography.DataLabel,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                    // Equal-height tiles: the longest label in the row sets
+                    // the height and short labels reserve the same two lines.
+                    minLines = 2,
+                    maxLines = 2,
                     modifier = Modifier.weight(1f),
                 )
                 if (icon != null) {
-                    Spacer(Modifier.width(6.dp))
+                    Spacer(Modifier.width(NexusSpacing.xxs))
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = (accent ?: MaterialTheme.colorScheme.onSurfaceVariant).copy(alpha = 0.8f),
-                        modifier = Modifier.size(14.dp)
+                        tint = accent ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(14.dp),
                     )
                 }
             }
-            Spacer(Modifier.height(9.dp))
+            Spacer(Modifier.height(NexusSpacing.xs))
             HorizontalDivider(
-                thickness = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
+                thickness = NexusSpacing.hairline,
+                color = MaterialTheme.nexus.hairlineStrong,
             )
-            Spacer(Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.Bottom) {
+            Spacer(Modifier.height(NexusSpacing.xs))
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.Start,
+            ) {
                 Text(
-                    text = "$animatedValue",
-                    style = NexusTypography.Stat.copy(fontSize = 26.sp, lineHeight = 30.sp),
+                    text = animatedValue.toString(),
+                    style = NexusTypography.Stat.copy(fontSize = 26.sp, lineHeight = 28.sp),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                 )
                 if (suffix.isNotEmpty()) {
                     Text(
                         text = suffix,
-                        style = NexusTypography.TelemetryMicro,
+                        style = NexusTypography.DataLabel,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 3.dp, bottom = 4.dp),
+                        maxLines = 1,
+                        modifier = Modifier
+                            .padding(start = 4.dp)
+                            .alignByBaseline(),
                     )
                 }
             }

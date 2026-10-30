@@ -27,7 +27,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.DarkMode
@@ -56,7 +55,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -67,9 +65,10 @@ import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
+import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
+import java.util.Locale
 
 data class AchievementBadge(
     val id: String,
@@ -189,7 +188,7 @@ private fun LevelXpCard(
 ) {
     NexusCard(
         modifier = Modifier.fillMaxWidth(),
-        gradient = NexusGradients.PrimaryDeep,
+        gradient = NexusGradients.Primary,
     ) {
         Column {
             Row(
@@ -197,49 +196,50 @@ private fun LevelXpCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.16f))
-                        .padding(horizontal = 14.dp, vertical = 6.dp),
-                ) {
-                    Text(
-                        text = stringResource(R.string.achievements_level_title, level, title),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                    )
-                }
+                Text(
+                    text = stringResource(R.string.achievements_level_title, level, title)
+                        .uppercase(Locale.ROOT),
+                    style = NexusTypography.DataLabel,
+                    color = NexusColors.SignalInk.copy(alpha = 0.86f),
+                )
                 Icon(
                     Icons.Default.RocketLaunch,
                     contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.9f),
-                    modifier = Modifier.size(24.dp),
+                    tint = NexusColors.SignalInk.copy(alpha = 0.86f),
+                    modifier = Modifier.size(20.dp),
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            Text(
-                text = stringResource(R.string.achievements_xp_progress, currentXp, xpForNext),
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.8f),
-            )
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(
+                    text = currentXp.toString(),
+                    style = NexusTypography.TelemetryDisplay,
+                    color = NexusColors.SignalInk,
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = stringResource(R.string.achievements_xp_of_total, xpForNext),
+                    style = NexusTypography.DataLabel,
+                    color = NexusColors.SignalInk.copy(alpha = 0.86f),
+                    modifier = Modifier.padding(bottom = 6.dp),
+                )
+            }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             LinearProgressIndicator(
                 progress = { animatedProgress },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(10.dp)
-                    .clip(RoundedCornerShape(5.dp)),
-                color = Color.White,
-                trackColor = Color.White.copy(alpha = 0.2f),
-                strokeCap = StrokeCap.Round,
+                    .height(4.dp)
+                    .clip(NexusShapes.tag),
+                color = NexusColors.SignalInk,
+                trackColor = NexusColors.SignalInk.copy(alpha = 0.18f),
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = stringResource(
@@ -247,7 +247,7 @@ private fun LevelXpCard(
                     (xpForNext - currentXp).coerceAtLeast(0),
                 ),
                 style = MaterialTheme.typography.labelSmall,
-                color = Color.White.copy(alpha = 0.6f),
+                color = NexusColors.SignalInk.copy(alpha = 0.86f),
             )
         }
     }
@@ -278,6 +278,7 @@ private fun NexusScoreCard(
             ) {
                 val trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
                 val arcColor = MaterialTheme.colorScheme.primary
+                val arcTail = MaterialTheme.nexus.structure
                 Canvas(modifier = Modifier.size(100.dp)) {
                     val sweepAngle = animatedProgress * 270f
                     val arcPadding = 12f
@@ -299,7 +300,7 @@ private fun NexusScoreCard(
 
                     drawArc(
                         brush = Brush.sweepGradient(
-                            listOf(arcColor, NexusColors.Cyan400),
+                            listOf(arcColor, arcTail),
                             center = androidx.compose.ui.geometry.Offset(size.width / 2, size.height / 2),
                         ),
                         startAngle = 135f,
@@ -347,7 +348,7 @@ private fun NexusScoreCard(
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = when {
-                        weeklyChange > 0 -> NexusColors.Emerald400
+                        weeklyChange > 0 -> MaterialTheme.nexus.positive
                         weeklyChange < 0 -> MaterialTheme.colorScheme.error
                         else -> MaterialTheme.colorScheme.onSurfaceVariant
                     },

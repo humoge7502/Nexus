@@ -19,8 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Notifications
@@ -37,7 +35,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -56,7 +53,9 @@ import com.nexus.designsystem.component.sheen
 import com.nexus.designsystem.effect.RevealOnLoad
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
+import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
@@ -217,7 +216,7 @@ private fun HomeTelemetry(
                 TelemetryItem(
                     label = stringResource(R.string.home_day_streak),
                     value = streak,
-                    accent = NexusColors.Amber400,
+                    accent = MaterialTheme.nexus.attention,
                 ),
                 TelemetryItem(
                     label = stringResource(R.string.home_interviews),
@@ -289,7 +288,7 @@ private fun GreetingSection(
                 Icon(
                     imageVector = Icons.Default.LocalFireDepartment,
                     contentDescription = null,
-                    tint = NexusColors.Amber400,
+                    tint = MaterialTheme.nexus.attention,
                     modifier = Modifier.size(14.dp)
                 )
                 Spacer(modifier = Modifier.width(5.dp))
@@ -315,7 +314,8 @@ private fun CareerReadinessCard(
         label = "score"
     )
     val readinessCaption = stringResource(R.string.home_readiness_caption)
-    val shape = RoundedCornerShape(28.dp)
+    val shape = NexusShapes.lg
+    val ink = NexusColors.SignalInk
 
     Box(
         modifier = modifier
@@ -325,13 +325,13 @@ private fun CareerReadinessCard(
                 brush = Brush.linearGradient(NexusGradients.Ascent),
                 shape = shape
             )
-            .instrumentGrid(spacingDp = 30f, alpha = 0.045f)
+            .instrumentGrid(spacingDp = 30f, alpha = 0.06f, color = ink)
             .hairline(
-                color = Color.White.copy(alpha = 0.16f),
-                cornerRadiusDp = 28f
+                color = ink.copy(alpha = 0.26f),
+                cornerRadiusDp = 18f
             )
-            .sheen(alpha = 0.07f)
-            .padding(horizontal = 22.dp, vertical = 20.dp)
+            .sheen(alpha = 0.10f)
+            .padding(horizontal = 20.dp, vertical = 20.dp)
     ) {
         Column {
             Row(
@@ -340,9 +340,9 @@ private fun CareerReadinessCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(R.string.text_career_readiness),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = Color.White.copy(alpha = 0.70f)
+                        text = stringResource(R.string.text_career_readiness).uppercase(Locale.ROOT),
+                        style = NexusTypography.DataLabel,
+                        color = ink.copy(alpha = 0.66f)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.Bottom) {
@@ -352,12 +352,12 @@ private fun CareerReadinessCard(
                                 fontSize = 54.sp,
                                 lineHeight = 56.sp,
                             ),
-                            color = Color.White,
+                            color = ink,
                         )
                         Text(
                             text = "%",
                             style = NexusTypography.TelemetryLarge,
-                            color = Color.White.copy(alpha = 0.62f),
+                            color = ink.copy(alpha = 0.55f),
                             modifier = Modifier.padding(start = 4.dp, bottom = 7.dp)
                         )
                     }
@@ -366,9 +366,9 @@ private fun CareerReadinessCard(
                 InstrumentGauge(
                     progress = score,
                     modifier = Modifier.size(112.dp),
-                    accent = NexusColors.Cyan400,
-                    trackColor = Color.White.copy(alpha = 0.15f),
-                    tickColor = Color.White.copy(alpha = 0.32f),
+                    accent = ink,
+                    trackColor = ink.copy(alpha = 0.16f),
+                    tickColor = ink.copy(alpha = 0.30f),
                     stroke = 8.dp,
                 )
             }
@@ -378,21 +378,21 @@ private fun CareerReadinessCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(1.dp)
-                    .background(Color.White.copy(alpha = 0.14f))
+                    .background(ink.copy(alpha = 0.16f))
             )
             Spacer(modifier = Modifier.height(13.dp))
             Row(verticalAlignment = Alignment.Top) {
                 Box(
                     modifier = Modifier
-                        .padding(top = 6.dp, end = 10.dp)
-                        .size(5.dp)
-                        .clip(CircleShape)
-                        .background(NexusColors.Cyan400)
+                        .padding(top = 4.dp, end = 10.dp)
+                        .size(width = 2.dp, height = 11.dp)
+                        .clip(NexusShapes.tag)
+                        .background(ink.copy(alpha = 0.75f))
                 )
                 Text(
                     text = caption.ifBlank { readinessCaption },
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.92f)
+                    color = ink.copy(alpha = 0.88f)
                 )
             }
         }

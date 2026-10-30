@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -56,16 +55,18 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusChip
 import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.SignalField
+import com.nexus.designsystem.component.SignalTag
+import com.nexus.designsystem.component.SignalTone
 import com.nexus.designsystem.component.pressScale
 import com.nexus.designsystem.effect.RevealOnLoad
-import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
 import com.nexus.domain.model.Certification
 import com.nexus.domain.model.Hackathon
 import com.nexus.domain.model.Internship
@@ -268,12 +269,12 @@ private fun ExploreSearchField(
         },
         singleLine = true,
         textStyle = MaterialTheme.typography.bodyMedium,
-        shape = RoundedCornerShape(16.dp),
+        shape = NexusShapes.sm,
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
             focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.55f),
-            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.9f),
+            unfocusedBorderColor = MaterialTheme.nexus.hairline,
             cursorColor = MaterialTheme.colorScheme.primary,
         ),
     )
@@ -476,19 +477,19 @@ private fun CategoryChip(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
-    val shape = RoundedCornerShape(12.dp)
+    val shape = NexusShapes.sm
     val bgColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+        targetValue = if (isSelected) MaterialTheme.nexus.signalContainer
         else MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.6f),
         label = "catBg",
     )
     val borderColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
-        else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.8f),
+        targetValue = if (isSelected) MaterialTheme.nexus.signal.copy(alpha = 0.55f)
+        else MaterialTheme.nexus.hairline,
         label = "catBorder",
     )
     val contentColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary
+        targetValue = if (isSelected) MaterialTheme.nexus.onSignalContainer
         else MaterialTheme.colorScheme.onSurfaceVariant,
         label = "catContent",
     )
@@ -498,7 +499,7 @@ private fun CategoryChip(
             .pressScale()
             .clip(shape)
             .background(bgColor)
-            .border(1.dp, borderColor, shape)
+            .border(NexusSpacing.hairline, borderColor, shape)
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -534,7 +535,7 @@ private fun ExploreOpportunityCard(
     ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Box(
-                modifier = Modifier.size(42.dp).clip(RoundedCornerShape(12.dp))
+                modifier = Modifier.size(42.dp).clip(NexusShapes.sm)
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center,
             ) {
@@ -550,40 +551,15 @@ private fun ExploreOpportunityCard(
                 Spacer(Modifier.height(6.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     for (tag in tags.take(2)) {
-                        Box(Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f),
-                                shape = RoundedCornerShape(4.dp),
-                            )
-                            .padding(horizontal = 6.dp, vertical = 2.dp)) {
-                            Text(tag, style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
+                        SignalTag(text = tag, tone = SignalTone.Neutral)
                     }
                 }
             }
             Spacer(Modifier.width(8.dp))
-            val strongMatch = matchScore >= 90
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .border(
-                        width = 1.dp,
-                        color = if (strongMatch) NexusColors.Emerald400.copy(alpha = 0.35f)
-                        else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f),
-                        shape = RoundedCornerShape(8.dp),
-                    )
-                    .padding(horizontal = 8.dp, vertical = 5.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.explore_match_percent, matchScore),
-                    style = NexusTypography.TelemetryMicro,
-                    color = if (strongMatch) NexusColors.Emerald400
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            SignalTag(
+                text = stringResource(R.string.explore_match_percent, matchScore),
+                tone = if (matchScore >= 90) SignalTone.Signal else SignalTone.Neutral,
+            )
         }
     }
 }
@@ -597,7 +573,7 @@ private fun CertificationCard(certification: Certification, onClick: () -> Unit)
     ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Box(
-                modifier = Modifier.size(42.dp).clip(RoundedCornerShape(12.dp))
+                modifier = Modifier.size(42.dp).clip(NexusShapes.sm)
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center,
             ) {
@@ -641,11 +617,11 @@ private fun CertificationCard(certification: Certification, onClick: () -> Unit)
 private fun InfoPill(text: String, icon: ImageVector? = null) {
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
+            .clip(NexusShapes.xs)
             .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f),
-                shape = RoundedCornerShape(4.dp),
+                width = NexusSpacing.hairline,
+                color = MaterialTheme.nexus.hairline,
+                shape = NexusShapes.xs,
             )
             .padding(horizontal = 6.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -654,7 +630,7 @@ private fun InfoPill(text: String, icon: ImageVector? = null) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = NexusColors.Amber400,
+                tint = MaterialTheme.nexus.attention,
                 modifier = Modifier.size(11.dp),
             )
             Spacer(Modifier.width(3.dp))
@@ -675,7 +651,7 @@ private fun HackathonCard(hackathon: Hackathon, onClick: () -> Unit) {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
-                modifier = Modifier.size(42.dp).clip(RoundedCornerShape(12.dp))
+                modifier = Modifier.size(42.dp).clip(NexusShapes.sm)
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center,
             ) {
@@ -693,16 +669,19 @@ private fun HackathonCard(hackathon: Hackathon, onClick: () -> Unit) {
                         fontWeight = FontWeight.SemiBold, maxLines = 1)
                     if (hackathon.isLive) {
                         Spacer(Modifier.width(8.dp))
-                        Box(Modifier.clip(RoundedCornerShape(4.dp))
-                            .border(
-                                width = 1.dp,
-                                color = NexusColors.Rose400.copy(alpha = 0.4f),
-                                shape = RoundedCornerShape(4.dp),
-                            )
-                            .padding(horizontal = 6.dp, vertical = 2.dp)) {
-                            Text(stringResource(R.string.explore_live), style = NexusTypography.TelemetryMicro,
-                                color = NexusColors.Rose400)
-                        }
+                        Box(
+                            Modifier
+                                .width(2.dp)
+                                .height(11.dp)
+                                .clip(NexusShapes.tag)
+                                .background(MaterialTheme.nexus.attention),
+                        )
+                        Spacer(Modifier.width(5.dp))
+                        Text(
+                            stringResource(R.string.explore_live),
+                            style = NexusTypography.DataLabel,
+                            color = MaterialTheme.nexus.attention,
+                        )
                     }
                 }
                 Text(hackathon.organizer, style = MaterialTheme.typography.bodySmall,
@@ -710,7 +689,7 @@ private fun HackathonCard(hackathon: Hackathon, onClick: () -> Unit) {
                 Spacer(Modifier.height(2.dp))
                 Text(stringResource(R.string.explore_prize, hackathon.prizePool),
                     style = NexusTypography.TelemetryMicro,
-                    color = NexusColors.Amber400)
+                    color = MaterialTheme.nexus.attention)
             }
         }
     }

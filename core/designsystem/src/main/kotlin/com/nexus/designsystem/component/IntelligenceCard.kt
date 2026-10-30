@@ -6,15 +6,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -27,11 +25,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.R
-import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusSpacing
+import com.nexus.designsystem.theme.NexusTypography
 import com.nexus.designsystem.theme.onAccent
+import com.nexus.designsystem.theme.nexus
 
 enum class IntelligenceCardType {
     ORACLE, SIGNAL, MIRROR, MOMENTUM
@@ -46,33 +47,53 @@ data class IntelligenceCardData(
     val priority: Int = 0,
 )
 
+/**
+ * Each intelligence type speaks in a different signal so a feed of these cards
+ * can be scanned by colour before it is read. The accent lives on the icon and
+ * the tag; the card surface itself stays neutral, which keeps four stacked
+ * cards from turning into a carnival.
+ */
 private data class TypeVoice(
     val accent: Color,
     val icon: ImageVector,
     val labelRes: Int,
+    val tone: SignalTone,
+    val iconTint: Color,
 )
 
-private fun voiceFor(type: IntelligenceCardType): TypeVoice = when (type) {
-    IntelligenceCardType.ORACLE -> TypeVoice(
-        NexusColors.NexusBlue,
-        Icons.Default.AutoAwesome,
-        R.string.designsystem_nexus_oracle,
-    )
-    IntelligenceCardType.SIGNAL -> TypeVoice(
-        NexusColors.Amber500,
-        Icons.Default.Bolt,
-        R.string.designsystem_nexus_signal,
-    )
-    IntelligenceCardType.MIRROR -> TypeVoice(
-        NexusColors.Cyan400,
-        Icons.Default.Visibility,
-        R.string.designsystem_nexus_mirror,
-    )
-    IntelligenceCardType.MOMENTUM -> TypeVoice(
-        NexusColors.AuroraGreen,
-        Icons.Default.TrendingUp,
-        R.string.designsystem_nexus_momentum,
-    )
+@Composable
+private fun voiceFor(type: IntelligenceCardType): TypeVoice {
+    val ext = MaterialTheme.nexus
+    return when (type) {
+        IntelligenceCardType.ORACLE -> TypeVoice(
+            accent = ext.signal,
+            icon = Icons.Default.AutoAwesome,
+            labelRes = R.string.designsystem_nexus_oracle,
+            tone = SignalTone.Signal,
+            iconTint = ext.signal,
+        )
+        IntelligenceCardType.SIGNAL -> TypeVoice(
+            accent = ext.attention,
+            icon = Icons.Default.Bolt,
+            labelRes = R.string.designsystem_nexus_signal,
+            tone = SignalTone.Attention,
+            iconTint = ext.attention,
+        )
+        IntelligenceCardType.MIRROR -> TypeVoice(
+            accent = ext.structure,
+            icon = Icons.Default.Visibility,
+            labelRes = R.string.designsystem_nexus_mirror,
+            tone = SignalTone.Structure,
+            iconTint = ext.structure,
+        )
+        IntelligenceCardType.MOMENTUM -> TypeVoice(
+            accent = ext.positive,
+            icon = Icons.Default.TrendingUp,
+            labelRes = R.string.designsystem_nexus_momentum,
+            tone = SignalTone.Neutral,
+            iconTint = ext.positive,
+        )
+    }
 }
 
 @Composable
@@ -84,7 +105,6 @@ fun IntelligenceCard(
     onDismiss: () -> Unit = {},
 ) {
     val voice = voiceFor(data.type)
-    val accent = voice.accent
 
     NexusCard(
         modifier = modifier.fillMaxWidth(),
@@ -95,60 +115,63 @@ fun IntelligenceCard(
                 Icon(
                     imageVector = voice.icon,
                     contentDescription = null,
-                    tint = accent,
+                    tint = voice.iconTint,
                     modifier = Modifier.size(20.dp),
                 )
-                Spacer(Modifier.width(10.dp))
-                Column {
+                Spacer(Modifier.width(NexusSpacing.sm))
+                Column(verticalArrangement = Arrangement.spacedBy(NexusSpacing.xxs)) {
                     Text(
                         data.title,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                     )
-                    Text(
-                        stringResource(voice.labelRes),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = accent,
+                    SignalTag(
+                        text = stringResource(voice.labelRes),
+                        tone = voice.tone,
+                        iconTint = voice.iconTint,
                     )
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(NexusSpacing.sm))
             Text(
                 data.description,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             if (data.primaryAction != null || data.secondaryAction != null) {
-                Spacer(Modifier.height(14.dp))
+                Spacer(Modifier.height(NexusSpacing.md))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(NexusSpacing.xs),
                 ) {
                     data.primaryAction?.let { action ->
                         Button(
                             onClick = onPrimaryAction,
-                            modifier = Modifier.weight(1f).height(42.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.weight(1f).height(NexusSpacing.minTouchTarget),
+                            shape = NexusShapes.sm,
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = accent,
-                                contentColor = onAccent(accent),
+                                containerColor = voice.accent,
+                                contentColor = onAccent(voice.accent),
                             ),
                         ) {
                             Text(
                                 action,
-                                style = MaterialTheme.typography.labelMedium,
+                                style = NexusTypography.LabelMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
                             )
                         }
                     }
                     data.secondaryAction?.let { action ->
                         Button(
                             onClick = onSecondaryAction,
-                            modifier = Modifier.weight(1f).height(42.dp),
-                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.weight(1f).height(NexusSpacing.minTouchTarget),
+                            shape = NexusShapes.sm,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -156,8 +179,9 @@ fun IntelligenceCard(
                         ) {
                             Text(
                                 action,
-                                style = MaterialTheme.typography.labelMedium,
+                                style = NexusTypography.LabelMedium,
                                 maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
                             )
                         }
                     }

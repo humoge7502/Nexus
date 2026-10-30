@@ -65,6 +65,12 @@
     <string name="arena_leave_action">Leave leaderboard</string>
     <string name="growth_goals_done">Goals done</string>
     <string name="growth_projects">Projects</string>
+    <string name="growth_this_month">%1$d this month</string>
+    <string name="growth_days">days</string>
+    <string name="growth_start_today">start today</string>
+    <string name="growth_best_streak">Best %1$d</string>
+    <string name="growth_completed">Completed</string>
+    <string name="growth_percent_complete">%1$d%% complete</string>
     <string name="dsa_solved">Solved</string>
     <string name="dsa_remaining">Remaining</string>
     <string name="dsa_day_streak">Day Streak</string>

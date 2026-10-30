@@ -4,10 +4,10 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
@@ -50,8 +49,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -60,9 +57,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nexus.designsystem.R
+import com.nexus.designsystem.theme.LocalReducedMotion
+import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusSpacing
+import com.nexus.designsystem.theme.nexus
 
 data class BottomNavItem(
     val labelRes: Int,
@@ -81,8 +83,11 @@ private val bottomNavItems = listOf(
 /**
  * Navigation as a single machined part: the lit lens is one object that glides
  * between equal-width stations, rather than five separate pills lighting up in
- * place. The glide is a spring, so it settles with a slight overshoot the way a
- * physical carriage would.
+ * place. A 2dp index needle at the lens foot is the same mark the gauges use,
+ * so the chrome and the data share one measurement language.
+ *
+ * The glide is a near-critically damped spring — it settles without overshoot,
+ * because a carriage that bounces reads as a toy, not an instrument.
  */
 @Composable
 fun NexusBottomBar(
@@ -91,6 +96,8 @@ fun NexusBottomBar(
     modifier: Modifier = Modifier,
 ) {
     val haptic = LocalHapticFeedback.current
+    val extended = MaterialTheme.nexus
+    val reducedMotion = LocalReducedMotion.current
 
     Box(
         modifier = modifier
@@ -98,19 +105,21 @@ fun NexusBottomBar(
             // Scaffold's bottomBar slot does not apply window insets itself,
             // so the bar would otherwise sit under the system gesture bar.
             .navigationBarsPadding()
-            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 10.dp)
+            .padding(
+                start = NexusSpacing.gutter,
+                end = NexusSpacing.gutter,
+                top = NexusSpacing.xs,
+                bottom = 10.dp,
+            )
     ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
+            shape = NexusShapes.lg,
             color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.98f),
             contentColor = MaterialTheme.colorScheme.onSurface,
             tonalElevation = 0.dp,
             shadowElevation = 0.dp,
-            border = BorderStroke(
-                1.dp,
-                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.8f)
-            )
+            border = BorderStroke(NexusSpacing.hairline, extended.hairline)
         ) {
             BoxWithConstraints(
                 modifier = Modifier
@@ -121,23 +130,35 @@ fun NexusBottomBar(
                 val cellWidth = maxWidth / count
                 val lensOffset by animateDpAsState(
                     targetValue = cellWidth * selectedIndex,
-                    animationSpec = spring(
-                        dampingRatio = 0.78f,
-                        stiffness = Spring.StiffnessMediumLow,
-                    ),
+                    animationSpec = if (reducedMotion) {
+                        snap<Dp>()
+                    } else {
+                        spring<Dp>(
+                            dampingRatio = Spring.DampingRatioNoBouncy,
+                            stiffness = Spring.StiffnessMediumLow,
+                        )
+                    },
                     label = "navLens",
                 )
-                val primary = MaterialTheme.colorScheme.primary
 
                 Canvas(modifier = Modifier.matchParentSize()) {
                     if (selectedIndex < 0) return@Canvas
                     val inset = 1.5.dp.toPx()
+                    val lensWidth = cellWidth.toPx() - inset * 2
                     val topLeft = Offset(lensOffset.toPx() + inset, inset)
-                    val lensSize = Size(cellWidth.toPx() - inset * 2, size.height - inset * 2)
-                    val radius = CornerRadius(15.dp.toPx())
+                    val lensSize = Size(lensWidth, size.height - inset * 2)
+                    // Matches NexusShapes.sm: a plate, not a pill.
+                    val radius = CornerRadius(10.dp.toPx())
+
+                    drawRoundRect(
+                        color = extended.signalContainer,
+                        topLeft = topLeft,
+                        size = lensSize,
+                        cornerRadius = radius,
+                    )
                     drawRoundRect(
                         brush = Brush.verticalGradient(
-                            listOf(primary.copy(alpha = 0.30f), primary.copy(alpha = 0.18f)),
+                            listOf(extended.signal.copy(alpha = 0.10f), Color.Transparent),
                             startY = 0f,
                             endY = size.height,
                         ),
@@ -146,11 +167,25 @@ fun NexusBottomBar(
                         cornerRadius = radius,
                     )
                     drawRoundRect(
-                        color = primary.copy(alpha = 0.45f),
+                        color = extended.signal.copy(alpha = 0.55f),
                         topLeft = topLeft,
                         size = lensSize,
                         cornerRadius = radius,
-                        style = Stroke(width = 1.dp.toPx()),
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(
+                            width = NexusSpacing.hairline.toPx()
+                        ),
+                    )
+
+                    val needleWidth = 14.dp.toPx()
+                    val needleHeight = 2.dp.toPx()
+                    drawRoundRect(
+                        color = extended.signal,
+                        topLeft = Offset(
+                            lensOffset.toPx() + (cellWidth.toPx() - needleWidth) / 2f,
+                            size.height - inset - 3.dp.toPx() - needleHeight,
+                        ),
+                        size = Size(needleWidth, needleHeight),
+                        cornerRadius = CornerRadius(needleHeight / 2f),
                     )
                 }
 
@@ -188,14 +223,20 @@ private fun NavStation(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val reducedMotion = LocalReducedMotion.current
+    val extended = MaterialTheme.nexus
     val iconScale by animateFloatAsState(
-        targetValue = if (isSelected) 1f else 0.92f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
+        targetValue = if (isSelected) 1f else 0.94f,
+        animationSpec = if (reducedMotion) {
+            snap()
+        } else {
+            spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium)
+        },
         label = "navIconScale",
     )
     val tint by animateColorAsState(
         targetValue = if (isSelected) {
-            MaterialTheme.colorScheme.onPrimaryContainer
+            extended.onSignalContainer
         } else {
             MaterialTheme.colorScheme.onSurfaceVariant
         },
@@ -206,14 +247,16 @@ private fun NavStation(
     Column(
         modifier = modifier
             .fillMaxHeight()
-            .clip(RoundedCornerShape(15.dp))
+            .clip(NexusShapes.sm)
             .selectable(
                 selected = isSelected,
                 interactionSource = interactionSource,
                 indication = null,
                 role = Role.Tab,
                 onClick = onClick,
-            ),
+            )
+            // Keeps the label clear of the index needle at the lens foot.
+            .padding(bottom = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -234,7 +277,7 @@ private fun NavStation(
             style = MaterialTheme.typography.labelSmall.copy(
                 fontSize = 10.sp,
                 lineHeight = 12.sp,
-                letterSpacing = 0.1.sp,
+                letterSpacing = 0.3.sp,
             ),
             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
             color = tint,

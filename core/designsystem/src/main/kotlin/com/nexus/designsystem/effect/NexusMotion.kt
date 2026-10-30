@@ -1,16 +1,18 @@
 package com.nexus.designsystem.effect
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -19,126 +21,232 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
+import com.nexus.designsystem.theme.LocalReducedMotion
 import com.nexus.designsystem.theme.NexusAnimation
-import com.nexus.designsystem.theme.NexusColors
+import com.nexus.designsystem.theme.nexus
+import kotlinx.coroutines.launch
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
+/**
+ * Entrance for a panel that "unfolds" into place.
+ *
+ * It unfolds from its top edge — the way a physical instrument cover lifts — rather
+ * than scaling from the centre, which would make every card feel like a modal. The
+ * spring is critically damped: content arriving is not an achievement.
+ */
 @Composable
 fun NexusUnfoldAnimation(
     isActive: Boolean,
     content: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var progress by remember { mutableFloatStateOf(0f) }
-
-    LaunchedEffect(isActive) {
-        if (isActive) {
-            progress = 0f
-            val anim = spring<Float>(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessMediumLow,
-            )
-            progress = 1f
-        }
-    }
-
-    val targetScale = if (isActive) 1f else 0.8f
-    val scale by animateFloatAsState(
-        targetValue = targetScale,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow),
-        label = "unfoldScale"
-    )
-    val targetAlpha = if (isActive) 1f else 0f
-    val alpha by animateFloatAsState(
-        targetValue = targetAlpha,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow),
-        label = "unfoldAlpha"
+    val reduced = LocalReducedMotion.current
+    val progress by animateFloatAsState(
+        targetValue = if (isActive) 1f else 0f,
+        animationSpec = if (reduced) snap() else NexusAnimation.Springs.card,
+        label = "unfold",
     )
 
     Box(
-        modifier = modifier
-            .scale(scale)
-            .alpha(alpha),
+        modifier = modifier.graphicsLayer {
+            alpha = progress
+            scaleX = 0.94f + 0.06f * progress
+            scaleY = 0.88f + 0.12f * progress
+            transformOrigin = TransformOrigin(0.5f, 0f)
+        },
         contentAlignment = Alignment.Center,
     ) {
         content()
     }
 }
 
+/**
+ * One-shot celebration for an unlocked achievement.
+ *
+ * This is the only place in the product where motion is allowed to be decorative —
+ * and it is still finite: the burst runs once, ends, and leaves nothing running.
+ */
 @Composable
 fun AchievementSupernova(
     isActive: Boolean,
     modifier: Modifier = Modifier,
     particleCount: Int = 60,
-    particleColors: List<Color> = listOf(
-        NexusColors.Rose400,
-        NexusColors.Amber400,
-        NexusColors.AuroraGreen,
-        NexusColors.NexusBlue,
-        NexusColors.Cyan400,
-    ),
+    particleColors: List<Color> = emptyList(),
 ) {
-    val transition = rememberInfiniteTransition(label = "supernova")
+    val palette = particleColors.ifEmpty {
+        val ext = MaterialTheme.nexus
+        listOf(ext.signal, ext.attention, ext.positive, ext.structure, ext.bone)
+    }
+    val reduced = LocalReducedMotion.current
+    val burst = remember { Animatable(0f) }
+
+    LaunchedEffect(isActive, reduced) {
+        if (!isActive) {
+            burst.snapTo(0f)
+            return@LaunchedEffect
+        }
+        if (reduced) {
+            burst.snapTo(1f)
+            return@LaunchedEffect
+        }
+        burst.snapTo(0f)
+        burst.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(
+                durationMillis = NexusAnimation.Duration.dramatic + 400,
+                easing = LinearEasing,
+            ),
+        )
+    }
 
     if (!isActive) return
 
     Box(modifier = modifier.fillMaxSize()) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val cx = size.width / 2
-            val cy = size.height / 2
+            val cx = size.width / 2f
+            val cy = size.height / 2f
             val maxRadius = size.minDimension * 0.8f
+            val count = particleCount.coerceIn(1, 240)
 
-            for (i in 0 until particleCount) {
-                val angle = (i.toFloat() / particleCount) * 360f
-                val rad = Math.toRadians(angle.toDouble()).toFloat()
-                val phase = i * 0.1f
-                val t = (System.currentTimeMillis() % 2000) / 2000f
-
-                val distance = maxRadius * (0.3f + 0.7f * ((t + phase) % 1f))
-                val px = cx + cos(rad) * distance
-                val py = cy + sin(rad) * distance
-
-                val particleSize = (2f + 4f * (1f - (t + phase) % 1f)) * density
-                val alpha = 1f - ((t + phase) % 1f)
-                val color = particleColors[i % particleColors.size]
-
+            if (reduced) {
+                // No motion: a still, quiet starburst reads as "achieved" without
+                // anything moving on screen.
                 drawCircle(
-                    color = color.copy(alpha = alpha * 0.8f),
-                    radius = particleSize,
-                    center = Offset(px, py),
+                    color = palette.first().copy(alpha = 0.5f),
+                    radius = maxRadius * 0.42f,
+                    center = Offset(cx, cy),
+                    style = Stroke(width = 1.dp.toPx()),
+                )
+                drawCircle(
+                    color = palette.first().copy(alpha = 0.22f),
+                    radius = maxRadius * 0.7f,
+                    center = Offset(cx, cy),
+                    style = Stroke(width = 1.dp.toPx()),
+                )
+                return@Canvas
+            }
+
+            val t = burst.value
+            val fade = (1f - t) * (1f - t)
+
+            // Shockwave: a single thin ring that outruns the particles and dies first.
+            val waveT = (t / 0.4f).coerceIn(0f, 1f)
+            if (waveT < 1f) {
+                drawCircle(
+                    color = palette.first().copy(alpha = (1f - waveT) * 0.45f),
+                    radius = maxRadius * (0.1f + 0.6f * waveT),
+                    center = Offset(cx, cy),
+                    style = Stroke(width = 1.dp.toPx()),
                 )
             }
+
+            for (i in 0 until count) {
+                // Deterministic jitter: a stable starburst, not a new random shape
+                // every time the effect is recomposed.
+                val jitter = ((i * 37) % 100) / 100f
+                val angle = (i.toFloat() / count) * 360f + jitter * 9f
+                val rad = angle * PI.toFloat() / 180f
+                val speed = 0.55f + 0.45f * (((i * 53) % 100) / 100f)
+                val distance = maxRadius * speed * (0.12f + 0.88f * t)
+
+                drawCircle(
+                    color = palette[i % palette.size].copy(alpha = fade * 0.9f),
+                    radius = (3f - 2f * t) * density,
+                    center = Offset(
+                        x = cx + cos(rad) * distance,
+                        y = cy + sin(rad) * distance,
+                    ),
+                )
+            }
+
+            // The bead the burst came from, snuffed out by the expansion.
+            drawCircle(
+                color = palette.first().copy(alpha = (1f - t) * 0.9f),
+                radius = (7f * (1f - t) + 1f) * density,
+                center = Offset(cx, cy),
+            )
         }
     }
 }
 
+/**
+ * "Still processing" indicator: concentric rings leaving a steady core.
+ *
+ * The core stays lit so the control never looks dead between rings, and the rings
+ * are hairlines rather than blobs — the same calibrated-line language as the gauges.
+ */
 @Composable
 fun IntelligencePulse(
     isThinking: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val transition = rememberInfiniteTransition(label = "intelPulse")
+    if (!isThinking) return
 
-    val pulseProgress by transition.animateFloat(
+    val signal = MaterialTheme.nexus.signal
+    val reduced = LocalReducedMotion.current
+    val pulse = rememberPulseProgress(reduced)
+
+    Box(
+        modifier = modifier.size(32.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (reduced) {
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .border(width = 1.dp, color = signal.copy(alpha = 0.45f), shape = CircleShape),
+            )
+        } else {
+            repeat(3) { index ->
+                val phase = (pulse + index / 3f) % 1f
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .scale(1f + phase * 1.3f)
+                        .alpha((1f - phase) * 0.55f)
+                        .border(width = 1.dp, color = signal, shape = CircleShape),
+                )
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .size(7.dp)
+                .clip(CircleShape)
+                .background(signal),
+        )
+    }
+}
+
+@Composable
+private fun rememberPulseProgress(reduced: Boolean): Float {
+    if (reduced) return 0f
+    val transition = rememberInfiniteTransition(label = "intelPulse")
+    val progress by transition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
@@ -147,132 +255,140 @@ fun IntelligencePulse(
         ),
         label = "pulse",
     )
-
-    if (!isThinking) return
-
-    Box(
-        modifier = modifier.size(32.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        repeat(3) { index ->
-            val delay = index * 0.2f
-            val adjustedProgress = ((pulseProgress - delay) % 1f).coerceAtLeast(0f)
-            val scale = 1f + adjustedProgress * 2f
-            val alpha = 1f - adjustedProgress
-
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .scale(scale)
-                    .alpha(alpha)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary),
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .size(8.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary),
-        )
-    }
+    return progress
 }
 
+/**
+ * Streak marker drawn as a bank of signal bars, not a cartoon flame.
+ *
+ * The tallest bar is always the centre, so the shape reads as a rising signal
+ * whether or not it is animating. Milestones get the attention→signal ramp; a
+ * normal day stays in one hue.
+ */
 @Composable
 fun StreakIgnition(
     streakCount: Int,
     modifier: Modifier = Modifier,
     isMilestone: Boolean = streakCount > 0 && streakCount % 7 == 0,
 ) {
-    val transition = rememberInfiniteTransition(label = "streakFlame")
+    val ext = MaterialTheme.nexus
+    val reduced = LocalReducedMotion.current
+    val breath = rememberBreath(reduced)
 
-    val flameIntensity by transition.animateFloat(
-        initialValue = 0.7f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(600, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "flameIntensity",
-    )
-
-    val flameHeight by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(800, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "flameHeight",
-    )
+    val attention = ext.attention
+    val signal = ext.signal
+    val boxSize = if (isMilestone) 48.dp else 32.dp
+    val barCount = 5
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Canvas(modifier = Modifier.size(if (isMilestone) 48.dp else 32.dp)) {
-            val cx = size.width / 2
-            val baseY = size.height * 0.85f
-            val flameRadius = size.minDimension * 0.25f * flameIntensity
-            val heightOffset = size.minDimension * 0.15f * flameHeight
-
-            val flameColor = if (isMilestone) {
-                Brush.verticalGradient(
-                    listOf(Color(0xFFFF6B35), Color(0xFFFBBF24), Color(0xFFF72585))
-                )
-            } else {
-                Brush.verticalGradient(
-                    listOf(Color(0xFFFF8C42), Color(0xFFFBBF24))
-                )
-            }
-
-            drawCircle(
-                brush = flameColor,
-                radius = flameRadius + heightOffset * 0.3f,
-                center = Offset(cx, baseY - heightOffset),
-            )
+        Canvas(modifier = Modifier.size(boxSize)) {
+            val barWidth = size.width * 0.105f
+            val gap = size.width * 0.07f
+            val totalWidth = barCount * barWidth + (barCount - 1) * gap
+            val startX = (size.width - totalWidth) / 2f
+            val baseY = size.height * 0.92f
+            val maxBarHeight = size.height * 0.74f
 
             if (isMilestone) {
-                val glowRadius = flameRadius * 1.5f
                 drawCircle(
-                    color = Color(0xFFFF6B35).copy(alpha = 0.15f * flameIntensity),
-                    radius = glowRadius,
-                    center = Offset(cx, baseY - heightOffset * 0.5f),
+                    color = attention.copy(alpha = 0.16f),
+                    radius = size.minDimension * 0.5f,
+                    center = Offset(size.width / 2f, baseY - maxBarHeight * 0.35f),
                 )
             }
+
+            for (i in 0 until barCount) {
+                val wave = 0.5f + 0.5f * sin(breath * 2f * PI.toFloat() + i * 0.9f)
+                val centreBias = 1f - abs(i - (barCount - 1) / 2f) / barCount
+                val barHeight = maxBarHeight * (0.34f + 0.66f * wave) * centreBias
+
+                drawRoundRect(
+                    brush = Brush.verticalGradient(
+                        colors = if (isMilestone) {
+                            listOf(signal, attention)
+                        } else {
+                            listOf(attention, attention.copy(alpha = 0.72f))
+                        },
+                    ),
+                    topLeft = Offset(startX + i * (barWidth + gap), baseY - barHeight),
+                    size = Size(barWidth, barHeight),
+                    cornerRadius = CornerRadius(barWidth / 2f),
+                )
+            }
+
+            // Baseline rule: the bars sit on something, so they read as a reading.
+            drawLine(
+                color = attention.copy(alpha = 0.35f),
+                start = Offset(startX - gap, baseY + gap * 0.4f),
+                end = Offset(startX + totalWidth + gap, baseY + gap * 0.4f),
+                strokeWidth = 1.dp.toPx(),
+            )
         }
     }
 }
 
+@Composable
+private fun rememberBreath(reduced: Boolean): Float {
+    if (reduced) return 0.35f
+    val transition = rememberInfiniteTransition(label = "streakBreath")
+    val value by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(NexusAnimation.Duration.dramatic * 2, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "breath",
+    )
+    return value
+}
+
+/**
+ * Reveal-on-scroll: content arrives from below and fades up.
+ *
+ * Travel is deliberately small (16dp). Anything larger turns a list into a
+ * slideshow; this is meant to look like the panel settling, not flying in.
+ */
 @Composable
 fun NexusReveal(
     isVisible: Boolean,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    var revealProgress by remember { mutableFloatStateOf(0f) }
-
-    LaunchedEffect(isVisible) {
-        if (isVisible) {
-            revealProgress = 0f
-            kotlinx.coroutines.delay(50)
-            revealProgress = 1f
-        }
-    }
-
-    val blurAlpha by animateFloatAsState(
+    val reduced = LocalReducedMotion.current
+    val travel = with(LocalDensity.current) { 16.dp.toPx() }
+    val progress by animateFloatAsState(
         targetValue = if (isVisible) 1f else 0f,
-        animationSpec = tween(300),
-        label = "revealAlpha"
+        animationSpec = if (reduced) {
+            snap()
+        } else {
+            tween(
+                durationMillis = NexusAnimation.Duration.emphasized,
+                easing = NexusAnimation.Easing.emphasizedDecelerate,
+            )
+        },
+        label = "reveal",
     )
 
     Box(
-        modifier = modifier
-            .alpha(blurAlpha),
+        modifier = modifier.graphicsLayer {
+            alpha = progress
+            translationY = (1f - progress) * travel
+        },
         contentAlignment = Alignment.Center,
     ) {
         content()
     }
 }
 
+/**
+ * Card that can be pushed aside to act on it.
+ *
+ * Dragging tracks the finger 1:1, tilts proportionally to the distance travelled,
+ * and only fires a callback once the card has actually crossed the threshold —
+ * otherwise it settles back. The haptic fires on commit, not on touch-down, so it
+ * confirms a decision rather than a tap.
+ */
 @Composable
 fun SwipeableCard(
     modifier: Modifier = Modifier,
@@ -280,21 +396,62 @@ fun SwipeableCard(
     onSwipeRight: () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
-    var offsetX by remember { mutableFloatStateOf(0f) }
-
-    val threshold = with(LocalDensity.current) { 100.dp.toPx() }
-    val rotation = (offsetX / threshold).coerceIn(-1f, 1f) * 5f
+    val reduced = LocalReducedMotion.current
+    val threshold = with(LocalDensity.current) { 96.dp.toPx() }
+    val haptics = LocalHapticFeedback.current
+    val scope = rememberCoroutineScope()
+    val offsetX = remember { Animatable(0f) }
 
     Box(
-        modifier = modifier,
+        modifier = modifier
+            .graphicsLayer {
+                translationX = offsetX.value
+                rotationZ = (offsetX.value / threshold).coerceIn(-1f, 1f) * 4f
+            }
+            .pointerInput(threshold, reduced) {
+                detectDragGestures(
+                    onDragEnd = {
+                        val settled = offsetX.value
+                        scope.launch {
+                            when {
+                                settled <= -threshold -> {
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onSwipeLeft()
+                                    offsetX.snapTo(0f)
+                                }
+                                settled >= threshold -> {
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onSwipeRight()
+                                    offsetX.snapTo(0f)
+                                }
+                                else -> offsetX.animateTo(
+                                    targetValue = 0f,
+                                    animationSpec = if (reduced) {
+                                        snap()
+                                    } else {
+                                        tween(
+                                            durationMillis = NexusAnimation.Duration.fast,
+                                            easing = NexusAnimation.Easing.emphasizedDecelerate,
+                                        )
+                                    },
+                                )
+                            }
+                        }
+                    },
+                    onDragCancel = {
+                        scope.launch {
+                            offsetX.animateTo(0f, NexusAnimation.Tween.press)
+                        }
+                    },
+                    onDrag = { change, dragAmount ->
+                        change.consume()
+                        scope.launch { offsetX.snapTo(offsetX.value + dragAmount.x) }
+                    },
+                )
+            },
         contentAlignment = Alignment.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .scale(1f - (kotlin.math.abs(offsetX) / (threshold * 4f)).coerceAtMost(0.05f))
-        ) {
-            content()
-        }
+        content()
     }
 }
 
@@ -312,7 +469,7 @@ fun DrawScope.drawIntelligenceRing(
         sweepAngle = 360f,
         useCenter = false,
         topLeft = Offset(center.x - radius, center.y - radius),
-        size = androidx.compose.ui.geometry.Size(radius * 2, radius * 2),
+        size = Size(radius * 2, radius * 2),
         style = Stroke(width = strokeWidth),
     )
     drawArc(
@@ -321,7 +478,7 @@ fun DrawScope.drawIntelligenceRing(
         sweepAngle = sweepAngle,
         useCenter = false,
         topLeft = Offset(center.x - radius, center.y - radius),
-        size = androidx.compose.ui.geometry.Size(radius * 2, radius * 2),
+        size = Size(radius * 2, radius * 2),
         style = Stroke(width = strokeWidth),
     )
 }

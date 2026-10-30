@@ -1,8 +1,6 @@
 package com.nexus.designsystem.component
 
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -14,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -27,14 +24,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.nexus.designsystem.theme.LocalReducedMotion
+import com.nexus.designsystem.theme.NexusAnimation
+import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
 
 /** One readout in a [TelemetryStrip]. */
 data class TelemetryItem(
@@ -55,34 +56,38 @@ fun TelemetryStrip(
     items: List<TelemetryItem>,
     modifier: Modifier = Modifier,
 ) {
+    val extended = MaterialTheme.nexus
+
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = NexusShapes.lg,
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         tonalElevation = 0.dp,
         shadowElevation = 0.dp,
-        border = BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.9f),
-        ),
+        border = BorderStroke(NexusSpacing.hairline, extended.hairline),
     ) {
         Box {
+            // The same top-light every instrument housing carries, so the strip
+            // reads as a milled plate rather than a flat rectangle.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(1.dp)
+                    .height(NexusSpacing.hairline)
                     .background(
                         Brush.horizontalGradient(
                             listOf(
                                 Color.Transparent,
-                                Color.White.copy(alpha = 0.09f),
+                                extended.innerLight,
                                 Color.Transparent,
                             )
                         )
                     )
             )
             Column(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                modifier = Modifier.padding(
+                    horizontal = NexusSpacing.gutter,
+                    vertical = NexusSpacing.xxs,
+                ),
             ) {
                 items.forEach { item -> TelemetryRow(item) }
             }
@@ -93,12 +98,18 @@ fun TelemetryStrip(
 @Composable
 private fun TelemetryRow(item: TelemetryItem) {
     var animatedValue by remember { mutableIntStateOf(0) }
+    val reducedMotion = LocalReducedMotion.current
+
     LaunchedEffect(item.value) {
-        animate(
-            initialValue = 0f,
-            targetValue = item.value.toFloat(),
-            animationSpec = tween(900, easing = FastOutSlowInEasing),
-        ) { current, _ -> animatedValue = current.toInt() }
+        if (reducedMotion) {
+            animatedValue = item.value
+        } else {
+            animate(
+                initialValue = animatedValue.toFloat(),
+                targetValue = item.value.toFloat(),
+                animationSpec = NexusAnimation.Tween.numberCount,
+            ) { current, _ -> animatedValue = current.toInt() }
+        }
     }
 
     Row(
@@ -106,14 +117,14 @@ private fun TelemetryRow(item: TelemetryItem) {
             .fillMaxWidth()
             .height(38.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(NexusSpacing.xs),
     ) {
         item.accent?.let { tint ->
+            // A gauge tick, not a bullet: the measure is on a scale.
             Box(
                 modifier = Modifier
-                    .size(5.dp)
-                    .clip(CircleShape)
-                    .background(tint)
+                    .size(width = 2.dp, height = 11.dp)
+                    .background(tint, RoundedCornerShape(1.dp))
             )
         }
         Text(
@@ -146,7 +157,7 @@ private fun TelemetryRow(item: TelemetryItem) {
 @Composable
 fun LeaderRule(
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.outlineVariant,
+    color: Color = MaterialTheme.nexus.hairlineStrong,
 ) {
     Canvas(modifier = modifier.height(2.dp)) {
         drawLine(

@@ -47,7 +47,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -57,6 +56,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.common.ApiResult
 import com.nexus.designsystem.component.NexusButton
+import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 
 @Composable
@@ -104,7 +104,7 @@ fun AuthScreen(
                     text = "A",
                     style = MaterialTheme.typography.displayLarge,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color.White,
+                    color = NexusColors.SignalInk,
                 )
             }
 

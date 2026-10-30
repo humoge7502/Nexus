@@ -46,32 +46,32 @@ object NexusTypography {
     val DisplayLarge = TextStyle(
         fontFamily = JakartaDisplay,
         fontWeight = FontWeight.ExtraBold,
-        fontSize = 40.sp,
+        fontSize = 42.sp,
         lineHeight = 46.sp,
-        letterSpacing = (-1.2).sp,
+        letterSpacing = (-1.7).sp,
         fontFeatureSettings = "tnum"
     )
     val DisplayMedium = TextStyle(
         fontFamily = JakartaDisplay,
         fontWeight = FontWeight.Bold,
-        fontSize = 34.sp,
-        lineHeight = 41.sp,
-        letterSpacing = (-0.6).sp,
+        fontSize = 35.sp,
+        lineHeight = 40.sp,
+        letterSpacing = (-1.1).sp,
         fontFeatureSettings = "tnum"
     )
     val HeadlineLarge = TextStyle(
         fontFamily = JakartaDisplay,
         fontWeight = FontWeight.Bold,
         fontSize = 28.sp,
-        lineHeight = 35.sp,
-        letterSpacing = (-0.3).sp
+        lineHeight = 34.sp,
+        letterSpacing = (-0.6).sp
     )
     val HeadlineMedium = TextStyle(
         fontFamily = JakartaDisplay,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 24.sp,
-        lineHeight = 31.sp,
-        letterSpacing = (-0.2).sp
+        fontSize = 23.sp,
+        lineHeight = 30.sp,
+        letterSpacing = (-0.4).sp
     )
     val HeadlineSmall = TextStyle(
         fontFamily = JakartaDisplay,
@@ -188,6 +188,24 @@ object NexusTypography {
         letterSpacing = 0.5.sp,
         fontFeatureSettings = "tnum"
     )
+
+    /**
+     * Field label for a measured value: `SCORE`, `DELTA`, `CURRENT STREAK`.
+     * Always sits *above data*, never above a headline — this is a label on an
+     * instrument, not a marketing eyebrow.
+     */
+    val DataLabel = TextStyle(
+        fontFamily = InstrumentMono,
+        fontWeight = FontWeight.Medium,
+        fontSize = 10.sp,
+        lineHeight = 12.sp,
+        letterSpacing = 1.1.sp,
+        fontFeatureSettings = "tnum"
+    )
+
+    /** Alias with intent: the number a component is actually reporting. */
+    val Readout = TelemetryLarge
+
 
     val Material = Typography(
         displayLarge = DisplayLarge,

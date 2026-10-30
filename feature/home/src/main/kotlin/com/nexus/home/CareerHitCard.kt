@@ -36,7 +36,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.component.NexusCard
-import com.nexus.designsystem.theme.NexusColors
+import com.nexus.designsystem.theme.nexus
 import com.nexus.domain.model.CareerHitCategory
 import com.nexus.domain.model.DailyCareerHit
 
@@ -106,7 +106,7 @@ fun CareerHitCard(
                         text = "+${hit.xpReward} XP",
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
-                        color = NexusColors.Emerald600,
+                        color = MaterialTheme.nexus.positive,
                     )
                 }
             }

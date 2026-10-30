@@ -33,15 +33,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.material3.CircularProgressIndicator
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
+import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
 import com.nexus.domain.model.LeaderboardEntry
 import com.nexus.domain.repository.LeaderboardTab
+import java.util.Locale
 
 private val tabEntries = listOf(
     R.string.leaderboard_tab_global to LeaderboardTab.GLOBAL,
@@ -121,7 +124,7 @@ private fun CurrentUserCard(currentUser: LeaderboardEntry) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp),
-        gradient = NexusGradients.PrimaryDeep,
+        gradient = NexusGradients.Primary,
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -131,14 +134,14 @@ private fun CurrentUserCard(currentUser: LeaderboardEntry) {
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.2f)),
+                    .background(NexusColors.SignalInk.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = currentUser.userName.take(1),
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    fontSize = 20.sp,
+                    color = NexusColors.SignalInk,
+                    style = MaterialTheme.typography.titleLarge,
                 )
             }
 
@@ -148,26 +151,28 @@ private fun CurrentUserCard(currentUser: LeaderboardEntry) {
                 Text(
                     text = currentUser.userName,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = NexusColors.SignalInk,
                 )
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = stringResource(R.string.leaderboard_rank, currentUser.rank),
-                    color = Color.White.copy(alpha = 0.7f),
-                    style = MaterialTheme.typography.bodySmall,
+                    text = stringResource(R.string.leaderboard_rank, currentUser.rank)
+                        .uppercase(Locale.ROOT),
+                    style = NexusTypography.DataLabel,
+                    color = NexusColors.SignalInk.copy(alpha = 0.85f),
                 )
             }
 
             Column(horizontalAlignment = Alignment.End) {
                 Text(
                     text = "${currentUser.score}",
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    fontSize = 20.sp,
+                    style = NexusTypography.TelemetryLarge,
+                    color = NexusColors.SignalInk,
                 )
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = stringResource(R.string.leaderboard_xp),
-                    color = Color.White.copy(alpha = 0.7f),
-                    style = MaterialTheme.typography.labelSmall,
+                    text = stringResource(R.string.leaderboard_xp).uppercase(Locale.ROOT),
+                    style = NexusTypography.DataLabel,
+                    color = NexusColors.SignalInk.copy(alpha = 0.85f),
                 )
             }
         }
@@ -198,11 +203,16 @@ private fun LeaderboardEmptyState(onOpenArena: () -> Unit) {
 private fun LeaderboardRow(
     entry: LeaderboardEntry,
 ) {
-    val rankColor = when (entry.rank) {
-        1 -> NexusColors.Amber400
-        2 -> NexusColors.Neutral300
-        3 -> NexusColors.Amber600
-        else -> null
+    val isPodium = entry.rank in 1..3
+    val rankPlate = if (isPodium) {
+        MaterialTheme.nexus.signalContainer
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerHighest
+    }
+    val rankInk = if (isPodium) {
+        MaterialTheme.nexus.onSignalContainer
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
     }
     val college = entry.college
 
@@ -219,15 +229,14 @@ private fun LeaderboardRow(
             Box(
                 modifier = Modifier
                     .size(32.dp)
-                    .clip(CircleShape)
-                    .background(rankColor?.copy(alpha = 0.16f) ?: Color.Transparent),
+                    .clip(NexusShapes.xs)
+                    .background(rankPlate),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "#${entry.rank}",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = rankColor ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                    text = "${entry.rank}",
+                    style = NexusTypography.Telemetry,
+                    color = rankInk,
                 )
             }
 

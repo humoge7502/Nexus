@@ -23,11 +23,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BusinessCenter
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -38,19 +37,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexus.designsystem.component.CalibratedRule
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.SignalTag
+import com.nexus.designsystem.component.SignalTone
 import com.nexus.designsystem.component.TelemetryItem
 import com.nexus.designsystem.component.TelemetryStrip
 import com.nexus.designsystem.component.hairline
 import com.nexus.designsystem.component.NexusTopBar
-import com.nexus.designsystem.theme.NexusColors
+import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
 import com.nexus.domain.model.Application
 import com.nexus.domain.model.ApplicationStatus
 
@@ -77,12 +80,12 @@ fun ApplicationsScreen(
           TelemetryItem(
             stringResource(R.string.applications_stat_interviewing),
             uiState.counts.interviewing,
-            accent = NexusColors.Amber400,
+            accent = MaterialTheme.nexus.attention,
           ),
           TelemetryItem(
             stringResource(R.string.applications_stat_offered),
             uiState.counts.offered,
-            accent = NexusColors.Emerald400,
+            accent = MaterialTheme.nexus.positive,
           ),
         ),
         modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 12.dp),
@@ -124,16 +127,16 @@ private fun ApplicationTabs(
   onSelect: (ApplicationTab) -> Unit,
 ) {
   val haptic = LocalHapticFeedback.current
-  val shape = RoundedCornerShape(16.dp)
+  val ext = MaterialTheme.nexus
   Row(
     modifier = Modifier
       .fillMaxWidth()
       .padding(horizontal = 24.dp, vertical = 14.dp)
-      .clip(shape)
+      .clip(NexusShapes.sm)
       .background(MaterialTheme.colorScheme.surfaceContainerLow)
       .hairline(
-        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f),
-        cornerRadiusDp = 16f,
+        color = ext.hairline,
+        cornerRadiusDp = 10f,
       )
       .padding(4.dp),
     horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -143,11 +146,8 @@ private fun ApplicationTabs(
       Box(
         modifier = Modifier
           .weight(1f)
-          .clip(RoundedCornerShape(11.dp))
-          .background(
-            if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-            else Color.Transparent
-          )
+          .clip(NexusShapes.xs)
+          .background(if (isSelected) ext.signalContainer else Color.Transparent)
           .clickable(role = Role.Tab) {
             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
             onSelect(tab)
@@ -166,7 +166,7 @@ private fun ApplicationTabs(
           ),
           style = MaterialTheme.typography.labelMedium,
           fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-          color = if (isSelected) MaterialTheme.colorScheme.primary
+          color = if (isSelected) ext.onSignalContainer
           else MaterialTheme.colorScheme.onSurfaceVariant,
           maxLines = 1,
         )
@@ -181,8 +181,12 @@ private fun ApplicationCard(
   onStatusChange: (ApplicationStatus) -> Unit,
   modifier: Modifier = Modifier,
 ) {
+  val matchPercent = stringResource(
+    R.string.applications_match_percent,
+    (application.matchScore * 100).toInt(),
+  )
   NexusCard(modifier = modifier.fillMaxWidth()) {
-    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+    Column(modifier = Modifier.fillMaxWidth()) {
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -204,27 +208,27 @@ private fun ApplicationCard(
         StatusChip(application.status)
       }
 
-      Spacer(Modifier.height(12.dp))
+      Spacer(Modifier.height(14.dp))
+      val matchAccent = when {
+        application.matchScore > 0.8f -> MaterialTheme.nexus.positive
+        application.matchScore > 0.5f -> MaterialTheme.nexus.attention
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+      }
       Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-          text = stringResource(
-            R.string.applications_match_percent,
-            (application.matchScore * 100).toInt(),
-          ),
-          style = MaterialTheme.typography.labelMedium,
-          color = NexusColors.Neutral400,
+          text = matchPercent,
+          style = NexusTypography.DataLabel,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          maxLines = 1,
         )
-        Spacer(Modifier.width(8.dp))
-        LinearProgressIndicator(
-          progress = { application.matchScore },
-          modifier = Modifier.weight(1f).height(4.dp).clip(RoundedCornerShape(2.dp)),
-          color = when {
-            application.matchScore > 0.8f -> NexusColors.Emerald400
-            application.matchScore > 0.5f -> NexusColors.Amber400
-            else -> NexusColors.Neutral400
-          },
-          trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-          strokeCap = StrokeCap.Round,
+        Spacer(Modifier.width(12.dp))
+        CalibratedRule(
+          progress = application.matchScore,
+          modifier = Modifier.weight(1f),
+          divisions = 10,
+          accent = matchAccent,
+          height = 16.dp,
+          contentDescription = matchPercent,
         )
       }
 
@@ -250,20 +254,15 @@ private fun StatusChip(status: ApplicationStatus) {
     ApplicationStatus.ACCEPTED -> stringResource(R.string.applications_status_accepted)
     else -> status.name
   }
-  val color = when (status) {
-    ApplicationStatus.SAVED -> NexusColors.Neutral400
-    ApplicationStatus.APPLIED -> NexusColors.Blue400
-    ApplicationStatus.INTERVIEWING -> NexusColors.Amber400
-    ApplicationStatus.REJECTED -> NexusColors.Rose400
-    ApplicationStatus.OFFERED, ApplicationStatus.ACCEPTED -> NexusColors.Emerald400
-    else -> NexusColors.Neutral400
+  val tone = when (status) {
+    ApplicationStatus.SAVED -> SignalTone.Neutral
+    ApplicationStatus.APPLIED -> SignalTone.Structure
+    ApplicationStatus.INTERVIEWING -> SignalTone.Attention
+    ApplicationStatus.REJECTED -> SignalTone.Critical
+    ApplicationStatus.OFFERED, ApplicationStatus.ACCEPTED -> SignalTone.Signal
+    else -> SignalTone.Neutral
   }
-  Text(
-    text = label,
-    style = MaterialTheme.typography.labelMedium,
-    fontWeight = FontWeight.SemiBold,
-    color = color,
-  )
+  SignalTag(text = label, tone = tone)
 }
 
 @Composable
@@ -289,8 +288,13 @@ private fun StatusActions(
       )
       OutlinedButton(
         onClick = { onStatusChange(status) },
-        modifier = Modifier.height(36.dp),
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+        modifier = Modifier.height(NexusSpacing.minTouchTarget),
+        shape = NexusShapes.sm,
+        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp),
+        colors = ButtonDefaults.outlinedButtonColors(
+          contentColor = if (isPositive) MaterialTheme.nexus.positive
+          else MaterialTheme.colorScheme.error,
+        ),
       ) {
         Text(
           text = when (status) {
@@ -302,7 +306,7 @@ private fun StatusActions(
             else -> status.name
           },
           style = MaterialTheme.typography.labelMedium,
-          color = if (isPositive) NexusColors.Emerald400 else NexusColors.Rose400,
+          maxLines = 1,
         )
       }
     }

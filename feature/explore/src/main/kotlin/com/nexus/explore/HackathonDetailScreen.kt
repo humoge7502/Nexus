@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BookmarkBorder
@@ -37,7 +36,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -48,9 +46,12 @@ import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
 import com.nexus.domain.model.Hackathon
 import com.nexus.domain.model.UiState
 import java.time.LocalDate
+import java.util.Locale
 
 @Composable
 fun HackathonDetailScreen(
@@ -109,30 +110,58 @@ fun HackathonDetailScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             NexusCard(
-                gradient = NexusGradients.PrimaryDeep,
+                gradient = NexusGradients.Primary,
                 shape = NexusShapes.lg,
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = hackathon.mode.name.uppercase(Locale.ROOT),
+                            style = NexusTypography.DataLabel,
+                            color = NexusColors.SignalInk.copy(alpha = 0.86f),
+                        )
+                        if (hackathon.isLive) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    Modifier
+                                        .width(2.dp)
+                                        .height(11.dp)
+                                        .clip(NexusShapes.tag)
+                                        .background(NexusColors.SignalInk),
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    text = stringResource(R.string.explore_live).uppercase(Locale.ROOT),
+                                    style = NexusTypography.DataLabel,
+                                    color = NexusColors.SignalInk,
+                                )
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(14.dp))
                     Icon(
                         Icons.Default.EmojiEvents,
                         contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(44.dp),
+                        tint = NexusColors.SignalInk.copy(alpha = 0.86f),
+                        modifier = Modifier.size(28.dp),
                     )
-                    Spacer(Modifier.height(12.dp))
-                    Text(hackathon.title, style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold, color = Color.White)
-                    Text(hackathon.organizer, style = MaterialTheme.typography.titleMedium,
-                        color = Color.White.copy(alpha = 0.8f))
-                    if (hackathon.isLive) {
-                        Spacer(Modifier.height(8.dp))
-                        Box(Modifier.clip(RoundedCornerShape(8.dp))
-                            .background(NexusColors.Rose400.copy(alpha = 0.22f))
-                            .padding(horizontal = 16.dp, vertical = 4.dp)) {
-                            Text(stringResource(R.string.explore_live), fontWeight = FontWeight.Bold,
-                                color = NexusColors.Rose400)
-                        }
-                    }
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        hackathon.title,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = NexusColors.SignalInk,
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        hackathon.organizer,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = NexusColors.SignalInk.copy(alpha = 0.86f),
+                    )
                 }
             }
 
@@ -181,7 +210,7 @@ fun HackathonDetailScreen(
                         Text(stringResource(R.string.explore_prize_pool), style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(hackathon.prizePool, style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold, color = NexusColors.Amber400)
+                            fontWeight = FontWeight.Bold, color = MaterialTheme.nexus.attention)
                     }
                     Column(horizontalAlignment = Alignment.End) {
                         Text(stringResource(R.string.explore_deadline), style = MaterialTheme.typography.labelMedium,
@@ -189,7 +218,7 @@ fun HackathonDetailScreen(
                         Text(hackathon.registrationDeadline.toString(),
                             style = MaterialTheme.typography.titleSmall,
                             color = if (hackathon.registrationDeadline.isBefore(LocalDate.now()))
-                                NexusColors.Rose400 else MaterialTheme.colorScheme.onSurface)
+                                MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
                     }
                 }
             }
@@ -197,7 +226,7 @@ fun HackathonDetailScreen(
             if (hackathon.tags.isNotEmpty()) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     for (tag in hackathon.tags) {
-                        Box(Modifier.clip(RoundedCornerShape(8.dp))
+                        Box(Modifier.clip(NexusShapes.xs)
                             .background(MaterialTheme.colorScheme.primaryContainer)
                             .padding(horizontal = 12.dp, vertical = 6.dp)) {
                             Text(tag, style = MaterialTheme.typography.labelMedium,
@@ -214,7 +243,7 @@ fun HackathonDetailScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(52.dp),
-                shape = RoundedCornerShape(16.dp),
+                shape = NexusShapes.sm,
             ) {
                 Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(8.dp))

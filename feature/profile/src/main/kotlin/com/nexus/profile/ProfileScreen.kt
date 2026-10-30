@@ -80,7 +80,9 @@ import com.nexus.designsystem.component.sheen
 import com.nexus.designsystem.effect.RevealOnLoad
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
+import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
 import com.nexus.domain.model.Achievement
 import com.nexus.domain.model.AchievementType
 import com.nexus.domain.model.Skill
@@ -252,7 +254,7 @@ private fun ProfileHeader(
             Icon(
                 Icons.Default.WorkspacePremium,
                 contentDescription = stringResource(R.string.cd_nexus_pro),
-                tint = NexusColors.Amber400,
+                tint = MaterialTheme.nexus.attention,
                 modifier = Modifier.size(22.dp),
             )
         }
@@ -454,14 +456,14 @@ private fun ProfileIdentity(
     avatarInitial: String,
     uiState: ProfileUiState,
 ) {
-    val shape = RoundedCornerShape(28.dp)
+    val shape = NexusShapes.lg
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
             .background(brush = Brush.linearGradient(NexusGradients.PrimaryDeep), shape = shape)
-            .instrumentGrid(spacingDp = 30f, alpha = 0.045f)
-            .hairline(color = Color.White.copy(alpha = 0.16f), cornerRadiusDp = 28f)
+            .instrumentGrid(spacingDp = 30f, alpha = 0.055f, color = NexusColors.SignalInk)
+            .hairline(color = NexusColors.SignalInk.copy(alpha = 0.18f), cornerRadiusDp = 18f)
             .sheen(alpha = 0.06f)
             .padding(horizontal = 20.dp, vertical = 20.dp),
     ) {
@@ -471,15 +473,15 @@ private fun ProfileIdentity(
                     modifier = Modifier
                         .size(66.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.14f))
-                        .hairline(color = Color.White.copy(alpha = 0.24f), cornerRadiusDp = 33f),
+                        .background(NexusColors.SignalInk.copy(alpha = 0.10f))
+                        .hairline(color = NexusColors.SignalInk.copy(alpha = 0.26f), cornerRadiusDp = 33f),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         text = avatarInitial,
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = NexusColors.SignalInk,
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
@@ -488,7 +490,7 @@ private fun ProfileIdentity(
                         text = displayName,
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color.White,
+                        color = NexusColors.SignalInk,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -497,7 +499,7 @@ private fun ProfileIdentity(
                         Text(
                             text = uiState.university,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.72f),
+                            color = NexusColors.SignalInk.copy(alpha = 0.86f),
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -506,7 +508,7 @@ private fun ProfileIdentity(
             }
 
             Spacer(modifier = Modifier.height(18.dp))
-            HorizontalDivider(thickness = 1.dp, color = Color.White.copy(alpha = 0.14f))
+            HorizontalDivider(thickness = 1.dp, color = NexusColors.SignalInk.copy(alpha = 0.16f))
             Spacer(modifier = Modifier.height(14.dp))
 
             FlowRow(

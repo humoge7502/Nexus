@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckCircle
@@ -27,7 +25,6 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -51,14 +47,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.component.AnimatedStatCard
+import com.nexus.designsystem.component.CalibratedRule
 import com.nexus.designsystem.component.LeaderRule
 import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.SignalTag
+import com.nexus.designsystem.component.SignalTone
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
+import java.time.LocalDate
+import java.util.Locale
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.roundToInt
@@ -74,16 +76,16 @@ internal fun MetricBar(metric: Metric) {
         Text(
             metric.label,
             style = MaterialTheme.typography.bodySmall,
-            color = Color.White.copy(alpha = 0.80f),
+            color = NexusColors.Bone.copy(alpha = 0.80f),
         )
         LeaderRule(
             modifier = Modifier.weight(1f),
-            color = Color.White.copy(alpha = 0.28f),
+            color = NexusColors.Bone.copy(alpha = 0.28f),
         )
         Text(
             stringResource(R.string.growth_progress_percent, (metric.progress * 100).toInt()),
             style = NexusTypography.TelemetryMicro,
-            color = Color.White,
+            color = NexusColors.Bone,
         )
     }
 }
@@ -213,77 +215,113 @@ internal fun LearningStreak(
     thisMonthActive: Int,
     weekActivity: List<Boolean>,
 ) {
+    val ext = MaterialTheme.nexus
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+
     NexusCard(shape = NexusShapes.lg) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.LocalFireDepartment,
                     contentDescription = null,
-                    tint = NexusColors.Amber400,
-                    modifier = Modifier.size(20.dp),
+                    tint = ext.attention,
+                    modifier = Modifier.size(16.dp),
                 )
                 Spacer(Modifier.width(NexusSpacing.xs))
                 Text(
-                    if (currentStreak > 0) {
-                        "$currentStreak-day streak"
-                    } else {
-                        "Start your streak today"
-                    },
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
+                    stringResource(R.string.arena_streak).uppercase(Locale.ROOT),
+                    style = NexusTypography.DataLabel,
+                    color = muted,
                     modifier = Modifier.weight(1f),
                 )
                 if (currentStreak > 0) {
                     Text(
-                        "$thisMonthActive this month",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        stringResource(R.string.growth_this_month, thisMonthActive),
+                        style = NexusTypography.TelemetryMicro,
+                        color = muted,
                     )
                 }
             }
-            if (currentStreak > 0) {
-                Spacer(Modifier.height(2.dp))
+
+            Spacer(Modifier.height(NexusSpacing.sm))
+
+            Row(verticalAlignment = Alignment.Bottom) {
                 Text(
-                    "Best streak $longestStreak ${if (longestStreak == 1) "day" else "days"}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    if (currentStreak > 0) currentStreak.toString() else "0",
+                    style = NexusTypography.TelemetryDisplay,
+                    color = if (currentStreak > 0) ext.attention else muted,
                 )
+                Spacer(Modifier.width(NexusSpacing.xs))
+                Text(
+                    if (currentStreak > 0) {
+                        stringResource(R.string.growth_days)
+                    } else {
+                        stringResource(R.string.growth_start_today)
+                    },
+                    style = NexusTypography.DataLabel,
+                    color = muted,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(bottom = NexusSpacing.xs),
+                )
+                if (longestStreak > 0) {
+                    Text(
+                        stringResource(R.string.growth_best_streak, longestStreak)
+                            .uppercase(Locale.ROOT),
+                        style = NexusTypography.DataLabel,
+                        color = muted,
+                        modifier = Modifier.padding(bottom = NexusSpacing.xs),
+                    )
+                }
             }
 
             Spacer(Modifier.height(NexusSpacing.md))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                horizontalArrangement = Arrangement.spacedBy(NexusSpacing.xs),
             ) {
                 for (index in 0 until 7) {
-                    val date = java.time.LocalDate.now().minusDays((6 - index).toLong())
+                    val date = LocalDate.now().minusDays((6 - index).toLong())
                     val isToday = index == 6
                     val isActive = weekActivity.getOrElse(index) { false }
-                    val background = when {
-                        isActive && isToday -> MaterialTheme.colorScheme.primary
-                        isActive -> MaterialTheme.colorScheme.primaryContainer
-                        else -> MaterialTheme.colorScheme.surfaceContainerHighest
-                    }
-                    val letterColor = when {
-                        isActive && isToday -> MaterialTheme.colorScheme.onPrimary
-                        isActive -> MaterialTheme.colorScheme.onPrimaryContainer
-                        else -> MaterialTheme.colorScheme.onSurfaceVariant
-                    }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
                         Box(
                             modifier = Modifier
-                                .size(if (isToday) 36.dp else 28.dp)
-                                .clip(CircleShape)
-                                .background(background),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Text(
-                                date.dayOfWeek.name.take(1),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = letterColor,
-                                fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
+                                .fillMaxWidth()
+                                .height(26.dp)
+                                .clip(NexusShapes.tag)
+                                .background(
+                                    if (isActive) ext.signal
+                                    else MaterialTheme.colorScheme.surfaceContainerHigh,
+                                ),
+                        )
+                        Spacer(Modifier.height(NexusSpacing.xs))
+                        Text(
+                            date.dayOfWeek.name.take(1),
+                            style = NexusTypography.DataLabel,
+                            color = if (isActive) {
+                                MaterialTheme.colorScheme.onSurface
+                            } else {
+                                muted
+                            },
+                        )
+                        Spacer(Modifier.height(NexusSpacing.xxs))
+                        if (isToday) {
+                            Box(
+                                modifier = Modifier
+                                    .width(2.dp)
+                                    .height(11.dp)
+                                    .background(
+                                        color = if (isActive) ext.signal else ext.hairlineStrong,
+                                        shape = NexusShapes.tag,
+                                    ),
                             )
+                        } else {
+                            Spacer(Modifier.height(11.dp))
                         }
                     }
                 }
@@ -325,6 +363,8 @@ internal fun GoalsPreview(
     goals: List<com.nexus.domain.model.Goal>,
     onGoals: () -> Unit,
 ) {
+    val ext = MaterialTheme.nexus
+
     NexusCard(onClick = onGoals, shape = NexusShapes.lg) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
@@ -359,7 +399,7 @@ internal fun GoalsPreview(
                             imageVector = if (goal.isCompleted) Icons.Default.CheckCircle
                             else Icons.Default.RadioButtonUnchecked,
                             contentDescription = null,
-                            tint = if (goal.isCompleted) NexusColors.AuroraGreen
+                            tint = if (goal.isCompleted) ext.positive
                             else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(18.dp),
                         )
@@ -369,27 +409,34 @@ internal fun GoalsPreview(
                                 goal.title,
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium,
-                                color = if (goal.isCompleted) NexusColors.AuroraGreen
+                                color = if (goal.isCompleted) ext.positive
                                 else MaterialTheme.colorScheme.onSurface,
                                 maxLines = 1,
                             )
-                            Spacer(Modifier.height(NexusSpacing.xxs))
+                            Spacer(Modifier.height(NexusSpacing.xs))
                             val progress by animateFloatAsState(
                                 targetValue = if (goal.isCompleted) 1f else goal.progress,
                                 animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy),
                                 label = "goal_${goal.id}",
                             )
-                            LinearProgressIndicator(
-                                progress = { progress },
-                                modifier = Modifier.fillMaxWidth().height(4.dp)
-                                    .clip(RoundedCornerShape(2.dp)),
-                                color = MaterialTheme.colorScheme.primary,
-                                trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                            CalibratedRule(
+                                progress = progress,
+                                modifier = Modifier.fillMaxWidth(),
+                                height = 16.dp,
+                                accent = if (goal.isCompleted) ext.positive
+                                else MaterialTheme.colorScheme.primary,
                             )
                             Spacer(Modifier.height(NexusSpacing.xxs))
                             Text(
-                                if (goal.isCompleted) "Completed" else "${(goal.progress * 100).toInt()}% complete",
-                                style = MaterialTheme.typography.labelSmall,
+                                if (goal.isCompleted) {
+                                    stringResource(R.string.growth_completed)
+                                } else {
+                                    stringResource(
+                                        R.string.growth_percent_complete,
+                                        (goal.progress * 100).toInt(),
+                                    )
+                                },
+                                style = NexusTypography.TelemetryMicro,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
@@ -469,10 +516,10 @@ internal fun TodaysChallenge(
         com.nexus.domain.model.DsaDifficulty.MEDIUM -> "Medium"
         com.nexus.domain.model.DsaDifficulty.HARD -> "Hard"
     }
-    val difficultyColor = when (challenge.difficulty) {
-        com.nexus.domain.model.DsaDifficulty.EASY -> NexusColors.AuroraGreen
-        com.nexus.domain.model.DsaDifficulty.MEDIUM -> NexusColors.Amber400
-        com.nexus.domain.model.DsaDifficulty.HARD -> NexusColors.Rose400
+    val difficultyTone = when (challenge.difficulty) {
+        com.nexus.domain.model.DsaDifficulty.EASY -> SignalTone.Signal
+        com.nexus.domain.model.DsaDifficulty.MEDIUM -> SignalTone.Attention
+        com.nexus.domain.model.DsaDifficulty.HARD -> SignalTone.Critical
     }
 
     NexusCard(shape = NexusShapes.lg) {
@@ -485,19 +532,7 @@ internal fun TodaysChallenge(
             Spacer(Modifier.height(NexusSpacing.sm))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(difficultyColor.copy(alpha = 0.16f))
-                        .padding(horizontal = 8.dp, vertical = 2.dp),
-                ) {
-                    Text(
-                        difficultyLabel,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = difficultyColor,
-                    )
-                }
+                SignalTag(text = difficultyLabel, tone = difficultyTone)
                 Spacer(Modifier.width(NexusSpacing.sm))
                 Text(
                     challenge.title,
@@ -507,7 +542,7 @@ internal fun TodaysChallenge(
                 )
                 Text(
                     challenge.platform,
-                    style = MaterialTheme.typography.labelSmall,
+                    style = NexusTypography.DataLabel,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }

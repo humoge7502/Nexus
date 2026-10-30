@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Star
@@ -34,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -41,11 +41,18 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.theme.NexusColors
+import com.nexus.designsystem.theme.NexusGradients
+import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
 import com.nexus.domain.model.CertProvider
 import com.nexus.domain.model.Certification
+import com.nexus.domain.model.DifficultyLevel
 import com.nexus.domain.model.Price
 import com.nexus.domain.model.SkillCategory
 import com.nexus.domain.model.UiState
+import java.util.Locale
 
 internal fun CertProvider.accentColor(): Color = when (this) {
     CertProvider.GOOGLE -> Color(0xFF4285F4)
@@ -89,6 +96,13 @@ internal fun SkillCategory.displayLabel(): String = when (this) {
     else -> name.lowercase()
         .split('_')
         .joinToString(" ") { word -> word.replaceFirstChar { it.titlecase() } }
+}
+
+/** Three-letter code so the difficulty tag reads as a data field, not a badge. */
+internal fun DifficultyLevel.shortCode(): String = when (this) {
+    DifficultyLevel.BEGINNER -> "BEG"
+    DifficultyLevel.INTERMEDIATE -> "INT"
+    DifficultyLevel.ADVANCED -> "ADV"
 }
 
 @Composable
@@ -173,28 +187,51 @@ private fun FeaturedCertCard(
     cert: Certification,
     onClick: () -> Unit,
 ) {
-    val accent = cert.accentColor()
+    val identity = lerp(cert.accentColor(), Color.White, 0.35f)
     NexusCard(
         onClick = onClick,
         modifier = Modifier.width(240.dp),
-        gradient = listOf(accent, accent.copy(alpha = 0.75f)),
+        gradient = NexusGradients.Cosmic,
+        shape = NexusShapes.md,
     ) {
         Column {
-            Text(
-                text = cert.displayProvider(),
-                style = MaterialTheme.typography.labelMedium,
-                color = Color.White.copy(alpha = 0.85f),
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        Modifier
+                            .width(2.dp)
+                            .height(11.dp)
+                            .clip(NexusShapes.tag)
+                            .background(identity),
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        text = cert.displayProvider().uppercase(Locale.ROOT),
+                        style = NexusTypography.DataLabel,
+                        color = NexusColors.Bone.copy(alpha = 0.68f),
+                    )
+                }
+                Icon(
+                    Icons.Default.ArrowForward,
+                    contentDescription = null,
+                    tint = NexusColors.Bone.copy(alpha = 0.6f),
+                    modifier = Modifier.size(16.dp),
+                )
+            }
+            Spacer(modifier = Modifier.height(14.dp))
             Text(
                 text = cert.title,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
+                fontWeight = FontWeight.SemiBold,
+                color = NexusColors.Bone,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -204,29 +241,22 @@ private fun FeaturedCertCard(
                     Icon(
                         Icons.Default.Star,
                         contentDescription = null,
-                        tint = Color(0xFFFBBF24),
-                        modifier = Modifier.size(16.dp),
+                        tint = NexusColors.Bone.copy(alpha = 0.75f),
+                        modifier = Modifier.size(14.dp),
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = if (cert.rating > 0f) "${cert.rating}" else stringResource(R.string.certifications_new),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.White,
+                        style = NexusTypography.Telemetry,
+                        color = NexusColors.Bone,
                     )
                 }
-                Icon(
-                    Icons.Default.ArrowForward,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(16.dp),
+                Text(
+                    text = stringResource(R.string.certifications_hours_price, cert.estimatedHours, cert.priceLabel()),
+                    style = NexusTypography.DataLabel,
+                    color = NexusColors.Bone.copy(alpha = 0.6f),
                 )
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = stringResource(R.string.certifications_hours_price, cert.estimatedHours, cert.priceLabel()),
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.White.copy(alpha = 0.8f),
-            )
         }
     }
 }
@@ -248,15 +278,15 @@ private fun CertListItem(
             Box(
                 modifier = Modifier
                     .size(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(accent.copy(alpha = 0.15f)),
+                    .clip(NexusShapes.sm)
+                    .background(accent.copy(alpha = 0.14f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = cert.title.take(2).uppercase(),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = accent,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
@@ -278,7 +308,7 @@ private fun CertListItem(
                         Icon(
                             Icons.Default.Star,
                             contentDescription = null,
-                            tint = Color(0xFFFBBF24),
+                            tint = MaterialTheme.nexus.attention,
                             modifier = Modifier.size(14.dp),
                         )
                         Spacer(modifier = Modifier.width(2.dp))

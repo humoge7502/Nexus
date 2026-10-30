@@ -18,6 +18,7 @@
     <string name="achievements_week_down">↓ %1$d this week</string>
     <string name="achievements_week_none">No change this week</string>
     <string name="achievements_xp_progress">%1$d / %2$d XP</string>
+    <string name="achievements_xp_of_total">of %1$d XP</string>
     <string name="achievements_xp_to_next">%1$d XP to next level</string>
     <string name="achievements_xp_earned">XP Earned</string>
     <string name="achievements_day_streak">Day Streak</string>

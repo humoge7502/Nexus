@@ -47,7 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusTopBar
-import com.nexus.designsystem.theme.NexusColors
+import com.nexus.designsystem.theme.nexus
 import kotlinx.coroutines.delay
 
 @Composable
@@ -62,6 +62,7 @@ fun ProductivityScreen(
     val formattedTime = "${(secondsRemaining / 60).toString().padStart(2, '0')}:${(secondsRemaining % 60).toString().padStart(2, '0')}"
     val trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
     val accent = MaterialTheme.colorScheme.primary
+    val accentTail = MaterialTheme.nexus.structure
     val dotCore = MaterialTheme.colorScheme.surfaceContainerLow
 
     LaunchedEffect(isRunning) {
@@ -115,7 +116,7 @@ fun ProductivityScreen(
 
                     drawArc(
                         brush = Brush.sweepGradient(
-                            listOf(accent.copy(alpha = 0.55f), accent, NexusColors.Cyan400),
+                            listOf(accent.copy(alpha = 0.55f), accent, accentTail),
                             center = center
                         ),
                         startAngle = -90f, sweepAngle = 360f * progress,
@@ -221,12 +222,12 @@ fun ProductivityScreen(
                                 pomodorosCompleted * 25,
                             ),
                             label = stringResource(R.string.productivity_minutes),
-                            color = NexusColors.Emerald400,
+                            color = MaterialTheme.nexus.positive,
                         )
                         TodayStat(
                             value = stringResource(R.string.productivity_12),
                             label = stringResource(R.string.productivity_streak),
-                            color = NexusColors.Amber400,
+                            color = MaterialTheme.nexus.attention,
                         )
                     }
                 }

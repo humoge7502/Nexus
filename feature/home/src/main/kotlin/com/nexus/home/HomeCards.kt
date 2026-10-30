@@ -4,7 +4,6 @@ import androidx.compose.ui.res.stringResource
 import com.nexus.home.R
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInHorizontally
@@ -23,7 +22,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.Work
@@ -40,7 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -48,18 +45,23 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nexus.designsystem.component.NexusCard
-import com.nexus.designsystem.component.NexusChip
+import com.nexus.designsystem.component.SignalTag
+import com.nexus.designsystem.component.SignalTone
 import com.nexus.designsystem.component.shimmer
-import com.nexus.designsystem.theme.NexusColors
+import com.nexus.designsystem.theme.NexusAnimation
+import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
 import com.nexus.domain.model.DailyQuote
 import com.nexus.domain.model.Internship
+import java.util.Locale
 
 @Composable
 internal fun OpportunitySkeletonRow() {
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(NexusSpacing.md),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = NexusSpacing.screenEdge),
         modifier = Modifier.fillMaxWidth()
     ) {
         items(2) {
@@ -67,7 +69,7 @@ internal fun OpportunitySkeletonRow() {
                 modifier = Modifier
                     .width(280.dp)
                     .height(178.dp)
-                    .clip(RoundedCornerShape(20.dp))
+                    .clip(NexusShapes.lg)
                     .shimmer()
             )
         }
@@ -85,13 +87,13 @@ internal fun OpportunityInlineState(
 ) {
     NexusCard(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = NexusShapes.lg,
     ) {
         Row {
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .clip(RoundedCornerShape(14.dp))
+                    .clip(NexusShapes.sm)
                     .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
@@ -122,9 +124,9 @@ internal fun OpportunityInlineState(
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(NexusShapes.xs)
                         .clickable(role = Role.Button) { onAction() }
-                        .padding(vertical = 6.dp)
+                        .padding(horizontal = NexusSpacing.xs, vertical = NexusSpacing.xxs)
                 )
             }
         }
@@ -144,15 +146,18 @@ internal fun OpportunityCard(
 
     AnimatedVisibility(
         visible = visible,
-        enter = fadeIn(tween(300)) + slideInHorizontally(
+        enter = fadeIn(NexusAnimation.Tween.cardFadeIn) + slideInHorizontally(
             initialOffsetX = { it / 3 },
-            animationSpec = tween(400, easing = FastOutSlowInEasing)
+            animationSpec = tween(
+                durationMillis = NexusAnimation.Duration.emphasized,
+                easing = NexusAnimation.Easing.emphasizedDecelerate
+            )
         )
     ) {
         NexusCard(
             onClick = onClick,
             modifier = Modifier.width(282.dp),
-            shape = RoundedCornerShape(20.dp),
+            shape = NexusShapes.lg,
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -162,22 +167,20 @@ internal fun OpportunityCard(
                 Box(
                     modifier = Modifier
                         .size(42.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(NexusShapes.sm)
                         .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = internship.company.name.take(2),
+                        text = internship.company.name.take(2).uppercase(Locale.ROOT),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
-                NexusChip(
+                SignalTag(
                     text = if (internship.isRemote) "Remote" else "On-site",
-                    isSelected = internship.isRemote,
-                    onToggle = { },
-                    modifier = Modifier
+                    tone = SignalTone.Neutral,
                 )
             }
             Spacer(modifier = Modifier.height(14.dp))
@@ -195,8 +198,8 @@ internal fun OpportunityCard(
             )
             Spacer(modifier = Modifier.height(12.dp))
             HorizontalDivider(
-                thickness = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
+                thickness = NexusSpacing.hairline,
+                color = MaterialTheme.nexus.hairlineStrong,
             )
             Spacer(modifier = Modifier.height(10.dp))
             Row(
@@ -232,20 +235,9 @@ internal fun OpportunityCard(
             )
             if (internship.tags.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(12.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(NexusSpacing.xxs)) {
                     for (tag in internship.tags.take(2)) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = tag,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                        SignalTag(text = tag, tone = SignalTone.Neutral)
                     }
                 }
             }
@@ -268,7 +260,7 @@ internal fun ApplicationSummaryCard(
             Box(
                 modifier = Modifier
                     .size(44.dp)
-                    .clip(RoundedCornerShape(14.dp))
+                    .clip(NexusShapes.sm)
                     .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
@@ -279,7 +271,7 @@ internal fun ApplicationSummaryCard(
                     modifier = Modifier.size(20.dp)
                 )
             }
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(NexusSpacing.sm))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = application.title,
@@ -292,18 +284,7 @@ internal fun ApplicationSummaryCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(NexusColors.Amber500.copy(alpha = 0.16f))
-                    .padding(horizontal = 10.dp, vertical = 4.dp)
-            ) {
-                Text(text = stringResource(R.string.text_in_review),
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = NexusColors.Amber400
-                )
-            }
+            SignalTag(text = stringResource(R.string.text_in_review), tone = SignalTone.Attention)
         }
     }
 }
