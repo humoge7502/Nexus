@@ -31,6 +31,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
@@ -43,7 +46,9 @@ import androidx.compose.ui.unit.sp
 import com.nexus.designsystem.component.CalibratedRule
 import com.nexus.designsystem.component.InstrumentGauge
 import com.nexus.designsystem.component.MomentumChart
+import com.nexus.designsystem.component.ConstellationNode
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.SkillConstellation
 import com.nexus.designsystem.component.SignalField
 import com.nexus.designsystem.component.hairline
 import com.nexus.designsystem.component.instrumentGrid
@@ -114,6 +119,11 @@ fun GrowthScreen(
                     SkillRadarEmpty()
                 } else {
                     SkillRadarChart(radarAxes)
+                }
+            }
+            item(key = "constellation") {
+                if (radarAxes.isNotEmpty()) {
+                    SkillMapCard(axes = radarAxes)
                 }
             }
             item(key = "streak") {
@@ -266,6 +276,45 @@ private fun NexusScoreCard(nexusScore: Int, nexusScoreFloat: Float, metrics: Lis
                 MetricBar(metric)
                 Spacer(Modifier.height(6.dp))
             }
+        }
+    }
+}
+
+/**
+ * The interactive skill map: the same proficiency data as the radar, drawn as
+ * a tappable constellation. Tapping a node reveals its level as real text.
+ */
+@Composable
+private fun SkillMapCard(axes: List<RadarAxis>) {
+    var selected by remember { mutableIntStateOf(-1) }
+    NexusCard(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.growth_skill_map_title),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 4.dp),
+        )
+        SkillConstellation(
+            nodes = axes.map { ConstellationNode(it.label, it.value) },
+            selected = selected.takeIf { it >= 0 },
+            onSelect = { selected = if (selected == it) -1 else it },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        val sel = selected.takeIf { it >= 0 }
+        if (sel != null && sel < axes.size) {
+            val axis = axes[sel]
+            Text(
+                text = "${axis.label} — ${(axis.value * 100).toInt()}% proficiency",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Spacer(Modifier.height(4.dp))
+        } else {
+            Text(
+                text = stringResource(R.string.growth_skill_map_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

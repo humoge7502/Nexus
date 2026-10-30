@@ -8,6 +8,8 @@
     <string name="text_top_drivers">Top drivers:</string>
     <string name="cd_back">Back</string>
     <string name="placementforecast_current_nexus_score">Current Ascent Score: %1$d</string>
+    <string name="placementforecast_score_trend_title">Score trend</string>
+    <string name="placementforecast_score_trend_caption">Your daily Ascent-score snapshots — the input the on-device model reads.</string>
     <string name="placementforecast_on_device_model_note">On-device model v%1$s · explainable, no data leaves your device</string>
     <string name="placementforecast_predicted_probability">%1$d%% predicted probability of placement this season</string>
     <string name="placementforecast_probability">Probability: %1$d%%</string>

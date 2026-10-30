@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.MomentumChart
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.domain.model.PlacementForecast
@@ -114,6 +115,25 @@ fun PlacementForecastContent(
               style = MaterialTheme.typography.titleMedium,
               fontWeight = FontWeight.SemiBold,
             )
+          }
+        }
+        if (uiState.scoreTrend.size >= 2) {
+          item(key = "score_trend") {
+            NexusCard(modifier = Modifier.fillMaxWidth()) {
+              Text(
+                text = stringResource(R.string.placementforecast_score_trend_title),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 8.dp),
+              )
+              MomentumChart(values = uiState.scoreTrend, modifier = Modifier.fillMaxWidth())
+              Spacer(Modifier.height(4.dp))
+              Text(
+                text = stringResource(R.string.placementforecast_score_trend_caption),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            }
           }
         }
         uiState.modelReadinessPct?.let { readiness ->

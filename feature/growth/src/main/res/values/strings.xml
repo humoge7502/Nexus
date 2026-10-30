@@ -76,4 +76,6 @@
     <string name="dsa_day_streak">Day Streak</string>
     <string name="growth_momentum_title">Momentum</string>
     <string name="growth_momentum_caption">Change at latest snapshot: %1$s</string>
+    <string name="growth_skill_map_title">Skill map</string>
+    <string name="growth_skill_map_hint">Tap a node for detail</string>
 </resources>

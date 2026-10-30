@@ -33,6 +33,7 @@ data class ForecastUiState(
   val isLoading: Boolean = true,
   val forecasts: List<PlacementForecast> = emptyList(),
   val currentScore: Int = 0,
+  val scoreTrend: List<Float> = emptyList(),
   val modelReadinessPct: Int? = null,
   val modelFactors: List<String> = emptyList(),
   val modelVersion: String = PlacementReadinessModel.VERSION,
@@ -87,6 +88,7 @@ class PlacementForecastViewModel @Inject constructor(
 
         val snapshots = scoreRepository.getRecentSnapshots(userId, limit = 60).first()
         val currentScore = snapshots.maxByOrNull { it.recordedAt }?.score ?: DEFAULT_SCORE
+        val scoreTrend = snapshots.sortedBy { it.recordedAt }.map { it.score.toFloat() }
         val collegeId = userPrefs.userCollege.first().ifBlank { "unknown" }
         val year = userPrefs.userYear.first()
 
@@ -181,6 +183,7 @@ class PlacementForecastViewModel @Inject constructor(
           it.copy(
             isLoading = false,
             currentScore = currentScore,
+            scoreTrend = scoreTrend,
             modelReadinessPct = modelPct,
             modelFactors = factors,
             whatIfMocks = 0,
