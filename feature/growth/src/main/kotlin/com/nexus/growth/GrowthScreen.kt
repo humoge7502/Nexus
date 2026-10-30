@@ -42,6 +42,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nexus.designsystem.component.CalibratedRule
 import com.nexus.designsystem.component.InstrumentGauge
+import com.nexus.designsystem.component.MomentumChart
+import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.SignalField
 import com.nexus.designsystem.component.hairline
 import com.nexus.designsystem.component.instrumentGrid
@@ -96,6 +98,14 @@ fun GrowthScreen(
                         nexusScore = uiState.nexusScore,
                         nexusScoreFloat = uiState.nexusScoreFloat,
                         metrics = metrics,
+                    )
+                }
+            }
+            item(key = "momentum") {
+                RevealOnLoad(delayMillis = 110) {
+                    MomentumCard(
+                        values = uiState.scoreMomentum,
+                        weeklyChange = uiState.scoreWeeklyChange,
                     )
                 }
             }
@@ -256,6 +266,40 @@ private fun NexusScoreCard(nexusScore: Int, nexusScoreFloat: Float, metrics: Lis
                 MetricBar(metric)
                 Spacer(Modifier.height(6.dp))
             }
+        }
+    }
+}
+
+/**
+ * The career-momentum instrument: the Ascent score's real daily history from
+ * the snapshot table. Empty when no snapshots exist yet — the chart shows its
+ * baseline and the caption stays honest about having no readings.
+ */
+@Composable
+private fun MomentumCard(
+    values: List<Float>,
+    weeklyChange: Int,
+) {
+    NexusCard(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.growth_momentum_title),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 12.dp),
+        )
+        MomentumChart(values = values, modifier = Modifier.fillMaxWidth())
+        if (values.isNotEmpty()) {
+            Spacer(Modifier.height(10.dp))
+            val formatted = String.format(Locale.getDefault(), "%+d", weeklyChange)
+            Text(
+                text = stringResource(R.string.growth_momentum_caption, formatted),
+                style = MaterialTheme.typography.bodySmall,
+                color = if (weeklyChange >= 0) {
+                    NexusColors.SignalDeep
+                } else {
+                    MaterialTheme.colorScheme.error
+                },
+            )
         }
     }
 }

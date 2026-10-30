@@ -62,6 +62,7 @@ data class GrowthUiState(
   val lastActiveToday: Boolean = false,
   val thisMonthActive: Int = 0,
   val scoreWeeklyChange: Int = 0,
+  val scoreMomentum: List<Float> = emptyList(),
   val skillAxes: List<GrowthRadarAxis> = emptyList(),
   val placementScore: Int = 0,
   val placementLevel: String = "Getting Started",
@@ -92,6 +93,7 @@ class GrowthViewModel @Inject constructor(
     observeMetrics()
     observeSkillAxes()
     observePlacementReadiness()
+    observeScoreMomentum()
     analyticsTracker.trackScreenView("growth")
   }
 
@@ -212,6 +214,26 @@ class GrowthViewModel @Inject constructor(
          _uiState.value = state
          xpRepository.recordScoreSnapshot(state.nexusScore)
        }
+    }
+  }
+
+  /** Real daily score history; never synthesised when snapshots are missing. */
+  private fun observeScoreMomentum() {
+    viewModelScope.launch {
+      xpRepository.getSnapshotsForUser()
+        .catch { Timber.e(it, "Score momentum observation failed") }
+        .collect { snapshots ->
+          val scores = snapshots.map { it.score.toFloat() }
+          val weekAgo = System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000
+          val baseline = snapshots.lastOrNull { it.recordedAt <= weekAgo }?.score
+            ?: snapshots.firstOrNull()?.score
+            ?: snapshots.lastOrNull()?.score
+            ?: 0
+          val weekly = (snapshots.lastOrNull()?.score ?: 0) - baseline
+          _uiState.update {
+            it.copy(scoreMomentum = scores, scoreWeeklyChange = weekly)
+          }
+        }
     }
   }
 

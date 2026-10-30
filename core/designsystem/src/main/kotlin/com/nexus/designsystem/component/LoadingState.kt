@@ -28,6 +28,13 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun Modifier.shimmer(): Modifier = composed {
+    // The sweep is an infinite animation; with reduced motion it renders as a
+    // static placeholder tone instead of looping forever.
+    if (com.nexus.designsystem.theme.LocalReducedMotion.current) {
+        return@composed this.background(
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
+        )
+    }
     val transition = rememberInfiniteTransition(label = "shimmer")
     val translateX by transition.animateFloat(
         initialValue = -300f,
