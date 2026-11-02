@@ -50,6 +50,12 @@ data class ExploreUiState(
    * so the card shows no chip rather than a number nobody derived.
    */
   val matchPercents: Map<String, Int> = emptyMap(),
+  /**
+   * Requirements the student has not claimed yet, per internship id, populated
+   * only where [matchPercents] would read zero. "Needs Java, JavaScript" is the
+   * same honest arithmetic as "0%" with something to act on.
+   */
+  val skillGaps: Map<String, List<String>> = emptyMap(),
 ) {
   val hasActiveSearch: Boolean get() = searchQuery.isNotBlank() || selectedFilters.isNotEmpty()
 }
@@ -146,6 +152,7 @@ class ExploreViewModel @Inject constructor(
       else -> emptyList()
     }
 
+    val fit = fits(internships)
     _uiState.value = state.copy(
       filteredInternships = internships,
       filteredHackathons = when (val hackathons = state.hackathons) {
@@ -156,7 +163,8 @@ class ExploreViewModel @Inject constructor(
         is UiState.Success -> certifications.data.filterCertificationsForExplore(query, filters, category)
         else -> emptyList()
       },
-      matchPercents = matchPercents(internships),
+      matchPercents = fit.first,
+      skillGaps = fit.second,
     )
   }
 
@@ -166,13 +174,23 @@ class ExploreViewModel @Inject constructor(
    * required skills the posting never stated what it wants; [OpportunityMatchingEngine]
    * answers 0.5 in those cases as a neutral placeholder, and rendering that as
    * "50% match" would show a student a number no one computed.
+   *
+   * Where the score is genuinely zero, the listing's own wording of what it still
+   * wants is published instead, so the card points at a gap rather than at a floor.
    */
-  private fun matchPercents(internships: List<Internship>): Map<String, Int> {
-    if (trackedSkills.isEmpty()) return emptyMap()
-    return internships.filter { it.requiredSkills.isNotEmpty() }
-      .associate { internship ->
-        internship.id to (matchingEngine.calculateMatchScore(internship, trackedSkills) * 100).toInt()
-      }
+  private fun fits(internships: List<Internship>): Pair<Map<String, Int>, Map<String, List<String>>> {
+    if (trackedSkills.isEmpty()) return emptyMap<String, Int>() to emptyMap()
+    val percents = LinkedHashMap<String, Int>(internships.size)
+    val gaps = LinkedHashMap<String, List<String>>()
+    internships.asSequence()
+        .map { it to matchingEngine.assess(it, trackedSkills) }
+        .filter { (_, fit) -> fit.required > 0 }
+        .forEach { (internship, fit) ->
+          val percent = (fit.ratio * 100).toInt()
+          if (percent > 0) percents[internship.id] = percent
+          else gaps[internship.id] = fit.missing
+        }
+    return percents to gaps
   }
 
   fun refresh() {

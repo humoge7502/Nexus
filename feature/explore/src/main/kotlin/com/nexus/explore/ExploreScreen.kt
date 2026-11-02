@@ -183,6 +183,7 @@ fun ExploreScreen(
                 hackathons = uiState.filteredHackathons,
                 certifications = uiState.filteredCertifications,
                 matchPercents = uiState.matchPercents,
+                skillGaps = uiState.skillGaps,
                 totalMatches = totalMatches,
                 isLoading = isLoading,
                 errorMessage = errorMessage,
@@ -329,6 +330,7 @@ private fun LazyListScope.exploreResults(
     hackathons: List<Hackathon>,
     certifications: List<Certification>,
     matchPercents: Map<String, Int>,
+    skillGaps: Map<String, List<String>>,
     totalMatches: Int,
     isLoading: Boolean,
     errorMessage: String?,
@@ -345,7 +347,7 @@ private fun LazyListScope.exploreResults(
         totalMatches == 0 -> emptyRow(category, hasActiveSearch, onClear)
         else -> when (category) {
             CATEGORY_INTERNSHIPS -> {
-                internshipCards(internships, matchPercents, onInternshipClick)
+                internshipCards(internships, matchPercents, skillGaps, onInternshipClick)
                 if (hackathons.isNotEmpty()) {
                     sectionHeader("Live Hackathons", hackathons.size)
                     hackathonCards(hackathons, onHackathonClick)
@@ -357,7 +359,7 @@ private fun LazyListScope.exploreResults(
             CATEGORY_MORE -> {
                 if (internships.isNotEmpty()) {
                     sectionHeader("Internships", internships.size)
-                    internshipCards(internships, matchPercents, onInternshipClick)
+                    internshipCards(internships, matchPercents, skillGaps, onInternshipClick)
                 }
                 if (hackathons.isNotEmpty()) {
                     sectionHeader("Hackathons", hackathons.size)
@@ -370,7 +372,7 @@ private fun LazyListScope.exploreResults(
             }
 
             else -> {
-                internshipCards(internships, matchPercents, onInternshipClick)
+                internshipCards(internships, matchPercents, skillGaps, onInternshipClick)
                 hackathonCards(hackathons, onHackathonClick)
             }
         }
@@ -389,6 +391,7 @@ private fun LazyListScope.sectionHeader(title: String, count: Int) {    item {
 private fun LazyListScope.internshipCards(
     internships: List<Internship>,
     matchPercents: Map<String, Int>,
+    skillGaps: Map<String, List<String>>,
     onClick: (String) -> Unit,
 ) {
     items(internships, key = { "internship_${it.id}" }) { internship ->
@@ -396,6 +399,7 @@ private fun LazyListScope.internshipCards(
             title = internship.title,
             org = internship.company.name,
             matchScore = matchPercents[internship.id],
+            missingSkills = skillGaps[internship.id].orEmpty(),
             tags = internship.tags.take(3),
             onClick = { onClick(internship.id) },
         )
@@ -528,6 +532,7 @@ private fun ExploreOpportunityCard(
     title: String,
     org: String,
     matchScore: Int?,
+    missingSkills: List<String>,
     tags: List<String>,
     onClick: () -> Unit,
 ) {
@@ -552,9 +557,22 @@ private fun ExploreOpportunityCard(
                 Text(org, style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(6.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    for (tag in tags.take(2)) {
-                        SignalTag(text = tag, tone = SignalTone.Neutral)
+                val named = missingSkills.take(2).joinToString(", ")
+                if (matchScore == null && named.isNotBlank()) {
+                    // The listing stated a bar the student has not cleared yet. Saying
+                    // "0%" is true and useless; naming the bar is what they can act on.
+                    Text(
+                        text = stringResource(R.string.explore_still_needs, named),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.nexus.attention,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                } else {
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        for (tag in tags.take(2)) {
+                            SignalTag(text = tag, tone = SignalTone.Neutral)
+                        }
                     }
                 }
             }

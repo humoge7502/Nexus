@@ -20,6 +20,7 @@
     <string name="explore_prize">Prize: %1$s</string>
     <string name="explore_results">%1$s results</string>
     <string name="explore_match_percent">%1$s%%</string>
+    <string name="explore_still_needs">Still needs: %1$s</string>
     <string name="cd_back">Back</string>
     <string name="cd_save">Save</string>
     <string name="cd_remove_from_saved">Remove from saved</string>

@@ -105,4 +105,13 @@ class NewMatchPlannerTest {
         assertEquals("HACKATHON:42", hackathon.key())
         assertFalse(internship.key() == hackathon.key())
     }
+
+    @Test
+    fun `a listing written differently still reaches the student who claimed it`() {
+        val matched = NewMatchPlanner.matchedSkills(
+            required = listOf("ReactJS", "Machine Learning (ML)", "JavaScript"),
+            ownedSkills = setOf("React", "ML"),
+        )
+        assertEquals(listOf("ReactJS", "Machine Learning (ML)"), matched)
+    }
 }

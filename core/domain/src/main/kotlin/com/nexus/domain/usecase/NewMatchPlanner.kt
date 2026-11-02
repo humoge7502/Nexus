@@ -37,16 +37,22 @@ object NewMatchPlanner {
 
     /**
      * The required skills this student already holds, in the order the listing
-     * states them. Comparison is trimmed and case-folded because the feed mixes
+     * states them. Comparison goes through [SkillNames] because the feed mixes
      * "Node.js", "node" and "NODEJS" across sources, and a missed synonym would
      * silently cost the student an alert.
      */
     fun matchedSkills(required: List<String>, ownedSkills: Set<String>): List<String> {
         if (ownedSkills.isEmpty()) return emptyList()
-        val owned = ownedSkills.map { it.trim().lowercase() }.toSet()
-        return required.map { it.trim() }
-            .filter { it.isNotBlank() && it.lowercase() in owned }
-            .distinctBy { it.lowercase() }
+        val owned = SkillNames.canonicalSet(ownedSkills)
+        val seen = HashSet<String>(required.size)
+        return required.asSequence()
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .map { it to SkillNames.canonical(it) }
+            .filter { (_, canonical) -> canonical.isNotEmpty() && seen.add(canonical) }
+            .filter { (_, canonical) -> canonical in owned }
+            .map { (name, _) -> name }
+            .toList()
     }
 
     /**
