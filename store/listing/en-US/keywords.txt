@@ -1,1 +1,1 @@
-career,job,placement,college,student,coding,scholarship,portfolio,interview,skills,fresher,remote
+internship,hackathon,placement,fresher,job,student
