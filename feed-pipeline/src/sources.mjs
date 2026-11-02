@@ -4,10 +4,13 @@ import {
   isEarlyCareerTitle,
   isEligibleLocation,
   parseDevpostEndDate,
+  parseDevpostTimeLeft,
 } from "./earlyCareer.mjs";
 
 const UA = "SagittaFeedBot/1.0 (+https://github.com/humoge7502/Nexus)";
 const TIMEOUT_MS = 20_000;
+const DEVPOST_PER_PAGE = 40;
+const DEVPOST_MAX_PAGES = 10;
 
 export async function fetchText(url, { timeout = TIMEOUT_MS } = {}) {
   try {
@@ -182,17 +185,21 @@ export async function getLeverJobs(company) {
 }
 
 export async function getDevpostHackathons() {
-  const result = await fetchJson("https://devpost.com/api/hackathons?status[]=open&limit=100");
-  if (!Array.isArray(result.data?.hackathons)) {
-    return { source: "Devpost", ok: false, status: result.status, items: [] };
+  const hackathons = await fetchAllDevpostHackathons();
+  if (hackathons === null) {
+    return { source: "Devpost", ok: false, status: 0, items: [] };
   }
   const now = Date.now();
   const items = [];
-  for (const hackathon of result.data.hackathons) {
+  for (const hackathon of hackathons) {
     if (hackathon.open_state !== "open") continue;
     const locationLabel = hackathon.displayed_location?.location || "";
     if (locationLabel && !/online/i.test(locationLabel) && !isEligibleLocation(locationLabel)) continue;
-    const end = parseDevpostEndDate(hackathon.submission_period_dates);
+    // The countdown is the listing's own claim about when submissions close; the
+    // printed range is a display string that can lag it by a day.
+    const end =
+      parseDevpostTimeLeft(hackathon.time_left_to_submission) ??
+      parseDevpostEndDate(hackathon.submission_period_dates);
     if (!end || end < now) continue;
     const themes = (hackathon.themes || []).map((theme) => theme.name).filter(Boolean);
     const prize = stripHtml(hackathon.prize_amount || "");
@@ -213,7 +220,35 @@ export async function getDevpostHackathons() {
       sourceName: "Devpost",
     });
   }
-  return { source: "Devpost", ok: true, status: result.status, items };
+  return { source: "Devpost", ok: true, status: 200, items };
+}
+
+/**
+ * Walk the open-hackathons pages until the advertised total is collected.
+ *
+ * `limit` is not a parameter this API reads; it serves a fixed `per_page` (40 at
+ * most) and paginates with `page`. Asking for one page silently capped the whole
+ * feed at 9 of the 50 open hackathons.
+ */
+async function fetchAllDevpostHackathons() {
+  const collected = [];
+  const seen = new Set();
+  let total = Infinity;
+  for (let page = 1; page <= DEVPOST_MAX_PAGES; page += 1) {
+    const result = await fetchJson(
+      `https://devpost.com/api/hackathons?status[]=open&per_page=${DEVPOST_PER_PAGE}&page=${page}`,
+    );
+    if (!Array.isArray(result.data?.hackathons)) return collected.length > 0 ? collected : null;
+    const batch = result.data.hackathons;
+    for (const hackathon of batch) {
+      if (!hackathon?.id || seen.has(hackathon.id)) continue;
+      seen.add(hackathon.id);
+      collected.push(hackathon);
+    }
+    total = Number(result.data.meta?.total_count) || total;
+    if (batch.length === 0 || collected.length >= total) break;
+  }
+  return collected;
 }
 
 export async function getDevfolioHackathons() {

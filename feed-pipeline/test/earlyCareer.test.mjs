@@ -9,6 +9,7 @@ import {
   isRollingOrFutureDeadline,
   normalizeUrl,
   parseDevpostEndDate,
+  parseDevpostTimeLeft,
   stripHtml,
   truncate,
 } from "../src/earlyCareer.mjs";
@@ -103,7 +104,7 @@ test("dedupe keeps the first item per normalized URL", () => {
   assert.equal(dedupeKey({ company: "Acme", title: "Intern" }), "role:acme|intern");
 });
 
-test("parseDevpostEndDate understands date ranges and rollover", () => {
+test("parseDevpostEndDate understands the ranges Devpost actually returns", () => {
   const now = new Date("2026-11-01T00:00:00Z");
   assert.equal(
     new Date(parseDevpostEndDate("Oct 01 - Nov 12, 2026", now)).toISOString().slice(0, 10),
@@ -113,7 +114,41 @@ test("parseDevpostEndDate understands date ranges and rollover", () => {
     new Date(parseDevpostEndDate("Dec 20 - Jan 05", now)).toISOString().slice(0, 10),
     "2027-01-05",
   );
+  // Same-month ranges drop the repeated month name; the trailing half has to
+  // borrow it from the front or the listing disappears with a null.
+  assert.equal(
+    new Date(parseDevpostEndDate("Nov 01 - 12, 2026", now)).toISOString().slice(0, 10),
+    "2026-11-12",
+  );
+  assert.equal(
+    new Date(parseDevpostEndDate("Jun 24 – Nov 15, 2026", now)).toISOString().slice(0, 10),
+    "2026-11-15",
+  );
   assert.equal(parseDevpostEndDate(""), null);
+});
+
+test("parseDevpostEndDate refuses to invent a future deadline for a closed event", () => {
+  const now = new Date("2026-11-03T00:00:00Z");
+  assert.equal(parseDevpostEndDate("Oct 23 - Nov 02, 2026", now), null);
+  // A range printed without a year is next year's edition, not a stale one:
+  // this endpoint only lists events Devpost itself still calls open.
+  assert.equal(
+    new Date(parseDevpostEndDate("Apr 04 - May 06", now)).toISOString().slice(0, 10),
+    "2027-05-06",
+  );
+});
+
+test("parseDevpostTimeLeft reads the countdown on the live listings", () => {
+  const now = new Date("2026-11-02T12:00:00Z");
+  const day = (iso) => new Date(parseDevpostTimeLeft(iso, now)).toISOString().slice(0, 10);
+  assert.equal(day("10 days left"), "2026-11-12");
+  assert.equal(day("about 1 month left"), "2026-12-02");
+  assert.equal(day("about 2 months left"), "2027-01-01");
+  assert.equal(day("16 days left"), "2026-11-18");
+  // One hour out is a real deadline, not a rounding artefact.
+  assert.ok(parseDevpostTimeLeft("about 1 hour left", now) > now.getTime());
+  assert.equal(parseDevpostTimeLeft("Submissions closed", now), null);
+  assert.equal(parseDevpostTimeLeft(null, now), null);
 });
 
 test("isRollingOrFutureDeadline treats missing deadlines as rolling", () => {

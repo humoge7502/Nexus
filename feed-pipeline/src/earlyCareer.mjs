@@ -106,22 +106,57 @@ const MONTHS = {
   dec: 11,
 };
 
+/**
+ * Resolve the closing day of a display range like "Oct 01 - Nov 12, 2026".
+ *
+ * The open-hackathons endpoint returns no ISO dates at all — start_date,
+ * end_date and submission_deadline are null — so this string is the only
+ * absolute date available. Ranges inside one month are written compactly
+ * ("Nov 01 - 12, 2026"), which is why the trailing part may have to borrow the
+ * month named at the front.
+ */
 export function parseDevpostEndDate(range, now = new Date()) {
   if (!range || typeof range !== "string") return null;
-  const end = range.split(/\s*[-–—]\s*/).pop();
-  if (!end) return null;
-  const parts = end.match(/([A-Za-z]{3,})\s+(\d{1,2})(?:,\s*(\d{4}))?/);
-  if (!parts) return null;
-  const month = MONTHS[parts[1].slice(0, 3).toLowerCase()];
-  const day = Number(parts[2]);
-  if (month === undefined || day < 1 || day > 31) return null;
-  const explicitYear = parts[3] ? Number(parts[3]) : null;
+  const halves = range.split(/\s*[-–—]\s*/).map((half) => half.trim()).filter(Boolean);
+  if (halves.length === 0) return null;
+  const end = halves[halves.length - 1];
+  const start = halves.length > 1 ? halves[0] : "";
+
+  const full = end.match(/([A-Za-z]{3,})\s+(\d{1,2})(?:,?\s*(\d{4}))?/);
+  const dayOnly = full ? null : end.match(/^(\d{1,2})(?:,?\s*(\d{4}))?/);
+  const monthName = full?.[1] ?? start.match(/([A-Za-z]{3,})/)?.[1];
+  const day = Number(full?.[2] ?? dayOnly?.[1]);
+  const explicitYear = Number(full?.[3] ?? dayOnly?.[2]) || null;
+  const month = monthName === undefined ? undefined : MONTHS[monthName.slice(0, 3).toLowerCase()];
+  if (month === undefined || !(day >= 1 && day <= 31)) return null;
+
   const year = explicitYear ?? now.getUTCFullYear();
   let timestamp = Date.UTC(year, month, day, 23, 59, 59);
-  if (!explicitYear && timestamp < now.getTime() - 1000 * 60 * 60 * 24 * 180) {
+  if (!explicitYear && timestamp < now.getTime()) {
     timestamp = Date.UTC(year + 1, month, day, 23, 59, 59);
   }
-  return timestamp;
+  // A date the source itself has already passed is not a deadline. Guessing the
+  // next occurrence would put a closed event in front of a student as "3 weeks
+  // left", which is worse than not showing it; time_left_to_submission is tried
+  // first by the caller for exactly this reason.
+  return timestamp >= now.getTime() ? timestamp : null;
+}
+
+/**
+ * Turn Devpost's own countdown ("10 days left", "about 1 hour left") into a
+ * closing timestamp. Relative to the scrape instant, this is what the listing
+ * actually claims, and it survives both a compact range and a range whose
+ * printed date has just slipped into the past while the event is still open.
+ */
+export function parseDevpostTimeLeft(text, now = new Date()) {
+  if (!text || typeof text !== "string") return null;
+  const match = /(\d+(?:[.,]\d+)?)\s*(hour|day|week|month)s?\s+left/i.exec(text);
+  if (!match) return null;
+  const amount = Number(match[1].replace(",", "."));
+  const unit = match[2].toLowerCase();
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+  const ms = { hour: 3_600_000, day: 86_400_000, week: 604_800_000, month: 2_592_000_000 }[unit];
+  return now.getTime() + amount * ms;
 }
 
 /**
