@@ -192,10 +192,10 @@ private fun AuthMasthead() {
         modifier = Modifier.fillMaxWidth(),
     )
 
-    Spacer(modifier = Modifier.height(NexusSpacing.xxl))
+    Spacer(modifier = Modifier.height(NexusSpacing.xl))
 
     Box(
-        modifier = Modifier.size(212.dp),
+        modifier = Modifier.size(180.dp),
         contentAlignment = Alignment.Center,
     ) {
         InstrumentGauge(
@@ -204,7 +204,7 @@ private fun AuthMasthead() {
             stroke = 8.dp,
             contentDescription = stringResource(R.string.auth_instrument_description),
         )
-        NexusMark(size = 76.dp)
+        NexusMark(size = 64.dp)
     }
 
     Spacer(modifier = Modifier.height(NexusSpacing.lg))
@@ -255,11 +255,23 @@ private fun AuthMasthead() {
     )
 }
 
-/** Legal line plus its own hit area: the link target is wider than the glyphs. */
+/** What the app collects, then the legal line and its own hit area. */
 @Composable
 private fun AuthPrivacyNotice() {
     val ext = MaterialTheme.nexus
     val uriHandler = LocalUriHandler.current
+
+    // Play wants this on the screen where data is actually collected, in plain
+    // sight rather than behind a link. The wording tracks docs/privacy-policy.html.
+    Text(
+        text = stringResource(R.string.auth_data_disclosure),
+        modifier = Modifier.fillMaxWidth(),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+        textAlign = TextAlign.Center,
+    )
+
+    Spacer(modifier = Modifier.height(NexusSpacing.xs))
 
     Text(
         text = stringResource(R.string.auth_privacy_prefix).trimEnd(),

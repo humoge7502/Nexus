@@ -8,6 +8,7 @@
     <string name="auth_terms">Terms of Service</string>
     <string name="auth_privacy">Privacy Policy</string>
     <string name="auth_privacy_conjunction"> and </string>
+    <string name="auth_data_disclosure">Saved listings, applications and progress stay on this device. Signing in backs them up to your account. AI questions are relayed to a provider that is not allowed to train on them, and app usage is logged.</string>
     <string name="auth_cancel">Cancel</string>
     <string name="auth_college_email">College email</string>
     <string name="auth_enter_a_valid_email_address">Enter a valid email address</string>
