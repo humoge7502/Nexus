@@ -1,4 +1,4 @@
-"""Generates the NEXUS placement-readiness training cohort.
+"""Generates the Sagitta placement-readiness training cohort.
 
 The data is synthetic. It is produced by a documented structural model so the
 training pipeline, calibration and export can be validated end-to-end before

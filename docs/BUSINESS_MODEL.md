@@ -1,152 +1,200 @@
-# NEXUS Business Model & Monetization Plan
+# Sagitta — Business Model
 
-> Status: v1, grounded in what is actually built (Play Billing 3-tier paywall wired
-> into navigation; per-user AI quota enforcement live in the backend proxy).
-
-## 1. Product thesis
-
-NEXUS is the **career operating system for engineering students in India**: one
-verifiable number (NEXUS Score), one AI mentor that remembers you (Career Memory),
-one cohort intelligence layer no competitor has. Monetization follows value, not
-ads: students pay for **outcomes and unfair advantages**, not for removing
-annoyances.
-
-## 2. Pricing (India-optimized, Play Billing)
-
-The app already ships three SKUs (`ProductTier`): `PRO_MONTHLY`, `PRO_YEARLY`,
-`LIFETIME`. Recommended price points:
-
-| Tier | Price | Target ARPU/yr | Positioning |
-|---|---|---|---|
-| Free | ₹0 | — | Full tracker: internships, DSA tracker, streaks, basic AI chat (quota'd) |
-| **Pro Monthly** | ₹99/mo | ₹1,188 | "Interview season mode" — 1–2 months before placements |
-| **Pro Yearly** | ₹499/yr (₹42/mo) | ₹499 | Default choice; 58% discount framing vs monthly |
-| **Lifetime** | ₹1,999 one-time | — | Anchors yearly as "rational"; early-adopter harvesting |
-
-Why these numbers: Indian student willingness-to-pay clusters at ₹50–150/mo for
-outcomes (Unstop pro programs, LeetCode India pricing, test-prep apps). The
-lifetime tier exists primarily to make ₹499/yr look small — expect <5% lifetime
-mix.
-
-## 3. Free vs Pro matrix (maps 1:1 to `FeatureGate` enum in code)
-
-| Feature (gate) | Free | Pro |
-|---|---|---|
-| Internships/Opportunities feed | ✅ | ✅ |
-| DSA Tracker + daily problem | ✅ | ✅ |
-| Streaks + Daily Career Hits | ✅ | ✅ |
-| Basic AI Chat | 15 msgs/day | Unlimited (fair-use) |
-| Resume Analyzer | 1/mo | Unlimited |
-| Roadmap Generator | ✅ 7-day trial | ✅ |
-| Skill Gap Analysis | — | ✅ |
-| Interview Coach | — | ✅ |
-| LinkedIn Post Generator | — | ✅ |
-| NEXUS Oracle + Arena | — | ✅ |
-| Career Insights (calibration report) | — | ✅ |
-| Career Mirror quarterly narrative | — | ✅ |
-| Priority opportunity matching (embeddings) | Standard | Priority + more skills |
-
-The free tier is deliberately **complete as a tracker** — retention first,
-monetization at the moment of ambition ("I have interviews in 3 weeks").
-
-## 4. Unit economics (verifiable from the code)
-
-Backend AI cost per Pro user, at the enforced quota (40 requests / 60k tokens
-per day, `gpt-4o-mini` at ~$0.15/M input, $0.60/M output):
-
-- Worst case: 60k tokens/day ≈ 45k in + 15k out ≈ **$0.0157/day** ≈ ₹1.3/day
-- Realistic (5–8 AI interactions/day, ~8k tokens): ≈ **$0.002/day** ≈ ₹0.17/day
-- Yearly worst case: ≈ ₹470 vs ₹499 revenue → still non-negative; realistic ≈ ₹62
-
-**Margin holds even at quota maximums.** This is the hard constraint the proxy
-allowlist + token clamp protects — never raise the per-request token ceiling
-without repricing.
-
-## 5. Revenue ladder (mirrors the research docs' moat plan)
-
-| Phase | Stream | Mechanism | Year-1 realistic |
-|---|---|---|---|
-| Now–6 mo | B2C subscriptions | Paywall (wired), conversion events tracked via `paywall_purchase` analytics | 2–4% of actives |
-| 6–12 mo | B2C add-ons | Placement-season "Interview Sprint" pass (limited-time tier) | seasonal spike |
-| 12–18 mo | **B2B campus** | Placement cells buy cohort dashboards (cohort_intelligence is already a Firestore collection + callable API) | ₹25k–1L/campus/yr |
-| 18–24 mo | Recruiter intelligence | Anonymized, aggregated skill-velocity benchmarks per college/tier | data licensing |
-| Later | Infrastructure | "AWS of career data" — the research docs' 10-year thesis | — |
-
-B2B campus is the strategic prize: `getCohortIntelligence` already exists as an
-authenticated callable. A college dashboard is a web view over data the app
-already collects — near-zero marginal product cost.
-
-## 6. Growth flywheel (all loops already have code)
-
-1. **Score sharing** — share card for the NEXUS Score (Konfetti + design system
-   already build the celebration); every share is a free install path.
-2. **Leaderboard** — now wired to real Firestore data with college/domain tabs;
-   social pressure → retention → Pro.
-3. **Career Mirror quarterly** — a genuinely shareable artifact ("my quarter in
-   review") that reactivates dormant users.
-4. **Referral XP** — `awardXP()` infra exists; wire invite-link → both sides
-   get XP/streak freeze.
-
-## 7. Activation metric to obsess over
-
-**D7 retention of users who log ≥1 application + solve ≥3 DSA problems in week 1.**
-Every quota, gate, and notification should be tuned to get new users to that
-state. The sync workers (deadline alerts, daily briefing) exist to automate it —
-they must be enabled in `NexusApplication` (tracked as R5).
-
-## 8. Non-negotiables
-
-- Never gate data the user created (their applications/goals) — gate
-  intelligence, not storage. Trust is the moat.
-- Never let AI cost exceed 35% of Pro ARPU (proxy quota makes this impossible
-  today; keep it that way).
-- Server-authoritative `isPro`: the Firestore rules merged in this repair
-  already prevent client self-grants; Play Billing real-time developer
-  notifications should be the next integration to revoke refunds.
-
+**Status:** working model, 2026-11-01
+**Product name:** Sagitta (the arrow constellation)
+**One line:** Every verified opportunity for Indian students, in one calm feed — with the deadline, the source, and the next step.
 
 ---
 
-## v2 — Investor-Ready Addendum (Oct 2026)
+## 1. The problem
 
-### What changed since v1
-- **Deep Research** (agent-search pattern): cited, source-grounded answers with
-  auto-generated follow-up questions — a Perplexity-class experience inside a
-  student career app. No competitor in the India placement-prep market has this.
-- **Full toolchain modernization**: Android 16 (SDK 36), Kotlin 2.1.21,
-  AGP 8.12.3, Gradle 8.14.3, Compose BOM 2025.06 — every library current.
-- **Verified live infrastructure**: owned Firebase project, real accounts
-  creating themselves end-to-end, emulator-verified UI.
+Indian students do not lack opportunities. They lack a reliable way to see them in time.
 
-### The one-line pitch
-> "NEXUS is the AI career co-pilot for India's 1.5M annual engineering
-> graduates — a live NEXUS Score, an AI mentor that remembers you, and Deep
-> Research with citations — on a freemium model the free AI quota makes
-> margin-safe at scale."
+- Higher-education enrolment is **4.33 crore students** (AISHE 2021-22), and the pipeline keeps growing.
+- Opportunities are scattered across Internshala, Unstop, LinkedIn, company career pages, college notice boards, WhatsApp groups, Telegram channels, Instagram stories, and PDF circulars.
+- The failure mode is not "no listing found". It is **finding out after the deadline**, or applying to a listing that expired three weeks ago.
+- Students spend hours filtering spam, duplicate posts, unpaid "internships", and posts with no application link. The cost is attention, not just time.
+- Colleges have no clean view of what their students actually apply to, and employers struggle to reach students outside a handful of tier-1 campuses.
 
-### Investor metrics that matter (all measurable from day 1)
-| Metric | Target (6 mo) | Instrumented via |
+Internshala alone reports **34 million registered users and 4.5 lakh employers** (company-reported, February 2026), and was acquired by upGrad in a 90% stock-swap deal. That proves the demand. It also shows the incumbent's centre of gravity: internships, employer postings, and course cross-sell. Unstop leads with competitions and gamified assessments. LinkedIn is general-purpose. Nobody owns the **verified, deadline-first, all-opportunity-type student feed** with a calm, trustworthy interface.
+
+## 2. The product wedge
+
+Sagitta is not another job board. It is an **opportunity instrument**:
+
+1. **One feed, every opportunity type** — internships, hackathons, scholarships, research, open source, certifications, workshops.
+2. **Verified before listed** — every card carries its source and a last-verified timestamp. Expired listings are removed automatically. No ghost jobs.
+3. **Deadline-first** — the deadline is a first-class object, not a line in a description. Each saved or in-progress opportunity warns at a week out, at three days, the day before, the day it closes, and again in its final evening — once each, never repeated.
+4. **A pipeline, not a bookmark pile** — saved → applied → interview → offer, with next actions. Students see momentum instead of a list of maybes.
+5. **Calm by design** — one clear signal per screen, no infinite dopamine feed, no fake urgency. The interface is an instrument, not a casino.
+
+The product promise: **you will not miss a real opportunity because it was buried, expired, or announced somewhere you do not follow.**
+
+## 3. Market
+
+| Layer | Size | Basis |
 |---|---|---|
-| W1 activation (1 app + 3 DSA) | 40% | ai_proxy_logs + analytics |
-| D7 retention | 25% | score_snapshots cadence |
-| Free→Pro conversion | 3-5% | BillingManager events |
-| AI cost / Pro user / day | < ₹2 | ai_proxy_logs totalTokens |
-| Organic K-factor (score shares) | 0.3 | deep-links + shares |
+| TAM | 4.33 crore higher-education students in India | AISHE 2021-22, Ministry of Education |
+| SAM | ~1.5 crore students actively seeking internships, placements, scholarships or competitions each year | Assumption: roughly one-third of enrolled students are in the active opportunity window; validate with cohort surveys |
+| SOM (36 months) | 1.5–2.5 million registered students; 300–500 paying campuses; 1,000+ verified employers | Bottom-up: campus-by-campus rollout, 2–3 states per year |
 
-### Why this can't be copied quickly
-1. **Career Memory** — a per-user longitudinal dataset that compounds daily;
-   a clone starts empty forever.
-2. **Cohort Intelligence** — anonymized placement outcomes per college/tier:
-   network-effect data no solo competitor can bootstrap.
-3. **On-device placement model** — 14-feature explainable logistic model,
-   golden-vector tested, zero inference cost; competitors pay per LLM call.
-4. **Deep Research loop** — the follow-up-question UX creates session depth
-   (5+ turns) that is the strongest retention signal in AI products.
+India is the beachhead because the pain is acute, the supply is fragmented, and the distribution is physical (campuses) as well as digital. The model travels to other South Asian markets later; the data model and verification workflow are not India-specific.
 
-### Series-ready roadmap (what the raise funds)
-1. **₹0 → ₹50L ARR path**: 5 college pilot licenses (₹1L/yr each) + 2,000 Pro
-   subs at ₹499 — both already built and wired.
-2. **Recruiter dashboard** (month 6-9): colleges pay for cohort analytics;
-   recruiters pay for verified skill-velocity data. Two-sided from one dataset.
-3. **Verifiable NEXUS Score API** (year 2): the "credit score for careers"
-   that placement cells and employers query — the infrastructure business.
+## 4. Competitive landscape
+
+| Player | Strength | Gap Sagitta exploits |
+|---|---|---|
+| Internshala / upGrad | Largest internship supply, employer relationships, training cross-sell | Internship-centric; course upsell dilutes trust; little verification transparency; deadlines are secondary |
+| Unstop | Competitions, gamification, assessments | Competition-first; internships and scholarships are secondary; engagement mechanics can overwhelm signal |
+| LinkedIn | Network, brand, scale | General-purpose; students drown in noise; no deadline workflow; no India-campus context |
+| College placement cells | Trusted, local | Manual, spreadsheet-driven, opaque to students; no cross-campus supply |
+| WhatsApp / Telegram groups | Fast, free | Unverified, duplicate-heavy, no search, no reminders, no source trail |
+
+**Sagitta's position:** the trustworthy, deadline-first layer across all opportunity types. We do not need to out-list Internshala on day one. We need to be the place a student checks every morning because it is accurate, complete for their goals, and never wastes their time.
+
+## 5. Business model
+
+**Students never pay to see or apply to an opportunity. That is a hard product rule.**
+
+Revenue comes from the supply side and from institutions that benefit when students succeed.
+
+### 5.1 Verified employer / organiser listings (primary, year 1)
+
+- ₹3,000 per role for 30 days; ₹24,000 for a 10-role annual pack.
+- Optional featured placement: +₹2,000, always labelled **Featured** and never allowed to outrank a better match silently.
+- First 500 verified employers free for 12 months to seed supply.
+- Verification includes organisation identity, application URL, deadline, and stipend/prize clarity.
+- Why employers pay: verified student intent, deadline-aware distribution, and a dashboard that shows applies and completions — not impressions.
+
+### 5.2 Campus Pro (primary, year 1–2)
+
+- ₹99 per student per year, minimum 1,000 students; ₹75,000/year flat for colleges below 1,000.
+- Includes a branded campus page, cohort analytics (aggregate and consented), bulk opportunity pushes, and a placement-cell console.
+- Why colleges pay: NAAC/NIRF reporting pressure, placement outcomes, and a defensible "we told every student in time" record.
+- Target: 25 campuses in year 1, 150 in year 2.
+
+### 5.3 Sagitta Pro for students (secondary, year 2)
+
+- ₹149/month or ₹799/year.
+- Advanced AI resume and cover-letter tailoring, unlimited mock interviews, portfolio reviews, application CRM exports, priority alerts.
+- **Never** gates opportunities, deadlines, reminders, or applications.
+- Target: 2% of active students convert.
+
+### 5.4 Sponsored scholarships and competitions (opportunistic)
+
+- Clearly labelled sponsored placements for mission-aligned scholarships, hackathons, and fellowships.
+- No sponsored result may hide its sponsor. No pay-to-rank for employers either.
+
+### 5.5 What we will not do
+
+- Sell student personal data.
+- Charge students to apply.
+- Let employers buy their way to the top of a student's match list.
+- Inflate user counts or engagement with fake urgency.
+- List an opportunity without a working application URL and a traceable source.
+
+## 6. Unit economics (illustrative, not a forecast)
+
+Year-1 operating scenario, deliberately conservative:
+
+| Line | Assumption | Annual |
+|---|---|---|
+| Employer listings | 150 listings/month average × ₹3,000 × 12 | ₹54,00,000 |
+| Campus Pro | 25 campuses × 2,000 students × ₹99 | ₹49,50,000 |
+| Student Pro | 100,000 MAU × 2% × ₹799 | ₹15,98,000 |
+| **Revenue** | | **₹1,19,48,000** |
+| Content + verification ops | 4 people × ₹6L | ₹24,00,000 |
+| Engineering + product | 3 people × ₹18L | ₹54,00,000 |
+| Infrastructure + tools | | ₹6,00,000 |
+| Growth + campus ambassadors | | ₹20,00,000 |
+| **Cost** | | **₹1,04,00,000** |
+
+At this scale the business is near break-even, before the campus flywheel compounds. The model is deliberately not dependent on student subscriptions.
+
+**Sensitivity:** if employer listings average 80/month, revenue falls to ~₹79L and the company is ~₹25L short. The year-1 plan therefore prioritises campus revenue and keeps the team small. The first hire after engineering should be a verification editor, not a salesperson.
+
+## 7. Go-to-market
+
+**Campus-led, not ad-led.**
+
+1. **Campus ambassadors** — one paid student leader per college (₹5,000/month stipend + Pro + certificate). They run a 10-minute onboarding, share the weekly digest in existing college groups, and report broken listings.
+2. **Placement-cell pilot** — free 60-day Campus Pro pilot for 20 colleges, with a clear outcome report (verified listings delivered, deadlines met, applications submitted).
+3. **Creator partnerships** — study/placement creators get a real dashboard of opportunities for their audience; no fake testimonials, no undisclosed sponsorships.
+4. **SEO and utility pages** — "internships closing this week", "scholarships for Indian students", "hackathons in November", each generated from the verified feed with schema markup.
+5. **Referrals** — students invite classmates; both get Pro, never cash for spam.
+6. **Employer supply** — start with 50 verified startups and early-career programmes; publish a public verification standard and a 48-hour review SLA.
+
+## 8. The update loop (why students stay current)
+
+This is a product requirement, not a marketing promise:
+
+- **Every 6 hours:** the client syncs the signed feed when on unmetered network; on-demand refresh otherwise.
+- **Every morning IST:** the feed pipeline re-validates every application URL, expires past deadlines, dedupes cross-posted roles, and publishes a new feed with a timestamp.
+- **Daily 07:00 IST:** a short briefing — new matches, deadlines in the next 7 days, one suggested action.
+- **Deadline reminders:** a week out, three days out, the day before, the day it closes, and once in its final evening — only for saved or in-progress opportunities, and each of those fires once. Feed deadlines are calendar days, so no reminder claims an hour the source never published.
+- **Weekly:** one local retention row for the cohort metrics above. There is no second weekly notification — the daily briefing already carries every deadline inside seven days, and a second digest would compete with the reminders that matter.
+- **Transparency:** every card shows source, last verified, and "report a problem". If we cannot verify it, we do not show it.
+
+## 9. Trust, safety and privacy
+
+- **Verification standard:** organisation identity, live application URL, explicit role, explicit location/eligibility, deadline (or "rolling" stated by the source), and stipend/prize clarity where the source provides it.
+- **Source trail:** every listing stores its source name and canonical URL. Curated listings are labelled as curated.
+- **Expiry:** the backend marks listings inactive after their deadline; the client hides expired entries even when offline.
+- **Moderation:** community submissions go to a review queue; no auto-publish.
+- **Privacy:** data minimisation, no sale of student data, consent-based campus analytics, and a deletion path. India's DPDP Act 2023 applies; the app ships a plain-language privacy policy and a Data Safety declaration.
+- **Play Store:** no misleading claims, no fake urgency, no restricted permissions, and a real privacy policy and support contact before submission.
+
+## 10. Metrics
+
+**North star:** *deadlines met per active student per month* — a student who sees an opportunity, saves it, and applies before the deadline. It measures whether the product actually helps, not whether it manufactures engagement.
+
+Supporting metrics:
+- Verified-to-live ratio (target > 98% of shown listings have a working URL).
+- Time from source publication to in-app listing (target < 24 hours).
+- Reminder → application conversion.
+- 4-week retention of students who save at least one opportunity.
+- Campus activation: % of students who open the weekly digest.
+- Employer repeat rate and time-to-fill.
+- Report rate per 1,000 listings (target < 2).
+
+## 11. Risks and mitigations
+
+| Risk | Mitigation |
+|---|---|
+| Cold-start supply | Curated official programmes + public ATS feeds + 50 design-partner employers; never fabricate listings |
+| Incumbent response | Win on trust and deadline reliability, not on breadth; campus distribution is slower for incumbents to copy |
+| Spam / low-quality listings | Paid listings still pass verification; public reporting; expiry automation; no auto-publish |
+| Seasonality (placement cycles) | Scholarships, hackathons, research and open-source programmes smooth the year |
+| Regulatory (DPDP, Play policy) | Data minimisation, consent, deletion, clear privacy policy, no sensitive permissions |
+| Content-ops cost | Automate URL verification and expiry; humans only review exceptions and curated programmes |
+
+## 12. Twelve-month plan
+
+| Quarter | Focus | Exit criterion |
+|---|---|---|
+| Q1 | Verified feed pipeline, rebrand, 20 design-partner employers, 5 campus pilots | 1,000 weekly active students; 98% live-link rate |
+| Q2 | Campus Pro console, cohort reporting, first design-partner campuses onboarded | 25 paying campuses; 25,000 MAU |
+| Q3 | Employer self-serve, sponsored programmes, creator partnerships | ₹25L quarterly revenue; 100k MAU |
+| Q4 | Student Pro, outcome reporting, expansion to 2 more states | Break-even contribution margin; 150 campuses |
+
+## 13. What this build implements now
+
+- Rebrand and product narrative aligned to the model.
+- A **real, scheduled feed** with source attribution, URL verification, expiry, and a public refresh cadence.
+- In-app **application tracking** and **deadline reminders** that work from the verified feed.
+- A guided tour that teaches the product in under two minutes.
+- Play Store-ready listing, privacy, and data-safety material — without committing secrets.
+
+The campus console and employer self-serve portal are deliberately **not** faked inside the student app. They are separate products and will ship as real surfaces when the first design partners are signed.
+
+## 14. Sources
+
+- AISHE 2021-22, Ministry of Education (PIB): https://www.pib.gov.in/PressReleasePage.aspx?PRID=1999713
+- upGrad acquires Internshala (90% stock swap), Entrepreneur India, 2026-02-26: https://india.entrepreneur.com/news-and-trends/upgrad-acquires-internship-platform-internshala-in/503027
+- Internshala scale (company-reported, Feb 2026): https://www.linkedin.com/posts/loveena-sirohi_a-significant-shift-just-happened-in-india-activity-7435246048421298176-4sFx
+- Handshake revenue and scale: https://sacra.com/c/handshake/
+- Handshake valuation: https://multiples.vc/private-comps/handshake
+- Unstop internships (live count): https://unstop.com/internship
+- Internshala internships (live count): https://internshala.com/internships/
+- DPDP Act 2023, MeitY: https://www.meity.gov.in/data-protection-framework
+- Google Play Data Safety: https://support.google.com/googleplay/android-developer/answer/10787469

@@ -50,7 +50,7 @@ Kotlin inference drift by more than `2e-4`.
 | 9 | `log1p(study streak days)` | `UserPreferences` |
 | 10 | skills on profile / 20 | `UserPreferences` |
 | 11 | `log1p(mock interviews)` | `InterviewReportRepository` |
-| 12 | NEXUS score / 1000 | `ScoreSnapshotRepository` |
+| 12 | Sagitta score / 1000 | `ScoreSnapshotRepository` |
 | 13 | college tier → `(5-tier)/4` | `UserPreferences.collegeTier` |
 | 14 | `log1p(solved + attempts)` | `DSAProblemRepository` |
 

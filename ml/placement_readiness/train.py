@@ -90,7 +90,7 @@ FEATURE_LABELS = [
     "Study streak",
     "Skills on profile",
     "Mock interviews",
-    "NEXUS score",
+    "Sagitta score",
     "College tier",
     "Practice attempts",
 ]
