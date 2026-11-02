@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material.icons.filled.BrightnessMedium
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.HelpOutline
+import androidx.compose.material.icons.filled.PlayCircleOutline
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Shield
@@ -37,7 +38,9 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -77,6 +80,7 @@ fun SettingsScreen(
     val versionName = remember(context) {
         context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: ""
     }
+    var showWalkthrough by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         NexusTopBar(
@@ -240,6 +244,13 @@ fun SettingsScreen(
             )
 
             SettingsItem(
+                icon = Icons.Default.PlayCircleOutline,
+                title = stringResource(R.string.settings_watch_walkthrough),
+                subtitle = stringResource(R.string.settings_watch_walkthrough_subtitle),
+                onClick = { showWalkthrough = true },
+            )
+
+            SettingsItem(
                 icon = Icons.Default.HelpOutline,
                 title = stringResource(R.string.settings_replay_tour),
                 subtitle = stringResource(R.string.settings_replay_tour_subtitle),
@@ -251,6 +262,10 @@ fun SettingsScreen(
                 },
             )
         }
+    }
+
+    if (showWalkthrough) {
+        WalkthroughFilmDialog(onDismiss = { showWalkthrough = false })
     }
 }
 

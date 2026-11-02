@@ -13,6 +13,14 @@
     <string name="settings_version">Version %1$s</string>
     <string name="settings_replay_tour">Replay guided tour</string>
     <string name="settings_replay_tour_subtitle">Walk through the five sections again</string>
+    <string name="settings_watch_walkthrough">Watch the walkthrough</string>
+    <string name="settings_watch_walkthrough_subtitle">See all five sections in motion, filmed in the app</string>
+    <string name="walkthrough_title">Sagitta walkthrough</string>
+    <string name="walkthrough_note">Filmed inside the running app on this device</string>
+    <string name="walkthrough_close">Close walkthrough</string>
+    <string name="walkthrough_play">Tap to play</string>
+    <string name="walkthrough_replay">Tap to replay</string>
+    <string name="walkthrough_stations">Home &#183; Explore &#183; AI &#183; Growth &#183; Me</string>
     <string name="delete_title">Delete Account</string>
     <string name="delete_warning">This will permanently delete all your Sagitta data.</string>
     <string name="delete_confirm_hint">Type DELETE to confirm</string>
