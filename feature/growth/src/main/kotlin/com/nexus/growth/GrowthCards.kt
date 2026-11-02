@@ -167,7 +167,7 @@ internal fun SkillRadarChart(axes: List<RadarAxis>) {
 }
 
 @Composable
-internal fun SkillRadarEmpty() {
+internal fun SkillRadarEmpty(onMarkSkills: () -> Unit) {
     NexusCard(shape = NexusShapes.lg) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.growth_skill_radar),
@@ -178,6 +178,13 @@ internal fun SkillRadarEmpty() {
             Text(stringResource(R.string.growth_mark_the_skills_you_already_know),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(NexusSpacing.md))
+            NexusButton(
+                text = stringResource(R.string.growth_mark_skills_action),
+                onClick = onMarkSkills,
+                modifier = Modifier.fillMaxWidth(),
+                gradient = NexusGradients.PrimaryDeep,
             )
         }
     }

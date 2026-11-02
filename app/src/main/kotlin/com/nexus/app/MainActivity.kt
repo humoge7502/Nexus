@@ -415,6 +415,7 @@ fun NexusMainScaffold(
                         onGoals = { navController.navigate(NexusDestination.Goals) },
                         onOracle = { navController.navigate(NexusDestination.Oracle) },
                         onArena = { navController.navigate(NexusDestination.Arena) },
+                        onSkills = { navController.navigate(NexusDestination.Profile) },
                         showBackArrow = false,
                     )
                 }

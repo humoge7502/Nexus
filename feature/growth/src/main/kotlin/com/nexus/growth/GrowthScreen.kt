@@ -54,6 +54,7 @@ fun GrowthScreen(
     onGoals: () -> Unit = {},
     onOracle: () -> Unit = {},
     onArena: () -> Unit = {},
+    onSkills: () -> Unit = {},
     onBack: () -> Unit = {},
     showBackArrow: Boolean = true,
     viewModel: GrowthViewModel = hiltViewModel(),
@@ -107,7 +108,7 @@ fun GrowthScreen(
             }
             item(key = "radar") {
                 if (radarAxes.isEmpty()) {
-                    SkillRadarEmpty()
+                    SkillRadarEmpty(onMarkSkills = onSkills)
                 } else {
                     SkillRadarChart(radarAxes)
                 }

@@ -23,7 +23,8 @@
     <string name="growth_growth">Growth</string>
     <string name="growth_label">%1$s · %2$s · %3$s</string>
     <string name="growth_label_2">%1$s</string>
-    <string name="growth_mark_the_skills_you_already_know">Mark the skills you already know in your profile to unlock your radar.</string>
+    <string name="growth_mark_the_skills_you_already_know">The radar plots the skills you already have against what real listings ask for. Mark a few and it fills in.</string>
+    <string name="growth_mark_skills_action">Mark your skills</string>
     <string name="growth_start_earning_score">Start earning XP to build your score</string>
     <string name="growth_no_goals_yet_set_one_and">No goals yet. Set one and your progress will show up here.</string>
     <string name="growth_participants">%1$s participants</string>
