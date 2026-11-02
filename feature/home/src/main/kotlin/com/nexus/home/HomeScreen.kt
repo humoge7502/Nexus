@@ -183,10 +183,6 @@ fun HomeScreen(
                 }
             }
         }
-
-        if (!uiState.tourCompleted) {
-            TourOverlay(onFinish = { viewModel.completeTour() })
-        }
     }
 }
 

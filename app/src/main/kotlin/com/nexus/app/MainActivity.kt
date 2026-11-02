@@ -30,10 +30,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -49,7 +51,14 @@ import com.nexus.achievements.LeaderboardScreen
 import com.nexus.ai.AIChatScreen
 import com.nexus.ai.AIHubScreen
 import com.nexus.ai.AIResumeAnalyzerScreen
+import com.nexus.ai.CareerInsightsScreen
+import com.nexus.ai.InterviewCoachScreen
+import com.nexus.ai.LinkedInPostScreen
 import com.nexus.ai.ResearchScreen
+import com.nexus.ai.RoadmapGeneratorScreen
+import com.nexus.ai.SkillGapScreen
+import com.nexus.app.tour.GuidedTour
+import com.nexus.app.tour.TourViewModel
 import com.nexus.applications.ApplicationsScreen
 import com.nexus.auth.AuthScreen
 import com.nexus.auth.AuthViewModel
@@ -240,6 +249,12 @@ fun NexusMainScaffold(
 ) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
+    val tourViewModel: TourViewModel = hiltViewModel()
+    val tourVisible by tourViewModel.tourVisible.collectAsStateWithLifecycle(initialValue = false)
+
+    // Measured by the bar itself. The tour points at a station it can see, never
+    // at a coordinate it recomputes from padding it would then have to duplicate.
+    var stationsBounds by remember { mutableStateOf<Rect?>(null) }
 
     LaunchedEffect(pendingDestination) {
         val destination = pendingDestination ?: return@LaunchedEffect
@@ -279,10 +294,15 @@ fun NexusMainScaffold(
             navigateToTab(navController, topLevelDestinations, index)
         }
 
+        Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             bottomBar = {
                 if (chromeVisible && layout == NexusNavigationLayout.BottomBars) {
-                    NexusBottomBar(selectedIndex = selectedTab, onNavigate = onNavigateTab)
+                    NexusBottomBar(
+                        selectedIndex = selectedTab,
+                        onNavigate = onNavigateTab,
+                        onStationsBoundsChanged = { bounds -> stationsBounds = bounds },
+                    )
                 }
             },
             // Side chrome takes its own window insets; padding the content with
@@ -349,9 +369,20 @@ fun NexusMainScaffold(
                 // AI HUB
                 composable<NexusDestination.AIHub> {
                     AIHubScreen(
-                        onChatClick = { navController.navigate(NexusDestination.AIChat) },
-                        onResumeAnalyzer = { navController.navigate(NexusDestination.AIResumeAnalyzer) },
-                        onResearchClick = { navController.navigate(NexusDestination.Research) },
+                        onToolRoute = { route ->
+                            navController.navigate(
+                                when (route) {
+                                    "chat" -> NexusDestination.AIChat
+                                    "resume" -> NexusDestination.AIResumeAnalyzer
+                                    "research" -> NexusDestination.Research
+                                    "roadmap" -> NexusDestination.Roadmap
+                                    "skillgap" -> NexusDestination.SkillGap
+                                    "linkedin" -> NexusDestination.LinkedInPost
+                                    "interview" -> NexusDestination.InterviewCoach
+                                    else -> NexusDestination.CareerInsights
+                                },
+                            )
+                        },
                         showBackArrow = false,
                     )
                 }
@@ -360,6 +391,21 @@ fun NexusMainScaffold(
                 }
                 composable<NexusDestination.AIResumeAnalyzer> {
                     AIResumeAnalyzerScreen(onBack = { navController.popBackStack() })
+                }
+                composable<NexusDestination.Roadmap> {
+                    RoadmapGeneratorScreen(onBack = { navController.popBackStack() })
+                }
+                composable<NexusDestination.SkillGap> {
+                    SkillGapScreen(onBack = { navController.popBackStack() })
+                }
+                composable<NexusDestination.LinkedInPost> {
+                    LinkedInPostScreen(onBack = { navController.popBackStack() })
+                }
+                composable<NexusDestination.InterviewCoach> {
+                    InterviewCoachScreen(onBack = { navController.popBackStack() })
+                }
+                composable<NexusDestination.CareerInsights> {
+                    CareerInsightsScreen(onBack = { navController.popBackStack() })
                 }
 
                 // GROWTH
@@ -499,6 +545,17 @@ fun NexusMainScaffold(
                 }
             }
                 }
+            }
+        }
+
+            // Only once the chrome exists: a tour that spotlights a bar which never
+            // got laid out would point at nothing.
+            if (tourVisible && chromeVisible) {
+                GuidedTour(
+                    stationsBounds = stationsBounds,
+                    onNavigateToStation = onNavigateTab,
+                    onFinish = { tourViewModel.finish() },
+                )
             }
         }
     }

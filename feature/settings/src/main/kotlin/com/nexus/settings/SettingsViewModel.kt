@@ -83,6 +83,14 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    /** Puts the walkthrough back on screen; the shell owns it, so it reappears on Home. */
+    fun reopenTour() {
+        viewModelScope.launch {
+            userPreferences.reopenTour()
+            analyticsTracker.track("tour_reopened")
+        }
+    }
+
     fun saveLeetcodeUsername(username: String) {
         viewModelScope.launch {
             userPreferences.saveLeetcodeUsername(username)

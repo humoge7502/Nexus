@@ -11,6 +11,8 @@
     <string name="settings_export_data">Export My Data</string>
     <string name="settings_delete_account">Delete Account</string>
     <string name="settings_version">Version %1$s</string>
+    <string name="settings_replay_tour">Replay guided tour</string>
+    <string name="settings_replay_tour_subtitle">Walk through the five sections again</string>
     <string name="delete_title">Delete Account</string>
     <string name="delete_warning">This will permanently delete all your Sagitta data.</string>
     <string name="delete_confirm_hint">Type DELETE to confirm</string>

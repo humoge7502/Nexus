@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material.icons.filled.BrightnessMedium
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Shield
@@ -236,6 +237,18 @@ fun SettingsScreen(
                 icon = Icons.Default.Info,
                 title = stringResource(R.string.settings_about),
                 subtitle = stringResource(R.string.settings_version, versionName)
+            )
+
+            SettingsItem(
+                icon = Icons.Default.HelpOutline,
+                title = stringResource(R.string.settings_replay_tour),
+                subtitle = stringResource(R.string.settings_replay_tour_subtitle),
+                onClick = {
+                    // Back first: the walkthrough is drawn by the shell and only
+                    // appears once a top-level section is on screen.
+                    onBack()
+                    viewModel.reopenTour()
+                },
             )
         }
     }

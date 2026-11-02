@@ -151,6 +151,11 @@ class UserPreferences @Inject constructor(
         prefs[USER_SKILLS] ?: emptySet()
     }
 
+    /** Replaces the declared skills; the matcher and the radar both read this set. */
+    suspend fun setUserSkills(skills: Collection<String>) {
+        context.dataStore.edit { prefs -> prefs[USER_SKILLS] = skills.toSet() }
+    }
+
     val userInterests: Flow<Set<String>> = context.dataStore.data.map { prefs ->
         prefs[USER_INTERESTS] ?: emptySet()
     }
@@ -185,6 +190,11 @@ class UserPreferences @Inject constructor(
 
     suspend fun setTourCompleted() {
         context.dataStore.edit { prefs -> prefs[TOUR_COMPLETED] = true }
+    }
+
+    /** Puts the guided tour back on screen for a student who wants it again. */
+    suspend fun reopenTour() {
+        context.dataStore.edit { prefs -> prefs[TOUR_COMPLETED] = false }
     }
 
     val tribeGoal: Flow<String> = context.dataStore.data.map { prefs ->

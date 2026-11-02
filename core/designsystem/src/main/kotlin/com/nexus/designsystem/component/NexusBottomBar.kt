@@ -46,12 +46,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -100,6 +103,9 @@ fun NexusBottomBar(
     selectedIndex: Int,
     onNavigate: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    // The guided tour points at a real station, so it needs the row's measured
+    // bounds rather than a copy of this layout's padding sums.
+    onStationsBoundsChanged: ((Rect) -> Unit)? = null,
 ) {
     val haptic = LocalHapticFeedback.current
     val extended = MaterialTheme.nexus
@@ -204,7 +210,10 @@ fun NexusBottomBar(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp)
-                        .selectableGroup(),
+                        .selectableGroup()
+                        .onGloballyPositioned { coordinate ->
+                            onStationsBoundsChanged?.invoke(coordinate.boundsInRoot())
+                        },
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

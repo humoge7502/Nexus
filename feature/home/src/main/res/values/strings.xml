@@ -12,14 +12,12 @@
     <string name="home_evaluate_offer">Evaluate Offer</string>
     <string name="home_interview_prep">Interview Prep</string>
     <string name="home_prep_now">Prep Now</string>
-    <string name="home_skip_tour">Skip tour</string>
     <string name="home_days_to_placement_season">%1$s days to placement season</string>
     <string name="home_evaluate_your_offer_with_nexus_ai">Evaluate your offer with Sagitta AI to understand market positioning.</string>
     <string name="home_focus_on_applications_and_interview_preparation">Focus on applications and interview preparation now.</string>
     <string name="home_interview_mode_active">Interview Mode Active</string>
     <string name="home_next_interview_in_days">Next interview in %1$s days</string>
     <string name="home_offer_received">Offer Received!</string>
-    <string name="home_step_of">Step %1$s of %2$s</string>
     <string name="home_you_have_active_interviews_at">You have active interviews at %1$s</string>
     <string name="home_today_s_opportunities">Today\'s Opportunities</string>
     <string name="home_opportunities_offline">Opportunities are offline</string>

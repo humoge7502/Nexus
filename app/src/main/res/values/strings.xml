@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Sagitta</string>
+
+    <!-- Guided first-run tour. Each stop names the section it is standing in, so
+         the copy has to stay true to what that screen actually renders. -->
+    <string name="tour_home_title">Today, before anything else</string>
+    <string name="tour_home_body">Home opens on your readiness reading and the deadlines nearest to passing. Below them: the opportunities that matched your skills since the last time you looked, and the applications you already started.</string>
+    <string name="tour_explore_title">The whole catalog</string>
+    <string name="tour_explore_body">Explore holds every internship and hackathon Sagitta is tracking. Filter by city, stipend or closing date, then save what is worth following — saved listings are what your alerts watch.</string>
+    <string name="tour_ai_title">Advice about you</string>
+    <string name="tour_ai_body">The AI hub reads the profile you built during onboarding, so a resume critique or a roadmap is answered against your own skills and timeline rather than generic advice.</string>
+    <string name="tour_growth_title">Proof, not vibes</string>
+    <string name="tour_growth_body">Growth plots the skills you have earned and the score history behind them. Each point comes from something you did in the app — practice, projects, consistency — so a weak area is visible as a gap, not a guess.</string>
+    <string name="tour_profile_title">Everything you saved</string>
+    <string name="tour_profile_body">Profile keeps your saved opportunities, applications, portfolio and the controls for alerts, data and privacy. If something you bookmarked is missing, it is here first.</string>
+    <string name="tour_close_title">That is the map</string>
+    <string name="tour_close_body">Tap any station to move between these five sections. New matches and closing deadlines arrive as notifications on their own — you do not have to hunt for them.</string>
+    <string name="tour_step_of">Step %1$d of %2$d</string>
+    <string name="tour_skip">Skip</string>
+    <string name="tour_next">Next</string>
+    <string name="tour_start">Start using Sagitta</string>
 </resources>
