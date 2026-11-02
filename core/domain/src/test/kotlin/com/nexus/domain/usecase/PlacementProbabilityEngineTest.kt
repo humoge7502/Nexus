@@ -41,9 +41,10 @@ class PlacementProbabilityEngineTest {
 
     private class FakeSkillRepository(private val skills: List<Skill>) : ISkillGraphRepository {
         override suspend fun initializeIfEmpty() = Unit
-        override suspend fun markKnownSkill(skillId: String) = Unit
+        override suspend fun setDeclaredSkills(names: Collection<String>) = Unit
         override suspend fun getRecommendedSkills(): List<Skill> = skills
         override suspend fun getUserSkills(): List<Skill> = skills
+        override fun observeUserSkills(): Flow<List<Skill>> = flowOf(skills)
     }
 
     private class FakeStreakRepository(private val streak: Int) : IStreakRepository {

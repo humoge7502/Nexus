@@ -42,13 +42,19 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material.icons.filled.WorkspacePremium
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -204,9 +210,15 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(18.dp))
                 ProfileStats(uiState = uiState)
 
+                val declaredSkills by viewModel.declaredSkills.collectAsStateWithLifecycle()
+                val skillSuggestions by viewModel.skillSuggestions.collectAsStateWithLifecycle()
+
                 ProfileSkillsSection(
                     ratedSkills = ratedSkills,
                     allSkills = uiState.skills,
+                    declared = declaredSkills,
+                    suggestions = skillSuggestions,
+                    onSaveSkills = viewModel::saveSkills,
                 )
 
                 ProfileAchievementsSection(
@@ -305,13 +317,30 @@ private fun ProfileStats(uiState: ProfileUiState) {
 private fun ProfileSkillsSection(
     ratedSkills: List<Skill>,
     allSkills: List<Skill>,
+    declared: List<String>,
+    suggestions: List<String>,
+    onSaveSkills: (List<String>) -> Unit,
 ) {
+    var showEditor by remember { mutableStateOf(false) }
     Spacer(modifier = Modifier.height(28.dp))
     SectionHeader(
         title = stringResource(R.string.profile_skills),
         index = "01",
         meta = ratedSkills.size.toString().padStart(2, '0'),
+        actionText = stringResource(R.string.profile_skills_edit),
+        onAction = { showEditor = true },
     )
+    if (showEditor) {
+        SkillEditorDialog(
+            declared = declared,
+            suggestions = suggestions,
+            onDismiss = { showEditor = false },
+            onSave = { names ->
+                onSaveSkills(names)
+                showEditor = false
+            },
+        )
+    }
     Spacer(modifier = Modifier.height(14.dp))
     if (ratedSkills.size >= 3) {
         Box(
@@ -351,6 +380,75 @@ private fun ProfileSkillsSection(
             )
         }
     }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SkillEditorDialog(
+    declared: List<String>,
+    suggestions: List<String>,
+    onDismiss: () -> Unit,
+    onSave: (List<String>) -> Unit,
+) {
+    var picked by remember { mutableStateOf(declared.toSet()) }
+    val options = (declared + suggestions).distinctBy { it.lowercase() }.sorted()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = { onSave(picked.toList().sorted()) },
+                enabled = picked.isNotEmpty(),
+            ) { Text(stringResource(R.string.profile_skills_save)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.profile_skills_cancel)) }
+        },
+        title = { Text(stringResource(R.string.profile_skills_editor_title)) },
+        text = {
+            Column {
+                Text(
+                    text = stringResource(R.string.profile_skills_editor_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(modifier = Modifier.height(14.dp))
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    options.forEach { name ->
+                        val selected = name in picked
+                        AssistChip(
+                            onClick = {
+                                picked = if (selected) picked - name else picked + name
+                            },
+                            label = { Text(name) },
+                            leadingIcon = if (selected) {
+                                {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                }
+                            } else {
+                                null
+                            },
+                        )
+                    }
+                }
+                if (options.isEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.profile_skills_editor_empty),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        },
+    )
 }
 
 @Composable

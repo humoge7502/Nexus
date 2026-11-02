@@ -50,6 +50,12 @@ SkillNodeEntity("mongodb", "MongoDB", "TOOL", 2, 0.70f),
 SkillNodeEntity("firebase", "Firebase", "PLATFORM", 2, 0.68f),
 SkillNodeEntity("leetcode", "LeetCode Practice", "CONCEPT", 3, 0.95f),
 SkillNodeEntity("competitive_programming", "Competitive Programming", "CONCEPT", 4, 0.72f),
+// Onboarding offers these four by name. A term with no catalog node can only ever be
+// a claim, never something the app recommends to the next student.
+SkillNodeEntity("cloud_computing", "Cloud Computing", "PLATFORM", 3, 0.80f),
+SkillNodeEntity("devops", "DevOps", "TOOL", 4, 0.72f),
+SkillNodeEntity("ui_ux", "UI/UX", "CONCEPT", 2, 0.75f),
+SkillNodeEntity("blockchain", "Blockchain", "DOMAIN", 4, 0.58f),
 )
 
 val edges: List<SkillEdgeEntity> = listOf(
@@ -91,5 +97,14 @@ SkillEdgeEntity("firebase", "android", "COMMONLY_PAIRED", 0.75f, 0.4f),
 SkillEdgeEntity("firebase", "flutter", "COMMONLY_PAIRED", 0.75f, 0.4f),
 SkillEdgeEntity("cpp", "competitive_programming", "LEADS_TO", 0.85f, 0.7f),
 SkillEdgeEntity("competitive_programming", "dsa", "LEADS_TO", 0.9f, 0.8f),
+SkillEdgeEntity("linux", "cloud_computing", "PREREQUISITE", 0.75f, 0.5f),
+SkillEdgeEntity("aws", "cloud_computing", "COMMONLY_PAIRED", 0.8f, 0.5f),
+SkillEdgeEntity("cloud_computing", "devops", "LEADS_TO", 0.8f, 0.5f),
+SkillEdgeEntity("docker", "devops", "LEADS_TO", 0.85f, 0.6f),
+SkillEdgeEntity("kubernetes", "devops", "COMMONLY_PAIRED", 0.8f, 0.5f),
+SkillEdgeEntity("html_css", "ui_ux", "PREREQUISITE", 0.7f, 0.4f),
+SkillEdgeEntity("react", "ui_ux", "COMMONLY_PAIRED", 0.65f, 0.4f),
+SkillEdgeEntity("computer_networks", "blockchain", "PREREQUISITE", 0.6f, 0.3f),
+SkillEdgeEntity("javascript", "blockchain", "COMMONLY_PAIRED", 0.6f, 0.3f),
 )
 }

@@ -78,6 +78,9 @@ interface SkillGraphDao {
     @Query("SELECT * FROM skill_nodes WHERE skillId = :skillId LIMIT 1")
     suspend fun getSkill(skillId: String): SkillNodeEntity?
 
+    @Query("SELECT * FROM skill_nodes WHERE displayName = :name COLLATE NOCASE LIMIT 1")
+    suspend fun getSkillByName(name: String): SkillNodeEntity?
+
     @Query(
         "UPDATE skill_nodes SET isUserKnown = :known, userProficiency = :proficiency, " +
             "lastUpdated = :now WHERE skillId = :skillId"

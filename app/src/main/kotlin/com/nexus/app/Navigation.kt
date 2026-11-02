@@ -24,6 +24,11 @@ sealed interface NexusDestination {
     // AI sub-screens
     @Serializable data object AIChat : NexusDestination
     @Serializable data object AIResumeAnalyzer : NexusDestination
+    @Serializable data object Roadmap : NexusDestination
+    @Serializable data object SkillGap : NexusDestination
+    @Serializable data object LinkedInPost : NexusDestination
+    @Serializable data object InterviewCoach : NexusDestination
+    @Serializable data object CareerInsights : NexusDestination
 
     // Sub-screens
     @Serializable data object Auth : NexusDestination

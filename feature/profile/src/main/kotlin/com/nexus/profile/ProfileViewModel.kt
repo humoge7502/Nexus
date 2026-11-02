@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -71,9 +70,44 @@ class ProfileViewModel @Inject constructor(
 
     private var hasAwardedProfileXP = false
 
+    /** Catalog skills the student has not claimed yet, offered as chips in the editor. */
+    private val _skillSuggestions = MutableStateFlow<List<String>>(emptyList())
+    val skillSuggestions: StateFlow<List<String>> = _skillSuggestions.asStateFlow()
+
+    /** Names the student declared in onboarding — the set the matcher actually scores. */
+    private val _declaredSkills = MutableStateFlow<List<String>>(emptyList())
+    val declaredSkills: StateFlow<List<String>> = _declaredSkills.asStateFlow()
+
     init {
         loadProfile()
+        loadSkillSuggestions()
         awardProfileCompletionOnce()
+        viewModelScope.launch {
+            userPreferences.userSkills.collect { _declaredSkills.value = it.toList().sorted() }
+        }
+    }
+
+    private fun loadSkillSuggestions() {
+        viewModelScope.launch {
+            _skillSuggestions.value = runCatching {
+                skillGraphRepository.getRecommendedSkills().map { it.name }
+            }.getOrDefault(_skillSuggestions.value)
+        }
+    }
+
+    /**
+     * Writes the declared set to both stores: DataStore drives opportunity
+     * matching, the graph drives the radar. Leaving one behind is how a profile
+     * starts disagreeing with itself.
+     */
+    fun saveSkills(names: List<String>) {
+        val cleaned = names.map { it.trim() }.filter { it.isNotEmpty() }
+        viewModelScope.launch {
+            userPreferences.setUserSkills(cleaned)
+            skillGraphRepository.setDeclaredSkills(cleaned)
+            _declaredSkills.value = cleaned
+            loadSkillSuggestions()
+        }
     }
 
     private fun loadProfile() {
@@ -147,9 +181,8 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun userSkillsFlow(): Flow<List<Skill>> = flow {
-        emit(runCatching { skillGraphRepository.getUserSkills() }.getOrDefault(emptyList()))
-    }
+    private fun userSkillsFlow(): Flow<List<Skill>> =
+        skillGraphRepository.observeUserSkills().catch { emit(emptyList()) }
 
     private fun awardProfileCompletionOnce() {
         viewModelScope.launch {

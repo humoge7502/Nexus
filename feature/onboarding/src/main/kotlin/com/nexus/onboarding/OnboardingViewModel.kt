@@ -7,6 +7,7 @@ import com.nexus.datastore.UserPreferences
 import com.nexus.data.repository.UserXpRepository
 import com.nexus.analytics.AnalyticsTracker
 import com.nexus.common.Constants
+import com.nexus.domain.repository.ISkillGraphRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -35,6 +36,7 @@ class OnboardingViewModel @Inject constructor(
     private val userPreferences: UserPreferences,
     private val xpRepository: UserXpRepository,
     private val analyticsTracker: AnalyticsTracker,
+    private val skillGraphRepository: ISkillGraphRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
@@ -88,6 +90,7 @@ class OnboardingViewModel @Inject constructor(
                 interests = state.interests,
                 careerGoal = state.careerGoal,
             )
+            skillGraphRepository.setDeclaredSkills(state.skills)
             xpRepository.awardXP(Constants.XP_ONBOARDING_COMPLETE, "onboarding")
             analyticsTracker.track(
                 "onboarding_complete",

@@ -4,6 +4,7 @@ import com.nexus.analytics.AnalyticsTracker
 import com.nexus.common.Constants
 import com.nexus.data.repository.UserXpRepository
 import com.nexus.datastore.UserPreferences
+import com.nexus.domain.repository.ISkillGraphRepository
 import com.nexus.domain.repository.XPAwardResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,6 +35,7 @@ class OnboardingViewModelTest {
     private lateinit var userPreferences: UserPreferences
     private lateinit var xpRepository: UserXpRepository
     private lateinit var analyticsTracker: AnalyticsTracker
+    private lateinit var skillGraphRepository: ISkillGraphRepository
 
     @Before
     fun setUp() {
@@ -41,7 +43,9 @@ class OnboardingViewModelTest {
         userPreferences = mock()
         xpRepository = mock()
         analyticsTracker = mock()
+        skillGraphRepository = mock()
         whenever(userPreferences.onboardingCompleted).thenReturn(flowOf(false))
+        runBlocking { whenever(skillGraphRepository.setDeclaredSkills(any())).thenReturn(Unit) }
         runBlocking {
             whenever(xpRepository.awardXP(any(), any())).thenReturn(
                 XPAwardResult(
@@ -60,7 +64,9 @@ class OnboardingViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel() = OnboardingViewModel(userPreferences, xpRepository, analyticsTracker)
+    private fun viewModel() = OnboardingViewModel(
+        userPreferences, xpRepository, analyticsTracker, skillGraphRepository,
+    )
 
     @Test
     fun `initial state is empty`() = runTest(testDispatcher) {
@@ -129,6 +135,7 @@ class OnboardingViewModelTest {
             careerGoal = "SDE",
         )
         verify(xpRepository).awardXP(Constants.XP_ONBOARDING_COMPLETE, "onboarding")
+        verify(skillGraphRepository).setDeclaredSkills(listOf("Kotlin", "Python"))
         verify(analyticsTracker).track(
             "onboarding_complete",
             mapOf("role" to "SDE", "skills" to "2", "interests" to "1"),

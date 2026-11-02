@@ -67,7 +67,6 @@ class HomeViewModelTest {
         whenever(certificationRepository.getCompletedCertificationCount()).thenReturn(flowOf(0))
         whenever(streakRepository.currentStreak).thenReturn(flowOf(StreakData(currentStreak = 7)))
         whenever(userPreferences.displayName).thenReturn(flowOf("Test User"))
-        whenever(userPreferences.tourCompleted).thenReturn(flowOf(true))
     }
 
     @After

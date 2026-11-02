@@ -6,10 +6,13 @@ import com.nexus.database.NexusDatabase
 import com.nexus.database.entity.AchievementEntity
 import com.nexus.database.entity.CertificationEntity
 import com.nexus.database.entity.DSAProblemEntity
+import com.nexus.datastore.UserPreferences
+import com.nexus.domain.repository.ISkillGraphRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -31,6 +34,8 @@ class DataSeeder @Inject constructor(
     @ApplicationContext private val context: Context,
     private val database: NexusDatabase,
     private val feed: OpportunityFeedRepository,
+    private val skillGraphRepository: ISkillGraphRepository,
+    private val userPreferences: UserPreferences,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -39,6 +44,28 @@ class DataSeeder @Inject constructor(
         scope.launch { seedCertifications() }
         scope.launch { seedDsaProblems() }
         scope.launch { seedAchievements() }
+        scope.launch { seedSkillGraph() }
+    }
+
+    /**
+     * The graph backs the skill radar, the "recommended next skill" list and the
+     * context AI answers are grounded in, and nothing had been asking for it —
+     * so it stayed empty and every profile looked like its student knew nothing.
+     *
+     * Students who already finished onboarding are repaired in the same pass:
+     * their claims live in preferences, and the graph adopts them. Sequencing
+     * matters — the catalog is seeded first so a claim matches a curated node
+     * instead of inventing a duplicate for it.
+     */
+    private suspend fun seedSkillGraph() = withContext(Dispatchers.IO) {
+        runCatching { skillGraphRepository.initializeIfEmpty() }
+            .onFailure { android.util.Log.e("DataSeeder", "skill graph seed failed", it) }
+        runCatching {
+            val declared = userPreferences.userSkills.first()
+            if (declared.isNotEmpty() && skillGraphRepository.getUserSkills().isEmpty()) {
+                skillGraphRepository.setDeclaredSkills(declared)
+            }
+        }.onFailure { android.util.Log.e("DataSeeder", "skill claim backfill failed", it) }
     }
 
     /**

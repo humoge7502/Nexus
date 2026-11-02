@@ -36,7 +36,6 @@ data class HomeUiState(
     val careerNextStep: String = "",
     val isOpportunitiesLoading: Boolean = true,
     val opportunitiesError: String? = null,
-    val tourCompleted: Boolean = true,
 )
 
 private data class UserSnapshot(
@@ -45,7 +44,6 @@ private data class UserSnapshot(
     val applicationCount: Int,
     val interviewCount: Int,
     val completedCerts: Int,
-    val tourCompleted: Boolean,
 )
 
 @HiltViewModel
@@ -104,11 +102,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun completeTour() {
-        _uiState.update { it.copy(tourCompleted = true) }
-        viewModelScope.launch { userPreferences.setTourCompleted() }
-    }
-
     /** Real user identity + streak + tracked application count. */
     private fun observeUserData() {
         viewModelScope.launch {
@@ -116,9 +109,8 @@ class HomeViewModel @Inject constructor(
                 userPreferences.displayName,
                 streakRepository.currentStreak.map { it.currentStreak },
                 applicationRepository.getAllApplications(),
-                userPreferences.tourCompleted,
                 certificationRepository.getCompletedCertificationCount(),
-            ) { name, streak, applications, tourDone, certs ->
+            ) { name, streak, applications, certs ->
                 UserSnapshot(
                     name = name,
                     streak = streak,
@@ -128,7 +120,6 @@ class HomeViewModel @Inject constructor(
                             it.status == ApplicationStatus.INTERVIEWING
                     },
                     completedCerts = certs,
-                    tourCompleted = tourDone,
                 )
             }.collect { snapshot ->
                 _uiState.update {
@@ -141,7 +132,6 @@ class HomeViewModel @Inject constructor(
                             currentStreak = snapshot.streak,
                             interviewsScheduled = snapshot.interviewCount,
                         ),
-                        tourCompleted = snapshot.tourCompleted,
                     )
                 }
             }

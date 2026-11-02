@@ -80,9 +80,7 @@ private val aiTools = listOf(
 
 @Composable
 fun AIHubScreen(
-    onChatClick: () -> Unit = {},
-    onResumeAnalyzer: () -> Unit = {},
-    onResearchClick: () -> Unit = {},
+    onToolRoute: (String) -> Unit = {},
     onBack: () -> Unit = {},
     showBackArrow: Boolean = true,
 ) {
@@ -115,7 +113,7 @@ fun AIHubScreen(
 
             RevealOnLoad(delayMillis = 40) {
                 AssistantHero(
-                    onChatClick = onChatClick,
+                    onChatClick = { onToolRoute("chat") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp, vertical = 12.dp),
@@ -139,13 +137,7 @@ fun AIHubScreen(
                     AIToolCard(
                         tool = tool,
                         index = index + 1,
-                        onClick = {
-                            when (tool.route) {
-                                "chat" -> onChatClick()
-                                "resume" -> onResumeAnalyzer()
-                                "research" -> onResearchClick()
-                            }
-                        },
+                        onClick = { onToolRoute(tool.route) },
                     )
                 }
             }

@@ -20,8 +20,14 @@
     <string name="profile_stat_certs">Certs</string>
     <string name="profile_stat_streak">Day streak</string>
     <string name="profile_stat_offers">Offers</string>
-    <string name="profile_skills_empty">No skills added yet. Complete onboarding or mark skills in Growth to build your radar.</string>
+    <string name="profile_skills_empty">No skills yet. Tap Edit and add the ones you actually know — matches and your radar are built from that list.</string>
     <string name="profile_skills_need_three">Add at least 3 rated skills to unlock your radar.</string>
+    <string name="profile_skills_edit">Edit</string>
+    <string name="profile_skills_save">Save</string>
+    <string name="profile_skills_cancel">Cancel</string>
+    <string name="profile_skills_editor_title">Your skills</string>
+    <string name="profile_skills_editor_hint">Tap to add or remove. Match scores and the radar read this list, so keep it honest.</string>
+    <string name="profile_skills_editor_empty">The skill catalog has not loaded yet. Connect to the internet once and reopen this.</string>
     <string name="profile_skills_radar_description">Skills radar: %1$s</string>
     <string name="profile_skill_percent">%1$s %2$d%%</string>
     <string name="profile_tool_applications">Applications</string>
