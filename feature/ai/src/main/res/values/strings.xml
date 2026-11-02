@@ -63,4 +63,5 @@
     <string name="cd_refresh">Refresh</string>
     <string name="cd_research">Research</string>
     <string name="cd_send">Send</string>
+    <string name="ai_service_unreachable">No answer just now — Sagitta could not reach the AI service. Check your connection and try again. If it keeps failing, the problem is our server, not your phone.</string>
 </resources>

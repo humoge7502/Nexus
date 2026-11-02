@@ -81,10 +81,6 @@ internal val TourStops = listOf(
  * The first-run walkthrough. Each step navigates to the section it describes and
  * cuts a hole in the scrim around that section's own station in the bar, so a
  * student is shown where the thing is rather than told about it in the abstract.
- *
- * The spotlight is drawn with an even-odd path instead of a clear blend mode:
- * the hole must not punch through the screen behind the overlay, and that needs
- * no offscreen compositing layer to be correct.
  */
 @Composable
 internal fun GuidedTour(
@@ -95,7 +91,6 @@ internal fun GuidedTour(
     var step by remember { mutableIntStateOf(0) }
     val current = TourStops[step]
     val isLast = step == TourStops.lastIndex
-    val reducedMotion = LocalReducedMotion.current
     val density = LocalDensity.current
     val extended = MaterialTheme.nexus
 
@@ -110,63 +105,18 @@ internal fun GuidedTour(
         onFinish()
     }
 
-    val insetX = with(density) { 3.dp.toPx() }
-    val insetY = with(density) { 4.dp.toPx() }
-    val cellWidth = stationsBounds?.let { it.width / NexusNavItems.size } ?: 0f
-    val target: Rect? = stationsBounds?.takeIf { current.station >= 0 && it.width > 0f }?.let { bar ->
-        val left = bar.left + cellWidth * current.station
-        Rect(
-            Offset(left + insetX, bar.top + insetY),
-            Offset(left + cellWidth - insetX, bar.bottom - insetY),
-        )
-    }
-
-    // The hole travels between stations rather than teleporting, which is what
-    // makes the bar read as one machined part being pointed at.
-    val spec = if (reducedMotion) snap<Float>() else spring(Spring.DampingRatioNoBouncy, Spring.StiffnessMediumLow)
-    val holeLeft by animateFloatAsState(target?.left ?: 0f, spec, label = "holeLeft")
-    val holeTop by animateFloatAsState(target?.top ?: 0f, spec, label = "holeTop")
-    val holeRight by animateFloatAsState(target?.right ?: 0f, spec, label = "holeRight")
-    val holeBottom by animateFloatAsState(target?.bottom ?: 0f, spec, label = "holeBottom")
-    val hasHole = target != null
-    val holeAlpha by animateFloatAsState(if (hasHole) 1f else 0f, spec, label = "holeAlpha")
+    val hole = rememberTourHole(stationsBounds, current.station)
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val screenHeightPx = with(density) { maxHeight.toPx() }
 
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                ) { /* the tour drives navigation; background taps are deliberately ignored */ }
-        ) {
-            val hole = Rect(Offset(holeLeft, holeTop), Offset(holeRight, holeBottom))
-            val path = Path().apply {
-                fillType = PathFillType.EvenOdd
-                addRect(Rect(Offset.Zero, size))
-                if (holeAlpha > 0.01f && hole.width > 1f && hole.height > 1f) {
-                    addRoundRect(RoundRect(hole, CornerRadius(14.dp.toPx())))
-                }
-            }
-            drawPath(path, Color.Black.copy(alpha = 0.76f))
-            if (holeAlpha > 0.01f && hole.width > 1f) {
-                drawRoundRect(
-                    color = extended.signal.copy(alpha = 0.9f * holeAlpha),
-                    topLeft = hole.topLeft,
-                    size = hole.size,
-                    cornerRadius = CornerRadius(14.dp.toPx()),
-                    style = Stroke(width = 2.dp.toPx()),
-                )
-            }
-        }
+        TourScrim(hole = hole, signal = extended.signal)
 
-        val cardBottomInset = if (hasHole) (screenHeightPx - holeTop).coerceAtLeast(0f) else 0f
+        val cardBottomInset = if (hole.highlighted) (screenHeightPx - hole.top).coerceAtLeast(0f) else 0f
 
         Surface(
             modifier = Modifier
-                .align(if (hasHole) Alignment.BottomCenter else Alignment.Center)
+                .align(if (hole.highlighted) Alignment.BottomCenter else Alignment.Center)
                 .fillMaxWidth()
                 .padding(
                     start = 20.dp,
@@ -228,6 +178,101 @@ internal fun GuidedTour(
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * The rectangle the tour points at, in canvas pixels, mid-animation. A closing
+ * card has no station to highlight, so it carries no hole and fades out.
+ */
+internal class TourHole(
+    val left: Float,
+    val top: Float,
+    val right: Float,
+    val bottom: Float,
+    val alpha: Float,
+    val highlighted: Boolean,
+) {
+    val rect: Rect get() = Rect(Offset(left, top), Offset(right, bottom))
+
+    /** Anything thinner than a pixel is a rounding artefact, not a spotlight. */
+    val visible: Boolean get() = alpha > 0.01f && right - left > 1f && bottom - top > 1f
+}
+
+/**
+ * The hole travels between stations rather than teleporting, which is what makes
+ * the bar read as one machined part being pointed at.
+ */
+@Composable
+private fun rememberTourHole(stationsBounds: Rect?, station: Int): TourHole {
+    val reducedMotion = LocalReducedMotion.current
+    val density = LocalDensity.current
+    val insetX = with(density) { 3.dp.toPx() }
+    val insetY = with(density) { 4.dp.toPx() }
+    val cellWidth = (stationsBounds?.width ?: 0f) / NexusNavItems.size
+    val target: Rect? = stationsBounds
+        ?.takeIf { station >= 0 && it.width > 0f }
+        ?.let { bar ->
+            val left = bar.left + cellWidth * station
+            Rect(
+                Offset(left + insetX, bar.top + insetY),
+                Offset(left + cellWidth - insetX, bar.bottom - insetY),
+            )
+        }
+    val spec = if (reducedMotion) {
+        snap<Float>()
+    } else {
+        spring(Spring.DampingRatioNoBouncy, Spring.StiffnessMediumLow)
+    }
+    val left by animateFloatAsState(target?.left ?: 0f, spec, label = "holeLeft")
+    val top by animateFloatAsState(target?.top ?: 0f, spec, label = "holeTop")
+    val right by animateFloatAsState(target?.right ?: 0f, spec, label = "holeRight")
+    val bottom by animateFloatAsState(target?.bottom ?: 0f, spec, label = "holeBottom")
+    val alpha by animateFloatAsState(if (target == null) 0f else 1f, spec, label = "holeAlpha")
+    return TourHole(
+        left = left,
+        top = top,
+        right = right,
+        bottom = bottom,
+        alpha = alpha,
+        highlighted = target != null,
+    )
+}
+
+/**
+ * The dimming scrim with the spotlight cut out of it. Drawn with an even-odd
+ * path: the hole must not punch through the screen behind the overlay, and that
+ * needs no offscreen compositing layer to be correct.
+ */
+@Composable
+private fun TourScrim(hole: TourHole, signal: Color) {
+    val density = LocalDensity.current
+    val cornerRadiusPx = with(density) { 14.dp.toPx() }
+    val strokePx = with(density) { 2.dp.toPx() }
+    Canvas(
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+            ) { /* the tour drives navigation; background taps are deliberately ignored */ }
+    ) {
+        val holeRect = hole.rect
+        val path = Path().apply {
+            fillType = PathFillType.EvenOdd
+            addRect(Rect(Offset.Zero, size))
+            if (hole.visible) addRoundRect(RoundRect(holeRect, CornerRadius(cornerRadiusPx)))
+        }
+        drawPath(path, Color.Black.copy(alpha = 0.76f))
+        if (hole.visible) {
+            drawRoundRect(
+                color = signal.copy(alpha = 0.9f * hole.alpha),
+                topLeft = holeRect.topLeft,
+                size = holeRect.size,
+                cornerRadius = CornerRadius(cornerRadiusPx),
+                style = Stroke(width = strokePx),
+            )
         }
     }
 }

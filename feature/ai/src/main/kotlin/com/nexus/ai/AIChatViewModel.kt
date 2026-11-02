@@ -240,7 +240,7 @@ tool = "chat",
                     streamingText = null,
                     messages = it.messages + ChatMessage(
                         id = "ai_err_${System.currentTimeMillis()}",
-                        text = "No answer just now — Sagitta could not reach the AI service. Check your connection and try again. If it keeps failing, the problem is our server, not your phone.",
+                        text = "",
                         isUser = false,
                         isError = true,
                     )

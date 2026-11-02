@@ -227,7 +227,9 @@ private fun ConversationTurn(
                 Spacer(Modifier.height(NexusSpacing.sm))
                 ResponseCallout(
                     label = noticeLabel,
-                    text = message.text,
+                    // The ViewModel raises this case and the copy lives here, so
+                    // the sentence a student reads is translatable.
+                    text = message.text.ifBlank { stringResource(R.string.ai_service_unreachable) },
                     tone = scheme.error,
                 )
             }

@@ -22,18 +22,18 @@ class OpportunityMatchingEngine @Inject constructor() {
     fun assess(internship: Internship, userSkills: List<Skill>): SkillFit {
         val owned = SkillNames.canonicalSet(userSkills.map { it.name })
         val seen = HashSet<String>(internship.requiredSkills.size)
-        val matched = mutableListOf<String>()
-        val missing = mutableListOf<String>()
-        var required = 0
-        for (skill in internship.requiredSkills) {
-            val name = skill.name.trim()
-            if (name.isEmpty()) continue
-            val canonical = SkillNames.canonical(name)
-            if (canonical.isEmpty() || !seen.add(canonical)) continue
-            required++
-            if (canonical in owned) matched += name else missing += name
-        }
-        return SkillFit(required = required, matched = matched, missing = missing)
+        val judged = internship.requiredSkills.asSequence()
+            .map { it.name.trim() }
+            .filter { it.isNotEmpty() }
+            .map { it to SkillNames.canonical(it) }
+            .filter { (_, canonical) -> canonical.isNotEmpty() && seen.add(canonical) }
+            .map { (name, canonical) -> name to (canonical in owned) }
+            .toList()
+        return SkillFit(
+            required = judged.size,
+            matched = judged.filter { it.second }.map { it.first },
+            missing = judged.filter { !it.second }.map { it.first },
+        )
     }
 
     /**
