@@ -105,7 +105,7 @@ app → feature/* → core/data → core/domain → core/network + core/database
 | `DSATracker` | `DSATrackerScreen` | |
 | `Notifications` | `NotificationsScreen` | |
 | `Leaderboard` | `LeaderboardScreen` | |
-| `InternshipDetail(internshipId)` | `InternshipDetailScreen` | Deep link: `nexus://internship/{id}` |
+| `InternshipDetail(internshipId)` | `InternshipDetailScreen` | Deep link: `sagitta://internship/{id}` |
 | `CertificationDetail(certId)` | `CertificationDetailScreen` | |
 | `CertificationBrowser` | `CertificationScreen` | |
 | `InternshipList` | `InternshipListScreen` | |

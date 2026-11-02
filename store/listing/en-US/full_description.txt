@@ -1,33 +1,40 @@
-NEXUS is your AI-powered career companion that helps you discover opportunities, build skills, and land your dream role.
+Track internships, hackathons and deadlines that actually fit your profile.
 
-**AI Career Coach**
-Get personalized career guidance powered by AI. Ask questions, get interview tips, and receive tailored advice based on your profile and goals.
+Sagitta is a career workspace for college students — one place to find openings worth your time, save them, apply, and keep the deadlines from sneaking past you.
 
-**Smart Opportunity Discovery**
-Find internships, jobs, certifications, hackathons, and scholarships matched to your skills. Real-time feed with personalized recommendations.
+LIVE OPPORTUNITY CATALOG
+Internships and hackathons are refreshed throughout the day, every day. Each listing carries what you actually need to decide: stipend, duration, location, mode, skills asked for, and the closing date. Listings we cannot verify are left out rather than padded in.
 
-**Skill Graph & Career Mirror**
-Visualize your skill progression with an interactive graph. See how you stack up against peers and track your growth over time with detailed analytics.
+DEADLINE AND MATCH ALERTS
+Save an opportunity and Sagitta watches it. You get notified when a deadline is close and when something new arrives that fits the skills on your profile — so a form closing on Friday is not a Sunday discovery.
 
-**Interview Intelligence**
-Prepare smarter with anonymized interview reports from real candidates. Track your interview outcomes, confidence scores, and identify areas for improvement.
+SKILL-BASED MATCHING
+Your profile is built from the skills you actually have. Match scores are computed against those skills, and a listing with nothing in common with your profile is not shown as a 90% match to make the screen look busy. Edit that list from your profile any time and the skill radar redraws from it.
 
-**Placement Forecast & Cohort Intelligence**
-Predict your placement probability with AI-driven forecasts. Compare your readiness against college cohorts and industry benchmarks.
+APPLICATIONS TRACKER
+Every opportunity you apply to moves through stages — applied, interview, offer, rejected — with the date you touched it. Your pipeline is a list you can read, not a pile of browser tabs.
 
-**Goal Tracking & Study Sessions**
-Set career goals, track DSA practice, and log study sessions with focus scoring. Stay accountable with streaks and progress metrics.
+DSA PRACTICE AND GROWTH
+Track problems solved across platforms, keep a daily streak, and see a growth score built from what you did in the app: practice, projects, consistency, certifications and goals. Nothing in the score is decorative.
 
-**Portfolio Builder**
-Showcase your projects, certifications, and achievements in a professional portfolio. Share your career journey with recruiters.
+PLACEMENT FORECAST
+A readiness reading based on your current profile, with the specific gaps that are holding it down, and how the number has moved over time.
 
-**Community & Tribe**
-Connect with peers in your college tribe. Share interview experiences, collaborate on projects, and grow together.
+PORTFOLIO AND CAREER MIRROR
+Collect projects, certifications and achievements into a portfolio you can share, and see your own history reflected back with the choices that moved you forward.
 
-**Offline First**
-Core features work offline with automatic sync when connected. Never lose your progress.
+AI CAREER HELP THAT HAS READ YOUR PROFILE
+Ask about a specific role, a resume line, or why you got rejected, and the answer is built from the skills, projects and applications already on your profile rather than a generic listicle. Sagitta also studies a target role into a roadmap, finds the gap between you and a listing, drafts the post for an achievement you just earned, runs a mock interview, and summarises your week.
 
-**Privacy Focused**
-Your data stays private with on-device storage and encrypted sync. Anonymized contributions help the community while protecting your identity.
+OFFLINE FIRST
+Your saved list, applications, streak and progress live on your device. Open the app on a bus with no signal and it still shows everything you have. When a connection returns, it syncs.
 
-Download NEXUS today and accelerate your career journey.
+PRIVACY
+No ads, no third-party trackers, and your data is never sold. If you sign in and turn on sync, your profile and pipeline are backed up to your own account and to nobody else's. AI questions are relayed through our own server to a model provider and used only to produce your answer — providers are not allowed to train on them. Usage analytics (screens opened, features used) are collected to improve the app. Community contributions are anonymised. Notifications use only the deadlines and saved items already on your device. You can export everything or delete your account from inside the app, and the deletion is real — it removes your data rather than hiding it. Full policy: humoge7502.github.io/Nexus/privacy-policy.html
+
+BUILT FOR THE WAY STUDENTS ACTUALLY LOOK
+Shortlist on the metro. Check a deadline between lectures. Log an application the minute you submit it. Everything fits in one hand and works on phones from Android 8 upward.
+
+Sagitta is free to use, with no ads and no sponsored listings — an opportunity appears because it matches you, not because someone paid for the slot. Finding, saving, tracking and practising cost nothing. AI answers are capped at 10 a day on the free tier; an optional Pro upgrade lifts that cap. Nothing else is behind a paywall.
+
+Download Sagitta and stop finding opportunities through five group chats.

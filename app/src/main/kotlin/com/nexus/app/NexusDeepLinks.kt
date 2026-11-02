@@ -3,7 +3,7 @@ package com.nexus.app
 import android.content.Intent
 
 /**
- * Maps push-notification payloads and `nexus://` URIs to a destination.
+ * Maps push-notification payloads and `sagitta://` URIs to a destination.
  * Both entry points are untrusted, so unknown values are ignored rather than
  * being turned into a navigation crash.
  */
@@ -56,6 +56,11 @@ object NexusDeepLinks {
         "tribe" -> NexusDestination.Tribe
         "ai", "ai-hub" -> NexusDestination.AIHub
         "chat" -> NexusDestination.AIChat
+        "roadmap" -> NexusDestination.Roadmap
+        "skill-gap" -> NexusDestination.SkillGap
+        "linkedin" -> NexusDestination.LinkedInPost
+        "interview-coach", "coach" -> NexusDestination.InterviewCoach
+        "insights" -> NexusDestination.CareerInsights
         "growth" -> NexusDestination.Growth
         "productivity", "focus", "pomodoro" -> NexusDestination.Productivity
         "notifications" -> NexusDestination.Notifications
