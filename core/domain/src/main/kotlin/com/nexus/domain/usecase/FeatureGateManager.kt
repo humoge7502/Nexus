@@ -1,5 +1,6 @@
 package com.nexus.domain.usecase
 
+import com.nexus.common.Constants
 import javax.inject.Inject
 
 enum class FeatureGate(val displayName: String) {
@@ -14,7 +15,7 @@ SKILL_GAP("Skill Gap Analysis"),
 INTERVIEW_COACH("Interview Coach"),
 LINKEDIN_POST("LinkedIn Post Gen"),
 LEADERBOARD("Leaderboard"),
-ORACLE("NEXUS Oracle"),
+ORACLE("${Constants.APP_NAME} Oracle"),
 ARENA("Arena Compete"),
 CAREER_INSIGHTS("Career Insights"),
 }

@@ -1,10 +1,20 @@
 package com.nexus.network.api
 
+import com.nexus.network.BuildConfig
 import com.nexus.network.dto.*
 import retrofit2.Response
 import retrofit2.http.*
 
 interface NexusApiService {
+
+    /**
+     * Keyless, read-only opportunity feed. A @Url override keeps this request
+     * off the first-party API base URL, so no auth header is attached.
+     */
+    @GET
+    suspend fun getOpportunityFeed(
+        @Url url: String = BuildConfig.SAGITTA_FEED_URL,
+    ): Response<FeedResponseDto>
 
     @GET("internships")
     suspend fun getInternships(

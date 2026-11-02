@@ -31,4 +31,24 @@ class CareerScoreCalculatorTest {
         val score = calculator.calculate(0.5f, 0.5f, 180, 150, emptyList(), 10)
         assertTrue(score.overallScore in 200..800)
     }
+
+    @Test
+    fun `ledger lines sum to the headline score`() {
+        val score = calculator.calculate(0.37f, 0.62f, 41, 87, emptyList(), 5)
+        assertEquals(score.components.sumOf { it.earned }, score.overallScore)
+    }
+
+    @Test
+    fun `every ledger line names the weight it is measured against`() {
+        val score = calculator.calculate(0.5f, 0.5f, 100, 100, emptyList(), 10)
+        assertEquals(1000, score.components.sumOf { it.available })
+        assertTrue(score.components.all { it.earned in 0..it.available })
+    }
+
+    @Test
+    fun `over-range fractions cannot mint points`() {
+        val score = calculator.calculate(2f, 2f, 9999, 9999, emptyList(), 9999)
+        assertTrue(score.overallScore <= 1000)
+        assertTrue(score.components.all { it.earned <= it.available })
+    }
 }

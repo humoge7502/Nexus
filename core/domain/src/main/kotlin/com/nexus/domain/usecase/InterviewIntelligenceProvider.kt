@@ -1,7 +1,9 @@
 package com.nexus.domain.usecase
 
+import com.nexus.common.Constants
 import com.nexus.database.dao.InterviewReportDao
 import com.nexus.database.entity.InterviewReportEntity
+import java.util.Locale
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -44,7 +46,7 @@ class InterviewIntelligenceProvider @Inject constructor(
     val intel = getIntelligenceFor(company)
     if (!intel.hasLocalData) return ""
     return buildString {
-      appendLine("=== NEXUS INTERVIEW INTELLIGENCE: $company ===")
+      appendLine("=== ${Constants.APP_NAME.uppercase(Locale.ROOT)} INTERVIEW INTELLIGENCE: $company ===")
       appendLine("Based on ${intel.totalReports} reported interviews")
       if (intel.topTopics.isNotEmpty()) {
         appendLine("Most tested topics (from successful candidates):")

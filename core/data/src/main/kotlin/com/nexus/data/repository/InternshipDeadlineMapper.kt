@@ -14,7 +14,11 @@ import java.time.ZoneOffset
  */
 internal fun InternshipEntity.deadlineDate(): LocalDate = deadline.toDeadlineDate()
 
-internal fun Long.toDeadlineDate(): LocalDate =
+/**
+ * Public because the reminder engine in `:core:sync` reads the same raw column
+ * and must decode both encodings the feed has ever written.
+ */
+fun Long.toDeadlineDate(): LocalDate =
     if (this > EPOCH_MILLIS_THRESHOLD) {
         Instant.ofEpochMilli(this).atZone(ZoneOffset.UTC).toLocalDate()
     } else {

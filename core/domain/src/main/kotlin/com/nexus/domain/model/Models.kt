@@ -13,7 +13,8 @@ data class Internship(
     val stipend: Stipend?,
     val duration: Duration,
     val requiredSkills: ImmutableList<Skill> = persistentListOf(),
-    val deadline: LocalDate,
+    /** Null means rolling admissions — the source does not publish a close date. */
+    val deadline: LocalDate? = null,
     val applyUrl: String,
     val description: String = "",
     val isRemote: Boolean = false,
@@ -21,7 +22,25 @@ data class Internship(
     val relevanceScore: Float = 0f,
     val postedAt: Instant,
     val tags: ImmutableList<String> = persistentListOf(),
+    val kind: OpportunityKind = OpportunityKind.INTERNSHIP,
+    /** Human-readable origin, e.g. "Stripe careers (Greenhouse)". */
+    val sourceName: String = "",
+    /** When the pipeline last confirmed [applyUrl] resolved. */
+    val verifiedAt: Instant? = null,
+    /** Stipend as published by the source; [stipend] stays null when no figure is published. */
+    val stipendLabel: String = "",
+    /** Duration as published, e.g. "12 weeks". [duration] is the numeric fallback. */
+    val durationLabel: String = "",
 )
+
+enum class OpportunityKind {
+    INTERNSHIP, FELLOWSHIP, SCHOLARSHIP, PROGRAM;
+
+    companion object {
+        fun from(raw: String?): OpportunityKind =
+            entries.firstOrNull { it.name.equals(raw, ignoreCase = true) } ?: INTERNSHIP
+    }
+}
 
 data class Company(
     val name: String,
@@ -225,6 +244,8 @@ data class Hackathon(
     val isLive: Boolean = false,
     val isSaved: Boolean = false,
     val relevanceScore: Float = 0f,
+    val sourceName: String = "",
+    val verifiedAt: Instant? = null,
 )
 
 enum class EventMode { ONLINE, OFFLINE, HYBRID }
@@ -373,6 +394,21 @@ data class NexusScore(
     val communityContribution: Float = 0f,
     val percentile: Int = 0,
     val weeklyChange: Int = 0,
+    val components: List<ScoreComponent> = emptyList(),
+)
+
+/**
+ * One weighted input to [NexusScore.overallScore], as the points it earned and the
+ * points it was worth. The pair is what makes the total checkable: a screen can show
+ * "105 / 250" instead of a bare "42%", which the reader cannot verify against anything.
+ *
+ * [key] is a stable identifier, not display copy — the label stays in the UI layer so it
+ * can be localised without the domain owning strings.
+ */
+data class ScoreComponent(
+    val key: String,
+    val earned: Int,
+    val available: Int,
 )
 
 // NEW: Notification model

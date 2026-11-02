@@ -34,20 +34,20 @@ class RetentionTrackerTest {
     fun `recordWeeklyActivity inserts entity`() = runTest {
         coEvery { retentionDao.insert(any()) } returns Unit
 
-        tracker.recordWeeklyActivity(sessionCount = 5, featuresUsed = listOf("home", "explore"))
+        tracker.recordWeeklyActivity(activeDays = 5, featuresUsed = listOf("home", "explore"))
 
         coVerify(exactly = 1) { retentionDao.insert(any<RetentionEntity>()) }
     }
 
     @Test
-    fun `recordWeeklyActivity stores correct session count`() = runTest {
+    fun `recordWeeklyActivity stores correct active day count`() = runTest {
         var captured: RetentionEntity? = null
         coEvery { retentionDao.insert(any()) } answers {
             captured = firstArg()
             Unit
         }
 
-        tracker.recordWeeklyActivity(sessionCount = 3, featuresUsed = listOf("ai"))
+        tracker.recordWeeklyActivity(activeDays = 3, featuresUsed = listOf("ai"))
 
         assertTrue(captured != null)
         assertEquals(3, captured?.sessionCount)
@@ -61,7 +61,7 @@ class RetentionTrackerTest {
             Unit
         }
 
-        tracker.recordWeeklyActivity(sessionCount = 1, featuresUsed = listOf("home", "explore", "ai"))
+        tracker.recordWeeklyActivity(activeDays = 1, featuresUsed = listOf("home", "explore", "ai"))
 
         assertTrue(captured != null)
         assertEquals("home,explore,ai", captured?.featuresUsed)
@@ -105,7 +105,7 @@ class RetentionTrackerTest {
     fun `recordWeeklyActivity tracks analytics event`() = runTest {
         coEvery { retentionDao.insert(any()) } returns Unit
 
-        tracker.recordWeeklyActivity(sessionCount = 2, featuresUsed = listOf("home"))
+        tracker.recordWeeklyActivity(activeDays = 2, featuresUsed = listOf("home"))
 
         coVerify { analyticsTracker.track("weekly_activity_recorded", any()) }
     }

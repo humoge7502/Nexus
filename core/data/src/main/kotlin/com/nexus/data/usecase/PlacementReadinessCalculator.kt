@@ -6,7 +6,6 @@ import com.nexus.data.repository.UserXpRepository
 import com.nexus.data.repository.ApplicationRepository
 import com.nexus.database.dao.SkillGraphDao
 import com.nexus.database.entity.SkillNodeEntity
-import com.nexus.datastore.UserPreferences
 import com.nexus.domain.model.ApplicationStatus
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
@@ -19,7 +18,6 @@ private val skillGraphDao: SkillGraphDao,
 private val applicationRepository: ApplicationRepository,
 private val dsaProblemRepository: DSAProblemRepository,
 private val streakRepository: StreakRepository,
-private val userPreferences: UserPreferences,
 ) {
 
 data class PlacementReadiness(
@@ -31,7 +29,6 @@ val consistencyScore: Float,
 val applicationScore: Float,
 val engagementScore: Float,
 val actionItems: List<PlacementAction>,
-val estimatedPlacementMonth: String,
 )
 
 data class PlacementAction(
@@ -110,8 +107,6 @@ if (applicationScore < 10f) {
 actionItems.add(PlacementAction(priority = 4, title = "Apply to more opportunities", description = "Track at least 5 applications to show active job search", impact = "MEDIUM", category = "APPLICATIONS"))
 }
 
-val collegeTier = userPreferences.collegeTier.first()
-
 return PlacementReadiness(
 score = totalScore,
 level = readinessLevel(totalScore.toFloat()),
@@ -121,7 +116,6 @@ consistencyScore = consistencyScore,
 applicationScore = applicationScore,
 engagementScore = engagementScore,
 actionItems = actionItems.sortedBy { it.priority },
-estimatedPlacementMonth = estimatePlacementMonth(totalScore.toFloat(), collegeTier),
 )
 }
 
@@ -131,22 +125,5 @@ score >= 60 -> "Nearly Ready"
 score >= 40 -> "Building Up"
 score >= 20 -> "Early Stage"
 else -> "Getting Started"
-}
-
-private fun estimatePlacementMonth(score: Float, collegeTier: String): String {
-val tierAdjustment = when (collegeTier.uppercase()) {
-"TIER_1", "IIT", "BITS" -> -1
-"TIER_3", "STATE" -> 1
-else -> 0
-}
-val baseMonths = when {
-score >= 80 -> 1
-score >= 60 -> 2
-score >= 40 -> 4
-else -> 6
-}
-val total = (baseMonths + tierAdjustment).coerceAtLeast(1)
-val target = java.time.LocalDate.now().plusMonths(total.toLong())
-return target.month.name.lowercase().replaceFirstChar { it.uppercase() } + " " + target.year
 }
 }

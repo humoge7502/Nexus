@@ -30,8 +30,19 @@ object RepositoryModule {
     fun provideOpportunityRepository(impl: OpportunityRepositoryImpl): IOpportunityRepository = impl
 
     @Provides @Singleton
-    fun provideInternshipRepository(api: NexusApiService, dao: InternshipDao): InternshipRepository =
-        InternshipRepository(api, dao)
+    fun provideOpportunityFeedRepository(
+        api: NexusApiService,
+        internshipDao: InternshipDao,
+        hackathonDao: HackathonDao,
+        gson: com.google.gson.Gson,
+    ): OpportunityFeedRepository =
+        OpportunityFeedRepository(api, internshipDao, hackathonDao, gson)
+
+    @Provides @Singleton
+    fun provideInternshipRepository(
+        feed: OpportunityFeedRepository,
+        dao: InternshipDao,
+    ): InternshipRepository = InternshipRepository(feed, dao)
 
     @Provides @Singleton
     fun provideCertificationRepository(
@@ -41,8 +52,10 @@ object RepositoryModule {
     ): CertificationRepository = CertificationRepository(api, dao, progressDao)
 
     @Provides @Singleton
-    fun provideHackathonRepository(api: NexusApiService, dao: HackathonDao): HackathonRepository =
-        HackathonRepository(api, dao)
+    fun provideHackathonRepository(
+        feed: OpportunityFeedRepository,
+        dao: HackathonDao,
+    ): HackathonRepository = HackathonRepository(feed, dao)
 
     @Provides @Singleton
     fun provideGoalRepository(api: NexusApiService, dao: GoalDao): GoalRepository =

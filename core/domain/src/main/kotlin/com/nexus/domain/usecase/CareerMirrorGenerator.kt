@@ -66,7 +66,7 @@ class CareerMirrorGenerator @Inject constructor() {
   private fun generateInsights(input: MirrorInput, scoreDelta: Int): List<String> {
     val list = mutableListOf<String>()
     list += when {
-      scoreDelta >= 50 -> "Excellent growth: NEXUS Score improved by +$scoreDelta pts this quarter"
+      scoreDelta >= 50 -> "Excellent growth: Score improved by +$scoreDelta pts this quarter"
       scoreDelta >= 20 -> "Steady progress: Score grew by +$scoreDelta pts this quarter"
       scoreDelta >= 0 -> "Score plateau: Only +$scoreDelta pts of growth — time to shift strategy"
       else -> "Score declined by ${abs(scoreDelta)} pts — review preparation intensity"

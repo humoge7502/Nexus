@@ -1,6 +1,7 @@
 package com.nexus.network.service
 
 import com.google.firebase.auth.FirebaseAuth
+import com.nexus.common.Constants
 import com.nexus.network.BuildConfig
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
@@ -30,6 +31,9 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+
+/** How the assistant names itself in every user-facing failure message. */
+private const val ASSISTANT_NAME = "${Constants.APP_NAME} AI"
 
 sealed interface AIStreamEvent {
     data class Delta(val text: String) : AIStreamEvent
@@ -73,7 +77,7 @@ class AIStreamClient @Inject constructor(
             null
         }
         if (token.isNullOrBlank()) {
-            return flowOf(AIStreamEvent.Failed("Sign in required to use NEXUS AI.", 401))
+            return flowOf(AIStreamEvent.Failed("Sign in required to use $ASSISTANT_NAME.", 401))
         }
         return streamWithToken(token, messages, streamUrl(), model, maxTokens)
     }
@@ -110,7 +114,7 @@ class AIStreamClient @Inject constructor(
             override fun onFailure(call: Call, e: IOException) {
                 if (call.isCanceled()) return
                 Timber.w(e, "AI stream connection failed")
-                trySend(AIStreamEvent.Failed("Could not reach NEXUS AI. Check your connection and try again."))
+                trySend(AIStreamEvent.Failed("Could not reach $ASSISTANT_NAME. Check your connection and try again."))
                 close()
             }
 
@@ -222,9 +226,9 @@ class AIStreamClient @Inject constructor(
         }
         if (!serverMessage.isNullOrBlank()) return serverMessage
         return when (response.code) {
-            401 -> "Sign in again to keep using NEXUS AI."
+            401 -> "Sign in again to keep using $ASSISTANT_NAME."
             429 -> "Daily AI limit reached. Try again tomorrow."
-            503 -> "NEXUS AI is not available right now. Try again later."
+            503 -> "$ASSISTANT_NAME is not available right now. Try again later."
             else -> "AI request failed (${response.code}). Please try again."
         }
     }

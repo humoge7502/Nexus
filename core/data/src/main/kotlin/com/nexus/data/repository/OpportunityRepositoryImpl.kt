@@ -19,18 +19,17 @@ import com.nexus.domain.model.Internship
 import com.nexus.domain.model.Location
 import com.nexus.domain.model.Price
 import com.nexus.domain.model.Opportunity
+import com.nexus.domain.model.OpportunityKind
 import com.nexus.domain.model.Skill
 import com.nexus.domain.model.SkillCategory
 import com.nexus.domain.model.Stipend
 import com.nexus.domain.repository.IOpportunityRepository
-import com.nexus.network.api.NexusApiService
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import timber.log.Timber
 import java.time.Instant
 import java.time.LocalDate
 import javax.inject.Inject
@@ -38,7 +37,7 @@ import javax.inject.Singleton
 
 @Singleton
 class OpportunityRepositoryImpl @Inject constructor(
-    private val api: NexusApiService,
+    private val feed: OpportunityFeedRepository,
     private val internshipDao: InternshipDao,
     private val hackathonDao: HackathonDao,
     private val certificationDao: CertificationDao,
@@ -60,7 +59,7 @@ class OpportunityRepositoryImpl @Inject constructor(
                 add(Opportunity.InternshipOpportunity(
                     id = d.id, title = d.title, company = d.company.name,
                     location = d.location.city, isRemote = d.isRemote,
-                    tags = if (it.skills.isNotBlank()) it.skills.split(",").toImmutableList() else persistentListOf()
+                    tags = d.tags
                 ))
             }
             hackathons.forEach {
@@ -83,79 +82,12 @@ class OpportunityRepositoryImpl @Inject constructor(
     override suspend fun refreshOpportunities(): ApiResult<Unit> {
         val isOnline = networkMonitor.isOnline.first()
         if (!isOnline) return ApiResult.Error("No internet connection")
-
-        var hasError = false
-
-        try {
-            val internResponse = api.getInternships()
-            if (internResponse.isSuccessful) {
-                val dtos = internResponse.body()?.data ?: emptyList()
-                val entities = dtos.map { it.toInternshipEntity() }
-                internshipDao.deleteAll()
-                internshipDao.insertAll(entities)
-            } else {
-                hasError = true
-                Timber.w("Internship refresh failed: ${internResponse.code()}")
-            }
-        } catch (e: Exception) {
-            hasError = true
-            Timber.e(e, "Internship refresh error")
+        return when (val result = feed.refresh()) {
+            is ApiResult.Success -> ApiResult.Success(Unit)
+            is ApiResult.Error -> ApiResult.Error(result.message)
+            ApiResult.Loading -> ApiResult.Loading
         }
-
-        try {
-            val hackResponse = api.getHackathons()
-            if (hackResponse.isSuccessful) {
-                val dtos = hackResponse.body()?.data ?: emptyList()
-                val entities = dtos.map { it.toHackathonEntity() }
-                hackathonDao.insertAll(entities)
-            } else {
-                hasError = true
-                Timber.w("Hackathon refresh failed: ${hackResponse.code()}")
-            }
-        } catch (e: Exception) {
-            hasError = true
-            Timber.e(e, "Hackathon refresh error")
-        }
-
-        try {
-            val certResponse = api.getRecommendedCertifications()
-            if (certResponse.isSuccessful) {
-                val dtos = certResponse.body() ?: emptyList()
-                val entities = dtos.map { it.toCertificationEntity() }
-                certificationDao.insertAll(entities)
-            } else {
-                hasError = true
-                Timber.w("Certification refresh failed: ${certResponse.code()}")
-            }
-        } catch (e: Exception) {
-            hasError = true
-            Timber.e(e, "Certification refresh error")
-        }
-
-        return if (hasError) ApiResult.Error("Partial sync failure")
-        else ApiResult.Success(Unit)
     }
-
-private fun com.nexus.network.dto.InternshipDto.toInternshipEntity() = InternshipEntity(
-  id = id,
-  title = title,
-  companyName = company,
-  companyLogoUrl = companyLogo,
-  location = location,
-  isRemote = isRemote,
-  stipendAmount = stipend?.filter { it.isDigit() }?.toIntOrNull(),
-  stipendCurrency = "INR",
-  durationMonths = duration.filter { it.isDigit() }.toIntOrNull() ?: 3,
-  skills = skills.joinToString(","),
-  deadline = deadline.ifBlank { LocalDate.now().plusDays(30).toString() }.let { raw ->
-    runCatching { LocalDate.parse(raw).toEpochDay() }.getOrDefault(LocalDate.now().plusDays(30).toEpochDay())
-  },
-  applyUrl = applyUrl,
-  description = description,
-  postedAt = postedAt.ifBlank { System.currentTimeMillis().toString() }.let { raw ->
-    raw.toLongOrNull() ?: System.currentTimeMillis()
-  },
-)
 
     private fun InternshipEntity.toDomain() = Internship(
         id = id, title = title,
@@ -163,38 +95,26 @@ private fun com.nexus.network.dto.InternshipDto.toInternshipEntity() = Internshi
         location = Location(location),
         stipend = stipendAmount?.let { Stipend(it, stipendCurrency) },
         duration = Duration(durationMonths),
-        deadline = deadlineDate(),
+        deadline = if (deadline > 0L) deadline.toDeadlineDate() else null,
         applyUrl = applyUrl, description = description,
         isRemote = isRemote, isSaved = isSaved,
         postedAt = Instant.ofEpochMilli(postedAt),
-        tags = skillNames(),
+        tags = tagNames(),
         requiredSkills = skillNames().map { Skill(name = it) }.toImmutableList(),
+        kind = OpportunityKind.from(kind),
+        sourceName = sourceName,
+        verifiedAt = verifiedAt?.takeIf { it > 0L }?.let(Instant::ofEpochMilli),
+        stipendLabel = stipendLabel,
+        durationLabel = durationLabel,
     )
 
     private fun InternshipEntity.skillNames() =
         if (skills.isBlank()) persistentListOf()
         else skills.split(",").map { it.trim() }.filter { it.isNotBlank() }.toImmutableList()
 
-private fun com.nexus.network.dto.HackathonDto.toHackathonEntity() = HackathonEntity(
-  id = id,
-  title = title,
-  organizer = organizer,
-  description = description,
-  mode = mode,
-  location = location,
-  startDate = parseDate(startDate) ?: LocalDate.now().toEpochDay(),
-  endDate = parseDate(endDate) ?: LocalDate.now().plusDays(7).toEpochDay(),
-  registrationDeadline = parseDate(registrationDeadline) ?: LocalDate.now().plusDays(14).toEpochDay(),
-  prizePool = prizePool,
-  registrationUrl = registrationUrl,
-  isLive = isLive,
-  isSaved = isSaved,
-  tags = tags.joinToString(","),
-)
-
-private fun parseDate(raw: String): Long? = try {
-  LocalDate.parse(raw.ifBlank { return null }.trim()).toEpochDay()
-} catch (_: Exception) { null }
+    private fun InternshipEntity.tagNames() =
+        if (tags.isBlank()) persistentListOf()
+        else tags.split(",").map { it.trim() }.filter { it.isNotBlank() }.toImmutableList()
 
     private fun HackathonEntity.toDomain() = Hackathon(
         id = id, title = title, organizer = organizer, description = description,
@@ -205,17 +125,11 @@ private fun parseDate(raw: String): Long? = try {
         registrationDeadline = LocalDate.ofEpochDay(registrationDeadline),
         prizePool = prizePool, registrationUrl = registrationUrl,
         isLive = isLive, isSaved = isSaved,
-        tags = if (tags.isNotBlank()) tags.split(",").toImmutableList() else persistentListOf(),
+        tags = if (tags.isNotBlank()) tags.split(",").map { it.trim() }.filter { it.isNotBlank() }.toImmutableList()
+            else persistentListOf(),
         skills = persistentListOf(),
-    )
-
-    private fun com.nexus.network.dto.CertificationDto.toCertificationEntity() = CertificationEntity(
-        id = id, title = title, provider = provider,
-        estimatedHours = estimatedHours,
-        skills = skills.joinToString(","),
-        rating = rating, enrollmentUrl = enrollmentUrl,
-        isTrending = rating >= 4.5f,
-        employerRecognition = (rating * 20).toInt(),
+        sourceName = sourceName,
+        verifiedAt = verifiedAt?.takeIf { it > 0L }?.let(Instant::ofEpochMilli),
     )
 
     private fun CertificationEntity.toDomain() = Certification(

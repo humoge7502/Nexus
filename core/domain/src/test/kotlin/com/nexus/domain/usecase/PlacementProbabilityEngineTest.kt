@@ -69,7 +69,7 @@ class PlacementProbabilityEngineTest {
             company: String,
             role: String,
             type: String,
-            matchScore: Float,
+            matchScore: Float?,
         ) = Unit
         override suspend fun updateStatus(id: String, status: ApplicationStatus) = Unit
         override suspend fun delete(id: String) = Unit

@@ -1,5 +1,6 @@
 package com.nexus.network.di
 
+import com.google.gson.Gson
 import com.nexus.network.BuildConfig
 import com.nexus.network.api.AuthInterceptor
 import com.nexus.network.api.NexusApiService
@@ -46,11 +47,15 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(client: OkHttpClient): Retrofit {
+    fun provideGson(): Gson = Gson()
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(client: OkHttpClient, gson: Gson): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BuildConfig.NEXUS_API_URL)
             .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
 

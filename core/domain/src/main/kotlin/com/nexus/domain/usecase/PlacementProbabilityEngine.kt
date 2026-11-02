@@ -1,5 +1,6 @@
 package com.nexus.domain.usecase
 
+import com.nexus.common.Constants
 import com.nexus.domain.repository.IDSAProblemRepository
 import com.nexus.domain.repository.ISkillGraphRepository
 import com.nexus.domain.repository.IApplicationRepository
@@ -33,7 +34,9 @@ class PlacementProbabilityEngine @Inject constructor(
     val tier2: TierProbability,
     val tier3: TierProbability,
     val primaryBottleneck: String,
-    val dataDisclaimer: String = "Estimates based on your preparation patterns. Accuracy improves as more NEXUS students share outcomes.",
+    val dataDisclaimer: String =
+      "Estimates based on your preparation patterns. Accuracy improves as more " +
+        "${Constants.APP_NAME} students share outcomes.",
   )
 
   suspend fun calculate(): PlacementProbabilities {

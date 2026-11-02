@@ -7,7 +7,8 @@ data class Application(
   val role: String,
   val opportunityType: String,
   val status: ApplicationStatus,
-  val matchScore: Float,
+  /** Null when no fit percentage could be derived — see IApplicationRepository.trackApplication. */
+  val matchScore: Float?,
   val appliedDate: Long?,
   val interviewDate: Long?,
   val interviewRounds: Int,

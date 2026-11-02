@@ -90,7 +90,7 @@ class WeeklyNarrativeGenerator @Inject constructor(
   }
 
   private fun buildStreakContext(streak: Int): String = when {
-    streak >= 30 -> " Your $streak-day streak puts you in the top 5% of NEXUS users."
+    streak >= 30 -> " Your $streak-day streak is a full month of showing up."
     streak >= 14 -> " Your $streak-day streak is genuinely impressive."
     streak >= 7 -> " Seven days in — you're building a real habit."
     streak > 0 -> " Day $streak — every streak starts here."

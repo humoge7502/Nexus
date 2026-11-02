@@ -47,7 +47,7 @@ class ApplicationRepository @Inject constructor(
         company: String,
         role: String,
         type: String,
-        matchScore: Float,
+        matchScore: Float?,
     ) {
         val existing = applicationDao.getByOpportunityId(opportunityId)
         if (existing == null) {
@@ -58,17 +58,18 @@ class ApplicationRepository @Inject constructor(
                     role = role,
                     opportunityType = type,
                     status = ApplicationStatus.SAVED.name,
-                    matchScore = matchScore,
+                    matchScore = matchScore ?: UNSCORED,
                 )
             )
-            analyticsTracker.track("application_tracked", mapOf(
-                "company" to company, "type" to type, "match_score" to matchScore,
-            ))
+            val properties = mutableMapOf<String, Any>("company" to company, "type" to type)
+            // An unscored track reports no score rather than a zero that never happened.
+            if (matchScore != null) properties["match_score"] = matchScore
+            analyticsTracker.track("application_tracked", properties)
         }
     }
 
     override suspend fun updateStatus(id: String, status: ApplicationStatus) {
-        val entity = applicationDao.getByOpportunityId(id) ?: return
+        val entity = applicationDao.getById(id) ?: return
         val now = System.currentTimeMillis()
         val updated = entity.copy(
             status = status.name,
@@ -87,7 +88,7 @@ class ApplicationRepository @Inject constructor(
         applicationDao.getCompanyStats()
 
     override suspend fun delete(id: String) {
-        applicationDao.getByOpportunityId(id)?.let { applicationDao.delete(it) }
+        applicationDao.deleteById(id)
     }
 
     override suspend fun refreshApplications(): ApiResult<Unit> {
@@ -102,9 +103,21 @@ class ApplicationRepository @Inject constructor(
     private fun ApplicationEntity.toDomain() = Application(
         id = id, opportunityId = opportunityId, company = company, role = role,
         opportunityType = opportunityType, status = ApplicationStatus.fromString(status),
-        matchScore = matchScore, appliedDate = appliedDate, interviewDate = interviewDate,
+        matchScore = if (matchScore < 0f) null else matchScore,
+        appliedDate = appliedDate, interviewDate = interviewDate,
         interviewRounds = interviewRounds, outcomeDate = outcomeDate, outcomeNotes = outcomeNotes,
         salaryOffered = salaryOffered, preparationNotes = preparationNotes,
         createdAt = createdAt, updatedAt = updatedAt,
     )
+
+    companion object {
+        /**
+         * The `match_score` column is NOT NULL in schema v11, and relaxing it would
+         * mean recreating the table for a value no student ever sees. A negative
+         * score is therefore the stored form of "not scored": 0 is a real outcome
+         * (skills named, none of them asked for) and must stay distinguishable from
+         * "nobody could compute one", which renders no number at all.
+         */
+        private const val UNSCORED = -1f
+    }
 }

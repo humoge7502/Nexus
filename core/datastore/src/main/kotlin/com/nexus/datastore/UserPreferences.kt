@@ -12,6 +12,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.nexus.datastore.security.TokenCipher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -49,6 +50,9 @@ class UserPreferences @Inject constructor(
         val TRIBE_GOAL = stringPreferencesKey("tribe_goal")
         val TRIBE_POD_SIZE = intPreferencesKey("tribe_pod_size")
         val FCM_TOKEN = stringPreferencesKey("fcm_token")
+        val DEADLINE_REMINDERS_FIRED = stringSetPreferencesKey("deadline_reminders_fired")
+        val OPPORTUNITIES_ANNOUNCED = stringSetPreferencesKey("opportunities_announced")
+        val OPPORTUNITY_LOG_SEEDED = booleanPreferencesKey("opportunity_log_seeded")
     }
 
     val dataStore: DataStore<Preferences> get() = context.dataStore
@@ -282,6 +286,73 @@ class UserPreferences @Inject constructor(
     }
 
     val fcmToken: Flow<String?> = context.dataStore.data.map { prefs -> prefs[FCM_TOKEN] }
+
+    /**
+     * Deadline reminders are notified at most once per opportunity per tier, so
+     * the six-hourly sweep never re-pings the same deadline. The log is local to
+     * this device and is pruned against the still-watched set on each sweep.
+     */
+    suspend fun firedDeadlineReminderKeys(): Set<String> =
+        context.dataStore.data
+            .map { prefs -> prefs[DEADLINE_REMINDERS_FIRED] ?: emptySet() }
+            .first()
+
+    suspend fun markDeadlineReminderKeysFired(keys: Collection<String>) {
+        if (keys.isEmpty()) return
+        context.dataStore.edit { prefs ->
+            prefs[DEADLINE_REMINDERS_FIRED] = (prefs[DEADLINE_REMINDERS_FIRED] ?: emptySet()) + keys
+        }
+    }
+
+    suspend fun retainDeadlineReminderKeys(keep: Collection<String>) {
+        val keepSet = keep.toSet()
+        context.dataStore.edit { prefs ->
+            val current = prefs[DEADLINE_REMINDERS_FIRED] ?: emptySet()
+            val pruned = current.filterTo(mutableSetOf()) { key ->
+                keepSet.any { key.startsWith("$it:") }
+            }
+            prefs[DEADLINE_REMINDERS_FIRED] = pruned
+        }
+    }
+
+    /**
+     * Which feed items this device has already told the student about, so the
+     * six-hourly match sweep announces an arrival once instead of every time it
+     * re-reads the catalog. Keys are `KIND:id`, scoped to items still in the
+     * feed, so the log cannot outlive the data it describes.
+     */
+    suspend fun announcedOpportunityKeys(): Set<String> =
+        context.dataStore.data
+            .map { prefs -> prefs[OPPORTUNITIES_ANNOUNCED] ?: emptySet() }
+            .first()
+
+    suspend fun markOpportunitiesAnnounced(keys: Collection<String>) {
+        if (keys.isEmpty()) return
+        context.dataStore.edit { prefs ->
+            prefs[OPPORTUNITIES_ANNOUNCED] =
+                (prefs[OPPORTUNITIES_ANNOUNCED] ?: emptySet()) + keys
+        }
+    }
+
+    suspend fun retainAnnouncedOpportunityKeys(keep: Collection<String>) {
+        val keepSet = keep.toSet()
+        context.dataStore.edit { prefs ->
+            val current = prefs[OPPORTUNITIES_ANNOUNCED] ?: emptySet()
+            prefs[OPPORTUNITIES_ANNOUNCED] = current.filterTo(mutableSetOf()) { it in keepSet }
+        }
+    }
+
+    /**
+     * The first sweep after install records the catalog without notifying: a
+     * student who has never seen the feed has nothing to compare an arrival
+     * against, and two hundred "new match" alerts is not an onboarding.
+     */
+    suspend fun isOpportunityLogSeeded(): Boolean =
+        context.dataStore.data.map { prefs -> prefs[OPPORTUNITY_LOG_SEEDED] ?: false }.first()
+
+    suspend fun markOpportunityLogSeeded() {
+        context.dataStore.edit { prefs -> prefs[OPPORTUNITY_LOG_SEEDED] = true }
+    }
 
     suspend fun clearAuth() {
         context.dataStore.edit { prefs ->

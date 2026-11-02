@@ -4,18 +4,18 @@ import com.nexus.common.ApiResult
 import com.nexus.database.dao.InternshipDao
 import com.nexus.database.entity.InternshipEntity
 import com.nexus.domain.model.*
-import com.nexus.network.api.NexusApiService
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class InternshipRepository @Inject constructor(
-    private val api: NexusApiService,
+    private val feed: OpportunityFeedRepository,
     private val dao: InternshipDao,
 ) {
     fun getAllInternships(): Flow<List<Internship>> =
@@ -28,7 +28,7 @@ class InternshipRepository @Inject constructor(
         dao.updateSaveStatus(internshipId, isSaved)
 
     suspend fun isSaved(internshipId: String): Boolean =
-        dao.getSavedInternships().first().any { it.id == internshipId }
+        internshipId in dao.getSavedIds()
 
     suspend fun getCachedInternshipsPage(page: Int, loadSize: Int): List<Internship> =
         dao.getPage(loadSize, page * loadSize).map { it.toDomain() }
@@ -36,35 +36,23 @@ class InternshipRepository @Inject constructor(
     suspend fun refreshInternshipsPage(page: Int, loadSize: Int): ApiResult<List<Internship>> =
         refreshInternships()
 
+    /**
+     * Publishes the verified feed into Room. A failed refresh keeps the last
+     * good cache visible rather than blanking the screen.
+     */
     suspend fun refreshInternships(): ApiResult<List<Internship>> {
-        return try {
-            val response = api.getInternships()
-            if (response.isSuccessful) {
-                val dtos = response.body()?.data ?: return ApiResult.Error("Empty response")
-                val entities = dtos.map { it.toEntity() }
-                dao.deleteAll()
-                dao.insertAll(entities)
-                ApiResult.Success(entities.map { it.toDomain() })
-            } else {
-                ApiResult.Error("Server error: ${response.code()}")
+        val cached = dao.getAllInternships().first().map { it.toDomain() }
+        return when (val result = feed.refresh()) {
+            is ApiResult.Success -> {
+                val fresh = dao.getAllInternships().first().map { it.toDomain() }
+                ApiResult.Success(fresh.ifEmpty { cached })
             }
-        } catch (e: Exception) {
-            ApiResult.Error(e.message ?: "Network error")
+            is ApiResult.Error ->
+                if (cached.isNotEmpty()) ApiResult.Success(cached)
+                else ApiResult.Error(result.message)
+            ApiResult.Loading -> ApiResult.Loading
         }
     }
-
-    private fun com.nexus.network.dto.InternshipDto.toEntity() = InternshipEntity(
-        id = id, title = title,
-        companyName = company, companyLogoUrl = companyLogo,
-        location = location, isRemote = isRemote,
-        stipendAmount = stipend?.filter { it.isDigit() }?.toIntOrNull(),
-        stipendCurrency = "INR",
-        durationMonths = duration.filter { it.isDigit() }.toIntOrNull() ?: 3,
-        skills = skills.joinToString(","),
-        deadline = java.time.LocalDate.now().toEpochDay(),
-        applyUrl = applyUrl, description = description,
-        postedAt = System.currentTimeMillis(),
-    )
 
     private fun InternshipEntity.toDomain() = Internship(
         id = id, title = title,
@@ -72,15 +60,24 @@ class InternshipRepository @Inject constructor(
         location = Location(location),
         stipend = stipendAmount?.let { Stipend(it, stipendCurrency) },
         duration = Duration(durationMonths),
-        deadline = deadlineDate(),
+        deadline = if (deadline > 0L) deadline.toDeadlineDate() else null,
         applyUrl = applyUrl, description = description,
         isRemote = isRemote, isSaved = isSaved,
-        postedAt = java.time.Instant.ofEpochMilli(postedAt),
-        tags = skillNames(),
+        postedAt = Instant.ofEpochMilli(postedAt),
+        tags = tagNames(),
         requiredSkills = skillNames().map { Skill(name = it) }.toImmutableList(),
+        kind = OpportunityKind.from(kind),
+        sourceName = sourceName,
+        verifiedAt = verifiedAt?.takeIf { it > 0L }?.let(Instant::ofEpochMilli),
+        stipendLabel = stipendLabel,
+        durationLabel = durationLabel,
     )
 
     private fun InternshipEntity.skillNames() =
         if (skills.isBlank()) persistentListOf()
         else skills.split(",").map { it.trim() }.filter { it.isNotBlank() }.toImmutableList()
+
+    private fun InternshipEntity.tagNames() =
+        if (tags.isBlank()) persistentListOf()
+        else tags.split(",").map { it.trim() }.filter { it.isNotBlank() }.toImmutableList()
 }

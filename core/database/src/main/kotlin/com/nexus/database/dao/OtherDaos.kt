@@ -79,6 +79,9 @@ interface ApplicationDao {
     @Query("SELECT * FROM applications WHERE opportunity_id = :opportunityId LIMIT 1")
     suspend fun getByOpportunityId(opportunityId: String): ApplicationEntity?
 
+    @Query("SELECT * FROM applications WHERE id = :id")
+    suspend fun getById(id: String): ApplicationEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(application: ApplicationEntity)
 

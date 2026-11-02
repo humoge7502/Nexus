@@ -67,7 +67,7 @@ class CareerMirrorGeneratorTest {
         )
 
         assertEquals(5, mirror.keyInsights.size)
-        assertTrue(mirror.keyInsights.first().contains("Excellent growth: NEXUS Score improved by +200 pts"))
+        assertTrue(mirror.keyInsights.first().contains("Excellent growth: Score improved by +200 pts"))
         assertTrue(mirror.keyInsights.any { it.contains("DSA momentum: 120 problems") })
         assertTrue(mirror.keyInsights.any { it.contains("2 offer(s)") })
         assertTrue(mirror.actionItems == listOf("Maintain velocity — strong trajectory building"))

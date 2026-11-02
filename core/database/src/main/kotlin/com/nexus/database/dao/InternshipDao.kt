@@ -12,15 +12,6 @@ interface InternshipDao {
     @Query("SELECT * FROM internships ORDER BY cached_at DESC LIMIT :limit OFFSET :offset")
     suspend fun getPage(limit: Int, offset: Int): List<com.nexus.database.entity.InternshipEntity>
 
-    @Query(
-        "SELECT * FROM internships WHERE " +
-        "(deadline > 10000000000 AND deadline <= :cutoffMillis) OR " +
-        "(deadline > 0 AND deadline <= 10000000000 AND deadline <= :cutoffEpochDay) " +
-        "ORDER BY deadline ASC"
-    )
-    suspend fun getInternshipsWithDeadlineBefore(cutoffMillis: Long, cutoffEpochDay: Long): List<com.nexus.database.entity.InternshipEntity>
-
-
     @Query("SELECT * FROM internships ORDER BY posted_at DESC")
     fun getAllInternships(): Flow<List<InternshipEntity>>
 
@@ -52,6 +43,13 @@ interface InternshipDao {
 
     @Query("UPDATE internships SET is_saved = :isSaved WHERE id = :id")
     suspend fun updateSaveStatus(id: String, isSaved: Boolean)
+
+    @Query("SELECT id FROM internships WHERE is_saved = 1")
+    suspend fun getSavedIds(): List<String>
+
+    /** Drops stale feed rows without discarding anything the student bookmarked. */
+    @Query("DELETE FROM internships WHERE is_saved = 0")
+    suspend fun deleteUnsaved()
 
     @Query("DELETE FROM internships")
     suspend fun deleteAll()

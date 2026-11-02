@@ -44,7 +44,7 @@ class RetentionTracker @Inject constructor(
     }
   }
 
-  suspend fun recordWeeklyActivity(sessionCount: Int, featuresUsed: List<String>) {
+  suspend fun recordWeeklyActivity(activeDays: Int, featuresUsed: List<String>) {
     val installDateStr = userPreferences.lastLoginDate.first()
     val installDate = if (installDateStr.isNotBlank()) {
       try {
@@ -65,7 +65,7 @@ class RetentionTracker @Inject constructor(
       installWeek = installWeek,
       activityWeek = currentWeek,
       weeksSinceInstall = weekNumber,
-      sessionCount = sessionCount,
+      sessionCount = activeDays,
       xpEarned = weeklyXP,
       featuresUsed = featuresUsed.joinToString(","),
     )
@@ -77,12 +77,12 @@ class RetentionTracker @Inject constructor(
       mapOf(
         "install_week" to installWeek,
         "weeks_since_install" to weekNumber.toString(),
-        "session_count" to sessionCount.toString(),
+        "active_days" to activeDays.toString(),
         "xp_earned" to weeklyXP.toString(),
       )
     )
 
-    Timber.d("Retention: Week $weekNumber since install, $sessionCount sessions, $weeklyXP XP")
+    Timber.d("Retention: Week $weekNumber since install, $activeDays active days, $weeklyXP XP")
   }
 
   suspend fun getRetentionTrajectory(): List<RetentionEntity> {

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reminder_week_title">%1$s — %2$d days left</string>
+    <string name="reminder_week_body">%1$s closes in %2$d days — enough time to build an application worth reading.</string>
+
+    <string name="reminder_three_title">%1$s — %2$d days left</string>
+    <string name="reminder_three_body">%1$s closes in %2$d days. If you want this one, finish the application now.</string>
+
+    <string name="reminder_tomorrow_title">Closes tomorrow: %1$s</string>
+    <string name="reminder_tomorrow_body">%1$s closes tomorrow. Today is the last full day to apply.</string>
+
+    <string name="reminder_today_title">Closes today: %1$s</string>
+    <string name="reminder_today_body">%1$s closes at the end of today. Applications are not accepted after that.</string>
+
+    <string name="reminder_final_title">Final hours: %1$s</string>
+    <string name="reminder_final_body">%1$s closes tonight. A few minutes now is the difference.</string>
+
+    <string name="reminder_more_body">%1$d more of your saved deadlines are close too. Open Sagitta to see the whole pipeline.</string>
+
+    <string name="new_match_title">New match at %1$s</string>
+    <string name="new_match_body">%1$s posted %2$s and it asks for %3$s — skills you already have.</string>
+    <string name="new_match_more_body">%1$d more new matches are waiting in Explore.</string>
+</resources>

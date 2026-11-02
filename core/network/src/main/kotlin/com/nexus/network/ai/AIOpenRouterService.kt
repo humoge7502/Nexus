@@ -1,5 +1,6 @@
 package com.nexus.network.ai
 
+import com.nexus.common.Constants
 import com.nexus.network.service.AIRequestRouter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -13,6 +14,14 @@ import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+
+/** What the model is told it is — the source of the assistant's self-identification. */
+private const val SYSTEM_PROMPT =
+    "You are ${Constants.APP_NAME} AI, a career assistant for CSE students. " +
+        "Help with internships, certifications, DSA, career advice, skill development, " +
+        "and interview prep. Be concise, practical, and encouraging."
+
+private const val OPENROUTER_APP_TITLE = "${Constants.APP_NAME} Career App"
 
 @Singleton
 class AIOpenRouterService @Inject constructor(
@@ -35,7 +44,7 @@ class AIOpenRouterService @Inject constructor(
             put("messages", JSONArray().apply {
                 put(JSONObject().apply {
                     put("role", "system")
-                    put("content", "You are NEXUS AI, a career assistant for CSE students. Help with internships, certifications, DSA, career advice, skill development, and interview prep. Be concise, practical, and encouraging.")
+                    put("content", SYSTEM_PROMPT)
                 })
                 messages.forEach { msg ->
                     put(JSONObject().apply {
@@ -58,7 +67,7 @@ class AIOpenRouterService @Inject constructor(
             .url(aiRequestRouter.getEndpoint())
             .addHeader("Authorization", aiRequestRouter.buildAuthHeader())
             .addHeader("HTTP-Referer", "https://nexus.app")
-            .addHeader("X-Title", "NEXUS Career App")
+            .addHeader("X-Title", OPENROUTER_APP_TITLE)
             .post(jsonBody.toString().toRequestBody(jsonMediaType))
             .build()
 

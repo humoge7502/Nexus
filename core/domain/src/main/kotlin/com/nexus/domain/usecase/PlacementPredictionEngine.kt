@@ -1,5 +1,6 @@
 package com.nexus.domain.usecase
 
+import com.nexus.common.Constants
 import com.nexus.domain.model.ApplicationStatus
 import com.nexus.domain.model.ScoreSnapshot
 import com.nexus.domain.model.CohortEntry
@@ -71,7 +72,7 @@ class PlacementPredictionEngine @Inject constructor(
 
       val gap = (targetScore - currentScore).coerceAtLeast(0)
       val gapItems = mutableListOf<String>()
-      if (gap > 50) gapItems.add("NEXUS Score is $gap points below tier threshold ($targetScore)")
+      if (gap > 50) gapItems.add("${Constants.APP_NAME} Score is $gap points below tier threshold ($targetScore)")
       if (velocity.delta30d < -20) gapItems.add("Score declined ${abs(velocity.delta30d)} pts in 30 days")
       if (velocity.trend == "flat" && readiness < 0.6f) gapItems.add("Score plateau detected while still below target")
 

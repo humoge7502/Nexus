@@ -28,6 +28,8 @@ object NexusDeepLinks {
                 targetId?.let { NexusDestination.InternshipDetail(it) } ?: NexusDestination.InternshipList
             "deadline" ->
                 targetId?.let { NexusDestination.InternshipDetail(it) } ?: NexusDestination.Applications
+            "hackathon" ->
+                targetId?.let { NexusDestination.HackathonDetail(it) } ?: NexusDestination.Explore
             "streak" -> NexusDestination.Productivity
             "social" -> NexusDestination.Community
             "insight" -> NexusDestination.AIChat

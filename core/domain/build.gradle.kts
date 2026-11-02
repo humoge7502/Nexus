@@ -24,7 +24,10 @@ dependencies {
     implementation(project(":core:network"))
     implementation(project(":core:database"))
     implementation(project(":core:datastore"))
-    implementation(libs.kotlinx.collections)
+    // api, not implementation: the public models in `model/Models.kt` expose
+    // ImmutableList fields, so every consumer of :core:domain needs the type on
+    // its own compile classpath.
+    api(libs.kotlinx.collections)
     implementation(libs.kotlinx.coroutines.core)
     implementation("javax.inject:javax.inject:1")
     implementation(libs.retrofit)

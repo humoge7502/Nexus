@@ -11,19 +11,20 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -59,7 +60,12 @@ import com.nexus.cohortintelligence.CohortIntelligenceScreen
 import com.nexus.common.ApiResult
 import com.nexus.community.CommunityScreen
 import com.nexus.designsystem.component.NexusBottomBar
+import com.nexus.designsystem.component.NexusNavigationLayout
+import com.nexus.designsystem.component.NexusRailBar
+import com.nexus.designsystem.component.NexusSideBar
+import com.nexus.designsystem.component.nexusNavigationLayoutFor
 import com.nexus.designsystem.theme.NexusTheme
+import com.nexus.designsystem.theme.NexusTransitions
 import com.nexus.explore.ExploreScreen
 import com.nexus.explore.HackathonDetailScreen
 import com.nexus.goals.GoalsScreen
@@ -182,11 +188,10 @@ fun NexusApp(
 
     AnimatedContent(
         targetState = currentStep,
-        transitionSpec = {
-            (slideInHorizontally(tween(360)) { it / 8 } + fadeIn(tween(360))) togetherWith
-                (slideOutHorizontally(tween(240)) { -it / 8 } + fadeOut(tween(240)))
-        },
-        label = "bootFlow"
+        // The boot flow only ever moves forward — auth, then onboarding, then the
+        // app — so it takes the forward pair rather than inventing its own timing.
+        transitionSpec = { NexusTransitions.forwardEnter() togetherWith NexusTransitions.forwardExit() },
+        label = "bootFlow",
     ) { step ->
         when (step) {
             "loading" -> { /* splash screen visible */ }
@@ -262,40 +267,59 @@ fun NexusMainScaffold(
         backStackEntry?.destination?.hasRoute(route) == true
     }
 
-    Scaffold(
-        bottomBar = {
-            if (selectedTab >= 0) {
-                NexusBottomBar(
-                    selectedIndex = selectedTab,
-                    onNavigate = { index ->
-                        navController.navigate(topLevelDestinations[index]) {
-                            popUpTo(NexusDestination.Home) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                )
-            }
+    // Compact keeps the thumb-reachable bar. A wide viewport gets a rail, then a
+    // permanent drawer — chosen from the width itself rather than a device label,
+    // so an unfolding foldable changes chrome without the app being told it moved
+    // to another class of hardware.
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val layout = nexusNavigationLayoutFor(maxWidth)
+        val chromeVisible = selectedTab >= 0
+        val sideChrome = chromeVisible && layout != NexusNavigationLayout.BottomBars
+        val onNavigateTab: (Int) -> Unit = { index ->
+            navigateToTab(navController, topLevelDestinations, index)
         }
-    ) { paddingValues ->
-        Surface(modifier = Modifier.fillMaxSize()) {
-            NavHost(
-                navController = navController,
-                startDestination = NexusDestination.Home,
-        enterTransition = {
-            slideInHorizontally(animationSpec = tween(300)) { it / 5 } + fadeIn(tween(300))
-        },
-        exitTransition = {
-            fadeOut(animationSpec = tween(220))
-        },
-        popEnterTransition = {
-            fadeIn(tween(280))
-        },
-        popExitTransition = {
-            slideOutHorizontally(animationSpec = tween(300)) { it / 5 } + fadeOut(tween(300))
-        },
-                modifier = Modifier.padding(paddingValues)
-            ) {
+
+        Scaffold(
+            bottomBar = {
+                if (chromeVisible && layout == NexusNavigationLayout.BottomBars) {
+                    NexusBottomBar(selectedIndex = selectedTab, onNavigate = onNavigateTab)
+                }
+            },
+            // Side chrome takes its own window insets; padding the content with
+            // system bars as well would drop a screen a status bar below a drawer
+            // that already starts beneath one.
+            contentWindowInsets = if (sideChrome) WindowInsets(0) else ScaffoldDefaults.contentWindowInsets,
+        ) { paddingValues ->
+            Row(modifier = Modifier.fillMaxSize()) {
+                if (sideChrome) {
+                    if (layout == NexusNavigationLayout.Rail) {
+                        NexusRailBar(selectedIndex = selectedTab, onNavigate = onNavigateTab)
+                    } else {
+                        NexusSideBar(selectedIndex = selectedTab, onNavigate = onNavigateTab)
+                    }
+                }
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize()
+                        .then(
+                            if (sideChrome) {
+                                Modifier.statusBarsPadding().navigationBarsPadding()
+                            } else {
+                                Modifier
+                            },
+                        )
+                        .padding(paddingValues),
+                ) {
+                    NavHost(
+                        navController = navController,
+                        startDestination = NexusDestination.Home,
+                        enterTransition = { NexusTransitions.forwardEnter() },
+                        exitTransition = { NexusTransitions.forwardExit() },
+                        popEnterTransition = { NexusTransitions.backwardEnter() },
+                        popExitTransition = { NexusTransitions.backwardExit() },
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
                 // HOME
                 composable<NexusDestination.Home> {
                     HomeScreen(
@@ -474,6 +498,26 @@ fun NexusMainScaffold(
                     TribeScreen(onBack = { navController.popBackStack() })
                 }
             }
+                }
+            }
         }
+    }
+}
+
+/**
+ * One rule for every piece of chrome: switching a tab replaces the stack rather
+ * than stacking on it, and state is restored against Home so a destination never
+ * sits behind the one the user just came from. The bar, the rail and the drawer
+ * all call this, which is the only reason they cannot drift apart.
+ */
+private fun navigateToTab(
+    navController: NavHostController,
+    destinations: List<NexusDestination>,
+    index: Int,
+) {
+    navController.navigate(destinations[index]) {
+        popUpTo(NexusDestination.Home) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
     }
 }

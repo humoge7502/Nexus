@@ -13,18 +13,6 @@ class NexusAnalytics @Inject constructor(
         ))
     }
 
-    fun trackOpportunitySaved(opportunityId: String, company: String, matchScore: Float) {
-        analyticsTracker.track("opportunity_saved", mapOf(
-            "opportunity_id" to opportunityId, "company" to company, "match_score" to matchScore,
-        ))
-    }
-
-    fun trackOpportunityApplied(opportunityId: String, company: String) {
-        analyticsTracker.track("opportunity_applied", mapOf(
-            "opportunity_id" to opportunityId, "company" to company,
-        ))
-    }
-
     fun trackApplicationStatusChanged(applicationId: String, oldStatus: String, newStatus: String, company: String) {
         analyticsTracker.track("application_status_changed", mapOf(
             "id" to applicationId, "old_status" to oldStatus, "new_status" to newStatus, "company" to company,

@@ -39,6 +39,13 @@ data class InternshipEntity(
     @ColumnInfo(name = "posted_at") val postedAt: Long = 0,
     @ColumnInfo(name = "is_saved") val isSaved: Boolean = false,
     @ColumnInfo(name = "cached_at") val cachedAt: Long = System.currentTimeMillis(),
+    val kind: String = "INTERNSHIP",
+    @ColumnInfo(name = "source_name") val sourceName: String = "",
+    @ColumnInfo(name = "verified_at") val verifiedAt: Long? = null,
+    @ColumnInfo(name = "stipend_label") val stipendLabel: String = "",
+    @ColumnInfo(name = "duration_label") val durationLabel: String = "",
+    /** Resource tags (source, location, domain) — distinct from [skills]. */
+    val tags: String = "",
 )
 
 @Entity(
@@ -146,6 +153,8 @@ data class HackathonEntity(
     val isSaved: Boolean = false,
     val tags: String = "",
     val cachedAt: Long = System.currentTimeMillis(),
+    @ColumnInfo(name = "source_name") val sourceName: String = "",
+    @ColumnInfo(name = "verified_at") val verifiedAt: Long? = null,
 )
 
 @Entity(

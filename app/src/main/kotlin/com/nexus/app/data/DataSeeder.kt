@@ -1,12 +1,11 @@
 package com.nexus.app.data
 
 import android.content.Context
+import com.nexus.data.repository.OpportunityFeedRepository
 import com.nexus.database.NexusDatabase
 import com.nexus.database.entity.AchievementEntity
 import com.nexus.database.entity.CertificationEntity
 import com.nexus.database.entity.DSAProblemEntity
-import com.nexus.database.entity.HackathonEntity
-import com.nexus.database.entity.InternshipEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,34 +13,31 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneOffset
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * First-launch seeding of the Room database from bundled real datasets
- * (assets/opportunities_seed.json — 17 internships and 4 hackathons,
- * certifications_seed.json — 57 certs, dsa_problems_seed.json — 147 problems,
- * roadmaps_seed.json — 10 roadmaps). This is what makes every screen show
- * real content on the very first run, offline, with zero backend needed.
+ * First-launch seeding from bundled datasets. Opportunities are a real,
+ * verified capture of the published feed (assets/opportunities_seed.json),
+ * so the very first run has genuine listings even with no connection; the
+ * next refresh replaces them. Certifications, DSA problems and badge
+ * definitions also seed from assets.
  *
- * Runs only when the corresponding table is empty, so user progress
- * (saved internships, solved problems, statuses) is never overwritten.
+ * Runs only when the corresponding table is empty, so user progress is never
+ * overwritten.
  */
 @Singleton
 class DataSeeder @Inject constructor(
     @ApplicationContext private val context: Context,
     private val database: NexusDatabase,
+    private val feed: OpportunityFeedRepository,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     fun seedIfEmpty() {
-        scope.launch { seedInternships() }
+        scope.launch { seedOpportunities() }
         scope.launch { seedCertifications() }
         scope.launch { seedDsaProblems() }
-        scope.launch { seedHackathons() }
         scope.launch { seedAchievements() }
     }
 
@@ -93,43 +89,14 @@ class DataSeeder @Inject constructor(
         )
     }
 
-    private suspend fun seedInternships() = withContext(Dispatchers.IO) {
-        val dao = database.internshipDao()
-        if (dao.countAll() > 0) return@withContext
+    private suspend fun seedOpportunities() = withContext(Dispatchers.IO) {
+        if (database.internshipDao().countAll() > 0 || database.hackathonDao().countAll() > 0) {
+            return@withContext
+        }
         runCatching {
             val json = context.assets.open("opportunities_seed.json").bufferedReader().use { it.readText() }
-            val arr = org.json.JSONObject(json).getJSONArray("opportunities")
-            val entities = mutableListOf<InternshipEntity>()
-            for (i in 0 until arr.length()) {
-                val o = arr.getJSONObject(i)
-                if (o.optString("type") != "INTERNSHIP") continue
-                val skills = o.optJSONArray("requiredSkills") ?: JSONArray()
-                val skillStr = (0 until skills.length()).joinToString(",") { skills.getString(it) }
-                val stipendStr = o.optString("stipend", "")
-                val stipendAmount = Regex("\\d{2,7}").find(stipendStr.replace(",", ""))?.value?.toIntOrNull()
-                val duration = o.optString("duration", "")
-                val months = Regex("\\d+").find(duration)?.value?.toIntOrNull() ?: 2
-                entities += InternshipEntity(
-                    id = o.optString("id", "opp_$i"),
-                    title = o.optString("role", "Internship"),
-                    companyName = o.optString("company", ""),
-                    companyLogoUrl = null,
-                    location = o.optString("location", ""),
-                    isRemote = o.optString("locationType", "") == "REMOTE",
-                    stipendAmount = stipendAmount,
-                    stipendCurrency = "INR",
-                    durationMonths = months,
-                    skills = skillStr,
-                    deadline = o.optLong("deadline", 0L),
-                    applyUrl = o.optString("applicationUrl", ""),
-                    description = o.optString("description", ""),
-                    postedAt = o.optLong("postedAt", 0L),
-                    isSaved = false,
-                    cachedAt = System.currentTimeMillis(),
-                )
-            }
-            if (entities.isNotEmpty()) dao.insertAll(entities)
-        }.onFailure { android.util.Log.e("DataSeeder", "internship seed failed", it) }
+            feed.importSnapshot(json)
+        }.onFailure { android.util.Log.e("DataSeeder", "opportunity seed failed", it) }
     }
 
     private suspend fun seedCertifications() = withContext(Dispatchers.IO) {
@@ -187,45 +154,4 @@ class DataSeeder @Inject constructor(
             if (entities.isNotEmpty()) dao.insertAll(entities)
         }.onFailure { android.util.Log.e("DataSeeder", "dsa seed failed", it) }
     }
-
-    private suspend fun seedHackathons() = withContext(Dispatchers.IO) {
-        val dao = database.hackathonDao()
-        if (dao.countAll() > 0) return@withContext
-        runCatching {
-            val json = context.assets.open("opportunities_seed.json").bufferedReader().use { it.readText() }
-            val arr = org.json.JSONObject(json).getJSONArray("opportunities")
-            val entities = mutableListOf<HackathonEntity>()
-            for (i in 0 until arr.length()) {
-                val h = arr.getJSONObject(i)
-                if (h.optString("type") != "HACKATHON") continue
-                val registrationDay = h.optLong("deadline", 0L).toEpochDayUtc()
-                val tags = h.optJSONArray("tags") ?: JSONArray()
-                entities += HackathonEntity(
-                    id = h.optString("id", "hackathon_$i"),
-                    title = h.optString("role", "Hackathon"),
-                    organizer = h.optString("company", ""),
-                    description = h.optString("description", ""),
-                    mode = when (h.optString("locationType").uppercase()) {
-                        "ONLINE", "REMOTE" -> "ONLINE"
-                        "HYBRID" -> "HYBRID"
-                        else -> "OFFLINE"
-                    },
-                    location = h.optString("location", "").ifBlank { null },
-                    startDate = registrationDay,
-                    endDate = registrationDay + 2,
-                    registrationDeadline = registrationDay,
-                    prizePool = h.optString("prizePool", ""),
-                    registrationUrl = h.optString("applicationUrl", ""),
-                    isLive = false,
-                    isSaved = false,
-                    tags = (0 until tags.length()).joinToString(",") { tags.getString(it) },
-                )
-            }
-            if (entities.isNotEmpty()) dao.insertAll(entities)
-        }.onFailure { android.util.Log.e("DataSeeder", "hackathon seed failed", it) }
-    }
-
-    private fun Long.toEpochDayUtc(): Long =
-        if (this > 0) Instant.ofEpochMilli(this).atZone(ZoneOffset.UTC).toLocalDate().toEpochDay()
-        else LocalDate.now().toEpochDay()
 }

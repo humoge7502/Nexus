@@ -1,6 +1,7 @@
 package com.nexus.network.service
 
 import com.google.firebase.auth.FirebaseAuth
+import com.nexus.common.Constants
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
@@ -117,7 +118,7 @@ class AIStreamClientTest {
         val failed = collectEvents().single() as AIStreamEvent.Failed
 
         assertEquals(401, failed.httpStatus)
-        assertEquals("Sign in again to keep using NEXUS AI.", failed.message)
+        assertEquals("Sign in again to keep using ${Constants.APP_NAME} AI.", failed.message)
     }
 
     @Test

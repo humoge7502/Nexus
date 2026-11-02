@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -135,7 +136,8 @@ class WeeklyNarrativeGeneratorTest {
 
         assertEquals("Outstanding week — real momentum", narrative.headline)
         assertEquals(1100, narrative.weeklyXP)
-        assertTrue(narrative.body.contains("top 5% of NEXUS users"))
+        assertTrue(narrative.body.contains("a full month of showing up"))
+        assertFalse(narrative.body.contains("top 5%"))
     }
 
     @Test

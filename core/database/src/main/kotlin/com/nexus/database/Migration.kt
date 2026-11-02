@@ -466,3 +466,21 @@ val MIGRATION_9_10 = object : Migration(9, 10) {
     )
   }
 }
+
+val MIGRATION_10_11 = object : Migration(10, 11) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE internships ADD COLUMN kind TEXT NOT NULL DEFAULT 'INTERNSHIP'")
+        db.execSQL("ALTER TABLE internships ADD COLUMN source_name TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE internships ADD COLUMN verified_at INTEGER")
+        db.execSQL("ALTER TABLE internships ADD COLUMN stipend_label TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE internships ADD COLUMN duration_label TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE internships ADD COLUMN tags TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE hackathons ADD COLUMN source_name TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE hackathons ADD COLUMN verified_at INTEGER")
+
+        // Versions up to 10 shipped a bundled placeholder catalogue. Clear it so
+        // every install is backed by the verified feed instead of fake roles.
+        db.execSQL("DELETE FROM internships")
+        db.execSQL("DELETE FROM hackathons")
+    }
+}

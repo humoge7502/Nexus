@@ -21,11 +21,15 @@ object NotificationHelper {
     fun createChannels(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
 
+        // Read the label from the installed package: this module has no dependency on
+        // core:common, and a hardcoded product name here drifts from the manifest.
+        val appName = context.packageManager.getApplicationLabel(context.applicationInfo).toString()
+
         val channels = listOf(
             NotificationChannel(
                 CHANNEL_DEFAULT, "General Updates",
                 NotificationManager.IMPORTANCE_DEFAULT
-            ).apply { description = "General NEXUS notifications" },
+            ).apply { description = "General $appName notifications" },
             NotificationChannel(
                 CHANNEL_OPPORTUNITIES, "Opportunities",
                 NotificationManager.IMPORTANCE_HIGH

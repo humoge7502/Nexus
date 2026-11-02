@@ -124,3 +124,52 @@ data class UserProfileDto(
     @SerializedName("career_score") val careerScore: Int = 0,
     val streak: Int = 0,
 )
+
+/**
+ * Shape of feed/opportunities.json, published by feed-pipeline and refreshed
+ * every six hours by GitHub Actions. Dates are ISO-8601 calendar days; null
+ * deadlines mean rolling admissions and are never replaced with a guess.
+ */
+data class FeedResponseDto(
+    val version: Int = 0,
+    @SerializedName("generatedAt") val generatedAt: String = "",
+    val internships: List<FeedInternshipDto> = emptyList(),
+    val hackathons: List<FeedHackathonDto> = emptyList(),
+)
+
+data class FeedInternshipDto(
+    val id: String,
+    val kind: String = "INTERNSHIP",
+    val title: String,
+    val company: String,
+    val location: String = "",
+    @SerializedName("isRemote") val isRemote: Boolean = false,
+    @SerializedName("stipendLabel") val stipendLabel: String = "",
+    val duration: String = "",
+    val deadline: String? = null,
+    @SerializedName("applyUrl") val applyUrl: String = "",
+    val description: String = "",
+    @SerializedName("postedAt") val postedAt: String? = null,
+    @SerializedName("sourceName") val sourceName: String = "",
+    @SerializedName("verifiedAt") val verifiedAt: String? = null,
+    val tags: List<String> = emptyList(),
+    val skills: List<String> = emptyList(),
+)
+
+data class FeedHackathonDto(
+    val id: String,
+    val title: String,
+    val organizer: String = "",
+    val description: String = "",
+    val mode: String = "ONLINE",
+    val location: String? = null,
+    @SerializedName("startDate") val startDate: String? = null,
+    @SerializedName("endDate") val endDate: String? = null,
+    @SerializedName("registrationDeadline") val registrationDeadline: String? = null,
+    @SerializedName("prizePool") val prizePool: String = "",
+    @SerializedName("registrationUrl") val registrationUrl: String = "",
+    @SerializedName("isLive") val isLive: Boolean = false,
+    val tags: List<String> = emptyList(),
+    @SerializedName("sourceName") val sourceName: String = "",
+    @SerializedName("verifiedAt") val verifiedAt: String? = null,
+)

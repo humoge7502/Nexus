@@ -19,6 +19,10 @@ interface HackathonDao {
     suspend fun insertAll(hackathons: List<HackathonEntity>)
     @Query("UPDATE hackathons SET isSaved = :saved WHERE id = :id")
     suspend fun updateSaveStatus(id: String, saved: Boolean)
+    @Query("SELECT id FROM hackathons WHERE isSaved = 1")
+    suspend fun getSavedIds(): List<String>
+    @Query("DELETE FROM hackathons WHERE isSaved = 0")
+    suspend fun deleteUnsaved()
     @Query("SELECT COUNT(*) FROM hackathons")
     suspend fun countAll(): Int
 }

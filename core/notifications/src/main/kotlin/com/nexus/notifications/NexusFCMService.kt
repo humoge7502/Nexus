@@ -27,9 +27,12 @@ class NexusFCMService : FirebaseMessagingService() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onMessageReceived(message: RemoteMessage) {
+        // A push with no title still needs one; the installed app label is the source of
+        // truth, since this module cannot reach the shared product constants.
+        val fallbackTitle = packageManager.getApplicationLabel(applicationInfo).toString()
         val title = message.notification?.title
             ?: message.data["title"]
-            ?: "NEXUS Update"
+            ?: fallbackTitle
         val body = message.notification?.body
             ?: message.data["body"]
             ?: ""

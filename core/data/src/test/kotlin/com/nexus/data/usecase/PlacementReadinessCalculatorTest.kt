@@ -23,7 +23,6 @@ class PlacementReadinessCalculatorTest {
   private lateinit var mockAppRepo: ApplicationRepository
   private lateinit var mockDsaRepo: DSAProblemRepository
   private lateinit var mockStreakRepo: StreakRepository
-  private lateinit var mockPrefs: com.nexus.datastore.UserPreferences
   private lateinit var calculator: PlacementReadinessCalculator
 
   @Before
@@ -33,12 +32,9 @@ class PlacementReadinessCalculatorTest {
     mockAppRepo = mockk(relaxed = true)
     mockDsaRepo = mockk(relaxed = true)
     mockStreakRepo = mockk(relaxed = true)
-    mockPrefs = mockk(relaxed = true)
-    every { mockPrefs.collegeTier } returns flowOf("TIER_2")
-    every { mockPrefs.userYear } returns flowOf(2)
     calculator = PlacementReadinessCalculator(
       mockXpRepo, mockSkillDao, mockAppRepo, mockDsaRepo,
-      mockStreakRepo, mockPrefs,
+      mockStreakRepo,
     )
   }
 
@@ -109,8 +105,10 @@ class PlacementReadinessCalculatorTest {
   }
 
   @Test
-  fun `estimated placement month is non-blank`() = runTest {
+  fun `no activity reports the starting band, never a placement date`() = runTest {
     setupMocks(0, 0, 0, 0, 0, 0, 0)
-    assertTrue(calculator.calculate().estimatedPlacementMonth.isNotBlank())
+    val readiness = calculator.calculate()
+    assertEquals("Getting Started", readiness.level)
+    assertTrue(readiness.score in 0..100)
   }
 }

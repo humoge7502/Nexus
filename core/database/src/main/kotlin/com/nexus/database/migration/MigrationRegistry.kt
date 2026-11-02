@@ -10,6 +10,7 @@ import com.nexus.database.MIGRATION_6_7
 import com.nexus.database.MIGRATION_7_8
 import com.nexus.database.MIGRATION_8_9
 import com.nexus.database.MIGRATION_9_10
+import com.nexus.database.MIGRATION_10_11
 
 object MigrationRegistry {
 
@@ -23,6 +24,7 @@ object MigrationRegistry {
         MIGRATION_7_8,
         MIGRATION_8_9,
         MIGRATION_9_10,
+        MIGRATION_10_11,
     )
 
     val LATEST_VERSION: Int

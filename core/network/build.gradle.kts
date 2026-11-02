@@ -24,6 +24,13 @@ android {
             "NEXUS_API_URL",
             "\"${localProps.getProperty("NEXUS_API_URL") ?: "https://api.nexus.app/"}\""
         )
+        // Verified opportunity feed, regenerated every 6 hours by feed-refresh.yml.
+        buildConfigField(
+            "String",
+            "SAGITTA_FEED_URL",
+            "\"${localProps.getProperty("SAGITTA_FEED_URL")
+                ?: "https://raw.githubusercontent.com/humoge7502/Nexus/master/feed/opportunities.json"}\""
+        )
     }
     buildFeatures {
         buildConfig = true

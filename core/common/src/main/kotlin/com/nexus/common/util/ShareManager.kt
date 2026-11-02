@@ -22,14 +22,14 @@ class ShareManager @Inject constructor(
             append("$description\n\n")
             if (score != null) append("\uD83D\uDCCA Career Score: $score/1000\n")
             if (streak != null) append("\uD83D\uDD25 Streak: $streak days\n")
-            append("\nTrack your career growth on Ascent!")
+            append("\nTrack your career growth on Sagitta!")
             append("\n${Constants.PLAY_STORE_URL}")
         }
 
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, text)
-            putExtra(Intent.EXTRA_SUBJECT, "My Ascent Achievement: $title")
+            putExtra(Intent.EXTRA_SUBJECT, "My Sagitta Achievement: $title")
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
 
@@ -42,7 +42,7 @@ class ShareManager @Inject constructor(
     fun shareLevelUp(levelName: String, totalXP: Int, streak: Int) {
         shareAchievement(
             title = "Reached $levelName Level!",
-            description = "I just leveled up to $levelName on Ascent with $totalXP XP!",
+            description = "I just leveled up to $levelName on Sagitta with $totalXP XP!",
             streak = streak,
         )
     }
@@ -58,7 +58,7 @@ class ShareManager @Inject constructor(
     fun shareStreakMilestone(days: Int, score: Int) {
         shareAchievement(
             title = "$days-Day Career Streak! \uD83D\uDD25",
-            description = "I've maintained a $days-day career growth streak on Ascent!",
+            description = "I've maintained a $days-day career growth streak on Sagitta!",
             score = score,
             streak = days,
         )
@@ -67,7 +67,7 @@ class ShareManager @Inject constructor(
     fun shareScore(score: Int, level: String) {
         shareAchievement(
             title = "Career Score: $score/1000",
-            description = "My career readiness score on Ascent as a $level.",
+            description = "My career readiness score on Sagitta as a $level.",
             score = score,
         )
     }

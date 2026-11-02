@@ -22,7 +22,13 @@ interface IApplicationRepository {
     company: String,
     role: String,
     type: String,
-    matchScore: Float,
+    /**
+     * Fit percentage in 0..1, or null when it cannot be derived — the student has
+     * named no skills, or the posting states none. Callers must pass null rather
+     * than a placeholder, because a percentage the student cannot trace is worse
+     * than no percentage.
+     */
+    matchScore: Float?,
   )
   suspend fun updateStatus(id: String, status: ApplicationStatus)
   suspend fun delete(id: String)
