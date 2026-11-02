@@ -1,0 +1,64 @@
+name: Refresh opportunity feed
+
+on:
+  schedule:
+    - cron: "15 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: opportunity-feed-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: Revalidate sources and publish feed
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Unit tests
+        run: node --test feed-pipeline/test/*.test.mjs
+
+      - name: Refresh verified feed
+        run: node feed-pipeline/src/index.mjs --verify
+
+      - name: Check feed quality gates
+        run: |
+          node -e '
+            const feed = require("./feed/opportunities.json");
+            const meta = require("./feed/meta.json");
+            if (feed.internships.length < 12) throw new Error("Too few internships: " + feed.internships.length);
+            if (feed.hackathons.length < 3) throw new Error("Too few hackathons: " + feed.hackathons.length);
+            const ids = new Set(feed.internships.map((item) => item.id));
+            if (ids.size !== feed.internships.length) throw new Error("Duplicate internship ids");
+            for (const item of feed.internships) {
+              if (!item.applyUrl.startsWith("https://")) throw new Error("Non-https apply URL: " + item.id);
+              if (!item.sourceName) throw new Error("Missing source: " + item.id);
+            }
+            for (const item of feed.hackathons) {
+              if (!item.registrationUrl.startsWith("https://")) throw new Error("Non-https registration URL: " + item.id);
+              if (!item.registrationDeadline) throw new Error("Missing deadline: " + item.id);
+            }
+            console.log("Feed OK:", feed.internships.length, "internships,", feed.hackathons.length, "hackathons");
+            console.log("Generated at:", meta.generatedAt);
+          '
+
+      - name: Commit refreshed feed
+        run: |
+          git config user.name "sagitta-feed-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add feed/opportunities.json feed/meta.json app/src/main/assets/opportunities_seed.json
+          if git diff --cached --quiet; then
+            echo "Feed unchanged; nothing to publish."
+            exit 0
+          fi
+          git commit -m "chore(feed): refresh verified opportunities [skip ci]"
+          git push

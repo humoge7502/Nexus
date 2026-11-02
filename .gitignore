@@ -78,3 +78,9 @@ __pycache__/
 # Brag local render artifacts
 brag-output/composition/.hyperframes/
 brag-output/composition/snapshots/
+brag-output/footage/
+
+# Session-local verification scratch: emulator screenshots and Coil image caches
+.shots/
+.cache-coil/
+.cache-coil-base/

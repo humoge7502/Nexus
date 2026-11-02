@@ -1,0 +1,245 @@
+{
+  "version": 2,
+  "generatedAt": "2026-11-02T16:25:39.298Z",
+  "durationMs": 35300,
+  "counts": {
+    "internships": 25,
+    "hackathons": 18,
+    "verifiedInternships": 25,
+    "verifiedHackathons": 18
+  },
+  "verification": {
+    "enabled": true,
+    "deadLinksDropped": 0
+  },
+  "sources": [
+    {
+      "name": "Stripe",
+      "ok": true,
+      "status": 200,
+      "count": 2
+    },
+    {
+      "name": "Databricks",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Coinbase",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Figma",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Cloudflare",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "MongoDB",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Duolingo",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Pinterest",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Robinhood",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Affirm",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Vercel",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Datadog",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "GitLab",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Elastic",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Dropbox",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Twilio",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Reddit",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Instacart",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Brex",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Ramp",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Netlify",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Airtable",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Discord",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Asana",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Groww",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Slice",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Porter",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "HighRadius",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Paytm",
+      "ok": false,
+      "status": 0,
+      "count": 0
+    },
+    {
+      "name": "Meesho",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "CRED",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Zeta",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Palantir",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Spotify",
+      "ok": true,
+      "status": 200,
+      "count": 0
+    },
+    {
+      "name": "Unstop",
+      "ok": true,
+      "status": 200,
+      "count": 8
+    },
+    {
+      "name": "Devpost",
+      "ok": true,
+      "status": 200,
+      "count": 9
+    },
+    {
+      "name": "Devfolio",
+      "ok": true,
+      "status": 200,
+      "count": 9
+    },
+    {
+      "name": "Official programmes",
+      "ok": true,
+      "status": 200,
+      "count": 15
+    }
+  ]
+}
