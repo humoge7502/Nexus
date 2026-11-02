@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:data"))
     implementation(project(":core:common"))
+    implementation(project(":core:datastore"))
     implementation(platform(libs.compose.bom))
     implementation(libs.bundles.compose)
     implementation(libs.hilt.android)

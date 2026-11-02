@@ -35,7 +35,8 @@ data class ForecastUiState(
   val currentScore: Int = 0,
   val scoreTrend: List<Float> = emptyList(),
   val modelReadinessPct: Int? = null,
-  val modelFactors: List<String> = emptyList(),
+  /** The drivers the model considers strongest, with the real points each one moves. */
+  val modelTopFactors: List<PlacementReadinessModel.Factor> = emptyList(),
   val modelVersion: String = PlacementReadinessModel.VERSION,
   val whatIfMocks: Int = 0,
   val whatIfPct: Int? = null,
@@ -139,7 +140,8 @@ class PlacementForecastViewModel @Inject constructor(
         val modelPct = PlacementReadinessModel.predictPercent(features)
         lastSignals = signals
         lastModelPct = modelPct
-        val factors = PlacementReadinessModel.topFactors(features, limit = 3).map { factor ->
+        val topFactors = PlacementReadinessModel.topFactors(features, limit = 3)
+        val factors = topFactors.map { factor ->
           val sign = if (factor.deltaPoints >= 0) "+" else ""
           "${factor.label} ($sign${factor.deltaPoints} pts)"
         }
@@ -185,7 +187,7 @@ class PlacementForecastViewModel @Inject constructor(
             currentScore = currentScore,
             scoreTrend = scoreTrend,
             modelReadinessPct = modelPct,
-            modelFactors = factors,
+            modelTopFactors = topFactors,
             whatIfMocks = 0,
             whatIfPct = null,
           )

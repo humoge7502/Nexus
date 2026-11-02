@@ -182,6 +182,7 @@ fun ExploreScreen(
                 internships = uiState.filteredInternships,
                 hackathons = uiState.filteredHackathons,
                 certifications = uiState.filteredCertifications,
+                matchPercents = uiState.matchPercents,
                 totalMatches = totalMatches,
                 isLoading = isLoading,
                 errorMessage = errorMessage,
@@ -327,6 +328,7 @@ private fun LazyListScope.exploreResults(
     internships: List<Internship>,
     hackathons: List<Hackathon>,
     certifications: List<Certification>,
+    matchPercents: Map<String, Int>,
     totalMatches: Int,
     isLoading: Boolean,
     errorMessage: String?,
@@ -343,7 +345,7 @@ private fun LazyListScope.exploreResults(
         totalMatches == 0 -> emptyRow(category, hasActiveSearch, onClear)
         else -> when (category) {
             CATEGORY_INTERNSHIPS -> {
-                internshipCards(internships, onInternshipClick)
+                internshipCards(internships, matchPercents, onInternshipClick)
                 if (hackathons.isNotEmpty()) {
                     sectionHeader("Live Hackathons", hackathons.size)
                     hackathonCards(hackathons, onHackathonClick)
@@ -355,7 +357,7 @@ private fun LazyListScope.exploreResults(
             CATEGORY_MORE -> {
                 if (internships.isNotEmpty()) {
                     sectionHeader("Internships", internships.size)
-                    internshipCards(internships, onInternshipClick)
+                    internshipCards(internships, matchPercents, onInternshipClick)
                 }
                 if (hackathons.isNotEmpty()) {
                     sectionHeader("Hackathons", hackathons.size)
@@ -368,7 +370,7 @@ private fun LazyListScope.exploreResults(
             }
 
             else -> {
-                internshipCards(internships, onInternshipClick)
+                internshipCards(internships, matchPercents, onInternshipClick)
                 hackathonCards(hackathons, onHackathonClick)
             }
         }
@@ -386,13 +388,14 @@ private fun LazyListScope.sectionHeader(title: String, count: Int) {    item {
 
 private fun LazyListScope.internshipCards(
     internships: List<Internship>,
+    matchPercents: Map<String, Int>,
     onClick: (String) -> Unit,
 ) {
     items(internships, key = { "internship_${it.id}" }) { internship ->
         ExploreOpportunityCard(
             title = internship.title,
             org = internship.company.name,
-            matchScore = (internship.relevanceScore * 100).toInt(),
+            matchScore = matchPercents[internship.id],
             tags = internship.tags.take(3),
             onClick = { onClick(internship.id) },
         )
@@ -524,7 +527,7 @@ private fun CategoryChip(
 private fun ExploreOpportunityCard(
     title: String,
     org: String,
-    matchScore: Int,
+    matchScore: Int?,
     tags: List<String>,
     onClick: () -> Unit,
 ) {
@@ -556,10 +559,13 @@ private fun ExploreOpportunityCard(
                 }
             }
             Spacer(Modifier.width(8.dp))
-            SignalTag(
-                text = stringResource(R.string.explore_match_percent, matchScore),
-                tone = if (matchScore >= 90) SignalTone.Signal else SignalTone.Neutral,
-            )
+            val percent = matchScore
+            if (percent != null) {
+                SignalTag(
+                    text = stringResource(R.string.explore_match_percent, percent),
+                    tone = if (percent >= 90) SignalTone.Signal else SignalTone.Neutral,
+                )
+            }
         }
     }
 }

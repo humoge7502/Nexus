@@ -24,7 +24,7 @@ import com.nexus.designsystem.theme.motionMillis
 import com.nexus.designsystem.theme.nexus
 
 /**
- * The career-momentum instrument: the user's Ascent-score history drawn as one
+ * The career-momentum instrument: the user's Sagitta-score history drawn as one
  * progressive line with a soft area under it, in the signal color.
  *
  * Data contract: [values] are chronological score readings (any scale; the

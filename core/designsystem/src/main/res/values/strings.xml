@@ -5,11 +5,10 @@
     <string name="nav_ai">AI</string>
     <string name="nav_growth">Growth</string>
     <string name="nav_profile">Me</string>
-    <string name="designsystem_nexus_mirror">Ascent Mirror</string>
-    <string name="designsystem_nexus_momentum">Ascent Momentum</string>
-    <string name="designsystem_nexus_oracle">Ascent Oracle</string>
-    <string name="designsystem_nexus_signal">Ascent Signal</string>
-    <string name="cd_score_ring">Ascent score %1$d out of %2$d</string>
-    <string name="cd_contribution_heatmap">Contribution heatmap over %1$d weeks. %2$d active days, %3$d total contributions</string>
+    <string name="designsystem_nexus_mirror">Sagitta Mirror</string>
+    <string name="designsystem_nexus_momentum">Sagitta Momentum</string>
+    <string name="designsystem_nexus_oracle">Sagitta Oracle</string>
+    <string name="designsystem_nexus_signal">Sagitta Signal</string>
+    <string name="cd_activity_heatmap">Activity calendar over %1$d weeks. %2$d active days, %3$d total sessions</string>
     <string name="cd_back">Back</string>
 </resources>

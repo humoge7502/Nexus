@@ -65,7 +65,7 @@ class PlacementForecastViewModelTest {
         companyTier = "TIER_1_PRODUCT",
         probabilityPct = 72,
         scoreGap = 30,
-        gapItems = listOf("Ascent Score is 30 points below tier threshold (750)"),
+        gapItems = listOf("Sagitta Score is 30 points below tier threshold (750)"),
         velocityTrend = "rising",
         cohortBenchmark = "40/100 placed (40%)",
         coachMessage = "On track but needs focused push.",
@@ -214,8 +214,14 @@ class PlacementForecastViewModelTest {
         assertNull(state.error)
         assertEquals(720, state.currentScore)
         assertEquals(expectedReadiness(), state.modelReadinessPct)
-        assertEquals(3, state.modelFactors.size)
-        assertTrue(state.modelFactors.all { it.endsWith(" pts)") })
+        assertEquals(3, state.modelTopFactors.size)
+        assertTrue(state.modelTopFactors.all { it.label.isNotBlank() })
+        // The screen numbers the drivers 1..n in list order, so the strongest effect
+        // has to come first.
+        assertEquals(
+            state.modelTopFactors.map { kotlin.math.abs(it.deltaPoints) },
+            state.modelTopFactors.map { kotlin.math.abs(it.deltaPoints) }.sortedDescending(),
+        )
         assertEquals(0, state.whatIfMocks)
         assertNull(state.whatIfPct)
     }

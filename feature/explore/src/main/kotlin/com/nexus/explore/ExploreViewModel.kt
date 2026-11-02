@@ -12,10 +12,13 @@ import com.nexus.data.repository.CertificationRepository
 import com.nexus.data.repository.HackathonRepository
 import com.nexus.data.repository.InternshipRepository
 import com.nexus.data.repository.UserXpRepository
+import com.nexus.datastore.UserPreferences
 import com.nexus.domain.model.Certification
 import com.nexus.domain.model.Hackathon
 import com.nexus.domain.model.Internship
+import com.nexus.domain.model.Skill
 import com.nexus.domain.model.UiState
+import com.nexus.domain.usecase.OpportunityMatchingEngine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -41,6 +44,12 @@ data class ExploreUiState(
   val searchQuery: String = "",
   val selectedFilters: Set<String> = emptySet(),
   val selectedCategory: String = CATEGORY_INTERNSHIPS,
+  /**
+   * Fit percentage per internship id. An id is absent when the score cannot be
+   * computed — the student has named no skills, or the posting asks for none —
+   * so the card shows no chip rather than a number nobody derived.
+   */
+  val matchPercents: Map<String, Int> = emptyMap(),
 ) {
   val hasActiveSearch: Boolean get() = searchQuery.isNotBlank() || selectedFilters.isNotEmpty()
 }
@@ -52,12 +61,17 @@ class ExploreViewModel @Inject constructor(
   private val certificationRepository: CertificationRepository,
   private val xpRepository: UserXpRepository,
   private val analyticsTracker: AnalyticsTracker,
+  private val userPreferences: UserPreferences,
+  private val matchingEngine: OpportunityMatchingEngine,
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(ExploreUiState())
   val uiState: StateFlow<ExploreUiState> = _uiState.asStateFlow()
 
   private var searchJob: Job? = null
+
+  /** Kept outside the state because it only annotates other results, never renders alone. */
+  private var trackedSkills: List<Skill> = emptyList()
 
   val pagedInternships: Flow<PagingData<Internship>> = Pager(
     config = PagingConfig(
@@ -70,9 +84,19 @@ class ExploreViewModel @Inject constructor(
 
   init {
     analyticsTracker.track("screen_view", mapOf("screen" to "explore"))
+    watchTrackedSkills()
     loadInternships()
     loadHackathons()
     loadCertifications()
+  }
+
+  private fun watchTrackedSkills() {
+    viewModelScope.launch {
+      userPreferences.userSkills.collect { names ->
+        trackedSkills = names.sorted().map { Skill(name = it) }
+        applyFilters()
+      }
+    }
   }
 
   private fun loadInternships() {
@@ -117,11 +141,13 @@ class ExploreViewModel @Inject constructor(
     val filters = state.selectedFilters
     val category = state.selectedCategory
 
+    val internships = when (val result = state.internships) {
+      is UiState.Success -> result.data.filterInternshipsForExplore(query, filters, category)
+      else -> emptyList()
+    }
+
     _uiState.value = state.copy(
-      filteredInternships = when (val internships = state.internships) {
-        is UiState.Success -> internships.data.filterInternshipsForExplore(query, filters, category)
-        else -> emptyList()
-      },
+      filteredInternships = internships,
       filteredHackathons = when (val hackathons = state.hackathons) {
         is UiState.Success -> hackathons.data.filterHackathonsForExplore(query, filters, category)
         else -> emptyList()
@@ -130,7 +156,23 @@ class ExploreViewModel @Inject constructor(
         is UiState.Success -> certifications.data.filterCertificationsForExplore(query, filters, category)
         else -> emptyList()
       },
+      matchPercents = matchPercents(internships),
     )
+  }
+
+  /**
+   * A percentage is only published when both sides of the comparison exist.
+   * With no tracked skills there is nothing to compare against, and with no
+   * required skills the posting never stated what it wants; [OpportunityMatchingEngine]
+   * answers 0.5 in those cases as a neutral placeholder, and rendering that as
+   * "50% match" would show a student a number no one computed.
+   */
+  private fun matchPercents(internships: List<Internship>): Map<String, Int> {
+    if (trackedSkills.isEmpty()) return emptyMap()
+    return internships.filter { it.requiredSkills.isNotEmpty() }
+      .associate { internship ->
+        internship.id to (matchingEngine.calculateMatchScore(internship, trackedSkills) * 100).toInt()
+      }
   }
 
   fun refresh() {

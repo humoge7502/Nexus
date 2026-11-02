@@ -29,16 +29,16 @@ fun motionMillis(millis: Int): Int = if (LocalReducedMotion.current) 0 else mill
 
 object NexusAnimation {
     object Duration {
-        val instant = 0
+        const val instant = 0
         /** Press feedback. Must land before the finger lifts. */
-        val micro = 90
-        val fast = 140
-        val standard = 220
+        const val micro = 90
+        const val fast = 140
+        const val standard = 220
         /** Longest UI transition allowed outside a hero gauge sweep. */
-        val emphasized = 280
+        const val emphasized = 280
         /** Hero-only: the first sweep of a primary instrument. */
-        val long = 480
-        val dramatic = 700
+        const val long = 480
+        const val dramatic = 700
     }
 
     object Easing {

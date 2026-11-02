@@ -48,7 +48,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.component.AnimatedStatCard
 import com.nexus.designsystem.component.CalibratedRule
-import com.nexus.designsystem.component.LeaderRule
 import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.SignalTag
@@ -65,30 +64,6 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
-
-@Composable
-internal fun MetricBar(metric: Metric) {
-    Row(
-        modifier = Modifier.fillMaxWidth().height(24.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        Text(
-            metric.label,
-            style = MaterialTheme.typography.bodySmall,
-            color = NexusColors.Bone.copy(alpha = 0.80f),
-        )
-        LeaderRule(
-            modifier = Modifier.weight(1f),
-            color = NexusColors.Bone.copy(alpha = 0.28f),
-        )
-        Text(
-            stringResource(R.string.growth_progress_percent, (metric.progress * 100).toInt()),
-            style = NexusTypography.TelemetryMicro,
-            color = NexusColors.Bone,
-        )
-    }
-}
 
 @Composable
 internal fun SkillRadarChart(axes: List<RadarAxis>) {

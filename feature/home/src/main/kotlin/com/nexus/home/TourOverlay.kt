@@ -1,7 +1,6 @@
 package com.nexus.home
 
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -54,7 +53,7 @@ private data class TourStep(
 
 private val tourSteps = listOf(
     TourStep(
-        "Welcome to Ascent",
+        "Welcome to Sagitta",
         "This is your mission control. Everything here exists to move your Career Readiness score up.",
     ),
     TourStep(
@@ -63,7 +62,7 @@ private val tourSteps = listOf(
     ),
     TourStep(
         "Grow your score",
-        "The Growth tab holds your Ascent Score, skill radar and DSA tracker. Solve one problem today to start your streak.",
+        "The Growth tab holds your Sagitta Score, skill radar and DSA tracker. Solve one problem today to start your streak.",
     ),
     TourStep(
         "AI that knows you",
@@ -178,7 +177,6 @@ fun TourOverlay(onFinish: () -> Unit) {
  */
 @Composable
 private fun DemoVideoDialog(onDismiss: () -> Unit) {
-    val context = LocalContext.current
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false),

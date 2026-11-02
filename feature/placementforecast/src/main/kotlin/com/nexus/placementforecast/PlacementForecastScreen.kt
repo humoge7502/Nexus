@@ -35,8 +35,19 @@ import com.nexus.designsystem.component.LoadingState
 import com.nexus.designsystem.component.MomentumChart
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.intelligence.ReadinessFactor
+import com.nexus.designsystem.component.intelligence.ReadinessFactorCard
+import com.nexus.designsystem.theme.NexusSpacing
+import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
 import com.nexus.domain.model.PlacementForecast
+import com.nexus.domain.usecase.PlacementReadinessModel
+import kotlin.math.abs
 import kotlin.math.roundToInt
+
+/** Coupled to the model's feature labels: college tier is an input the student cannot
+ *  change, so it must never be lit up as something to work on today. */
+private const val FIXED_FACTOR_LABEL = "College tier"
 
 @Composable
 fun PlacementForecastScreen(
@@ -140,7 +151,7 @@ fun PlacementForecastContent(
           item {
             ReadinessCard(
               readinessPct = readiness,
-              factors = uiState.modelFactors,
+              factors = uiState.modelTopFactors,
               modelVersion = uiState.modelVersion,
               whatIfMocks = uiState.whatIfMocks,
               whatIfPct = uiState.whatIfPct,
@@ -159,7 +170,7 @@ fun PlacementForecastContent(
 @Composable
 private fun ReadinessCard(
   readinessPct: Int,
-  factors: List<String>,
+  factors: List<PlacementReadinessModel.Factor>,
   modelVersion: String,
   whatIfMocks: Int,
   whatIfPct: Int?,
@@ -179,10 +190,34 @@ private fun ReadinessCard(
         modifier = Modifier.fillMaxWidth(),
       )
       if (factors.isNotEmpty()) {
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = stringResource(R.string.text_top_drivers), style = MaterialTheme.typography.labelSmall)
-        factors.forEach { factor ->
-          Text(text = "• $factor", style = MaterialTheme.typography.bodySmall)
+        Spacer(modifier = Modifier.height(NexusSpacing.lg))
+        Text(
+          text = stringResource(R.string.text_top_drivers),
+          style = NexusTypography.DataLabel,
+          color = MaterialTheme.nexus.signal,
+        )
+        Spacer(modifier = Modifier.height(NexusSpacing.xs))
+        // The bar is a share of the measured push, and a lone driver therefore shows 100%.
+        // Said out loud, so nobody reads it as a chance of getting placed.
+        Text(
+          text = stringResource(R.string.placementforecast_factor_share),
+          style = NexusTypography.BodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        // Each bar is that driver's share of the total push the three add up to, and the
+        // copy states the absolute effect, so the two can be checked against each other.
+        val totalPush = factors.sumOf { abs(it.deltaPoints) }.coerceAtLeast(1)
+        factors.forEachIndexed { index, factor ->
+          Spacer(modifier = Modifier.height(NexusSpacing.md))
+          ReadinessFactorCard(
+            factor = ReadinessFactor(
+              label = factor.label,
+              fraction = abs(factor.deltaPoints).toFloat() / totalPush,
+              detail = factorDetail(factor.deltaPoints, factor.label == FIXED_FACTOR_LABEL),
+              isImprovableNow = factor.label != FIXED_FACTOR_LABEL,
+            ),
+            rank = index + 1,
+          )
         }
       }
       Spacer(modifier = Modifier.height(12.dp))
@@ -220,6 +255,19 @@ private fun ReadinessCard(
       )
     }
   }
+}
+
+/**
+ * States the effect in points rather than adjectives. A bar alone reads as
+ * importance; the number says how much, and the fixed-input line says when a
+ * driver is not a to-do.
+ */
+@Composable
+private fun factorDetail(deltaPoints: Int, isFixedInput: Boolean): String = when {
+  isFixedInput -> stringResource(R.string.placementforecast_factor_fixed)
+  deltaPoints > 0 -> stringResource(R.string.placementforecast_factor_raises, deltaPoints)
+  deltaPoints < 0 -> stringResource(R.string.placementforecast_factor_lowers, -deltaPoints)
+  else -> stringResource(R.string.placementforecast_factor_none)
 }
 
 @Composable

@@ -7,9 +7,9 @@
     <string name="text_placement_readiness">Placement readiness</string>
     <string name="text_top_drivers">Top drivers:</string>
     <string name="cd_back">Back</string>
-    <string name="placementforecast_current_nexus_score">Current Ascent Score: %1$d</string>
+    <string name="placementforecast_current_nexus_score">Current Sagitta Score: %1$d</string>
     <string name="placementforecast_score_trend_title">Score trend</string>
-    <string name="placementforecast_score_trend_caption">Your daily Ascent-score snapshots — the input the on-device model reads.</string>
+    <string name="placementforecast_score_trend_caption">Your daily Sagitta-score snapshots — the input the on-device model reads.</string>
     <string name="placementforecast_on_device_model_note">On-device model v%1$s · explainable, no data leaves your device</string>
     <string name="placementforecast_predicted_probability">%1$d%% predicted probability of placement this season</string>
     <string name="placementforecast_probability">Probability: %1$d%%</string>
@@ -17,4 +17,9 @@
     <string name="placementforecast_readiness_would_move">Readiness would move to %1$d%% (%2$s pts)</string>
     <string name="placementforecast_tier">Tier: %1$s</string>
     <string name="placementforecast_what_if_mock_interviews">What if I add %1$d mock interviews?</string>
+    <string name="placementforecast_factor_share">The share shown is each driver\'s part of the total measured push, not a probability.</string>
+    <string name="placementforecast_factor_raises">One standard step up in this input adds %1$d points to the model estimate.</string>
+    <string name="placementforecast_factor_lowers">One standard step up in this input removes %1$d points from the model estimate.</string>
+    <string name="placementforecast_factor_none">This input has no measurable effect at your current numbers.</string>
+    <string name="placementforecast_factor_fixed">Your college tier is part of the model but is not something you can change.</string>
 </resources>

@@ -60,7 +60,6 @@ class HomeViewModelTest {
                     applicationScore = 0f,
                     engagementScore = 0f,
                     actionItems = emptyList(),
-                    estimatedPlacementMonth = "March 2027",
                 )
             )
         }

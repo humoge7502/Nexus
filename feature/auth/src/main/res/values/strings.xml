@@ -17,4 +17,16 @@
     <string name="text_or">or</string>
     <string name="text_skip_for_now">Skip for now</string>
     <string name="text_your_ai_powered_career_co_pilot">Your AI-powered career co-pilot</string>
+    <string name="auth_wordmark">SAGITTA</string>
+    <string name="auth_eyebrow">Career instrument</string>
+    <string name="auth_instrument_description">Sagitta career instrument</string>
+    <string name="auth_authentication">Authentication</string>
+    <string name="auth_welcome_back">Welcome back</string>
+    <string name="auth_create_account_title">Create your account</string>
+    <string name="auth_switch_to_sign_up">New here? Create an account</string>
+    <string name="auth_switch_to_sign_in">Already have an account? Sign in</string>
+    <string name="auth_sign_in">Sign in</string>
+    <string name="auth_create_account">Create account</string>
+    <string name="auth_show_password">Show password</string>
+    <string name="auth_hide_password">Hide password</string>
 </resources>

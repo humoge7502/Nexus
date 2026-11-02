@@ -1,9 +1,7 @@
 package com.nexus.auth
 
-import androidx.compose.ui.res.stringResource
-import com.nexus.auth.R
-
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
@@ -11,30 +9,31 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -46,18 +45,37 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.common.ApiResult
+import com.nexus.common.Constants
+import com.nexus.designsystem.component.CalibratedRule
+import com.nexus.designsystem.component.InstrumentGauge
 import com.nexus.designsystem.component.NexusButton
-import com.nexus.designsystem.theme.NexusColors
+import com.nexus.designsystem.component.NexusMark
+import com.nexus.designsystem.component.NexusOutlineButton
+import com.nexus.designsystem.component.NexusWordmark
+import com.nexus.designsystem.component.NexusTextField
+import com.nexus.designsystem.component.SignalField
+import com.nexus.designsystem.theme.LocalReducedMotion
+import com.nexus.designsystem.theme.NexusAnimation
 import com.nexus.designsystem.theme.NexusGradients
+import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusSpacing
+import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
+import java.util.Locale
 
 @Composable
 fun AuthScreen(
@@ -69,6 +87,7 @@ fun AuthScreen(
     var showEmailDialog by remember { mutableStateOf(false) }
     var visible by remember { mutableStateOf(false) }
     val authState by viewModel.authState.collectAsStateWithLifecycle()
+    val reducedMotion = LocalReducedMotion.current
     LaunchedEffect(Unit) { visible = true }
 
     if (showEmailDialog) {
@@ -80,106 +99,189 @@ fun AuthScreen(
         )
     }
 
-    AnimatedVisibility(
-        visible = visible,
-        enter = fadeIn() + slideInVertically { it / 3 },
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .navigationBarsPadding()
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+    Box(modifier = Modifier.fillMaxSize()) {
+        SignalField(
+            modifier = Modifier.matchParentSize(),
+            bloomHeight = 560.dp,
+        )
+
+        AnimatedVisibility(
+            visible = visible,
+            enter = if (reducedMotion) {
+                fadeIn(tween(0))
+            } else {
+                fadeIn(
+                    animationSpec = tween(
+                        durationMillis = NexusAnimation.Duration.emphasized,
+                        easing = NexusAnimation.Easing.emphasizedDecelerate,
+                    ),
+                ) + slideInVertically(
+                    animationSpec = tween(
+                        durationMillis = NexusAnimation.Duration.emphasized,
+                        easing = NexusAnimation.Easing.emphasizedDecelerate,
+                    ),
+                    initialOffsetY = { it / 24 },
+                )
+            },
         ) {
-            Box(
+            Column(
                 modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape)
-                    .background(brush = Brush.linearGradient(NexusGradients.PrimaryDeep)),
-                contentAlignment = Alignment.Center,
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .statusBarsPadding()
+                    .navigationBarsPadding()
+                    .padding(horizontal = NexusSpacing.xl, vertical = NexusSpacing.lg),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
             ) {
-                Text(
-                    text = "A",
-                    style = MaterialTheme.typography.displayLarge,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = NexusColors.SignalInk,
+                AuthMasthead()
+
+                Spacer(modifier = Modifier.height(NexusSpacing.lg))
+
+                NexusButton(
+                    text = stringResource(R.string.auth_google),
+                    onClick = onGoogleSignIn,
+                    gradient = NexusGradients.SignalSweep,
+                    modifier = Modifier.height(56.dp),
                 )
-            }
 
-            Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(NexusSpacing.sm))
 
-            Text(text = stringResource(R.string.text_engineer_your_future),
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-                textAlign = TextAlign.Center,
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(text = stringResource(R.string.text_your_ai_powered_career_co_pilot),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            NexusButton(
-                text = stringResource(R.string.auth_google),
-                onClick = onGoogleSignIn,
-                gradient = NexusGradients.Ascent,
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            OutlinedButton(
-                onClick = onGitHubSignIn,
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-            ) {
-                Icon(Icons.Default.Code, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = stringResource(R.string.auth_github),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
+                NexusOutlineButton(
+                    text = stringResource(R.string.auth_github),
+                    onClick = onGitHubSignIn,
+                    icon = Icons.Default.Code,
                 )
-            }
 
-            Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(NexusSpacing.sm))
 
-            OutlinedButton(
-                onClick = { showEmailDialog = true },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-            ) {
-                Icon(Icons.Default.Email, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = stringResource(R.string.auth_email),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
+                NexusOutlineButton(
+                    text = stringResource(R.string.auth_email),
+                    onClick = { showEmailDialog = true },
+                    icon = Icons.Default.Email,
                 )
+
+                Spacer(modifier = Modifier.height(NexusSpacing.xs))
+
+                TextButton(
+                    onClick = onSkip,
+                    modifier = Modifier.heightIn(min = NexusSpacing.touchTarget),
+                ) {
+                    Text(
+                        text = stringResource(R.string.text_skip_for_now),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(NexusSpacing.xs))
+
+                AuthPrivacyNotice()
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(text = stringResource(R.string.text_or),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(text = stringResource(R.string.text_skip_for_now),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.clickable { onSkip() },
-            )
         }
+    }
+}
+
+/** The typeset opening: wordmark, instrument, eyebrow, headline and calibrated rule. */
+@Composable
+private fun AuthMasthead() {
+    val ext = MaterialTheme.nexus
+
+    NexusWordmark(
+        label = stringResource(R.string.auth_wordmark),
+        modifier = Modifier.fillMaxWidth(),
+    )
+
+    Spacer(modifier = Modifier.height(NexusSpacing.xxl))
+
+    Box(
+        modifier = Modifier.size(212.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        InstrumentGauge(
+            progress = 1f,
+            modifier = Modifier.matchParentSize(),
+            stroke = 8.dp,
+            contentDescription = stringResource(R.string.auth_instrument_description),
+        )
+        NexusMark(size = 76.dp)
+    }
+
+    Spacer(modifier = Modifier.height(NexusSpacing.lg))
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(NexusSpacing.xs),
+    ) {
+        Box(
+            modifier = Modifier
+                .width(2.dp)
+                .height(10.dp)
+                .background(ext.signal),
+        )
+        Text(
+            text = stringResource(R.string.auth_eyebrow).uppercase(Locale.ROOT),
+            style = NexusTypography.DataLabel,
+            color = ext.signal,
+        )
+    }
+
+    Spacer(modifier = Modifier.height(NexusSpacing.sm))
+
+    Text(
+        text = stringResource(R.string.text_engineer_your_future),
+        style = NexusTypography.DisplayMedium,
+        color = MaterialTheme.colorScheme.onBackground,
+        textAlign = TextAlign.Center,
+    )
+
+    Spacer(modifier = Modifier.height(NexusSpacing.xs))
+
+    Text(
+        text = stringResource(R.string.text_your_ai_powered_career_co_pilot),
+        style = NexusTypography.BodyLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+    )
+
+    Spacer(modifier = Modifier.height(NexusSpacing.xl))
+
+    CalibratedRule(
+        progress = 1f,
+        modifier = Modifier.fillMaxWidth(),
+        divisions = 24,
+        height = 16.dp,
+        accent = ext.signal.copy(alpha = 0.55f),
+    )
+}
+
+/** Legal line plus its own hit area: the link target is wider than the glyphs. */
+@Composable
+private fun AuthPrivacyNotice() {
+    val ext = MaterialTheme.nexus
+    val uriHandler = LocalUriHandler.current
+
+    Text(
+        text = stringResource(R.string.auth_privacy_prefix).trimEnd(),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+        textAlign = TextAlign.Center,
+    )
+    Box(
+        modifier = Modifier
+            .heightIn(min = NexusSpacing.minTouchTarget)
+            .clip(NexusShapes.xs)
+            .clickable(role = Role.Button) {
+                uriHandler.openUri(Constants.PRIVACY_POLICY_URL)
+            }
+            .padding(horizontal = NexusSpacing.xs),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = stringResource(R.string.auth_privacy),
+            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+            color = ext.signal,
+        )
     }
 }
 
@@ -195,6 +297,7 @@ private fun EmailSignInDialog(
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
     var isSignUp by remember { mutableStateOf(false) }
     var attempted by remember { mutableStateOf(false) }
 
@@ -203,88 +306,179 @@ private fun EmailSignInDialog(
     val emailError = attempted && !isEmailValid(email)
     val passwordError = attempted && password.length < 8
 
-    // Success closes the dialog; the app-level authState watcher swaps to "main".
     LaunchedEffect(authState) {
-        if (authState is ApiResult.Success && (authState as ApiResult.Success<Boolean>).data) {
+        if (authState.dataOrNull == true) {
             onDismiss()
         }
     }
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = { if (!isLoading) onDismiss() },
-        title = {
-            Text(
-                text = if (isSignUp) "Create your account" else "Welcome back",
-                fontWeight = FontWeight.Bold,
-            )
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it.trim() },
-                    label = { Text(stringResource(R.string.auth_college_email)) },
-                    singleLine = true,
-                    isError = emailError,
-                    supportingText = if (emailError) {
-                        { Text(stringResource(R.string.auth_enter_a_valid_email_address)) }
-                    } else null,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text(stringResource(R.string.auth_password_min_8_characters)) },
-                    singleLine = true,
-                    isError = passwordError,
-                    supportingText = if (passwordError) {
-                        { Text(stringResource(R.string.auth_use_at_least_8_characters)) }
-                    } else null,
-                    visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                errorMessage?.let {
-                    Text(
-                        text = it,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-                TextButton(
-                    onClick = { isSignUp = !isSignUp },
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                ) {
-                    Text(
-                        if (isSignUp) "Already have an account? Sign in"
-                        else "New here? Create an account",
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    attempted = true
-                    if (isEmailValid(email) && password.length >= 8) {
-                        if (isSignUp) onSignUp(email, password) else onSignIn(email, password)
-                    }
-                },
-                enabled = !isLoading,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .imePadding()
+                .padding(horizontal = NexusSpacing.xl),
+            contentAlignment = Alignment.Center,
+        ) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = NexusShapes.xl,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                tonalElevation = 0.dp,
             ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
-                        strokeWidth = 2.dp,
+                Column(
+                    modifier = Modifier.padding(NexusSpacing.xl),
+                    verticalArrangement = Arrangement.spacedBy(NexusSpacing.md),
+                ) {
+                    EmailDialogHeader(
+                        isSignUp = isSignUp,
+                        dismissEnabled = !isLoading,
+                        onDismiss = onDismiss,
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+
+                    NexusTextField(
+                        value = email,
+                        onValueChange = { email = it.trim() },
+                        label = stringResource(R.string.auth_college_email),
+                        isError = emailError,
+                        supportingText = if (emailError) {
+                            stringResource(R.string.auth_enter_a_valid_email_address)
+                        } else {
+                            null
+                        },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    )
+
+                    EmailPasswordField(
+                        value = password,
+                        onValueChange = { password = it },
+                        visible = passwordVisible,
+                        onToggleVisible = { passwordVisible = !passwordVisible },
+                        isError = passwordError,
+                        supportingText = if (passwordError) {
+                            stringResource(R.string.auth_use_at_least_8_characters)
+                        } else {
+                            null
+                        },
+                    )
+
+                    if (errorMessage != null) {
+                        Text(
+                            text = errorMessage,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+
+                    NexusButton(
+                        text = stringResource(
+                            if (isSignUp) R.string.auth_create_account else R.string.auth_sign_in,
+                        ),
+                        onClick = {
+                            attempted = true
+                            if (isEmailValid(email) && password.length >= 8) {
+                                if (isSignUp) onSignUp(email, password) else onSignIn(email, password)
+                            }
+                        },
+                        gradient = NexusGradients.SignalSweep,
+                        loading = isLoading,
+                    )
+
+                    TextButton(
+                        onClick = {
+                            isSignUp = !isSignUp
+                            attempted = false
+                        },
+                        enabled = !isLoading,
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                    ) {
+                        Text(
+                            text = stringResource(
+                                if (isSignUp) R.string.auth_switch_to_sign_in else R.string.auth_switch_to_sign_up,
+                            ),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
-                Text(if (isSignUp) "Create account" else "Sign in")
             }
+        }
+    }
+}
+
+/** Eyebrow, title and the close control, which must go dark while a request is in flight. */
+@Composable
+private fun EmailDialogHeader(
+    isSignUp: Boolean,
+    dismissEnabled: Boolean,
+    onDismiss: () -> Unit,
+) {
+    val ext = MaterialTheme.nexus
+
+    Row(verticalAlignment = Alignment.Top) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.auth_authentication).uppercase(Locale.ROOT),
+                style = NexusTypography.DataLabel,
+                color = ext.signal,
+            )
+            Spacer(modifier = Modifier.height(NexusSpacing.xs))
+            Text(
+                text = stringResource(
+                    if (isSignUp) R.string.auth_create_account_title else R.string.auth_welcome_back,
+                ),
+                style = NexusTypography.HeadlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+        IconButton(onClick = onDismiss, enabled = dismissEnabled) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = stringResource(R.string.auth_cancel),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmailPasswordField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    visible: Boolean,
+    onToggleVisible: () -> Unit,
+    isError: Boolean,
+    supportingText: String?,
+) {
+    NexusTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = stringResource(R.string.auth_password_min_8_characters),
+        isError = isError,
+        supportingText = supportingText,
+        visualTransformation = if (visible) {
+            VisualTransformation.None
+        } else {
+            PasswordVisualTransformation()
         },
-        dismissButton = {
-            TextButton(onClick = onDismiss, enabled = !isLoading) { Text(stringResource(R.string.auth_cancel)) }
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        trailingIcon = {
+            IconButton(onClick = onToggleVisible) {
+                Icon(
+                    imageVector = if (visible) {
+                        Icons.Default.VisibilityOff
+                    } else {
+                        Icons.Default.Visibility
+                    },
+                    contentDescription = stringResource(
+                        if (visible) R.string.auth_hide_password else R.string.auth_show_password,
+                    ),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         },
     )
 }

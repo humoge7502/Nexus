@@ -10,14 +10,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 /**
- * Distinctive typographic voice — three faces, three jobs.
+ * Distinctive typographic voice — four faces, four jobs.
  *
- * Plus Jakarta Sans carries display and headings: geometric, confident.
- * Inter carries body copy and labels: the most legible UI face at 12–16sp.
- * JetBrains Mono carries anything a machine measures — scores, counters,
- * deltas, tick labels — so numbers read as instrument output rather than
- * prose. All three ship as variable fonts in res/font (OFL licensed), so
- * rendering is instant and offline with the full weight axis.
+ * Newsreader carries the editorial voice: the statements a screen opens with and
+ * the sentences a user is meant to read rather than scan. It is set light and
+ * large, which is how a serif earns its place — a heavy serif at 40sp turns into
+ * a logo. Plus Jakarta Sans carries UI headings and controls: geometric,
+ * confident. Inter carries body copy and labels: the most legible UI face at
+ * 12–16sp. JetBrains Mono carries anything a machine measures — scores, counters,
+ * deltas, tick labels — so numbers read as instrument output rather than prose.
+ *
+ * All four ship as variable fonts in res/font (OFL licensed), so rendering is
+ * instant and offline with the full weight axis.
  */
 private fun jakarta(vararg weights: FontWeight) = FontFamily(
     weights.map { Font(R.font.plus_jakarta_sans_variable, weight = it) }
@@ -29,6 +33,18 @@ private fun inter(vararg weights: FontWeight) = FontFamily(
 
 private fun mono(vararg weights: FontWeight) = FontFamily(
     weights.map { Font(R.font.jetbrains_mono_variable, weight = it) }
+)
+
+private fun newsreader(vararg weights: FontWeight) = FontFamily(
+    weights.map { Font(R.font.newsreader_variable, weight = it) }
+)
+
+private val NewsreaderRoman = newsreader(
+    FontWeight.Normal, FontWeight.Medium, FontWeight.SemiBold, FontWeight.Bold,
+)
+private val NewsreaderItalic = FontFamily(
+    Font(R.font.newsreader_italic_variable, weight = FontWeight.Normal),
+    Font(R.font.newsreader_italic_variable, weight = FontWeight.Medium),
 )
 
 private val JakartaDisplay = jakarta(
@@ -206,6 +222,69 @@ object NexusTypography {
     /** Alias with intent: the number a component is actually reporting. */
     val Readout = TelemetryLarge
 
+    /** The instrument family on its own, for inline spans inside prose — code,
+     *  shell commands, identifiers. A span needs a family, not a whole style. */
+    val Mono: FontFamily = InstrumentMono
+
+    // ── Editorial voice ──────────────────────────────────────────────────────
+    // The serif is the *narrative* layer: it says the thing the instrument
+    // measures. It is set light and large with generous leading, because a serif
+    // earns authority from size and air, not from weight. Nothing measured lives
+    // here — a score in Newsreader would be a score pretending to be prose.
+
+    /** The statement a screen opens with. One per screen, never two. */
+    val EditorialDisplay = TextStyle(
+        fontFamily = NewsreaderRoman,
+        fontWeight = FontWeight.Normal,
+        fontSize = 44.sp,
+        lineHeight = 48.sp,
+        letterSpacing = (-0.9).sp,
+    )
+
+    /** Section-level statement — still prose, one rung quieter. */
+    val EditorialHeadline = TextStyle(
+        fontFamily = NewsreaderRoman,
+        fontWeight = FontWeight.Normal,
+        fontSize = 32.sp,
+        lineHeight = 37.sp,
+        letterSpacing = (-0.5).sp,
+    )
+
+    /** A lead paragraph: readable measure, relaxed leading. */
+    val EditorialLead = TextStyle(
+        fontFamily = InterBody,
+        fontWeight = FontWeight.Normal,
+        fontSize = 17.sp,
+        lineHeight = 27.sp,
+        letterSpacing = (-0.15).sp,
+    )
+
+    /** Running editorial copy under a headline. */
+    val EditorialBody = TextStyle(
+        fontFamily = InterBody,
+        fontWeight = FontWeight.Normal,
+        fontSize = 15.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.05.sp,
+    )
+
+    /** A voice speaking — pull quotes, AI answers, motivational lines. */
+    val EditorialQuote = TextStyle(
+        fontFamily = NewsreaderItalic,
+        fontWeight = FontWeight.Normal,
+        fontSize = 22.sp,
+        lineHeight = 30.sp,
+        letterSpacing = (-0.2).sp,
+    )
+
+    /** Small serif title where a card wants a byline rather than a label. */
+    val EditorialTitle = TextStyle(
+        fontFamily = NewsreaderRoman,
+        fontWeight = FontWeight.Medium,
+        fontSize = 21.sp,
+        lineHeight = 26.sp,
+        letterSpacing = (-0.2).sp,
+    )
 
     val Material = Typography(
         displayLarge = DisplayLarge,

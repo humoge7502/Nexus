@@ -82,7 +82,7 @@ fun AccountDeletionScreen(
                 Spacer(Modifier.height(8.dp))
 
                 listOf(
-                    "Your Ascent profile and career score",
+                    "Your Sagitta profile and career score",
                     "All saved opportunities and applications",
                     "AI chat history and conversations",
                     "Goals and progress tracking",

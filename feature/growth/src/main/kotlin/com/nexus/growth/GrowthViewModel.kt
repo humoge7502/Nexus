@@ -16,6 +16,7 @@ import com.nexus.domain.model.DSAProblem
 import com.nexus.domain.model.DsaDifficulty
 import com.nexus.domain.model.DsaStatus
 import com.nexus.domain.model.Goal
+import com.nexus.domain.model.ScoreComponent
 import com.nexus.domain.model.UiState
 import com.nexus.domain.usecase.CareerScoreCalculator
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -41,7 +42,6 @@ data class GrowthUiState(
   val goals: UiState<List<Goal>> = UiState.Loading,
   val selectedDifficulty: DsaDifficulty? = null,
   val nexusScore: Int = 0,
-  val nexusScoreFloat: Float = 0f,
   val dailyChallenge: DSAProblem? = null,
   val currentStreak: Int = 0,
   val longestStreak: Int = 0,
@@ -53,11 +53,8 @@ data class GrowthUiState(
   val levelName: String = "Rookie",
   val projectsCount: Int = 0,
   val completedGoals: Int = 0,
-  val skillProgress: Float = 0f,
-  val opportunityEngagement: Float = 0f,
-  val consistency: Float = 0f,
-  val portfolioStrength: Float = 0f,
-  val achievementsProgress: Float = 0f,
+  /** Points earned against points available, per weighted input to [nexusScore]. */
+  val scoreComponents: List<ScoreComponent> = emptyList(),
   val weekActivity: List<Boolean> = List(7) { false },
   val lastActiveToday: Boolean = false,
   val thisMonthActive: Int = 0,
@@ -66,7 +63,6 @@ data class GrowthUiState(
   val skillAxes: List<GrowthRadarAxis> = emptyList(),
   val placementScore: Int = 0,
   val placementLevel: String = "Getting Started",
-  val placementMonthEstimate: String = "~9 months from now",
   val placementActionItems: List<PlacementReadinessCalculator.PlacementAction> = emptyList(),
 )
 
@@ -164,9 +160,6 @@ class GrowthViewModel @Inject constructor(
         val achievements = try { achievementRepository.getUnlocked().first() } catch (_: Exception) { emptyList<com.nexus.domain.model.Achievement>() }
         val skillProgress = (solved.toFloat() / total.coerceAtLeast(1)).coerceIn(0f, 1f)
         val opportunityEngagement = (completedGoals.coerceAtMost(20) / 20f).coerceIn(0f, 1f)
-        val consistency = (streak.currentStreak.coerceAtMost(365) / 365f).coerceIn(0f, 1f)
-        val portfolioStrength = (projectCount.coerceAtMost(10) / 10f).coerceIn(0f, 1f)
-        val achievementsProgress = (achievements.size.coerceAtMost(20) / 20f).coerceIn(0f, 1f)
         val nexusScoreResult = careerScoreCalculator.calculate(
           skillProgress = skillProgress,
           opportunityEngagement = opportunityEngagement,
@@ -189,7 +182,6 @@ class GrowthViewModel @Inject constructor(
         val thisMonthActive = inferredActiveDays.count { !it.isBefore(today.withDayOfMonth(1)) }
         _uiState.value.copy(
           nexusScore = nexusScoreResult.overallScore,
-          nexusScoreFloat = nexusScoreResult.overallScore.toFloat() / 1000f,
           currentStreak = streak.currentStreak,
           longestStreak = streak.longestStreak,
           dsaSolved = solved,
@@ -200,11 +192,7 @@ class GrowthViewModel @Inject constructor(
           levelName = xpRepository.levelName(level),
           projectsCount = projectCount,
           completedGoals = completedGoals,
-          skillProgress = skillProgress,
-          opportunityEngagement = opportunityEngagement,
-          consistency = consistency,
-          portfolioStrength = portfolioStrength,
-          achievementsProgress = achievementsProgress,
+          scoreComponents = nexusScoreResult.components,
           weekActivity = weekActivity,
           lastActiveToday = lastActive == today,
           thisMonthActive = thisMonthActive,
@@ -245,7 +233,6 @@ class GrowthViewModel @Inject constructor(
           it.copy(
             placementScore = readiness.score,
             placementLevel = readiness.level,
-            placementMonthEstimate = readiness.estimatedPlacementMonth,
             placementActionItems = readiness.actionItems,
           )
         }

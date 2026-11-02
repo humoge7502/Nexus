@@ -2,18 +2,25 @@ package com.nexus.designsystem.component
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,6 +43,7 @@ import com.nexus.designsystem.theme.LocalReducedMotion
 import com.nexus.designsystem.theme.NexusAnimation
 import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.onAccent
+import com.nexus.designsystem.theme.nexus
 
 /**
  * The primary action. A gradient button paints the gradient on its own surface
@@ -51,6 +59,7 @@ fun NexusButton(
     gradient: List<Color>? = null,
     shape: Shape = NexusShapes.md,
     enabled: Boolean = true,
+    loading: Boolean = false,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -58,7 +67,7 @@ fun NexusButton(
     val reducedMotion = LocalReducedMotion.current
 
     val scale by animateFloatAsState(
-        targetValue = if (isPressed && enabled) 0.97f else 1f,
+        targetValue = if (isPressed && enabled && !loading) 0.97f else 1f,
         animationSpec = tween(
             durationMillis = if (reducedMotion) 0 else NexusAnimation.Duration.micro,
             easing = NexusAnimation.Easing.standard,
@@ -92,7 +101,7 @@ fun NexusButton(
                     Modifier
                 }
             ),
-        enabled = enabled,
+        enabled = enabled && !loading,
         shape = shape,
         interactionSource = interactionSource,
         colors = if (gradientContentColor == null) {
@@ -105,6 +114,85 @@ fun NexusButton(
                 disabledContentColor = gradientContentColor.copy(alpha = 0.6f),
             )
         }
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            if (loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(18.dp),
+                    strokeWidth = 2.dp,
+                    color = LocalContentColor.current,
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+            } else if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+            }
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
+
+/**
+ * The secondary action: same geometry and press response as [NexusButton], but
+ * hollow. The border is a hairline rather than a full outline, so it sits behind
+ * the primary action in the hierarchy without looking disabled.
+ */
+@Composable
+fun NexusOutlineButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    enabled: Boolean = true,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val haptic = LocalHapticFeedback.current
+    val reducedMotion = LocalReducedMotion.current
+    val edge = MaterialTheme.nexus.hairlineStrong
+
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed && enabled) 0.97f else 1f,
+        animationSpec = tween(
+            durationMillis = if (reducedMotion) 0 else NexusAnimation.Duration.micro,
+            easing = NexusAnimation.Easing.standard,
+        ),
+        label = "outlineButtonScale",
+    )
+
+    OutlinedButton(
+        onClick = {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            onClick()
+        },
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 52.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            },
+        enabled = enabled,
+        shape = NexusShapes.md,
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (enabled) edge else edge.copy(alpha = 0.4f),
+        ),
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+        ),
+        interactionSource = interactionSource,
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

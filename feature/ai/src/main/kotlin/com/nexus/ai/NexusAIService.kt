@@ -54,7 +54,7 @@ class NexusAIService @Inject constructor(
         val contextMessages = conversationMemoryManager.buildContext(history)
         val systemPrompt = userProfile?.let {
             systemPromptBuilder.buildSystemPrompt(it)
-        } ?: "You are Ascent AI, a career assistant for CSE students. Help with internships, certifications, DSA, career advice, skill development, and interview prep. Be concise, practical, and encouraging."
+        } ?: "You are Sagitta AI, a career assistant for CSE students. Help with internships, scholarships, hackathons, DSA, career advice, skill development, and interview prep. Be concise, practical, and encouraging."
         val messages = buildList {
             add(ChatMessage("system", systemPrompt))
             addAll(contextMessages.map { ChatMessage(it.role.name.lowercase(), it.content) })
@@ -102,7 +102,7 @@ class NexusAIService @Inject constructor(
             .url(aiRequestRouter.getEndpoint())
             .addHeader("Authorization", aiRequestRouter.buildAuthHeader())
             .addHeader("HTTP-Referer", "https://nexus.app")
-            .addHeader("X-Title", "Ascent Career App")
+            .addHeader("X-Title", "Sagitta")
             .post(jsonBody.toString().toRequestBody(jsonMediaType))
             .build()
 
@@ -124,38 +124,39 @@ class NexusAIService @Inject constructor(
         }
 
         val source = body.source()
-        val buffer = okio.Buffer()
-        var partial = ""
         try {
-            while (!source.exhausted()) {
-                source.read(buffer, 2048)
-                partial += buffer.readUtf8()
-                val lines = partial.split("\n")
-                val completeLines = if (lines.lastOrNull()?.startsWith("data: ") == false) {
-                    partial = lines.last()
-                    lines.dropLast(1)
-                } else {
-                    lines
-                }
-                for (line in completeLines) {
-                    val trimmed = line.trim()
-                    if (!trimmed.startsWith("data: ")) continue
-                    val data = trimmed.removePrefix("data: ").trim()
-                    if (data == "[DONE]") continue
-                    try {
-                        val json = JSONObject(data)
-                        val content = json.getJSONArray("choices")
-                            .getJSONObject(0)
-                            .optJSONObject("delta")
-                            ?.optString("content", "") ?: ""
-                        if (content.isNotEmpty()) emit(content)
-                    } catch (e: Exception) { Timber.w(e, "Failed to parse stream chunk") }
-                }
+            var line = source.readUtf8Line()
+            while (line != null && !isStreamDone(line)) {
+                streamDelta(line)?.takeIf { it.isNotEmpty() }?.let { emit(it) }
+                line = source.readUtf8Line()
             }
         } finally {
             source.close()
         }
         }.flowOn(Dispatchers.IO)
+    }
+
+    /** The stream's terminal marker, `data: [DONE]`. */
+    private fun isStreamDone(line: String): Boolean {
+        val trimmed = line.trim()
+        return trimmed.startsWith("data:") &&
+            trimmed.removePrefix("data:").trim() == "[DONE]"
+    }
+
+    /** Content carried by one SSE line, or null when the line carries none. */
+    private fun streamDelta(line: String): String? {
+        val trimmed = line.trim()
+        if (!trimmed.startsWith("data:")) return null
+        return try {
+            JSONObject(trimmed.removePrefix("data:").trim())
+                .getJSONArray("choices")
+                .getJSONObject(0)
+                .optJSONObject("delta")
+                ?.optString("content", "")
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to parse stream chunk")
+            null
+        }
     }
 
     data class ChatMessage(val role: String, val content: String)

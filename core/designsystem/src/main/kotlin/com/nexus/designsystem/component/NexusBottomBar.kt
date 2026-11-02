@@ -72,7 +72,13 @@ data class BottomNavItem(
     val unselectedIcon: ImageVector,
 )
 
-private val bottomNavItems = listOf(
+/**
+ * The five destinations, in the order the shell draws them.
+ *
+ * Public because compact, medium and expanded chrome are three layouts of one
+ * navigation model; a list per layout is how a rail and a bar drift apart.
+ */
+val NexusNavItems = listOf(
     BottomNavItem(R.string.nav_home, Icons.Filled.Home, Icons.Outlined.Home),
     BottomNavItem(R.string.nav_explore, Icons.Filled.TravelExplore, Icons.Outlined.TravelExplore),
     BottomNavItem(R.string.nav_ai, Icons.Filled.Bolt, Icons.Outlined.Bolt),
@@ -126,7 +132,7 @@ fun NexusBottomBar(
                     .fillMaxWidth()
                     .padding(6.dp)
             ) {
-                val count = bottomNavItems.size
+                val count = NexusNavItems.size
                 val cellWidth = maxWidth / count
                 val lensOffset by animateDpAsState(
                     targetValue = cellWidth * selectedIndex,
@@ -145,8 +151,13 @@ fun NexusBottomBar(
                     if (selectedIndex < 0) return@Canvas
                     val inset = 1.5.dp.toPx()
                     val lensWidth = cellWidth.toPx() - inset * 2
-                    val topLeft = Offset(lensOffset.toPx() + inset, inset)
-                    val lensSize = Size(lensWidth, size.height - inset * 2)
+                    // The lens is a cap over the station, not a fill of it. At full
+                    // cell height the selected tab reads as a block of colour and
+                    // the four unlit stations disappear beside it.
+                    val lensHeight = 40.dp.toPx()
+                    val lensTop = (size.height - lensHeight) / 2f
+                    val topLeft = Offset(lensOffset.toPx() + inset, lensTop)
+                    val lensSize = Size(lensWidth, lensHeight)
                     // Matches NexusShapes.sm: a plate, not a pill.
                     val radius = CornerRadius(10.dp.toPx())
 
@@ -159,15 +170,15 @@ fun NexusBottomBar(
                     drawRoundRect(
                         brush = Brush.verticalGradient(
                             listOf(extended.signal.copy(alpha = 0.10f), Color.Transparent),
-                            startY = 0f,
-                            endY = size.height,
+                            startY = lensTop,
+                            endY = lensTop + lensHeight,
                         ),
                         topLeft = topLeft,
                         size = lensSize,
                         cornerRadius = radius,
                     )
                     drawRoundRect(
-                        color = extended.signal.copy(alpha = 0.55f),
+                        color = extended.signal.copy(alpha = 0.30f),
                         topLeft = topLeft,
                         size = lensSize,
                         cornerRadius = radius,
@@ -182,7 +193,7 @@ fun NexusBottomBar(
                         color = extended.signal,
                         topLeft = Offset(
                             lensOffset.toPx() + (cellWidth.toPx() - needleWidth) / 2f,
-                            size.height - inset - 3.dp.toPx() - needleHeight,
+                            lensTop + lensHeight - inset - needleHeight,
                         ),
                         size = Size(needleWidth, needleHeight),
                         cornerRadius = CornerRadius(needleHeight / 2f),
@@ -197,7 +208,7 @@ fun NexusBottomBar(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    bottomNavItems.forEachIndexed { index, item ->
+                    NexusNavItems.forEachIndexed { index, item ->
                         NavStation(
                             item = item,
                             isSelected = index == selectedIndex,

@@ -126,7 +126,7 @@ fun DSATrackerScreen(
             item {
                 // The one lime slab on this screen: ink figures on a lit rule.
                 NexusCard(
-                    gradient = NexusGradients.Ascent,
+                    gradient = NexusGradients.SignalSweep,
                     shape = NexusShapes.lg,
                 ) {
                     val ink = NexusColors.SignalInk

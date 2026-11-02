@@ -12,17 +12,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,7 +32,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.SignalChoice
 import com.nexus.domain.model.SearchMode
 
 @Composable
@@ -58,11 +59,19 @@ fun SearchScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
-            OutlinedTextField(
+            NexusTextField(
                 value = uiState.query,
                 onValueChange = viewModel::updateQuery,
-                placeholder = { Text(stringResource(R.string.search_search_internships_skills_companies)) },
-                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                label = stringResource(R.string.search_search),
+                placeholder = stringResource(R.string.search_search_internships_skills_companies),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Search,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
                 trailingIcon = {
                     if (uiState.query.isNotEmpty()) {
                         IconButton(onClick = { viewModel.updateQuery("") }) {
@@ -70,8 +79,6 @@ fun SearchScreen(
                         }
                     }
                 },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
             )
 
             Spacer(Modifier.height(8.dp))
@@ -80,10 +87,10 @@ fun SearchScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 SearchMode.entries.forEach { mode ->
-                    FilterChip(
+                    SignalChoice(
+                        label = mode.name.lowercase().replaceFirstChar { it.uppercase() },
                         selected = uiState.searchMode == mode,
                         onClick = { viewModel.setSearchMode(mode) },
-                        label = { Text(mode.name.lowercase().replaceFirstChar { it.uppercase() }) },
                     )
                 }
             }

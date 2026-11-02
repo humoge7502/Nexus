@@ -8,6 +8,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.nexus.designsystem.theme.NexusTheme
 import com.nexus.domain.model.PlacementForecast
+import com.nexus.domain.usecase.PlacementReadinessModel
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -60,7 +61,9 @@ class PlacementForecastScreenTest {
                 isLoading = false,
                 currentScore = 720,
                 modelReadinessPct = 68,
-                modelFactors = listOf("Mock interviews"),
+                modelTopFactors = listOf(
+                    PlacementReadinessModel.Factor(label = "Mock interviews", deltaPoints = 4),
+                ),
                 modelVersion = "1.0.0",
                 whatIfMocks = 4,
                 whatIfPct = 74,
@@ -75,12 +78,16 @@ class PlacementForecastScreenTest {
             ),
         )
 
-        composeRule.onNodeWithText("Current Ascent Score: 720").assertIsDisplayed()
+        composeRule.onNodeWithText("Current Sagitta Score: 720").assertIsDisplayed()
         composeRule.onNodeWithText("Placement readiness").assertIsDisplayed()
         composeRule.onNodeWithText("68% predicted probability of placement this season")
             .assertIsDisplayed()
         composeRule.onNodeWithText("Top drivers:").assertIsDisplayed()
-        composeRule.onNodeWithText("• Mock interviews").assertIsDisplayed()
+        composeRule.onNodeWithText("Mock interviews").assertIsDisplayed()
+        composeRule.onNodeWithText("01").assertIsDisplayed()
+        composeRule.onNodeWithText(
+            "One standard step up in this input adds 4 points to the model estimate.",
+        ).assertIsDisplayed()
         composeRule.onNodeWithText("What if I add 4 mock interviews?").assertIsDisplayed()
         composeRule.onNodeWithText("Readiness would move to 74% (+6 pts)").assertIsDisplayed()
         composeRule.onNodeWithText(

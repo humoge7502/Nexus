@@ -2,9 +2,13 @@ package com.nexus.internships
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nexus.data.repository.ApplicationRepository
 import com.nexus.data.repository.InternshipRepository
+import com.nexus.datastore.UserPreferences
 import com.nexus.domain.model.Internship
+import com.nexus.domain.model.Skill
 import com.nexus.domain.model.UiState
+import com.nexus.domain.usecase.OpportunityMatchingEngine
 import com.nexus.data.repository.UserXpRepository
 import com.nexus.analytics.AnalyticsTracker
 import com.nexus.common.Constants
@@ -25,8 +29,11 @@ import javax.inject.Inject
 @HiltViewModel
 class InternshipViewModel @Inject constructor(
     private val repository: InternshipRepository,
+    private val applicationRepository: ApplicationRepository,
     private val xpRepository: UserXpRepository,
     private val analyticsTracker: AnalyticsTracker,
+    private val userPreferences: UserPreferences,
+    private val matchingEngine: OpportunityMatchingEngine,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState<List<Internship>>>(UiState.Loading)
@@ -35,9 +42,68 @@ class InternshipViewModel @Inject constructor(
     private val _effect = MutableSharedFlow<InternshipEffect>()
     val effect: SharedFlow<InternshipEffect> = _effect.asSharedFlow()
 
+    /** Opportunity ids the student already tracks, so the CTA can say so instead of firing twice. */
+    private val _trackedIds = MutableStateFlow<Set<String>>(emptySet())
+    val trackedIds: StateFlow<Set<String>> = _trackedIds.asStateFlow()
+
+    /** Kept outside the state because it only feeds the score, never renders alone. */
+    private var trackedSkills: List<Skill> = emptyList()
+
     init {
         analyticsTracker.track("screen_view", mapOf("screen" to "internships"))
         loadInternships()
+        watchTrackedSkills()
+        watchTrackedApplications()
+    }
+
+    private fun watchTrackedSkills() {
+        viewModelScope.launch {
+            userPreferences.userSkills.collect { names ->
+                trackedSkills = names.sorted().map { Skill(name = it) }
+            }
+        }
+    }
+
+    private fun watchTrackedApplications() {
+        viewModelScope.launch {
+            applicationRepository.getAllApplications()
+                .map { applications -> applications.map { it.opportunityId }.toSet() }
+                .collect { _trackedIds.value = it }
+        }
+    }
+
+    /**
+     * Adds the role to My applications so the student can move it through the
+     * saved → applied → interview → outcome ladder. The percentage is stored only
+     * when both sides of the comparison exist: with no skills named by the student,
+     * or none asked for by the posting, there is nothing to score, and [OpportunityMatchingEngine]
+     * answers 0.5 in those cases as a neutral placeholder that would render as a
+     * "50% match" nobody derived.
+     */
+    fun track(internship: Internship) {
+        if (_trackedIds.value.contains(internship.id)) return
+        val score = when {
+            trackedSkills.isEmpty() || internship.requiredSkills.isEmpty() -> null
+            else -> matchingEngine.calculateMatchScore(internship, trackedSkills)
+        }
+        viewModelScope.launch {
+            applicationRepository.trackApplication(
+                opportunityId = internship.id,
+                company = internship.company.name,
+                role = internship.title,
+                type = internship.kind.name,
+                matchScore = score,
+            )
+            _effect.emit(
+                InternshipEffect.ShowSnackbar(
+                    if (score == null) {
+                        "Tracking in My applications. Set your skills to see a fit score."
+                    } else {
+                        "Tracking ${internship.company.name} in My applications."
+                    }
+                )
+            )
+        }
     }
 
     private fun loadInternships() {

@@ -195,8 +195,8 @@ internal val LightExtendedColors = NexusExtendedColors(
  * these grounds.
  */
 object NexusGradients {
-    /** Signature Ascent ramp: the instrument needle warming from olive to lime. */
-    val Ascent = listOf(NexusColors.NexusBlueDark, NexusColors.NexusBlue, NexusColors.SignalBright)
+    /** Signature ramp: the instrument needle warming from olive to lime. */
+    val SignalSweep = listOf(NexusColors.NexusBlueDark, NexusColors.NexusBlue, NexusColors.SignalBright)
     val Nexus = listOf(NexusColors.NexusBlue, NexusColors.SignalBright)
     val Aurora = listOf(NexusColors.AuroraGreen, NexusColors.Cyan400)
     val Stellar = listOf(NexusColors.StellarPink, NexusColors.PlasmaOrange)

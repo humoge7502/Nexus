@@ -10,6 +10,7 @@ dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:analytics"))
     implementation(project(":core:data"))
+    implementation(project(":core:datastore"))
     implementation(project(":core:domain"))
     implementation(project(":core:common"))
     implementation(platform(libs.compose.bom))
@@ -25,4 +26,6 @@ dependencies {
     implementation(libs.lifecycle.runtime.compose)
 
     implementation(libs.hilt.navigation.compose)
+
+    testImplementation(libs.junit)
 }

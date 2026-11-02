@@ -105,6 +105,14 @@ private fun Internship.searchableText(): String = buildString {
     append(' ')
     append(location.city)
     append(' ')
+    append(stipendLabel)
+    append(' ')
+    append(durationLabel)
+    append(' ')
+    append(sourceName)
+    append(' ')
+    append(kind.name.replace('_', ' '))
+    append(' ')
     append(tags.joinToString(" "))
     append(' ')
     append(requiredSkills.joinToString(" ") { it.name })
@@ -145,8 +153,20 @@ private fun Certification.matchesSearch(query: String): Boolean =
 
 private fun Internship.matchesFilter(filter: String): Boolean = when (filter) {
     "remote" -> isRemote || location.city.contains("remote", ignoreCase = true)
-    "paid" -> (stipend?.amount ?: 0) > 0
+    "paid" -> isPaid()
     else -> tagKeywords[filter]?.any { searchableText().containsKeyword(it) } ?: true
+}
+
+/**
+ * The feed publishes a stipend string rather than a number, so "Paid" has to
+ * read the label — while still excluding explicit no-stipend wording.
+ */
+private fun Internship.isPaid(): Boolean {
+    if ((stipend?.amount ?: 0) > 0) return true
+    val label = stipendLabel.lowercase()
+    if (label.isBlank()) return false
+    if (listOf("not listed", "unpaid", "no stipend", "volunteer").any { label.contains(it) }) return false
+    return listOf("paid", "stipend", "salary", "compensation", "usd", "inr", "₹", "\$").any { label.contains(it) }
 }
 
 private fun Hackathon.matchesFilter(filter: String): Boolean = when (filter) {

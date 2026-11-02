@@ -20,6 +20,7 @@
     <string name="applications_action_got_offer">Got Offer!</string>
     <string name="applications_action_accept">Accept</string>
     <string name="applications_action_reject">Reject</string>
+    <string name="applications_action_remove">Remove</string>
     <string name="applications_empty_all">No applications tracked yet</string>
     <string name="applications_empty_applied">No applications submitted</string>
     <string name="applications_empty_interviewing">No interviews scheduled</string>

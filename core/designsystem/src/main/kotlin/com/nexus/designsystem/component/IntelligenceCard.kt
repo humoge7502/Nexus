@@ -198,7 +198,7 @@ object IntelligenceCardDefaults {
         secondaryLabel: String = "Later",
     ) = IntelligenceCardData(
         type = IntelligenceCardType.ORACLE,
-        title = "Ascent Oracle",
+        title = "Sagitta Oracle",
         description = prediction,
         primaryAction = actionLabel,
         secondaryAction = secondaryLabel,

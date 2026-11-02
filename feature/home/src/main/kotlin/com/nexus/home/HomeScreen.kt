@@ -1,6 +1,5 @@
 package com.nexus.home
 
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -33,8 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,14 +44,12 @@ import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.SignalField
 import com.nexus.designsystem.component.TelemetryItem
 import com.nexus.designsystem.component.TelemetryStrip
-import com.nexus.designsystem.component.hairline
-import com.nexus.designsystem.component.instrumentGrid
-import com.nexus.designsystem.component.sheen
+import com.nexus.designsystem.component.editorial.EditorialSurface
 import com.nexus.designsystem.effect.RevealOnLoad
-import com.nexus.designsystem.theme.NexusColors
-import com.nexus.designsystem.theme.NexusGradients
-import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusAnimation
+import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.motionMillis
 import com.nexus.designsystem.theme.nexus
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -308,93 +303,77 @@ private fun CareerReadinessCard(
     caption: String,
     modifier: Modifier = Modifier,
 ) {
+    val ext = MaterialTheme.nexus
     val animatedScore by animateFloatAsState(
         targetValue = score,
-        animationSpec = tween(1500, easing = FastOutSlowInEasing),
-        label = "score"
+        animationSpec = tween(
+            durationMillis = motionMillis(NexusAnimation.Duration.long),
+            easing = NexusAnimation.Easing.emphasizedDecelerate,
+        ),
+        label = "readiness",
     )
     val readinessCaption = stringResource(R.string.home_readiness_caption)
-    val shape = NexusShapes.lg
-    val ink = NexusColors.SignalInk
 
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(
-                brush = Brush.linearGradient(NexusGradients.Ascent),
-                shape = shape
-            )
-            .instrumentGrid(spacingDp = 30f, alpha = 0.06f, color = ink)
-            .hairline(
-                color = ink.copy(alpha = 0.26f),
-                cornerRadiusDp = 18f
-            )
-            .sheen(alpha = 0.10f)
-            .padding(horizontal = 20.dp, vertical = 20.dp)
-    ) {
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.text_career_readiness).uppercase(Locale.ROOT),
-                        style = NexusTypography.DataLabel,
-                        color = ink.copy(alpha = 0.66f)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(verticalAlignment = Alignment.Bottom) {
-                        Text(
-                            text = "${(animatedScore * 100).toInt()}",
-                            style = NexusTypography.TelemetryDisplay.copy(
-                                fontSize = 54.sp,
-                                lineHeight = 56.sp,
-                            ),
-                            color = ink,
-                        )
-                        Text(
-                            text = "%",
-                            style = NexusTypography.TelemetryLarge,
-                            color = ink.copy(alpha = 0.55f),
-                            modifier = Modifier.padding(start = 4.dp, bottom = 7.dp)
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                InstrumentGauge(
-                    progress = score,
-                    modifier = Modifier.size(112.dp),
-                    accent = ink,
-                    trackColor = ink.copy(alpha = 0.16f),
-                    tickColor = ink.copy(alpha = 0.30f),
-                    stroke = 8.dp,
+    // Readiness sits on paper, not on a field of its own colour. A saturated
+    // plate makes the loudest object on the screen the *background* of a
+    // measurement, and a gauge drawn in ink on ink — which is what this was —
+    // cannot be read at all. On paper the dial is the only lit thing, so it is
+    // the only thing the eye measures.
+    EditorialSurface(modifier = modifier.fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.text_career_readiness).uppercase(Locale.ROOT),
+                    style = NexusTypography.DataLabel,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(
+                        text = "${(animatedScore * 100).toInt()}",
+                        style = NexusTypography.TelemetryDisplay.copy(
+                            fontSize = 54.sp,
+                            lineHeight = 56.sp,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        text = "%",
+                        style = NexusTypography.TelemetryLarge,
+                        color = ext.signal.copy(alpha = 0.6f),
+                        modifier = Modifier.padding(start = 4.dp, bottom = 7.dp),
+                    )
+                }
             }
+            Spacer(modifier = Modifier.width(12.dp))
+            // Left on the gauge's own defaults: signal arc, ink track. That is the
+            // one combination that measures cleanly on this surface.
+            InstrumentGauge(
+                progress = score,
+                modifier = Modifier.size(112.dp),
+            )
+        }
 
-            Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(18.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(NexusSpacing.hairline)
+                .background(ext.hairline),
+        )
+        Spacer(modifier = Modifier.height(13.dp))
+        Row(verticalAlignment = Alignment.Top) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(ink.copy(alpha = 0.16f))
+                    .padding(top = 4.dp, end = 10.dp)
+                    .size(width = 2.dp, height = 11.dp)
+                    .background(ext.signal),
             )
-            Spacer(modifier = Modifier.height(13.dp))
-            Row(verticalAlignment = Alignment.Top) {
-                Box(
-                    modifier = Modifier
-                        .padding(top = 4.dp, end = 10.dp)
-                        .size(width = 2.dp, height = 11.dp)
-                        .clip(NexusShapes.tag)
-                        .background(ink.copy(alpha = 0.75f))
-                )
-                Text(
-                    text = caption.ifBlank { readinessCaption },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = ink.copy(alpha = 0.88f)
-                )
-            }
+            Text(
+                text = caption.ifBlank { readinessCaption },
+                style = NexusTypography.EditorialBody,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

@@ -31,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -56,6 +57,7 @@ import com.nexus.designsystem.theme.NexusTypography
 import com.nexus.designsystem.theme.nexus
 import com.nexus.domain.model.Application
 import com.nexus.domain.model.ApplicationStatus
+import java.util.Locale
 
 @Composable
 fun ApplicationsScreen(
@@ -113,6 +115,7 @@ fun ApplicationsScreen(
               onStatusChange = { newStatus ->
                 viewModel.updateStatus(application.id, newStatus)
               },
+              onRemove = { viewModel.remove(application.id) },
             )
           }
         }
@@ -179,12 +182,10 @@ private fun ApplicationTabs(
 private fun ApplicationCard(
   application: Application,
   onStatusChange: (ApplicationStatus) -> Unit,
+  onRemove: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val matchPercent = stringResource(
-    R.string.applications_match_percent,
-    (application.matchScore * 100).toInt(),
-  )
+  val score = application.matchScore
   NexusCard(modifier = modifier.fillMaxWidth()) {
     Column(modifier = Modifier.fillMaxWidth()) {
       Row(
@@ -208,28 +209,34 @@ private fun ApplicationCard(
         StatusChip(application.status)
       }
 
-      Spacer(Modifier.height(14.dp))
-      val matchAccent = when {
-        application.matchScore > 0.8f -> MaterialTheme.nexus.positive
-        application.matchScore > 0.5f -> MaterialTheme.nexus.attention
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
-      }
-      Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
-          text = matchPercent,
-          style = NexusTypography.DataLabel,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-          maxLines = 1,
+      if (score != null) {
+        Spacer(Modifier.height(14.dp))
+        val matchLabel = stringResource(
+            R.string.applications_match_percent,
+            (score * 100).toInt(),
         )
-        Spacer(Modifier.width(12.dp))
-        CalibratedRule(
-          progress = application.matchScore,
-          modifier = Modifier.weight(1f),
-          divisions = 10,
-          accent = matchAccent,
-          height = 16.dp,
-          contentDescription = matchPercent,
-        )
+        val matchAccent = when {
+          score > 0.8f -> MaterialTheme.nexus.positive
+          score > 0.5f -> MaterialTheme.nexus.attention
+          else -> MaterialTheme.colorScheme.onSurfaceVariant
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Text(
+            text = matchLabel,
+            style = NexusTypography.DataLabel,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+          )
+          Spacer(Modifier.width(12.dp))
+          CalibratedRule(
+            progress = score,
+            modifier = Modifier.weight(1f),
+            divisions = 10,
+            accent = matchAccent,
+            height = 16.dp,
+            contentDescription = matchLabel,
+          )
+        }
       }
 
       AnimatedVisibility(visible = application.status.ordinal < ApplicationStatus.ACCEPTED.ordinal) {
@@ -238,6 +245,27 @@ private fun ApplicationCard(
           currentStatus = application.status,
           onStatusChange = onStatusChange,
         )
+      }
+
+      // Applied, interviewing and offered rows carry dates a student would not
+      // want lost to a mis-tap. A saved row is the mis-tap worth undoing, and a
+      // closed outcome is the row they want off the list.
+      val isRemovable = application.status == ApplicationStatus.SAVED ||
+        application.status == ApplicationStatus.REJECTED ||
+        application.status == ApplicationStatus.ACCEPTED
+      if (isRemovable) {
+        Spacer(Modifier.height(10.dp))
+        TextButton(
+          onClick = onRemove,
+          shape = NexusShapes.sm,
+          contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp),
+        ) {
+          Text(
+            text = stringResource(R.string.applications_action_remove).uppercase(Locale.ROOT),
+            style = NexusTypography.TelemetryMicro,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
+        }
       }
     }
   }

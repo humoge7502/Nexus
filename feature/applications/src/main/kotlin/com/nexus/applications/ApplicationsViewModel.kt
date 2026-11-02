@@ -56,9 +56,12 @@ class ApplicationsViewModel @Inject constructor(
     fun updateStatus(applicationId: String, newStatus: ApplicationStatus) {
         viewModelScope.launch {
             applicationRepository.updateStatus(applicationId, newStatus)
-if (newStatus == ApplicationStatus.OFFERED) {
-      nexusAnalytics.trackOpportunityApplied(applicationId, "")
+        }
     }
+
+    fun remove(applicationId: String) {
+        viewModelScope.launch {
+            applicationRepository.delete(applicationId)
         }
     }
 
