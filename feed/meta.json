@@ -1,16 +1,16 @@
 {
   "version": 2,
-  "generatedAt": "2026-11-03T14:04:34.935Z",
-  "durationMs": 24350,
+  "generatedAt": "2026-11-03T23:16:21.255Z",
+  "durationMs": 39187,
   "counts": {
     "internships": 25,
-    "hackathons": 53,
-    "verifiedInternships": 26,
-    "verifiedHackathons": 53
+    "hackathons": 51,
+    "verifiedInternships": 25,
+    "verifiedHackathons": 51
   },
   "verification": {
     "enabled": true,
-    "deadLinksDropped": 4
+    "deadLinksDropped": 2
   },
   "sources": [
     {
@@ -183,9 +183,9 @@
     },
     {
       "name": "Paytm",
-      "ok": true,
-      "status": 200,
-      "count": 6
+      "ok": false,
+      "status": 0,
+      "count": 0
     },
     {
       "name": "Meesho",
@@ -195,8 +195,8 @@
     },
     {
       "name": "CRED",
-      "ok": true,
-      "status": 200,
+      "ok": false,
+      "status": 0,
       "count": 0
     },
     {
@@ -213,27 +213,27 @@
     },
     {
       "name": "Spotify",
-      "ok": true,
-      "status": 200,
+      "ok": false,
+      "status": 0,
       "count": 0
     },
     {
       "name": "Unstop",
       "ok": true,
       "status": 200,
-      "count": 8
+      "count": 10
     },
     {
       "name": "Devpost",
       "ok": true,
       "status": 200,
-      "count": 43
+      "count": 42
     },
     {
       "name": "Devfolio",
       "ok": true,
       "status": 200,
-      "count": 10
+      "count": 9
     },
     {
       "name": "Official programmes",
