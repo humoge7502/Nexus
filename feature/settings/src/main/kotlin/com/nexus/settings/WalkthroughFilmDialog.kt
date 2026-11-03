@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.nexus.designsystem.component.NexusIconButton
 
 /**
  * The walkthrough film. The asset is footage captured from the running app on a
@@ -84,13 +84,12 @@ fun WalkthroughFilmDialog(onDismiss: () -> Unit) {
                         color = Color.White.copy(alpha = 0.65f),
                     )
                 }
-                IconButton(onClick = onDismiss) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = stringResource(R.string.walkthrough_close),
-                        tint = Color.White,
-                    )
-                }
+                NexusIconButton(
+                    icon = Icons.Default.Close,
+                    contentDescription = stringResource(R.string.walkthrough_close),
+                    onClick = onDismiss,
+                    tint = Color.White,
+                )
             }
 
             Box(

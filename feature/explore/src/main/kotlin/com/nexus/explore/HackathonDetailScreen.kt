@@ -25,10 +25,7 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.OpenInNew
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,7 +38,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
@@ -68,28 +68,27 @@ fun HackathonDetailScreen(
             title = stringResource(R.string.explore_hackathon),
             onBack = onBack,
             actions = {
-                IconButton(onClick = { hackathon?.let { viewModel.toggleSave(it.id) } }) {
-                    Icon(
-                        if (hackathon?.isSaved == true) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                        contentDescription = if (hackathon?.isSaved == true) {
-                            stringResource(R.string.cd_remove_from_saved)
-                        } else {
-                            stringResource(R.string.cd_save)
-                        },
-                        tint = if (hackathon?.isSaved == true) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                    )
-                }
+                NexusIconButton(
+                    icon = if (hackathon?.isSaved == true) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                    contentDescription = if (hackathon?.isSaved == true) {
+                        stringResource(R.string.cd_remove_from_saved)
+                    } else {
+                        stringResource(R.string.cd_save)
+                    },
+                    onClick = { hackathon?.let { viewModel.toggleSave(it.id) } },
+                    tint = if (hackathon?.isSaved == true) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
             },
         )
 
         if (hackathon == null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 when (state) {
-                    is UiState.Loading -> CircularProgressIndicator()
+                    is UiState.Loading -> LoadingState()
                     is UiState.Error -> Text(
                         (state as UiState.Error).message,
                         style = MaterialTheme.typography.bodyLarge,
@@ -236,19 +235,16 @@ fun HackathonDetailScreen(
                 }
             }
 
-            Button(
+            NexusButton(
+                text = stringResource(R.string.explore_register_now),
                 onClick = {
                     if (hackathon.registrationUrl.isNotBlank()) {
                         uriHandler.openUri(hackathon.registrationUrl)
                     }
                 },
-                modifier = Modifier.fillMaxWidth().height(52.dp),
+                icon = Icons.Default.OpenInNew,
                 shape = NexusShapes.sm,
-            ) {
-                Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.explore_register_now), fontWeight = FontWeight.SemiBold)
-            }
+            )
 
             Spacer(Modifier.height(16.dp))
         }

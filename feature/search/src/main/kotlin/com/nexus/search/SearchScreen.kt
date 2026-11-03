@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.component.SignalChoice
@@ -74,9 +74,11 @@ fun SearchScreen(
                 },
                 trailingIcon = {
                     if (uiState.query.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.updateQuery("") }) {
-                            Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.cd_clear))
-                        }
+                        NexusIconButton(
+                            icon = Icons.Filled.Clear,
+                            contentDescription = stringResource(R.string.cd_clear),
+                            onClick = { viewModel.updateQuery("") },
+                        )
                     }
                 },
             )

@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -88,30 +86,26 @@ fun CareerMirrorContent(
       verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
       // Period card
-      Card(
+      NexusCard(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-          containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
       ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-          Text(
-            text = mirror.periodLabel,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-          )
-          Spacer(modifier = Modifier.height(4.dp))
-          Text(
-            text = stringResource(
-              R.string.careermirror_score_with_delta,
-              uiState.currentScore,
-              if (uiState.scoreDelta >= 0) "+${uiState.scoreDelta}" else uiState.scoreDelta.toString(),
-            ),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-          )
-        }
+        Text(
+          text = mirror.periodLabel,
+          style = MaterialTheme.typography.labelLarge,
+          color = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+          text = stringResource(
+            R.string.careermirror_score_with_delta,
+            uiState.currentScore,
+            if (uiState.scoreDelta >= 0) "+${uiState.scoreDelta}" else uiState.scoreDelta.toString(),
+          ),
+          style = MaterialTheme.typography.headlineMedium,
+          fontWeight = FontWeight.Bold,
+          color = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
       }
 
       // Narrative card

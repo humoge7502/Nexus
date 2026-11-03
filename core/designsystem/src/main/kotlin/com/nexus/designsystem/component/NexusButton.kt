@@ -60,6 +60,9 @@ fun NexusButton(
     shape: Shape = NexusShapes.md,
     enabled: Boolean = true,
     loading: Boolean = false,
+    /** A primary action usually spans its row; pass false for an inline CTA
+     *  that should hug its label instead of stretching. */
+    expand: Boolean = true,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -85,7 +88,7 @@ fun NexusButton(
             onClick()
         },
         modifier = modifier
-            .fillMaxWidth()
+            .then(if (expand) Modifier.fillMaxWidth() else Modifier)
             .heightIn(min = 52.dp)
             .graphicsLayer {
                 scaleX = scale
@@ -154,6 +157,8 @@ fun NexusOutlineButton(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     enabled: Boolean = true,
+    /** Matches [NexusButton.expand]: false for an inline secondary action. */
+    expand: Boolean = true,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -176,7 +181,7 @@ fun NexusOutlineButton(
             onClick()
         },
         modifier = modifier
-            .fillMaxWidth()
+            .then(if (expand) Modifier.fillMaxWidth() else Modifier)
             .heightIn(min = 52.dp)
             .graphicsLayer {
                 scaleX = scale

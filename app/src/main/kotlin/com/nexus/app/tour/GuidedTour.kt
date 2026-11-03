@@ -20,8 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -51,9 +49,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nexus.app.R
+import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusNavItems
 import com.nexus.designsystem.theme.LocalReducedMotion
-import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.nexus
 
@@ -163,19 +161,13 @@ internal fun GuidedTour(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    Button(
+                    NexusButton(
+                        text = stringResource(if (isLast) R.string.tour_start else R.string.tour_next),
                         onClick = { if (isLast) endTour() else step++ },
+                        gradient = listOf(extended.signal),
                         shape = NexusShapes.sm,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = extended.signal,
-                            contentColor = NexusColors.SignalInk,
-                        ),
-                    ) {
-                        Text(
-                            text = stringResource(if (isLast) R.string.tour_start else R.string.tour_next),
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                    }
+                        expand = false,
+                    )
                 }
             }
         }

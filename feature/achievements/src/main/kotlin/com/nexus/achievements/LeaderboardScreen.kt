@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
@@ -34,7 +33,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.material3.CircularProgressIndicator
+import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusColors
@@ -96,12 +96,7 @@ fun LeaderboardScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         when {
-            uiState.isLoading -> Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-            }
+            uiState.isLoading -> LoadingState(modifier = Modifier.fillMaxSize())
 
             uiState.entries.isEmpty() -> LeaderboardEmptyState(onOpenArena)
 
@@ -193,9 +188,10 @@ private fun LeaderboardEmptyState(onOpenArena: () -> Unit) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onOpenArena) {
-            Text(stringResource(R.string.leaderboard_open_arena))
-        }
+        NexusButton(
+            text = stringResource(R.string.leaderboard_open_arena),
+            onClick = onOpenArena,
+        )
     }
 }
 

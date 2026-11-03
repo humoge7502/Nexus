@@ -23,7 +23,11 @@ import com.nexus.common.AIRateLimiter
 import com.nexus.common.RateLimitResult
 import com.nexus.datastore.UserPreferences
 import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusChip
+import com.nexus.designsystem.component.NexusOutlineButton
+import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.network.ai.AIOpenRouterService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -106,35 +110,32 @@ fun LinkedInPostScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
         ) {
-            OutlinedTextField(
+            NexusTextField(
                 value = uiState.achievement,
                 onValueChange = { viewModel.updateAchievement(it) },
-                label = { Text(stringResource(R.string.ai_describe_your_achievement)) },
-                placeholder = { Text(stringResource(R.string.ai_e_g_won_a_hackathon_completed)) },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 3,
-                maxLines = 6,
+                label = stringResource(R.string.ai_describe_your_achievement),
+                placeholder = stringResource(R.string.ai_e_g_won_a_hackathon_completed),
+                singleLine = false,
+                minLines = 2,
             )
             Spacer(Modifier.height(12.dp))
             Text(stringResource(R.string.ai_tone), style = MaterialTheme.typography.labelLarge)
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 tones.forEach { tone ->
-                    FilterChip(
-                        selected = uiState.tone == tone,
-                        onClick = { viewModel.updateTone(tone) },
-                        label = { Text(tone) },
+                    NexusChip(
+                        text = tone,
+                        isSelected = uiState.tone == tone,
+                        onToggle = { viewModel.updateTone(tone) },
                     )
                 }
             }
             Spacer(Modifier.height(16.dp))
-            Button(
+            NexusButton(
+                text = if (uiState.isLoading) "Generating..." else "Generate Post",
                 onClick = { viewModel.generate() },
-                modifier = Modifier.fillMaxWidth(),
                 enabled = uiState.achievement.isNotBlank() && !uiState.isLoading,
-            ) {
-                Text(if (uiState.isLoading) "Generating..." else "Generate Post")
-            }
+            )
             Spacer(Modifier.height(16.dp))
 
             if (uiState.isLoading) {
@@ -152,13 +153,12 @@ fun LinkedInPostScreen(
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Spacer(Modifier.height(12.dp))
-                    OutlinedButton(
+                    NexusOutlineButton(
+                        text = stringResource(R.string.ai_copy_to_clipboard),
                         onClick = { clipboard.setText(AnnotatedString(uiState.generatedPost)) },
-                    ) {
-                        Icon(Icons.Default.ContentCopy, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text(stringResource(R.string.ai_copy_to_clipboard))
-                    }
+                        icon = Icons.Default.ContentCopy,
+                        expand = false,
+                    )
                 }
             }
         }

@@ -24,9 +24,6 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.SkipNext
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,7 +42,9 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.nexus
 import kotlinx.coroutines.delay
@@ -156,42 +155,30 @@ fun ProductivityScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                IconButton(
+                NexusIconButton(
+                    icon = Icons.Default.Replay,
+                    contentDescription = stringResource(R.string.cd_reset),
                     onClick = { isRunning = false; secondsRemaining = 25 * 60 },
-                    modifier = Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                ) {
-                    Icon(
-                        Icons.Default.Replay,
-                        contentDescription = stringResource(R.string.cd_reset),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                    modifier = Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
 
-                Button(
+                NexusButton(
+                    text = stringResource(
+                        if (isRunning) R.string.productivity_pause else R.string.productivity_start,
+                    ),
                     onClick = { isRunning = !isRunning },
-                    modifier = Modifier.size(72.dp),
-                    shape = CircleShape,
-                ) {
-                    Icon(
-                        imageVector = if (isRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = stringResource(
-                            if (isRunning) R.string.productivity_pause else R.string.productivity_start,
-                        ),
-                        modifier = Modifier.size(32.dp),
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
+                    icon = if (isRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
+                    expand = false,
+                )
 
-                IconButton(
+                NexusIconButton(
+                    icon = Icons.Default.SkipNext,
+                    contentDescription = stringResource(R.string.cd_skip),
                     onClick = { pomodorosCompleted++ },
-                    modifier = Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                ) {
-                    Icon(
-                        Icons.Default.SkipNext,
-                        contentDescription = stringResource(R.string.cd_skip),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                    modifier = Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
 
             Spacer(modifier = Modifier.height(40.dp))

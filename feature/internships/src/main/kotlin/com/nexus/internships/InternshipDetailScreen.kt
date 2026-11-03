@@ -26,13 +26,7 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -54,6 +48,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.InstrumentPlate
+import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.NexusButton
+import com.nexus.designsystem.component.NexusIconButton
+import com.nexus.designsystem.component.NexusOutlineButton
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusSpacing
@@ -174,7 +172,7 @@ private fun DetailPlaceholder(
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         when (uiState) {
-            is UiState.Loading -> CircularProgressIndicator(color = ext.signal)
+            is UiState.Loading -> LoadingState()
             is UiState.Error -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     uiState.message,
@@ -215,18 +213,19 @@ private fun InternshipDetailTopBar(
         onBack = onBack,
         meta = kindLabel(internship.kind).uppercase(Locale.ROOT),
         actions = {
-            IconButton(onClick = onToggleSave) {
-                Icon(
-                    imageVector = if (internship.isSaved) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                    contentDescription = if (internship.isSaved) {
-                        stringResource(R.string.cd_remove_from_saved)
-                    } else {
-                        stringResource(R.string.cd_save)
-                    },
-                    tint = if (internship.isSaved) ext.signal else scheme.onSurfaceVariant,
-                )
-            }
-            IconButton(
+            NexusIconButton(
+                icon = if (internship.isSaved) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                contentDescription = if (internship.isSaved) {
+                    stringResource(R.string.cd_remove_from_saved)
+                } else {
+                    stringResource(R.string.cd_save)
+                },
+                onClick = onToggleSave,
+                tint = if (internship.isSaved) ext.signal else scheme.onSurfaceVariant,
+            )
+            NexusIconButton(
+                icon = Icons.Default.Share,
+                contentDescription = stringResource(R.string.cd_share),
                 onClick = {
                     val shareText = buildString {
                         append(
@@ -246,13 +245,8 @@ private fun InternshipDetailTopBar(
                         Intent.createChooser(send, context.getString(R.string.internships_share_internship)),
                     )
                 },
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Share,
-                    contentDescription = stringResource(R.string.cd_share),
-                    tint = scheme.onSurfaceVariant,
-                )
-            }
+                tint = scheme.onSurfaceVariant,
+            )
         },
         title = {
             Text(
@@ -448,69 +442,36 @@ private fun ApplyActions(
     onTrack: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
-    val ext = MaterialTheme.nexus
-    val scheme = MaterialTheme.colorScheme
     val hasApplyUrl = internship.applyUrl.isNotBlank()
 
-    Button(
+    NexusButton(
+        text = if (hasApplyUrl) {
+            stringResource(
+                R.string.internships_apply_cta,
+                internship.sourceName.ifBlank { stringResource(R.string.internships_apply_short) },
+            )
+        } else {
+            stringResource(R.string.internships_apply_short)
+        }.uppercase(Locale.ROOT),
         onClick = {
             if (hasApplyUrl) uriHandler.openUri(internship.applyUrl)
             onApply()
         },
         enabled = hasApplyUrl,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
         shape = NexusShapes.sm,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = ext.signal,
-            contentColor = ext.ink,
-            disabledContainerColor = scheme.surfaceContainerHigh,
-            disabledContentColor = scheme.onSurfaceVariant,
-        ),
-    ) {
-        Text(
-            text = if (hasApplyUrl) {
-                stringResource(
-                    R.string.internships_apply_cta,
-                    internship.sourceName.ifBlank { stringResource(R.string.internships_apply_short) },
-                )
-            } else {
-                stringResource(R.string.internships_apply_short)
-            }.uppercase(Locale.ROOT),
-            style = NexusTypography.DataLabel,
-        )
-    }
+    )
 
     if (!isClosed) {
         Spacer(Modifier.height(NexusSpacing.sm))
-        OutlinedButton(
+        NexusOutlineButton(
+            text = stringResource(
+                if (isTracked) R.string.internships_tracked_cta
+                else R.string.internships_track_cta
+            ).uppercase(Locale.ROOT),
             onClick = onTrack,
             enabled = !isTracked,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            shape = NexusShapes.sm,
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = if (isTracked) scheme.onSurfaceVariant else ext.signal,
-            ),
-        ) {
-            if (isTracked) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                )
-                Spacer(Modifier.width(NexusSpacing.xs))
-            }
-            Text(
-                text = stringResource(
-                    if (isTracked) R.string.internships_tracked_cta
-                    else R.string.internships_track_cta
-                ).uppercase(Locale.ROOT),
-                style = NexusTypography.DataLabel,
-            )
-        }
+            icon = if (isTracked) Icons.Default.Check else null,
+        )
     }
 }
 

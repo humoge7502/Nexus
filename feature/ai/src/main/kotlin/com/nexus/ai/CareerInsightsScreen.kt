@@ -20,7 +20,9 @@ import com.nexus.common.AIRateLimiter
 import com.nexus.common.RateLimitResult
 import com.nexus.datastore.UserPreferences
 import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.network.ai.AIOpenRouterService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -86,9 +88,11 @@ fun CareerInsightsScreen(
             title = stringResource(R.string.ai_career_insights),
             onBack = onBack,
             actions = {
-                IconButton(onClick = { viewModel.loadInsights() }) {
-                    Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.cd_refresh))
-                }
+                NexusIconButton(
+                    icon = Icons.Default.Refresh,
+                    contentDescription = stringResource(R.string.cd_refresh),
+                    onClick = { viewModel.loadInsights() },
+                )
             },
         )
 
@@ -102,9 +106,9 @@ fun CareerInsightsScreen(
                     .padding(16.dp),
             ) {
                 uiState.error?.let { error ->
-                    Card(
+                    NexusCard(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
                     ) {
                         Text(
                             text = error,
@@ -113,9 +117,11 @@ fun CareerInsightsScreen(
                         )
                     }
                     Spacer(Modifier.height(16.dp))
-                    Button(onClick = { viewModel.loadInsights() }) {
-                        Text(stringResource(R.string.ai_retry))
-                    }
+                    NexusButton(
+                        text = stringResource(R.string.ai_retry),
+                        onClick = { viewModel.loadInsights() },
+                        expand = false,
+                    )
                 }
 
                 if (uiState.insights.isNotBlank()) {

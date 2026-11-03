@@ -23,9 +23,7 @@ import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -42,6 +40,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.NexusButton
+import com.nexus.designsystem.component.NexusIconButton
+import com.nexus.designsystem.component.NexusOutlineButton
 import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.hairline
 import com.nexus.designsystem.component.instrumentGrid
@@ -222,14 +222,12 @@ private fun PaywallHero(onDismiss: () -> Unit) {
                         color = NexusColors.SignalInk.copy(alpha = 0.86f),
                     )
                 }
-                IconButton(onClick = onDismiss) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = stringResource(R.string.paywall_maybe_later),
-                        tint = NexusColors.SignalInk.copy(alpha = 0.86f),
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
+                NexusIconButton(
+                    icon = Icons.Default.Close,
+                    contentDescription = stringResource(R.string.paywall_maybe_later),
+                    onClick = onDismiss,
+                    tint = NexusColors.SignalInk.copy(alpha = 0.86f),
+                )
             }
             Spacer(modifier = Modifier.height(22.dp))
             Text(
@@ -325,15 +323,11 @@ private fun PlanCard(
                     gradient = NexusGradients.PrimaryDeep,
                 )
             } else {
-                OutlinedButton(
+                NexusOutlineButton(
+                    text = actionLabel,
                     onClick = onAction,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    shape = RoundedCornerShape(14.dp),
-                ) {
-                    Text(actionLabel, fontWeight = FontWeight.SemiBold)
-                }
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }

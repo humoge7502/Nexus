@@ -11,6 +11,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -39,6 +42,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -73,6 +77,7 @@ import com.nexus.designsystem.component.NexusNavigationLayout
 import com.nexus.designsystem.component.NexusRailBar
 import com.nexus.designsystem.component.NexusSideBar
 import com.nexus.designsystem.component.nexusNavigationLayoutFor
+import com.nexus.designsystem.theme.LocalReducedMotion
 import com.nexus.designsystem.theme.NexusTheme
 import com.nexus.designsystem.theme.NexusTransitions
 import com.nexus.explore.ExploreScreen
@@ -195,11 +200,19 @@ fun NexusApp(
         }
     }
 
+    val bootReducedMotion = LocalReducedMotion.current
     AnimatedContent(
         targetState = currentStep,
         // The boot flow only ever moves forward — auth, then onboarding, then the
         // app — so it takes the forward pair rather than inventing its own timing.
-        transitionSpec = { NexusTransitions.forwardEnter() togetherWith NexusTransitions.forwardExit() },
+        // Reduced motion swaps instantly: the step change itself is the signal.
+        transitionSpec = {
+            if (bootReducedMotion) {
+                EnterTransition.None togetherWith ExitTransition.None
+            } else {
+                NexusTransitions.forwardEnter() togetherWith NexusTransitions.forwardExit()
+            }
+        },
         label = "bootFlow",
     ) { step ->
         when (step) {
@@ -331,13 +344,21 @@ fun NexusMainScaffold(
                         )
                         .padding(paddingValues),
                 ) {
+                    // Tab switches are peer-to-peer and fade-lift — sliding a peer
+                    // sideways would claim an order the navigation does not have.
+                    // Only opening or leaving a detail slides. Reduced motion
+                    // collapses every page change to an instant swap.
+                    val reducedMotion = LocalReducedMotion.current
+                    val isTopLevel = { entry: NavBackStackEntry ->
+                        topLevelRoutes.any { entry.destination.hasRoute(it) }
+                    }
                     NavHost(
                         navController = navController,
                         startDestination = NexusDestination.Home,
-                        enterTransition = { NexusTransitions.forwardEnter() },
-                        exitTransition = { NexusTransitions.forwardExit() },
-                        popEnterTransition = { NexusTransitions.backwardEnter() },
-                        popExitTransition = { NexusTransitions.backwardExit() },
+                        enterTransition = navEnter(reducedMotion, isTopLevel),
+                        exitTransition = navExit(reducedMotion, isTopLevel),
+                        popEnterTransition = navEnter(reducedMotion, isTopLevel, backward = true),
+                        popExitTransition = navExit(reducedMotion, isTopLevel, backward = true),
                         modifier = Modifier.fillMaxSize(),
                     ) {
                 // HOME
@@ -577,5 +598,35 @@ private fun navigateToTab(
         popUpTo(NexusDestination.Home) { saveState = true }
         launchSingleTop = true
         restoreState = true
+    }
+}
+
+/** What arrives on a page change: peers fade-lift, a detail slides in from
+ *  its parent, and reduced motion swaps instantly — the hop itself carries
+ *  the meaning, so no movement is added on top of it. */
+private fun navEnter(
+    reducedMotion: Boolean,
+    isTopLevel: (NavBackStackEntry) -> Boolean,
+    backward: Boolean = false,
+): AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
+    when {
+        reducedMotion -> EnterTransition.None
+        isTopLevel(initialState) && isTopLevel(targetState) -> NexusTransitions.peerEnter()
+        backward -> NexusTransitions.backwardEnter()
+        else -> NexusTransitions.forwardEnter()
+    }
+}
+
+/** What leaves on a page change — the mirror of [navEnter]. */
+private fun navExit(
+    reducedMotion: Boolean,
+    isTopLevel: (NavBackStackEntry) -> Boolean,
+    backward: Boolean = false,
+): AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
+    when {
+        reducedMotion -> ExitTransition.None
+        isTopLevel(initialState) && isTopLevel(targetState) -> NexusTransitions.peerExit()
+        backward -> NexusTransitions.backwardExit()
+        else -> NexusTransitions.forwardExit()
     }
 }

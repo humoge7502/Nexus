@@ -38,7 +38,6 @@ import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -57,6 +56,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusChip
+import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.SignalField
 import com.nexus.designsystem.component.SignalTag
@@ -211,13 +211,12 @@ private fun ExploreHeader(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (showBackArrow) {
-                IconButton(onClick = onBack, modifier = Modifier.padding(end = 4.dp).size(32.dp)) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.cd_back),
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
+                NexusIconButton(
+                    icon = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.cd_back),
+                    onClick = onBack,
+                    modifier = Modifier.padding(end = 4.dp).size(32.dp),
+                )
             }
             Text(
                 text = stringResource(R.string.nav_explore),
@@ -260,13 +259,11 @@ private fun ExploreSearchField(
         },
         trailingIcon = {
             if (query.isNotEmpty()) {
-                IconButton(onClick = { onQueryChange("") }) {
-                    Icon(
-                        Icons.Default.Close,
-                        contentDescription = stringResource(R.string.cd_clear_search),
-                        modifier = Modifier.size(18.dp),
-                    )
-                }
+                NexusIconButton(
+                    icon = Icons.Default.Close,
+                    contentDescription = stringResource(R.string.cd_clear_search),
+                    onClick = { onQueryChange("") },
+                )
             }
         },
         singleLine = true,

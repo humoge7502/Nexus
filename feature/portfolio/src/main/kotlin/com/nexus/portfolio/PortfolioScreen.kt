@@ -29,11 +29,8 @@ import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.minimumInteractiveComponentSize
@@ -66,7 +63,10 @@ import androidx.lifecycle.viewModelScope
 import com.nexus.common.Constants
 import com.nexus.data.repository.PortfolioRepository
 import com.nexus.data.repository.UserXpRepository
+import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusIconButton
+import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.component.hairline
 import com.nexus.designsystem.component.instrumentGrid
@@ -151,7 +151,9 @@ fun PortfolioScreen(
             onBack = onBack,
             actions = {
                 if (uiState.projects.isNotEmpty()) {
-                    IconButton(
+                    NexusIconButton(
+                        icon = Icons.Default.Share,
+                        contentDescription = stringResource(R.string.portfolio_share),
                         onClick = {
                             val send = Intent(Intent.ACTION_SEND).apply {
                                 type = "text/plain"
@@ -166,20 +168,14 @@ fun PortfolioScreen(
                                     context.getString(R.string.portfolio_share_title),
                                 )
                             )
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Share,
-                            contentDescription = stringResource(R.string.portfolio_share),
-                        )
-                    }
-                }
-                IconButton(onClick = { showAddDialog = true }) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = stringResource(R.string.portfolio_add_project),
+                        },
                     )
                 }
+                NexusIconButton(
+                    icon = Icons.Default.Add,
+                    contentDescription = stringResource(R.string.portfolio_add_project),
+                    onClick = { showAddDialog = true },
+                )
             },
         )
 
@@ -363,9 +359,10 @@ private fun PortfolioEmpty(
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(20.dp))
-        Button(onClick = onAdd) {
-            Text(stringResource(R.string.portfolio_add_first))
-        }
+        NexusButton(
+            text = stringResource(R.string.portfolio_add_first),
+            onClick = onAdd,
+        )
     }
 }
 
@@ -485,27 +482,26 @@ private fun AddProjectDialog(
                     .heightIn(max = 420.dp)
                     .verticalScroll(rememberScrollState()),
             ) {
-                OutlinedTextField(
+                NexusTextField(
                     value = draft.title,
                     onValueChange = { draft = draft.copy(title = it) },
-                    label = { Text(stringResource(R.string.portfolio_project_title)) },
-                    singleLine = true,
+                    label = stringResource(R.string.portfolio_project_title),
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(Modifier.height(12.dp))
-                OutlinedTextField(
+                NexusTextField(
                     value = draft.description,
                     onValueChange = { draft = draft.copy(description = it) },
-                    label = { Text(stringResource(R.string.portfolio_project_description)) },
+                    label = stringResource(R.string.portfolio_project_description),
+                    singleLine = false,
                     maxLines = 3,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(Modifier.height(12.dp))
-                OutlinedTextField(
+                NexusTextField(
                     value = draft.githubUrl,
                     onValueChange = { draft = draft.copy(githubUrl = it) },
-                    label = { Text(stringResource(R.string.portfolio_project_code_link)) },
-                    singleLine = true,
+                    label = stringResource(R.string.portfolio_project_code_link),
                     keyboardOptions = KeyboardOptions(
                         autoCorrectEnabled = false,
                         keyboardType = KeyboardType.Uri,
@@ -513,11 +509,10 @@ private fun AddProjectDialog(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(Modifier.height(12.dp))
-                OutlinedTextField(
+                NexusTextField(
                     value = draft.liveUrl,
                     onValueChange = { draft = draft.copy(liveUrl = it) },
-                    label = { Text(stringResource(R.string.portfolio_project_live_link)) },
-                    singleLine = true,
+                    label = stringResource(R.string.portfolio_project_live_link),
                     keyboardOptions = KeyboardOptions(
                         autoCorrectEnabled = false,
                         keyboardType = KeyboardType.Uri,

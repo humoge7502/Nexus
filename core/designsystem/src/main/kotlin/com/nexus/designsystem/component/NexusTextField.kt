@@ -43,6 +43,11 @@ fun NexusTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     trailingIcon: (@Composable () -> Unit)? = null,
     singleLine: Boolean = true,
+    /** How many lines the field opens with — prose answers deserve room to
+     *  begin, not a one-line sliver that grows only after typing. */
+    minLines: Int = 1,
+    /** Where multiline entry stops; ignored while [singleLine] is true. */
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     enabled: Boolean = true,
 ) {
     val scheme = MaterialTheme.colorScheme
@@ -54,6 +59,8 @@ fun NexusTextField(
         modifier = modifier.fillMaxWidth(),
         enabled = enabled,
         singleLine = singleLine,
+        minLines = minLines,
+        maxLines = maxLines,
         isError = isError,
         textStyle = MaterialTheme.typography.bodyLarge,
         label = {

@@ -15,11 +15,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Group
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,7 +32,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusOutlineButton
+import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.domain.model.CohortEntry
 import kotlin.math.roundToInt
@@ -112,7 +112,7 @@ fun TribeContent(
 
 @Composable
 private fun TribeJoinCard(onJoin: () -> Unit) {
-  Card(modifier = Modifier.fillMaxWidth()) {
+  NexusCard(modifier = Modifier.fillMaxWidth()) {
     Column(modifier = Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
       Icon(Icons.Default.Group, null, modifier = Modifier.padding(8.dp),
         tint = MaterialTheme.colorScheme.primary)
@@ -123,7 +123,7 @@ private fun TribeJoinCard(onJoin: () -> Unit) {
       Text(stringResource(R.string.tribe_accountability_pods_of_57_students_from),
         style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
       Spacer(modifier = Modifier.height(16.dp))
-      Button(onClick = onJoin) { Text(stringResource(R.string.tribe_create_or_join_tribe)) }
+      NexusButton(text = stringResource(R.string.tribe_create_or_join_tribe), onClick = onJoin)
     }
   }
 }
@@ -174,9 +174,11 @@ private fun TribeHome(uiState: TribeUiState, onLeave: () -> Unit) {
     }
   }
 
-  Button(onClick = onLeave, modifier = Modifier.fillMaxWidth()) {
-    Text(stringResource(R.string.tribe_leave_tribe))
-  }
+  NexusButton(
+    text = stringResource(R.string.tribe_leave_tribe),
+    onClick = onLeave,
+    modifier = Modifier.fillMaxWidth(),
+  )
 }
 
 private fun placementPercent(cohort: CohortEntry): Int =
@@ -204,21 +206,29 @@ private fun TribeSetupForm(
   NexusCard {
     Text(stringResource(R.string.tribe_set_up_your_tribe), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
     Spacer(modifier = Modifier.height(8.dp))
-    OutlinedTextField(value = college, onValueChange = { college = it },
-      label = { Text(stringResource(R.string.tribe_college_name)) }, modifier = Modifier.fillMaxWidth())
+    NexusTextField(value = college, onValueChange = { college = it },
+      label = stringResource(R.string.tribe_college_name), modifier = Modifier.fillMaxWidth())
     Spacer(modifier = Modifier.height(8.dp))
-    OutlinedTextField(value = goal, onValueChange = { goal = it },
-      label = { Text(stringResource(R.string.tribe_shared_placement_goal)) }, modifier = Modifier.fillMaxWidth())
+    NexusTextField(value = goal, onValueChange = { goal = it },
+      label = stringResource(R.string.tribe_shared_placement_goal), modifier = Modifier.fillMaxWidth())
     Spacer(modifier = Modifier.height(8.dp))
-    OutlinedTextField(value = podSize, onValueChange = { podSize = it.filter(Char::isDigit) },
-      label = { Text(stringResource(R.string.tribe_pod_size_37)) }, modifier = Modifier.fillMaxWidth())
+    NexusTextField(value = podSize, onValueChange = { podSize = it.filter(Char::isDigit) },
+      label = stringResource(R.string.tribe_pod_size_37), modifier = Modifier.fillMaxWidth())
     Spacer(modifier = Modifier.height(12.dp))
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      Button(onClick = { onSetup(college, goal, (podSize.toIntOrNull() ?: 5).coerceIn(3, 7)) },
-        modifier = Modifier.weight(1f), enabled = college.isNotBlank()) {
-        Text(stringResource(R.string.tribe_create_tribe))
-      }
-      androidx.compose.material3.OutlinedButton(onClick = onDismiss) { Text(stringResource(R.string.tribe_cancel)) }
+      NexusButton(
+        text = stringResource(R.string.tribe_create_tribe),
+        onClick = { onSetup(college, goal, (podSize.toIntOrNull() ?: 5).coerceIn(3, 7)) },
+        modifier = Modifier.weight(1f),
+        enabled = college.isNotBlank(),
+        expand = false,
+      )
+      NexusOutlineButton(
+        text = stringResource(R.string.tribe_cancel),
+        onClick = onDismiss,
+        modifier = Modifier.weight(1f),
+        expand = false,
+      )
     }
   }
 }

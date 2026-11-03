@@ -20,7 +20,9 @@ import com.nexus.common.Constants
 import com.nexus.common.RateLimitResult
 import com.nexus.data.repository.UserXpRepository
 import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.domain.model.AIMessage
 import com.nexus.domain.model.AiMessageRole
@@ -116,22 +118,19 @@ fun RoadmapGeneratorScreen(
         )
 
         Column(modifier = Modifier.padding(16.dp)) {
-            OutlinedTextField(
+            NexusTextField(
                 value = uiState.targetRole,
                 onValueChange = { viewModel.updateRole(it) },
-                label = { Text(stringResource(R.string.ai_target_role)) },
-                placeholder = { Text(stringResource(R.string.ai_e_g_full_stack_developer_data)) },
-                modifier = Modifier.fillMaxWidth(),
+                label = stringResource(R.string.ai_target_role),
+                placeholder = stringResource(R.string.ai_e_g_full_stack_developer_data),
                 singleLine = true,
             )
             Spacer(Modifier.height(12.dp))
-            Button(
+            NexusButton(
+                text = if (uiState.isLoading) "Generating..." else "Generate Roadmap",
                 onClick = { viewModel.generate() },
-                modifier = Modifier.fillMaxWidth(),
                 enabled = uiState.targetRole.isNotBlank() && !uiState.isLoading,
-            ) {
-                Text(if (uiState.isLoading) "Generating..." else "Generate Roadmap")
-            }
+            )
         }
 
         if (uiState.isLoading) {

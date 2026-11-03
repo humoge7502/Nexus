@@ -19,9 +19,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -41,15 +38,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.AnimatedStatCard
 import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.effect.StreakIgnition
+import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.domain.model.LeaderboardEntry
-
-private val PodiumGold = Color(0xFFFFD700)
-private val PodiumSilver = Color(0xFFC0C0C0)
-private val PodiumBronze = Color(0xFFCD7F32)
 
 @Composable
 fun NexusArenaScreen(
@@ -180,12 +176,11 @@ private fun ArenaTopBar(
             }
         },
         actions = {
-            IconButton(onClick = onRefresh) {
-                Icon(
-                    Icons.Default.Refresh,
-                    contentDescription = stringResource(R.string.arena_refresh),
-                )
-            }
+            NexusIconButton(
+                icon = Icons.Default.Refresh,
+                contentDescription = stringResource(R.string.arena_refresh),
+                onClick = onRefresh,
+            )
         },
     )
 }
@@ -261,21 +256,21 @@ private fun Podium(entries: List<LeaderboardEntry>) {
         PodiumSpot(
             entry = entries[1],
             place = 2,
-            accent = PodiumSilver,
+            accent = NexusColors.PodiumSilver,
             blockHeight = 84.dp,
             modifier = Modifier.weight(1f),
         )
         PodiumSpot(
             entry = entries[0],
             place = 1,
-            accent = PodiumGold,
+            accent = NexusColors.PodiumGold,
             blockHeight = 116.dp,
             modifier = Modifier.weight(1f),
         )
         PodiumSpot(
             entry = entries[2],
             place = 3,
-            accent = PodiumBronze,
+            accent = NexusColors.PodiumBronze,
             blockHeight = 68.dp,
             modifier = Modifier.weight(1f),
         )
@@ -302,7 +297,7 @@ private fun PodiumSpot(
                 text = entry.userName.trim().take(1).uppercase().ifBlank { "?" },
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1F2937),
+                color = NexusColors.Ink,
             )
         }
         Spacer(Modifier.height(6.dp))
@@ -437,17 +432,13 @@ private fun JoinLeaderboardCard(
             )
         }
         Spacer(Modifier.height(12.dp))
-        Button(
+        NexusButton(
+            text = stringResource(
+                if (isPublishing) R.string.arena_joining else R.string.arena_join_action,
+            ),
             onClick = onJoin,
             enabled = !isPublishing,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(
-                stringResource(
-                    if (isPublishing) R.string.arena_joining else R.string.arena_join_action,
-                )
-            )
-        }
+        )
     }
 }
 
@@ -484,8 +475,8 @@ private fun PublishedProfileCard(
 }
 
 private fun podiumColor(rank: Int): Color? = when (rank) {
-    1 -> PodiumGold
-    2 -> PodiumSilver
-    3 -> PodiumBronze
+    1 -> NexusColors.PodiumGold
+    2 -> NexusColors.PodiumSilver
+    3 -> NexusColors.PodiumBronze
     else -> null
 }

@@ -19,7 +19,10 @@ import com.nexus.common.AIRateLimiter
 import com.nexus.common.RateLimitResult
 import com.nexus.datastore.UserPreferences
 import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusChip
+import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.domain.usecase.InterviewIntelligenceEngine
 import com.nexus.network.ai.AIOpenRouterService
@@ -157,22 +160,18 @@ fun InterviewCoachScreen(
         .verticalScroll(rememberScrollState())
         .padding(16.dp),
     ) {
-      OutlinedTextField(
+      NexusTextField(
         value = uiState.targetRole,
         onValueChange = { viewModel.updateTargetRole(it) },
-        label = { Text(stringResource(R.string.ai_target_role)) },
-        placeholder = { Text(stringResource(R.string.ai_e_g_android_developer_data_analyst)) },
-        modifier = Modifier.fillMaxWidth(),
-        singleLine = true,
+        label = stringResource(R.string.ai_target_role),
+        placeholder = stringResource(R.string.ai_e_g_android_developer_data_analyst),
       )
       Spacer(Modifier.height(12.dp))
-      OutlinedTextField(
+      NexusTextField(
         value = uiState.targetCompany,
         onValueChange = viewModel::updateTargetCompany,
-        label = { Text(stringResource(R.string.ai_target_company_optional)) },
-        placeholder = { Text(stringResource(R.string.ai_e_g_google_razorpay)) },
-        modifier = Modifier.fillMaxWidth(),
-        singleLine = true,
+        label = stringResource(R.string.ai_target_company_optional),
+        placeholder = stringResource(R.string.ai_e_g_google_razorpay),
       )
       uiState.companyIntel?.let { intel ->
         Spacer(Modifier.height(12.dp))
@@ -198,21 +197,19 @@ fun InterviewCoachScreen(
       Spacer(Modifier.height(8.dp))
       Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         questionTypes.forEach { type ->
-          FilterChip(
-            selected = uiState.questionType == type,
-            onClick = { viewModel.updateQuestionType(type) },
-            label = { Text(type) },
+          NexusChip(
+            text = type,
+            isSelected = uiState.questionType == type,
+            onToggle = { viewModel.updateQuestionType(type) },
           )
         }
       }
       Spacer(Modifier.height(16.dp))
-      Button(
+      NexusButton(
+        text = if (uiState.isLoading) "Generating..." else "Generate Question",
         onClick = { viewModel.generateQuestion() },
-        modifier = Modifier.fillMaxWidth(),
         enabled = uiState.targetRole.isNotBlank() && !uiState.isLoading,
-      ) {
-        Text(if (uiState.isLoading) "Generating..." else "Generate Question")
-      }
+      )
       Spacer(Modifier.height(16.dp))
 
       if (uiState.isLoading) {
@@ -232,22 +229,19 @@ fun InterviewCoachScreen(
           )
         }
         Spacer(Modifier.height(16.dp))
-        OutlinedTextField(
+        NexusTextField(
           value = uiState.userAnswer,
           onValueChange = { viewModel.updateAnswer(it) },
-          label = { Text(stringResource(R.string.ai_your_answer)) },
-          modifier = Modifier.fillMaxWidth(),
+          label = stringResource(R.string.ai_your_answer),
+          singleLine = false,
           minLines = 3,
-          maxLines = 6,
         )
         Spacer(Modifier.height(12.dp))
-        Button(
+        NexusButton(
+          text = stringResource(R.string.ai_get_feedback),
           onClick = { viewModel.getFeedback() },
-          modifier = Modifier.fillMaxWidth(),
           enabled = uiState.userAnswer.isNotBlank() && !uiState.isLoading,
-        ) {
-          Text(stringResource(R.string.ai_get_feedback))
-        }
+        )
       }
 
       if (uiState.feedback.isNotBlank()) {

@@ -13,8 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,6 +28,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.GlassCard
 import com.nexus.designsystem.component.LoadingState
 import com.nexus.designsystem.component.NexusButton
+import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.component.SectionHeader
 import com.nexus.domain.model.Hackathon
@@ -53,12 +52,12 @@ fun CommunityScreen(
                 title = stringResource(R.string.community_community),
                 onBack = onBack,
                 actions = {
-                    IconButton(onClick = viewModel::refresh, enabled = !isRefreshing) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = stringResource(R.string.community_refresh),
-                        )
-                    }
+                    NexusIconButton(
+                        icon = Icons.Default.Refresh,
+                        contentDescription = stringResource(R.string.community_refresh),
+                        onClick = viewModel::refresh,
+                        enabled = !isRefreshing,
+                    )
                 },
             )
         },

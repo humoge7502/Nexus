@@ -42,8 +42,6 @@ import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -62,11 +60,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.component.AchievementBurst
+import com.nexus.designsystem.component.CalibratedRule
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
-import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusTypography
 import com.nexus.designsystem.theme.nexus
 import java.util.Locale
@@ -130,9 +129,11 @@ fun AchievementsScreen(
                 title = stringResource(R.string.achievements_achievements),
                 onBack = onBack,
                 actions = {
-                    IconButton(onClick = onSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.cd_settings))
-                    }
+                    NexusIconButton(
+                        icon = Icons.Default.Settings,
+                        contentDescription = stringResource(R.string.cd_settings),
+                        onClick = onSettings,
+                    )
                 },
             )
         }
@@ -236,14 +237,19 @@ private fun LevelXpCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            LinearProgressIndicator(
-                progress = { animatedProgress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(NexusShapes.tag),
-                color = NexusColors.SignalInk,
+            CalibratedRule(
+                progress = animatedProgress,
+                modifier = Modifier.fillMaxWidth(),
+                divisions = 10,
+                accent = NexusColors.SignalInk,
                 trackColor = NexusColors.SignalInk.copy(alpha = 0.18f),
+                tickColor = NexusColors.SignalInk.copy(alpha = 0.40f),
+                height = 18.dp,
+                contentDescription = stringResource(
+                    R.string.achievements_xp_progress,
+                    currentXp,
+                    xpForNext,
+                ),
             )
 
             Spacer(modifier = Modifier.height(8.dp))

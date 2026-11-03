@@ -36,9 +36,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -62,6 +60,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.CalibratedRule
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusIconButton
+import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.component.SignalTag
 import com.nexus.designsystem.component.SignalTone
@@ -398,13 +398,12 @@ private fun GoalCard(
                 }
             }
             Box {
-                IconButton(onClick = { menuExpanded = true }) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = stringResource(R.string.goals_goal_actions),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                NexusIconButton(
+                    icon = Icons.Default.MoreVert,
+                    contentDescription = stringResource(R.string.goals_goal_actions),
+                    onClick = { menuExpanded = true },
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 DropdownMenu(
                     expanded = menuExpanded,
                     onDismissRequest = { menuExpanded = false },
@@ -450,13 +449,11 @@ private fun GoalComposerDialog(
         },
         text = {
             Column {
-                OutlinedTextField(
+                NexusTextField(
                     value = title,
                     onValueChange = { if (it.length <= 80) title = it },
-                    label = { Text(stringResource(R.string.goals_goal_title)) },
-                    placeholder = { Text(stringResource(R.string.goals_goal_title_hint)) },
-                    singleLine = true,
-                    shape = NexusShapes.sm,
+                    label = stringResource(R.string.goals_goal_title),
+                    placeholder = stringResource(R.string.goals_goal_title_hint),
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(Modifier.height(NexusSpacing.md))

@@ -124,6 +124,35 @@ object NexusColors {
 
     val LinkedInBlue = Color(0xFF0A66C2)
     val GitHubDark = Color(0xFF24292F)
+
+    /**
+     * Vendor brand marks — the fixed identities of external companies. These are
+     * exempt from the one-signal palette rule the way a logo is: they identify
+     * the vendor inside its own card or badge and never tint system chrome,
+     * text, or navigation. Single-sourced here so no feature file carries a
+     * hex literal.
+     */
+    object Vendor {
+        val Google = Color(0xFF4285F4)
+        val Meta = Color(0xFF1877F2)
+        val Aws = Color(0xFFFF9900)
+        val Microsoft = Color(0xFF0078D4)
+        val Ibm = Color(0xFF0F62FE)
+        val Coursera = Color(0xFF0056D2)
+        val Udemy = Color(0xFF5624D0)
+        val LinkedIn = Color(0xFF0A66C2)
+        val Other = Color(0xFF4F8EF7)
+    }
+
+    /**
+     * Rank — the one place a second hue is earned by convention: a podium reads
+     * gold, silver and bronze in every league table the user has ever seen.
+     * Reserved for rank encoding on the arena surfaces; decorative accents may
+     * not borrow them.
+     */
+    val PodiumGold = Color(0xFFFFD700)
+    val PodiumSilver = Color(0xFFC0C0C0)
+    val PodiumBronze = Color(0xFFCD7F32)
 }
 
 /**

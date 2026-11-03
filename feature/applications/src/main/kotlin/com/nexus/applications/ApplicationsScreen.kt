@@ -25,10 +25,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BusinessCenter
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -45,6 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.CalibratedRule
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusOutlineButton
 import com.nexus.designsystem.component.SignalTag
 import com.nexus.designsystem.component.SignalTone
 import com.nexus.designsystem.component.TelemetryItem
@@ -308,35 +307,19 @@ private fun StatusActions(
 
   Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
     nextStatuses.forEach { status ->
-      val isPositive = status in listOf(
-        ApplicationStatus.APPLIED,
-        ApplicationStatus.INTERVIEWING,
-        ApplicationStatus.OFFERED,
-        ApplicationStatus.ACCEPTED,
-      )
-      OutlinedButton(
+      NexusOutlineButton(
+        text = when (status) {
+          ApplicationStatus.APPLIED -> stringResource(R.string.applications_action_mark_applied)
+          ApplicationStatus.INTERVIEWING -> stringResource(R.string.applications_action_got_interview)
+          ApplicationStatus.OFFERED -> stringResource(R.string.applications_action_got_offer)
+          ApplicationStatus.ACCEPTED -> stringResource(R.string.applications_action_accept)
+          ApplicationStatus.REJECTED -> stringResource(R.string.applications_action_reject)
+          else -> status.name
+        },
         onClick = { onStatusChange(status) },
         modifier = Modifier.height(NexusSpacing.minTouchTarget),
-        shape = NexusShapes.sm,
-        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp),
-        colors = ButtonDefaults.outlinedButtonColors(
-          contentColor = if (isPositive) MaterialTheme.nexus.positive
-          else MaterialTheme.colorScheme.error,
-        ),
-      ) {
-        Text(
-          text = when (status) {
-            ApplicationStatus.APPLIED -> stringResource(R.string.applications_action_mark_applied)
-            ApplicationStatus.INTERVIEWING -> stringResource(R.string.applications_action_got_interview)
-            ApplicationStatus.OFFERED -> stringResource(R.string.applications_action_got_offer)
-            ApplicationStatus.ACCEPTED -> stringResource(R.string.applications_action_accept)
-            ApplicationStatus.REJECTED -> stringResource(R.string.applications_action_reject)
-            else -> status.name
-          },
-          style = MaterialTheme.typography.labelMedium,
-          maxLines = 1,
-        )
-      }
+        expand = false,
+      )
     }
   }
 }

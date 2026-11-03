@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,11 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.OpenInNew
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -45,7 +40,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.CalibratedRule
+import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusOutlineButton
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.component.Readout
 import com.nexus.designsystem.component.SignalTag
@@ -78,7 +76,7 @@ fun CertificationDetailScreen(
         if (cert == null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 when (uiState) {
-                    is UiState.Loading -> CircularProgressIndicator()
+                    is UiState.Loading -> LoadingState(modifier = Modifier.fillMaxSize())
                     is UiState.Error -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             (uiState as UiState.Error).message,
@@ -309,22 +307,20 @@ fun CertificationDetailScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (progress != null && !progress.isCompleted) {
-                OutlinedButton(
+                NexusOutlineButton(
+                    text = stringResource(R.string.text_mark_done),
                     onClick = { viewModel.completeModule(cert.id) },
-                    modifier = Modifier.weight(1f).height(52.dp),
-                    shape = NexusShapes.sm,
-                    contentPadding = PaddingValues(horizontal = 12.dp),
-                ) {
-                    Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.size(6.dp))
-                    Text(text = stringResource(R.string.text_mark_done),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                    )
-                }
+                    icon = Icons.Default.Check,
+                    modifier = Modifier.weight(1f),
+                    expand = false,
+                )
             }
-            Button(
+            NexusButton(
+                text = when {
+                    progress?.isCompleted == true -> stringResource(R.string.certifications_review_course)
+                    progress != null -> stringResource(R.string.certifications_continue_course)
+                    else -> stringResource(R.string.certifications_start_course)
+                },
                 onClick = {
                     if (progress == null) {
                         viewModel.startCertification(cert.id, cert.estimatedHours)
@@ -334,23 +330,11 @@ fun CertificationDetailScreen(
                     }
                 },
                 enabled = cert.enrollmentUrl.isNotBlank(),
+                icon = Icons.Default.OpenInNew,
                 modifier = Modifier
-                    .weight(if (progress != null && !progress.isCompleted) 1.5f else 1f)
-                    .height(52.dp),
-                shape = NexusShapes.sm,
-            ) {
-                Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(Modifier.size(8.dp))
-                Text(
-                    text = when {
-                        progress?.isCompleted == true -> stringResource(R.string.certifications_review_course)
-                        progress != null -> stringResource(R.string.certifications_continue_course)
-                        else -> stringResource(R.string.certifications_start_course)
-                    },
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
-            }
+                    .weight(if (progress != null && !progress.isCompleted) 1.5f else 1f),
+                expand = false,
+            )
         }
     }
 }

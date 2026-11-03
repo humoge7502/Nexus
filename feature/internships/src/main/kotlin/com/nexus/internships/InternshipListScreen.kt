@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -51,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.InstrumentPlate
+import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.component.SignalChoice
@@ -101,14 +101,12 @@ fun InternshipListScreen(
                 meta = stringResource(R.string.internships_feed_meta),
                 onBack = onBack,
                 actions = {
-                    IconButton(onClick = viewModel::refresh) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = stringResource(R.string.cd_refresh),
-                            tint = MaterialTheme.nexus.signal,
-                            modifier = Modifier.size(20.dp),
-                        )
-                    }
+                    NexusIconButton(
+                        icon = Icons.Default.Refresh,
+                        contentDescription = stringResource(R.string.cd_refresh),
+                        onClick = viewModel::refresh,
+                        tint = MaterialTheme.nexus.signal,
+                    )
                 },
             )
         },
@@ -390,16 +388,14 @@ private fun InternshipListItem(
                 )
             }
             Spacer(modifier = Modifier.width(NexusSpacing.xs))
-            IconButton(onClick = onToggleSave) {
-                Icon(
-                    imageVector = if (internship.isSaved) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                    contentDescription = stringResource(
-                        if (internship.isSaved) R.string.cd_remove_from_saved else R.string.cd_save
-                    ),
-                    tint = if (internship.isSaved) ext.signal else scheme.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp),
-                )
-            }
+            NexusIconButton(
+                icon = if (internship.isSaved) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                contentDescription = stringResource(
+                    if (internship.isSaved) R.string.cd_remove_from_saved else R.string.cd_save
+                ),
+                onClick = onToggleSave,
+                tint = if (internship.isSaved) ext.signal else scheme.onSurfaceVariant,
+            )
         }
     }
 }

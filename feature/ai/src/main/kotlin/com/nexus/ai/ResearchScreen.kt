@@ -21,10 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -40,6 +37,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusIconButton
+import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
@@ -86,22 +85,22 @@ fun ResearchScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
-                OutlinedTextField(
+                NexusTextField(
                     value = question,
                     onValueChange = { question = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = {
-                        Text(stringResource(R.string.ai_ask_anything_about_your_career_ne))
-                    },
-                    minLines = 2,
-                    shape = NexusShapes.sm,
+                    label = stringResource(R.string.ai_ask_nexus_anything),
+                    placeholder = stringResource(R.string.ai_ask_anything_about_your_career_ne),
+                    singleLine = false,
                     trailingIcon = {
                         if (ui.isLoading) {
                             CircularProgressIndicator(modifier = Modifier.padding(8.dp).width(20.dp).height(20.dp))
                         } else {
-                            IconButton(onClick = { run(question) }, enabled = question.isNotBlank() && !ui.isLoading) {
-                                Icon(Icons.Default.Search, contentDescription = stringResource(R.string.cd_research))
-                            }
+                            NexusIconButton(
+                                icon = Icons.Default.Search,
+                                contentDescription = stringResource(R.string.cd_research),
+                                onClick = { run(question) },
+                                enabled = question.isNotBlank() && !ui.isLoading,
+                            )
                         }
                     },
                 )

@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexus.designsystem.component.LoadingState
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusColors
@@ -55,15 +55,15 @@ import com.nexus.domain.model.UiState
 import java.util.Locale
 
 internal fun CertProvider.accentColor(): Color = when (this) {
-    CertProvider.GOOGLE -> Color(0xFF4285F4)
-    CertProvider.META -> Color(0xFF1877F2)
-    CertProvider.AWS -> Color(0xFFFF9900)
-    CertProvider.MICROSOFT -> Color(0xFF0078D4)
-    CertProvider.IBM -> Color(0xFF0F62FE)
-    CertProvider.COURSERA -> Color(0xFF0056D2)
-    CertProvider.UDEMY -> Color(0xFF5624D0)
-    CertProvider.LINKEDIN -> Color(0xFF0A66C2)
-    CertProvider.OTHER -> Color(0xFF4F8EF7)
+    CertProvider.GOOGLE -> NexusColors.Vendor.Google
+    CertProvider.META -> NexusColors.Vendor.Meta
+    CertProvider.AWS -> NexusColors.Vendor.Aws
+    CertProvider.MICROSOFT -> NexusColors.Vendor.Microsoft
+    CertProvider.IBM -> NexusColors.Vendor.Ibm
+    CertProvider.COURSERA -> NexusColors.Vendor.Coursera
+    CertProvider.UDEMY -> NexusColors.Vendor.Udemy
+    CertProvider.LINKEDIN -> NexusColors.Vendor.LinkedIn
+    CertProvider.OTHER -> NexusColors.Vendor.Other
 }
 
 internal fun Certification.accentColor(): Color {
@@ -156,9 +156,7 @@ fun CertificationBrowserScreen(
                 }
             }
 
-            uiState is UiState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
+            uiState is UiState.Loading -> LoadingState(modifier = Modifier.fillMaxSize())
 
             uiState is UiState.Error -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {

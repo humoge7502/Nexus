@@ -29,10 +29,7 @@ import androidx.compose.material.icons.filled.PostAdd
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TrackChanges
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,7 +46,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.SignalField
 import com.nexus.designsystem.component.hairline
@@ -57,6 +56,7 @@ import com.nexus.designsystem.component.instrumentGrid
 import com.nexus.designsystem.component.sheen
 import com.nexus.designsystem.effect.RevealOnLoad
 import com.nexus.designsystem.theme.NexusColors
+import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusTypography
 
@@ -95,13 +95,12 @@ fun AIHubScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (showBackArrow) {
-                    IconButton(onClick = onBack, modifier = Modifier.padding(end = 4.dp).size(32.dp)) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.cd_back),
-                            modifier = Modifier.size(20.dp),
-                        )
-                    }
+                    NexusIconButton(
+                        icon = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.cd_back),
+                        onClick = onBack,
+                        modifier = Modifier.padding(end = 4.dp).size(32.dp),
+                    )
                 }
                 Text(
                     text = stringResource(R.string.ai_hub_title),
@@ -223,27 +222,17 @@ private fun AssistantHero(
                 color = NexusColors.Bone,
             )
             Spacer(Modifier.height(18.dp))
-            Button(
+            // The hero is this screen's one signature surface, so its CTA earns
+            // the PrimaryDeep ramp the rest of the app reserves for primary
+            // actions; ink content on the lime terminal stays readable.
+            NexusButton(
+                text = stringResource(R.string.ai_start_conversation_u2192),
                 onClick = onChatClick,
+                icon = Icons.AutoMirrored.Filled.ArrowForward,
+                gradient = NexusGradients.PrimaryDeep,
                 shape = NexusShapes.sm,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = NexusColors.Signal,
-                    contentColor = NexusColors.SignalInk,
-                ),
-                contentPadding = PaddingValues(horizontal = 18.dp, vertical = 10.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.ai_start_conversation_u2192),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Spacer(Modifier.width(8.dp))
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                )
-            }
+                expand = false,
+            )
         }
     }
 }

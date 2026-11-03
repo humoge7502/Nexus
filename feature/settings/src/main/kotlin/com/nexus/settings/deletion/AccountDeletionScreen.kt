@@ -13,13 +13,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,7 +29,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusOutlineButton
+import com.nexus.designsystem.component.NexusTextField
 import com.nexus.settings.R
 
 @Composable
@@ -111,11 +109,10 @@ fun AccountDeletionScreen(
             color = MaterialTheme.colorScheme.error,
         )
 
-        OutlinedTextField(
+        NexusTextField(
             value = confirmText,
             onValueChange = { confirmText = it },
-            label = { Text(stringResource(R.string.delete_confirm_hint)) },
-            singleLine = true,
+            label = stringResource(R.string.delete_confirm_hint),
             modifier = Modifier.fillMaxWidth(),
         )
 
@@ -129,29 +126,22 @@ fun AccountDeletionScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            OutlinedButton(onClick = onNavigateBack, modifier = Modifier.weight(1f)) {
-                Text(stringResource(R.string.delete_cancel))
-            }
-
-            Button(
-                onClick = { viewModel.confirmDeletion() },
-                enabled = confirmText == "DELETE" && !uiState.isDeleting,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError,
-                ),
+            NexusOutlineButton(
+                text = stringResource(R.string.delete_cancel),
+                onClick = onNavigateBack,
                 modifier = Modifier.weight(1f),
-            ) {
-                if (uiState.isDeleting) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onError,
-                        strokeWidth = 2.dp,
-                    )
-                } else {
-                    Text(stringResource(R.string.delete_button))
-                }
-            }
+                expand = false,
+            )
+
+            NexusButton(
+                text = stringResource(R.string.delete_button),
+                onClick = { viewModel.confirmDeletion() },
+                enabled = confirmText == "DELETE",
+                loading = uiState.isDeleting,
+                gradient = listOf(MaterialTheme.colorScheme.error),
+                modifier = Modifier.weight(1f),
+                expand = false,
+            )
         }
     }
 }

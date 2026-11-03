@@ -46,7 +46,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -78,6 +77,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.AnimatedStatCard
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.SignalField
 import com.nexus.designsystem.component.hairline
@@ -247,13 +247,12 @@ private fun ProfileHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (showBackArrow) {
-            IconButton(onClick = onBack, modifier = Modifier.padding(end = 4.dp).size(32.dp)) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.cd_back),
-                    modifier = Modifier.size(20.dp),
-                )
-            }
+            NexusIconButton(
+                icon = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(R.string.cd_back),
+                onClick = onBack,
+                modifier = Modifier.padding(end = 4.dp).size(32.dp),
+            )
         }
         Text(
             text = stringResource(R.string.profile_title),
@@ -262,21 +261,17 @@ private fun ProfileHeader(
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.weight(1f),
         )
-        IconButton(onClick = onGoPro) {
-            Icon(
-                Icons.Default.WorkspacePremium,
-                contentDescription = stringResource(R.string.cd_nexus_pro),
-                tint = MaterialTheme.nexus.attention,
-                modifier = Modifier.size(22.dp),
-            )
-        }
-        IconButton(onClick = onSettings) {
-            Icon(
-                Icons.Default.Settings,
-                contentDescription = stringResource(R.string.cd_settings),
-                modifier = Modifier.size(22.dp),
-            )
-        }
+        NexusIconButton(
+            icon = Icons.Default.WorkspacePremium,
+            contentDescription = stringResource(R.string.cd_nexus_pro),
+            onClick = onGoPro,
+            tint = MaterialTheme.nexus.attention,
+        )
+        NexusIconButton(
+            icon = Icons.Default.Settings,
+            contentDescription = stringResource(R.string.cd_settings),
+            onClick = onSettings,
+        )
     }
 }
 

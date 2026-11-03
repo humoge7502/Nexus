@@ -19,7 +19,9 @@ import com.nexus.common.AIRateLimiter
 import com.nexus.common.RateLimitResult
 import com.nexus.datastore.UserPreferences
 import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.network.ai.AIOpenRouterService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -100,32 +102,28 @@ fun SkillGapScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
         ) {
-            OutlinedTextField(
+            NexusTextField(
                 value = uiState.currentSkills,
                 onValueChange = { viewModel.updateCurrentSkills(it) },
-                label = { Text(stringResource(R.string.ai_your_current_skills)) },
-                placeholder = { Text(stringResource(R.string.ai_e_g_python_java_html_css)) },
-                modifier = Modifier.fillMaxWidth(),
+                label = stringResource(R.string.ai_your_current_skills),
+                placeholder = stringResource(R.string.ai_e_g_python_java_html_css),
+                singleLine = false,
                 minLines = 2,
-                maxLines = 4,
             )
             Spacer(Modifier.height(12.dp))
-            OutlinedTextField(
+            NexusTextField(
                 value = uiState.targetRole,
                 onValueChange = { viewModel.updateTargetRole(it) },
-                label = { Text(stringResource(R.string.ai_target_role)) },
-                placeholder = { Text(stringResource(R.string.ai_e_g_machine_learning_engineer_full)) },
-                modifier = Modifier.fillMaxWidth(),
+                label = stringResource(R.string.ai_target_role),
+                placeholder = stringResource(R.string.ai_e_g_machine_learning_engineer_full),
                 singleLine = true,
             )
             Spacer(Modifier.height(16.dp))
-            Button(
+            NexusButton(
+                text = if (uiState.isLoading) "Analyzing..." else "Analyze Gap",
                 onClick = { viewModel.analyze() },
-                modifier = Modifier.fillMaxWidth(),
                 enabled = uiState.currentSkills.isNotBlank() && uiState.targetRole.isNotBlank() && !uiState.isLoading,
-            ) {
-                Text(if (uiState.isLoading) "Analyzing..." else "Analyze Gap")
-            }
+            )
             Spacer(Modifier.height(16.dp))
 
             if (uiState.isLoading) {
