@@ -65,6 +65,7 @@ fun HomeScreen(
     onNavigateToProductivity: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToNotifications: () -> Unit = {},
+    onOpenCommandPalette: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -83,6 +84,7 @@ fun HomeScreen(
                     userName = uiState.userName,
                     streakDays = uiState.streakDays,
                     onNavigateToNotifications = onNavigateToNotifications,
+                    onOpenCommandPalette = onOpenCommandPalette,
                     modifier = Modifier.padding(horizontal = 24.dp)
                 )
             }
@@ -224,6 +226,7 @@ private fun GreetingSection(
     userName: String,
     streakDays: Int,
     onNavigateToNotifications: () -> Unit,
+    onOpenCommandPalette: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val currentHour = remember { Calendar.getInstance().get(Calendar.HOUR_OF_DAY) }
@@ -256,6 +259,12 @@ private fun GreetingSection(
                 text = dateLabel,
                 style = NexusTypography.TelemetryMicro,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+            )
+            NexusIconButton(
+                icon = Icons.Default.Search,
+                contentDescription = stringResource(R.string.home_cd_search),
+                onClick = onOpenCommandPalette,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             NexusIconButton(
                 icon = Icons.Default.Notifications,

@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,9 +42,16 @@ import com.nexus.domain.model.SearchMode
 fun SearchScreen(
     onBack: () -> Unit,
     onResultClick: (String) -> Unit,
+    initialQuery: String = "",
     viewModel: SearchViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // A hand-off from the command palette arrives with its query attached;
+    // seeding once means the user's typed words are not thrown away.
+    LaunchedEffect(initialQuery) {
+        if (initialQuery.isNotBlank()) viewModel.updateQuery(initialQuery.trim())
+    }
 
     Scaffold(
         topBar = {

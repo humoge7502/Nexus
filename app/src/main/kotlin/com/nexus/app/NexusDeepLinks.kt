@@ -51,7 +51,7 @@ object NexusDeepLinks {
         "cohort", "cohort-intelligence" -> NexusDestination.CohortIntelligence
         "interview", "interviews", "interview-log" -> NexusDestination.InterviewLog
         "portfolio" -> NexusDestination.Portfolio
-        "search" -> NexusDestination.Search
+        "search" -> NexusDestination.Search()
         "community" -> NexusDestination.Community
         "tribe" -> NexusDestination.Tribe
         "ai", "ai-hub" -> NexusDestination.AIHub

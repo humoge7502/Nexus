@@ -48,7 +48,7 @@ sealed interface NexusDestination {
     @Serializable data object InterviewLog : NexusDestination
     @Serializable data object PlacementForecast : NexusDestination
     @Serializable data object Portfolio : NexusDestination
-    @Serializable data object Search : NexusDestination
+    @Serializable data class Search(val initialQuery: String = "") : NexusDestination
     @Serializable data object Tribe : NexusDestination
 
     // Monetization

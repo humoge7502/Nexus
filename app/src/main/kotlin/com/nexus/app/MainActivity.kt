@@ -39,6 +39,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -73,6 +74,8 @@ import com.nexus.cohortintelligence.CohortIntelligenceScreen
 import com.nexus.common.ApiResult
 import com.nexus.community.CommunityScreen
 import com.nexus.designsystem.component.NexusBottomBar
+import com.nexus.designsystem.component.NexusCommand
+import com.nexus.designsystem.component.NexusCommandPalette
 import com.nexus.designsystem.component.NexusNavigationLayout
 import com.nexus.designsystem.component.NexusRailBar
 import com.nexus.designsystem.component.NexusSideBar
@@ -306,6 +309,10 @@ fun NexusMainScaffold(
         val onNavigateTab: (Int) -> Unit = { index ->
             navigateToTab(navController, topLevelDestinations, index)
         }
+        // The command palette: one query to anywhere. State lives at the shell
+        // level so any screen's trigger opens the same overlay.
+        var paletteOpen by rememberSaveable { mutableStateOf(false) }
+        var paletteQuery by rememberSaveable { mutableStateOf("") }
 
         Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -369,7 +376,8 @@ fun NexusMainScaffold(
                         onViewAllInternships = { navController.navigate(NexusDestination.InternshipList) },
                         onNavigateToProductivity = { navController.navigate(NexusDestination.Productivity) },
                         onNavigateToProfile = { navController.navigate(NexusDestination.Profile) },
-                        onNavigateToNotifications = { navController.navigate(NexusDestination.Notifications) }
+                        onNavigateToNotifications = { navController.navigate(NexusDestination.Notifications) },
+                        onOpenCommandPalette = { paletteOpen = true },
                     )
                 }
 
@@ -477,7 +485,7 @@ fun NexusMainScaffold(
                         onCohort = { navController.navigate(NexusDestination.CohortIntelligence) },
                         onInterviewLog = { navController.navigate(NexusDestination.InterviewLog) },
                         onPortfolio = { navController.navigate(NexusDestination.Portfolio) },
-                        onSearch = { navController.navigate(NexusDestination.Search) },
+                        onSearch = { navController.navigate(NexusDestination.Search()) },
                         onCommunity = { navController.navigate(NexusDestination.Community) },
                         onTribe = { navController.navigate(NexusDestination.Tribe) },
                         showBackArrow = false,
@@ -556,10 +564,11 @@ fun NexusMainScaffold(
                 composable<NexusDestination.Portfolio> {
                     PortfolioScreen(onBack = { navController.popBackStack() })
                 }
-                composable<NexusDestination.Search> {
+                composable<NexusDestination.Search> { entry ->
                     SearchScreen(
                         onBack = { navController.popBackStack() },
                         onResultClick = { id -> navController.navigate(NexusDestination.InternshipDetail(id)) },
+                        initialQuery = entry.toRoute<NexusDestination.Search>().initialQuery,
                     )
                 }
                 composable<NexusDestination.Tribe> {
@@ -579,8 +588,67 @@ fun NexusMainScaffold(
                     onFinish = { tourViewModel.finish() },
                 )
             }
+
+            // The palette floats above the shell: reachable from wherever the
+            // user is standing, not just from the screen that hosts a trigger.
+            CommandPaletteOverlay(
+                open = paletteOpen,
+                query = paletteQuery,
+                onQueryChange = { paletteQuery = it },
+                onDismiss = {
+                    paletteOpen = false
+                    paletteQuery = ""
+                },
+                onNavigate = navController::navigate,
+            )
         }
     }
+}
+
+/** The palette's presentation half: filters the destination index, offers the
+ *  content-search hand-off once there is something to search, and maps a
+ *  selection onto the navigation graph. The shell owns the state; this owns
+ *  the shape and the routing decision. */
+@Composable
+private fun CommandPaletteOverlay(
+    open: Boolean,
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onNavigate: (NexusDestination) -> Unit,
+) {
+    if (!open) return
+    val destinations = paletteDestinations()
+    NexusCommandPalette(
+        query = query,
+        onQueryChange = onQueryChange,
+        hint = stringResource(R.string.palette_hint),
+        emptyLabel = stringResource(R.string.palette_empty),
+        commands = buildList {
+            addAll(destinations.map { it.first })
+            if (query.trim().length >= 2) {
+                add(
+                    NexusCommand(
+                        id = "search-content",
+                        title = stringResource(R.string.palette_search_content, query.trim()),
+                        category = "FIND",
+                    ),
+                )
+            }
+        },
+        onSelect = { command ->
+            val destination = destinations
+                .firstOrNull { it.first.id == command.id }
+                ?.second
+            when {
+                command.id == "search-content" ->
+                    onNavigate(NexusDestination.Search(query.trim()))
+                destination != null -> onNavigate(destination)
+            }
+            onDismiss()
+        },
+        onDismiss = onDismiss,
+    )
 }
 
 /**
@@ -601,10 +669,70 @@ private fun navigateToTab(
     }
 }
 
+/** The palette's index of the product: every place worth jumping to, grouped
+ *  the way a table of contents groups chapters. Curated rather than
+ *  exhaustive — the five tabs, the finders, the career tools, the rooms. */
+@Composable
+private fun paletteDestinations(): List<Pair<NexusCommand, NexusDestination>> = listOf(
+    NexusCommand("home", stringResource(R.string.palette_destination_home), category = "GO") to
+        NexusDestination.Home,
+    NexusCommand("explore", stringResource(R.string.palette_destination_explore), category = "GO") to
+        NexusDestination.Explore,
+    NexusCommand("aihub", stringResource(R.string.palette_destination_aihub), category = "GO") to
+        NexusDestination.AIHub,
+    NexusCommand("growth", stringResource(R.string.palette_destination_growth), category = "GO") to
+        NexusDestination.Growth,
+    NexusCommand("profile", stringResource(R.string.palette_destination_profile), category = "GO") to
+        NexusDestination.Profile,
+    NexusCommand("search", stringResource(R.string.palette_destination_search), category = "FIND") to
+        NexusDestination.Search(),
+    NexusCommand("internships", stringResource(R.string.palette_destination_internships), category = "FIND") to
+        NexusDestination.InternshipList,
+    NexusCommand("certifications", stringResource(R.string.palette_destination_certifications), category = "FIND") to
+        NexusDestination.CertificationBrowser,
+    NexusCommand("applications", stringResource(R.string.palette_destination_applications), category = "CAREER") to
+        NexusDestination.Applications,
+    NexusCommand("forecast", stringResource(R.string.palette_destination_forecast), category = "CAREER") to
+        NexusDestination.PlacementForecast,
+    NexusCommand("portfolio", stringResource(R.string.palette_destination_portfolio), category = "CAREER") to
+        NexusDestination.Portfolio,
+    NexusCommand("interviewlog", stringResource(R.string.palette_destination_interviewlog), category = "CAREER") to
+        NexusDestination.InterviewLog,
+    NexusCommand("careermirror", stringResource(R.string.palette_destination_careermirror), category = "CAREER") to
+        NexusDestination.CareerMirror,
+    NexusCommand("goals", stringResource(R.string.palette_destination_goals), category = "GROW") to
+        NexusDestination.Goals,
+    NexusCommand("dsa", stringResource(R.string.palette_destination_dsa), category = "GROW") to
+        NexusDestination.DSATracker,
+    NexusCommand("productivity", stringResource(R.string.palette_destination_productivity), category = "GROW") to
+        NexusDestination.Productivity,
+    NexusCommand("achievements", stringResource(R.string.palette_destination_achievements), category = "GROW") to
+        NexusDestination.Achievements,
+    NexusCommand("leaderboard", stringResource(R.string.palette_destination_leaderboard), category = "GROW") to
+        NexusDestination.Leaderboard,
+    NexusCommand("arena", stringResource(R.string.palette_destination_arena), category = "GROW") to
+        NexusDestination.Arena,
+    NexusCommand("notifications", stringResource(R.string.palette_destination_notifications), category = "GROW") to
+        NexusDestination.Notifications,
+    NexusCommand("aichat", stringResource(R.string.palette_destination_aichat), category = "AI") to
+        NexusDestination.AIChat,
+    NexusCommand("research", stringResource(R.string.palette_destination_research), category = "AI") to
+        NexusDestination.Research,
+    NexusCommand("cohort", stringResource(R.string.palette_destination_cohort), category = "MORE") to
+        NexusDestination.CohortIntelligence,
+    NexusCommand("oracle", stringResource(R.string.palette_destination_oracle), category = "MORE") to
+        NexusDestination.Oracle,
+    NexusCommand("community", stringResource(R.string.palette_destination_community), category = "MORE") to
+        NexusDestination.Community,
+    NexusCommand("tribe", stringResource(R.string.palette_destination_tribe), category = "MORE") to
+        NexusDestination.Tribe,
+    NexusCommand("settings", stringResource(R.string.palette_destination_settings), category = "MORE") to
+        NexusDestination.Settings,
+)
+
 /** What arrives on a page change: peers fade-lift, a detail slides in from
  *  its parent, and reduced motion swaps instantly — the hop itself carries
- *  the meaning, so no movement is added on top of it. */
-private fun navEnter(
+ *  the meaning, so no movement is added on top of it. */private fun navEnter(
     reducedMotion: Boolean,
     isTopLevel: (NavBackStackEntry) -> Boolean,
     backward: Boolean = false,

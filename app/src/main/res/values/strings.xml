@@ -20,4 +20,37 @@
     <string name="tour_skip">Skip</string>
     <string name="tour_next">Next</string>
     <string name="tour_start">Start using Sagitta</string>
+
+    <!-- Command palette. Destination names are app-shell copy, so they live
+         here rather than in a feature module the palette cannot see. -->
+    <string name="palette_hint">Search destinations and actions</string>
+    <string name="palette_empty">Nothing goes by that name. Try a place, a tool, or a few letters of it.</string>
+    <string name="palette_search_content">Search opportunities for “%1$s”</string>
+    <string name="palette_destination_home">Home</string>
+    <string name="palette_destination_explore">Explore</string>
+    <string name="palette_destination_aihub">AI Hub</string>
+    <string name="palette_destination_growth">Growth</string>
+    <string name="palette_destination_profile">Profile</string>
+    <string name="palette_destination_search">Search opportunities</string>
+    <string name="palette_destination_internships">Internship listings</string>
+    <string name="palette_destination_certifications">Certification catalog</string>
+    <string name="palette_destination_applications">Applications</string>
+    <string name="palette_destination_forecast">Placement forecast</string>
+    <string name="palette_destination_portfolio">Portfolio</string>
+    <string name="palette_destination_interviewlog">Interview log</string>
+    <string name="palette_destination_careermirror">Career mirror</string>
+    <string name="palette_destination_goals">Goals</string>
+    <string name="palette_destination_dsa">DSA tracker</string>
+    <string name="palette_destination_productivity">Productivity</string>
+    <string name="palette_destination_achievements">Achievements</string>
+    <string name="palette_destination_leaderboard">Leaderboard</string>
+    <string name="palette_destination_arena">Arena</string>
+    <string name="palette_destination_notifications">Notifications</string>
+    <string name="palette_destination_aichat">Sagitta AI chat</string>
+    <string name="palette_destination_research">Deep research</string>
+    <string name="palette_destination_cohort">Cohort intelligence</string>
+    <string name="palette_destination_oracle">Oracle</string>
+    <string name="palette_destination_community">Community</string>
+    <string name="palette_destination_tribe">Tribe</string>
+    <string name="palette_destination_settings">Settings</string>
 </resources>
