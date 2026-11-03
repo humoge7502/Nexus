@@ -1,16 +1,16 @@
 {
   "version": 2,
-  "generatedAt": "2026-11-02T20:50:45.279Z",
-  "durationMs": 47675,
+  "generatedAt": "2026-11-03T00:55:16.317Z",
+  "durationMs": 24904,
   "counts": {
-    "internships": 29,
-    "hackathons": 54,
-    "verifiedInternships": 32,
-    "verifiedHackathons": 54
+    "internships": 27,
+    "hackathons": 53,
+    "verifiedInternships": 29,
+    "verifiedHackathons": 53
   },
   "verification": {
     "enabled": true,
-    "deadLinksDropped": 0
+    "deadLinksDropped": 3
   },
   "sources": [
     {
@@ -227,7 +227,7 @@
       "name": "Devpost",
       "ok": true,
       "status": 200,
-      "count": 45
+      "count": 44
     },
     {
       "name": "Devfolio",
