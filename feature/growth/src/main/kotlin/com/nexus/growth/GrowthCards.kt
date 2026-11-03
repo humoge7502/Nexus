@@ -182,7 +182,7 @@ internal fun SkillLevelBreakdown(axes: List<RadarAxis>, onMarkSkills: () -> Unit
             Spacer(Modifier.height(NexusSpacing.sm))
             Text(
                 text = stringResource(R.string.growth_skill_breakdown_note),
-                style = MaterialTheme.typography.bodySmall,
+                style = NexusTypography.Voice,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(NexusSpacing.md))
@@ -445,7 +445,7 @@ internal fun GoalsPreview(
 
             if (goals.isEmpty()) {
                 Text(stringResource(R.string.growth_no_goals_yet_set_one_and),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = NexusTypography.Voice,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             } else {

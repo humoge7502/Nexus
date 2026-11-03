@@ -623,14 +623,14 @@ private fun IdentitySpec(icon: ImageVector, value: String) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = Color.White.copy(alpha = 0.62f),
+            tint = NexusColors.SignalInk.copy(alpha = 0.62f),
             modifier = Modifier.size(13.dp),
         )
         Spacer(modifier = Modifier.width(5.dp))
         Text(
             text = value,
             style = NexusTypography.TelemetryMicro,
-            color = Color.White.copy(alpha = 0.92f),
+            color = NexusColors.SignalInk.copy(alpha = 0.92f),
             maxLines = 1,
         )
     }

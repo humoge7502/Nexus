@@ -19,6 +19,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
 
 /**
  * Section marker: an optional mono index, the title, and a rule that runs to
@@ -71,7 +72,10 @@ fun SectionHeader(
             Text(
                 text = actionText,
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
+                // Navigation affordances keep one hue family in both themes —
+                // colorScheme.primary flips lime/indigo with the scheme, which
+                // made the same link read as two different decisions.
+                color = MaterialTheme.nexus.signal,
                 modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
                     .clickable(role = Role.Button) {

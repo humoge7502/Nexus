@@ -1,11 +1,9 @@
 package com.nexus.ai
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,21 +12,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.PostAdd
-import androidx.compose.material.icons.filled.RecordVoiceOver
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.TrackChanges
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,12 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -59,23 +46,23 @@ import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
 
 data class AITool(
     val title: String,
     val subtitle: String,
-    val icon: ImageVector,
     val route: String,
 )
 
 private val aiTools = listOf(
-    AITool("Deep Research", "Cited answers + smart follow-ups", Icons.Default.Search, "research"),
-    AITool("Sagitta AI Chat", "Your personal career mentor", Icons.Default.Bolt, "chat"),
-    AITool("Resume Analyzer", "Get ATS score + tips", Icons.Default.Description, "resume"),
-    AITool("Roadmap Generator", "Personalized learning path", Icons.Default.Map, "roadmap"),
-    AITool("LinkedIn Post Gen", "Auto-craft achievements", Icons.Default.PostAdd, "linkedin"),
-    AITool("Skill Gap Analysis", "What to learn next", Icons.Default.TrackChanges, "skillgap"),
-    AITool("Interview Coach", "AI mock interviews", Icons.Default.RecordVoiceOver, "interview"),
-    AITool("Career Insights", "Predictive analytics", Icons.Default.Analytics, "insights"),
+    AITool("Deep Research", "Cited answers + smart follow-ups", "research"),
+    AITool("Sagitta AI Chat", "Your personal career mentor", "chat"),
+    AITool("Resume Analyzer", "Get ATS score + tips", "resume"),
+    AITool("Roadmap Generator", "Personalized learning path", "roadmap"),
+    AITool("LinkedIn Post Gen", "Auto-craft achievements", "linkedin"),
+    AITool("Skill Gap Analysis", "What to learn next", "skillgap"),
+    AITool("Interview Coach", "AI mock interviews", "interview"),
+    AITool("Career Insights", "Predictive analytics", "insights"),
 )
 
 @Composable
@@ -87,7 +74,14 @@ fun AIHubScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         SignalField(modifier = Modifier.fillMaxSize())
 
-        Column(modifier = Modifier.fillMaxSize()) {
+        // The roster below is a static editorial list rather than a lazy grid,
+        // so this column scrolls itself to keep every row reachable on small
+        // screens the way the grid's internal scroll used to.
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -126,18 +120,24 @@ fun AIHubScreen(
                 modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 12.dp),
             )
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 0.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                itemsIndexed(aiTools) { index, tool ->
-                    AIToolCard(
+            // The roster reads as one instrument plate instead of a card grid:
+            // hairline rules between full-width rows, each led by its mono
+            // index, because §7 bans the identical icon-title-description
+            // cards this section used to be and §4 names hairline tables as
+            // the replacement.
+            NexusCard(modifier = Modifier.fillMaxWidth()) {
+                aiTools.forEachIndexed { index, tool ->
+                    AIToolRow(
                         tool = tool,
                         index = index + 1,
                         onClick = { onToolRoute(tool.route) },
                     )
+                    if (index != aiTools.lastIndex) {
+                        HorizontalDivider(
+                            thickness = 1.dp,
+                            color = MaterialTheme.nexus.hairline,
+                        )
+                    }
                 }
             }
         }
@@ -166,31 +166,9 @@ private fun AssistantHero(
             .sheen(alpha = 0.06f)
             .padding(20.dp)
     ) {
-        Canvas(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .size(120.dp)
-        ) {
-            val stroke = Stroke(width = 1.5.dp.toPx(), cap = StrokeCap.Round)
-            listOf(52f, 38f, 24f).forEachIndexed { index, radiusDp ->
-                val inset = radiusDp.dp.toPx()
-                drawArc(
-                    color = NexusColors.Signal.copy(alpha = 0.5f - index * 0.12f),
-                    startAngle = 180f,
-                    sweepAngle = 90f,
-                    useCenter = false,
-                    topLeft = Offset(size.width - inset, 0f),
-                    size = Size(inset * 2, inset * 2),
-                    style = stroke,
-                )
-            }
-            drawCircle(
-                color = NexusColors.Signal,
-                radius = 2.5.dp.toPx(),
-                center = Offset(size.width - 18.dp.toPx(), 18.dp.toPx()),
-            )
-        }
-
+        // No floating ornament sits on the plate: the measurement grid, the
+        // hairline, and the sheen are its whole surface treatment, and §7
+        // bans decorative shapes that measure nothing.
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
@@ -215,10 +193,13 @@ private fun AssistantHero(
                 )
             }
             Spacer(Modifier.height(16.dp))
+            // The promise is this screen's one narrative sentence, so it
+            // speaks in the Newsreader voice rather than the instrument's
+            // sans (§3) — the weight tuning came with the sans style and the
+            // serif defines its own.
             Text(
                 text = stringResource(R.string.ai_your_personal_career_mentor),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.SemiBold,
+                style = NexusTypography.EditorialHeadline,
                 color = NexusColors.Bone,
             )
             Spacer(Modifier.height(18.dp))
@@ -238,43 +219,46 @@ private fun AssistantHero(
 }
 
 @Composable
-private fun AIToolCard(tool: AITool, index: Int, onClick: () -> Unit) {
-    NexusCard(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = NexusShapes.md,
+private fun AIToolRow(
+    tool: AITool,
+    index: Int,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            // 14dp of vertical air keeps the row past the 48dp touch floor.
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                imageVector = tool.icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp),
-            )
-            Spacer(Modifier.weight(1f))
+        Text(
+            text = index.toString().padStart(2, '0'),
+            style = NexusTypography.DataLabel,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = index.toString().padStart(2, '0'),
-                style = NexusTypography.TelemetryMicro,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                text = tool.title,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = tool.subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        Spacer(Modifier.height(14.dp))
-        Text(
-            text = tool.title,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Spacer(Modifier.height(2.dp))
-        Text(
-            text = tool.subtitle,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 2,
+        // The row's text carries the meaning, so the chevron stays quiet in
+        // onSurfaceVariant and hides from screen readers.
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(18.dp),
         )
     }
 }

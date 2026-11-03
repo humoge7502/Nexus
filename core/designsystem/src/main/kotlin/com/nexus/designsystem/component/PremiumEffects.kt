@@ -173,14 +173,16 @@ fun Modifier.hairline(
 }
 
 /** A soft multi-layer halo behind an arc — makes progress rings feel lit
- *  rather than flat. Draw before the solid arc. */
+ *  rather than flat. Draw before the solid arc. The layers hug the stroke:
+ *  a halo wider than ~1.8× stops reading as light on the arc and starts
+ *  reading as a smear detached from the measurement. */
 fun DrawScope.arcGlow(
     color: Color,
     startAngle: Float,
     sweepAngle: Float,
     baseWidthPx: Float,
 ) {
-    listOf(2.4f to 0.10f, 1.7f to 0.16f, 1.2f to 0.25f).forEach { (mult, alpha) ->
+    listOf(1.8f to 0.08f, 1.35f to 0.14f).forEach { (mult, alpha) ->
         drawArc(
             color = color.copy(alpha = alpha),
             startAngle = startAngle,

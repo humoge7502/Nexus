@@ -286,6 +286,20 @@ object NexusTypography {
         letterSpacing = (-0.2).sp,
     )
 
+    /**
+     * The aside rung: a sentence of narrative set inside an instrument's card —
+     * the line that says *why the dial is empty*, not what the dial reads.
+     * Quiet italic, card-caption scale; if it ever carries a number it has
+     * stopped being a voice and become a readout.
+     */
+    val Voice = TextStyle(
+        fontFamily = NewsreaderItalic,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.sp,
+    )
+
     val Material = Typography(
         displayLarge = DisplayLarge,
         displayMedium = DisplayMedium,

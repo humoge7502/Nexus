@@ -245,7 +245,10 @@ private fun GreetingSection(
         ) {
             Text(
                 text = greeting,
-                style = MaterialTheme.typography.bodyMedium,
+                // The greeting is the screen's one narrative sentence — the serif
+                // byline above the instrument's loudest readout, not a caption
+                // competing with the telemetry for the same tiny size.
+                style = NexusTypography.EditorialTitle,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
             )

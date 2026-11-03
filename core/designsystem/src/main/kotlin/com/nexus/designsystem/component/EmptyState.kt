@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +26,7 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.nexus.designsystem.theme.NexusTypography
 
 @Composable
 @Suppress("ComposableLambdaParameterNaming")
@@ -35,6 +36,9 @@ fun EmptyState(
     modifier: Modifier = Modifier,
     lottieResId: Int? = null,
     icon: @Composable (() -> Unit)? = null,
+    /** The aside in the product's serif voice — why this space is quiet, in
+     *  one sentence. Null keeps the empty state purely informational. */
+    voice: String? = null,
     actionLabel: String? = null,
     onAction: (() -> Unit)? = null,
 ) {
@@ -64,6 +68,16 @@ fun EmptyState(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        if (voice != null) {
+            Text(
+                text = voice,
+                style = NexusTypography.Voice,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
@@ -82,9 +96,11 @@ fun EmptyState(
 
         if (actionLabel != null && onAction != null) {
             Spacer(modifier = Modifier.height(24.dp))
-            Button(onClick = onAction) {
-                Text(text = actionLabel)
-            }
+            NexusButton(
+                text = actionLabel,
+                onClick = onAction,
+                modifier = Modifier.widthIn(max = 280.dp),
+            )
         }
     }
 }

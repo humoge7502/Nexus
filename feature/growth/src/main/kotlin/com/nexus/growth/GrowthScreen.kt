@@ -44,6 +44,7 @@ import com.nexus.designsystem.component.editorial.ProgressionReading
 import com.nexus.designsystem.effect.RevealOnLoad
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusSpacing
+import com.nexus.designsystem.theme.NexusTypography
 import java.util.Locale
 
 internal data class RadarAxis(val label: String, val value: Float)
@@ -82,7 +83,7 @@ fun GrowthScreen(
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
+            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 116.dp),
             verticalArrangement = Arrangement.spacedBy(NexusSpacing.lg),
         ) {
             item(key = "header") {
@@ -280,7 +281,7 @@ private fun MomentumCard(
             // waiting panel and a broken one.
             Text(
                 text = stringResource(R.string.growth_momentum_empty),
-                style = MaterialTheme.typography.bodySmall,
+                style = NexusTypography.Voice,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else {

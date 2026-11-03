@@ -38,6 +38,7 @@ import com.nexus.designsystem.theme.LocalReducedMotion
 import com.nexus.designsystem.theme.NexusAnimation
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusTypography
 
 /**
  * The one full-lime slab in the product: a completion certificate, not a screen.
@@ -117,7 +118,10 @@ fun AhaMomentScreen(
 
             Text(
                 text = stringResource(R.string.aha_dashboard_ready, displayName),
-                style = MaterialTheme.typography.bodyLarge,
+                // First-run is where the product introduces its voice; the lead
+                // under the headline speaks in the editorial measure, not the
+                // instrument's.
+                style = NexusTypography.EditorialLead,
                 color = NexusColors.SignalInk.copy(alpha = 0.86f),
                 textAlign = TextAlign.Center,
             )

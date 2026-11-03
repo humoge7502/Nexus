@@ -115,7 +115,9 @@ fun PaywallScreen(
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
-                        tint = MaterialTheme.nexus.positive,
+                        // Inclusion is stated by the row itself; a second
+                        // attention hue next to the lime header reads as noise.
+                        tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(15.dp),
                     )
                 }
