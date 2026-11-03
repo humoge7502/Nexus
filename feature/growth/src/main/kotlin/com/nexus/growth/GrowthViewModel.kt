@@ -122,6 +122,12 @@ class GrowthViewModel @Inject constructor(
               com.nexus.domain.model.SkillCategory.UI_UX -> "Design"
               com.nexus.domain.model.SkillCategory.DATABASE -> "Database"
               com.nexus.domain.model.SkillCategory.PROGRAMMING -> "Code"
+              com.nexus.domain.model.SkillCategory.LANGUAGE -> "Languages"
+              com.nexus.domain.model.SkillCategory.FRAMEWORK -> "Frameworks"
+              com.nexus.domain.model.SkillCategory.TOOL -> "Tools"
+              com.nexus.domain.model.SkillCategory.PLATFORM -> "Platforms"
+              com.nexus.domain.model.SkillCategory.DOMAIN -> "Domains"
+              com.nexus.domain.model.SkillCategory.CONCEPT -> "Concepts"
               com.nexus.domain.model.SkillCategory.GENERAL -> "Other"
             },
             value = (group.map { it.proficiency }.average().toFloat() / 3f).coerceIn(0f, 1f),

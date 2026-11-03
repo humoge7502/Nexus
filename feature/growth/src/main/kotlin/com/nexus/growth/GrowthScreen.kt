@@ -107,10 +107,10 @@ fun GrowthScreen(
                 }
             }
             item(key = "radar") {
-                if (radarAxes.isEmpty()) {
-                    SkillRadarEmpty(onMarkSkills = onSkills)
-                } else {
-                    SkillRadarChart(radarAxes)
+                when {
+                    radarAxes.isEmpty() -> SkillRadarEmpty(onMarkSkills = onSkills)
+                    radarAxes.size < 3 -> SkillLevelBreakdown(axes = radarAxes, onMarkSkills = onSkills)
+                    else -> SkillRadarChart(radarAxes)
                 }
             }
             item(key = "constellation") {
@@ -273,7 +273,17 @@ private fun MomentumCard(
             modifier = Modifier.padding(bottom = 12.dp),
         )
         MomentumChart(values = values, modifier = Modifier.fillMaxWidth())
-        if (values.isNotEmpty()) {
+        if (values.isEmpty()) {
+            Spacer(Modifier.height(10.dp))
+            // The instrument is empty because there is nothing to measure yet, not
+            // because it failed to load; saying so is the difference between a
+            // waiting panel and a broken one.
+            Text(
+                text = stringResource(R.string.growth_momentum_empty),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        } else {
             Spacer(Modifier.height(10.dp))
             val formatted = String.format(Locale.getDefault(), "%+d", weeklyChange)
             Text(

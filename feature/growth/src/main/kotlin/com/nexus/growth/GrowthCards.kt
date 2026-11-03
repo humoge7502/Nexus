@@ -166,6 +166,83 @@ internal fun SkillRadarChart(axes: List<RadarAxis>) {
     }
 }
 
+/**
+ * The same reading the radar gives, in the only form one or two categories can
+ * honestly take: a radar needs three spokes to enclose a shape, and drawing one
+ * anyway shows a figure the data cannot support.
+ */
+@Composable
+internal fun SkillLevelBreakdown(axes: List<RadarAxis>, onMarkSkills: () -> Unit) {
+    NexusCard(shape = NexusShapes.lg) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(R.string.growth_skill_radar),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Spacer(Modifier.height(NexusSpacing.sm))
+            Text(
+                text = stringResource(R.string.growth_skill_breakdown_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(NexusSpacing.md))
+            axes.forEach { axis -> SkillLevelRail(axis) }
+            Spacer(Modifier.height(NexusSpacing.md))
+            NexusButton(
+                text = stringResource(R.string.growth_add_more_skills),
+                onClick = onMarkSkills,
+                modifier = Modifier.fillMaxWidth(),
+                gradient = NexusGradients.PrimaryDeep,
+            )
+        }
+    }
+}
+
+@Composable
+private fun SkillLevelRail(axis: RadarAxis) {
+    val fill = remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(axis.value) { fill.floatValue = axis.value.coerceIn(0f, 1f) }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = axis.label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            modifier = Modifier.width(92.dp),
+        )
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(5.dp)
+                .clip(NexusShapes.pill)
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(fill.floatValue)
+                    .height(5.dp)
+                    .clip(NexusShapes.pill)
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(NexusColors.SignalDeep, MaterialTheme.colorScheme.primary),
+                        ),
+                    ),
+            )
+        }
+        Spacer(Modifier.width(NexusSpacing.sm))
+        Text(
+            text = "${(axis.value * 100).roundToInt()}%",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
 @Composable
 internal fun SkillRadarEmpty(onMarkSkills: () -> Unit) {
     NexusCard(shape = NexusShapes.lg) {

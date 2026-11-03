@@ -25,6 +25,8 @@
     <string name="growth_label_2">%1$s</string>
     <string name="growth_mark_the_skills_you_already_know">The radar plots the skills you already have against what real listings ask for. Mark a few and it fills in.</string>
     <string name="growth_mark_skills_action">Mark your skills</string>
+    <string name="growth_skill_breakdown_note">A radar needs three categories before it can draw a shape. Until then your levels are listed as they are.</string>
+    <string name="growth_add_more_skills">Add more skills</string>
     <string name="growth_start_earning_score">Start earning XP to build your score</string>
     <string name="growth_no_goals_yet_set_one_and">No goals yet. Set one and your progress will show up here.</string>
     <string name="growth_participants">%1$s participants</string>
@@ -74,6 +76,7 @@
     <string name="dsa_remaining">Remaining</string>
     <string name="dsa_day_streak">Day Streak</string>
     <string name="growth_momentum_title">Momentum</string>
+    <string name="growth_momentum_empty">One reading is saved a day, while you have the app open. The line starts drawing once there are two.</string>
     <string name="growth_momentum_caption">Change at latest snapshot: %1$s</string>
     <string name="growth_skill_map_title">Skill map</string>
     <string name="growth_skill_map_hint">Tap a node for detail</string>

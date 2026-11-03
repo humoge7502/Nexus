@@ -90,7 +90,12 @@ data class Skill(
 enum class SkillCategory {
     MOBILE_DEVELOPMENT, WEB_DEVELOPMENT, DATA_SCIENCE, AI_ML,
     CLOUD_COMPUTING, CYBERSECURITY, DEVOPS, BLOCKCHAIN, UI_UX,
-    PROGRAMMING, DATABASE, GENERAL
+    PROGRAMMING, DATABASE, GENERAL,
+
+    // The skill graph catalog sorts nodes by kind, not by vertical. Without
+    // these the stored "LANGUAGE"/"FRAMEWORK"/... never survived valueOf, every
+    // node fell back to GENERAL, and the Growth radar plotted one flat "Other".
+    LANGUAGE, FRAMEWORK, TOOL, PLATFORM, DOMAIN, CONCEPT,
 }
 
 enum class ApplicationStatus {
