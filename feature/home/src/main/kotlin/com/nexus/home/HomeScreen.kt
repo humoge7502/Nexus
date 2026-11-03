@@ -40,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.InstrumentGauge
 import com.nexus.designsystem.component.NexusIconButton
+import com.nexus.designsystem.component.NexusWordmark
 import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.SignalField
 import com.nexus.designsystem.component.TelemetryItem
@@ -78,6 +79,13 @@ fun HomeScreen(
             contentPadding = PaddingValues(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            item {
+                NexusWordmark(
+                    label = stringResource(R.string.home_brand_label),
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                )
+            }
+
             item {
                 GreetingSection(
                     userName = uiState.userName,
