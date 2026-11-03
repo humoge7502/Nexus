@@ -25,6 +25,11 @@
     <string name="applications_empty_applied">No applications submitted</string>
     <string name="applications_empty_interviewing">No interviews scheduled</string>
     <string name="applications_empty_outcomes">No outcomes yet</string>
+    <string name="applications_timeline_section_title">Your Pipeline</string>
+    <string name="applications_timeline_empty_title">No dated milestones yet</string>
+    <string name="applications_timeline_empty_detail">Milestones appear here as you record application, interview, and outcome dates.</string>
+    <string name="applications_timeline_empty_voice">Dates turn a list of companies into a story.</string>
+    <string name="applications_timeline_outcome_other">Outcome</string>
     <string name="cd_navigate_back">Navigate back</string>
     <string name="text_save_an_opportunity_and_track_your_progress_here">Save an opportunity and track your progress here</string>
 </resources>

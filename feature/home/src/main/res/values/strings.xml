@@ -38,6 +38,12 @@
     <string name="home_readiness_caption">Your readiness updates as you learn and apply</string>
     <string name="home_cd_notifications">Notifications</string>
     <string name="home_cd_search">Search and jump anywhere</string>
+    <string name="home_orbit_readiness">Readiness</string>
+    <string name="home_orbit_hint">Tap a satellite to read it</string>
+    <string name="home_orbit_reading_tracked">%1$d tracked</string>
+    <string name="home_orbit_reading_earned">%1$d earned</string>
+    <string name="home_orbit_reading_streak">%1$d-day streak</string>
+    <string name="home_orbit_reading_scheduled">%1$d scheduled</string>
     <plurals name="home_streak_days">
         <item quantity="one">%1$d-day streak</item>
         <item quantity="other">%1$d-day streak</item>

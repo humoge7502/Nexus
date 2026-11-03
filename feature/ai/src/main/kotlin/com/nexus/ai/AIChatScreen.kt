@@ -23,8 +23,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,7 +40,11 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexus.designsystem.component.NexusToastData
+import com.nexus.designsystem.component.NexusToastHost
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.ToastTone
+import com.nexus.designsystem.component.rememberNexusToastState
 import com.nexus.designsystem.component.conversation.AssistantResponse
 import com.nexus.designsystem.component.conversation.ConversationByline
 import com.nexus.designsystem.component.conversation.ConversationComposer
@@ -66,7 +68,7 @@ fun AIChatScreen(
     viewModel: AIChatViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val toastState = rememberNexusToastState()
     var inputText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -82,15 +84,20 @@ fun AIChatScreen(
         if (itemCount > 0) listState.animateScrollToItem(itemCount - 1)
     }
 
+    // A limit is not a failure — nothing broke — but the user cannot send
+    // another message, so it reads on the ember Attention bar, not a neutral one.
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is AIChatEffect.ShowRateLimitDialog -> snackbarHostState.showSnackbar(
-                    if (effect.isPro) {
-                        "Daily AI limit reached. Please try again tomorrow."
-                    } else {
-                        "Free AI limit reached (${effect.limit}/day). Upgrade to Sagitta Pro for more."
-                    }
+                is AIChatEffect.ShowRateLimitDialog -> toastState.show(
+                    NexusToastData(
+                        if (effect.isPro) {
+                            "Daily AI limit reached. Please try again tomorrow."
+                        } else {
+                            "Free AI limit reached (${effect.limit}/day). Upgrade to Sagitta Pro for more."
+                        },
+                        ToastTone.Attention,
+                    ),
                 )
             }
         }
@@ -180,9 +187,11 @@ fun AIChatScreen(
             )
         }
 
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter).padding(NexusSpacing.md),
+        // The toast host owns its own gutter, so the overlay needs only the
+        // bottom-center anchor the old SnackbarHost was given.
+        NexusToastHost(
+            state = toastState,
+            modifier = Modifier.align(Alignment.BottomCenter),
         )
     }
 }

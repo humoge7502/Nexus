@@ -42,12 +42,15 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.CalibratedRule
+import com.nexus.designsystem.component.EditorialTimeline
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusOutlineButton
+import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.SignalTag
 import com.nexus.designsystem.component.SignalTone
 import com.nexus.designsystem.component.TelemetryItem
 import com.nexus.designsystem.component.TelemetryStrip
+import com.nexus.designsystem.component.TimelineEntry
 import com.nexus.designsystem.component.hairline
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusShapes
@@ -116,6 +119,32 @@ fun ApplicationsScreen(
               },
               onRemove = { viewModel.remove(application.id) },
             )
+          }
+
+          // The pipeline section reads the same list as the cards above, but
+          // as history: one dated event per node, newest first, so the screen
+          // answers both "what do I act on" and "how did I get here". It sits
+          // at the end of the scroll with a full section gap above it, and the
+          // empty branch of the tab above it means it only ever renders with
+          // at least one application present.
+          item(key = "pipeline", contentType = "timeline") {
+            Column(
+              modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = NexusSpacing.sm),
+            ) {
+              SectionHeader(
+                title = stringResource(R.string.applications_timeline_section_title),
+                index = "01",
+                modifier = Modifier.padding(bottom = NexusSpacing.sm),
+              )
+              EditorialTimeline(
+                entries = applicationTimelineEntries(uiState.applications),
+                emptyTitle = stringResource(R.string.applications_timeline_empty_title),
+                emptyDetail = stringResource(R.string.applications_timeline_empty_detail),
+                emptyVoice = stringResource(R.string.applications_timeline_empty_voice),
+              )
+            }
           }
         }
       }
@@ -359,4 +388,71 @@ private fun EmptyApplicationsState(selectedTab: ApplicationTab) {
       textAlign = TextAlign.Center,
     )
   }
+}
+
+/**
+ * Flattens the visible applications into dated pipeline events. Each
+ * application contributes up to three entries — applied, interview, outcome —
+ * and an event without a date is omitted, never invented: the timeline charts
+ * only history the user actually recorded. Stage labels reuse the status
+ * vocabulary the cards already speak, with the company and role as the entry's
+ * context line; tone follows the stage (applied is structural bookkeeping, the
+ * interview carries the loud signal, and an outcome takes its verdict's tone).
+ * Newest first, because a pipeline is read backwards from where you stand now.
+ */
+@Composable
+private fun applicationTimelineEntries(applications: List<Application>): List<TimelineEntry> {
+  val appliedLabel = stringResource(R.string.applications_status_applied)
+  val interviewLabel = stringResource(R.string.applications_status_interviewing)
+  val offeredLabel = stringResource(R.string.applications_status_offered)
+  val acceptedLabel = stringResource(R.string.applications_status_accepted)
+  val rejectedLabel = stringResource(R.string.applications_status_rejected)
+  val otherOutcomeLabel = stringResource(R.string.applications_timeline_outcome_other)
+
+  return applications
+    .flatMap { application ->
+      val context = "${application.company} — ${application.role}"
+      buildList {
+        application.appliedDate?.let { timestamp ->
+          add(
+            TimelineEntry(
+              id = "applied-${application.id}",
+              label = appliedLabel,
+              detail = context,
+              timestamp = timestamp,
+              tone = SignalTone.Structure,
+            )
+          )
+        }
+        application.interviewDate?.let { timestamp ->
+          add(
+            TimelineEntry(
+              id = "interview-${application.id}",
+              label = interviewLabel,
+              detail = context,
+              timestamp = timestamp,
+              tone = SignalTone.Signal,
+            )
+          )
+        }
+        application.outcomeDate?.let { timestamp ->
+          val (label, tone) = when (application.status) {
+            ApplicationStatus.OFFERED -> offeredLabel to SignalTone.Signal
+            ApplicationStatus.ACCEPTED -> acceptedLabel to SignalTone.Signal
+            ApplicationStatus.REJECTED -> rejectedLabel to SignalTone.Critical
+            else -> otherOutcomeLabel to SignalTone.Neutral
+          }
+          add(
+            TimelineEntry(
+              id = "outcome-${application.id}",
+              label = label,
+              detail = context,
+              timestamp = timestamp,
+              tone = tone,
+            )
+          )
+        }
+      }
+    }
+    .sortedByDescending { it.timestamp ?: 0L }
 }

@@ -28,14 +28,11 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,7 +49,11 @@ import com.nexus.designsystem.component.LoadingState
 import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusOutlineButton
+import com.nexus.designsystem.component.NexusToastData
+import com.nexus.designsystem.component.NexusToastHost
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.ToastTone
+import com.nexus.designsystem.component.rememberNexusToastState
 import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
@@ -77,15 +78,20 @@ fun InternshipDetailScreen(
         ?: emptyList()
     val internship = internships.find { it.id == internshipId }
     val scheme = MaterialTheme.colorScheme
-    val snackbarHostState = remember { SnackbarHostState() }
+    val toastState = rememberNexusToastState()
 
+    // The effect stream picks the tone: a failure reads Critical, a level-up is
+    // a Signal milestone, and plain confirmations stay Neutral.
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is InternshipEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
-                is InternshipEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
+                is InternshipEffect.ShowSnackbar -> toastState.show(NexusToastData(effect.message))
+                is InternshipEffect.ShowError ->
+                    toastState.show(NexusToastData(effect.message, ToastTone.Critical))
                 is InternshipEffect.ShowLevelUp ->
-                    snackbarHostState.showSnackbar("LEVEL ${effect.newLevel} REACHED")
+                    toastState.show(
+                        NexusToastData("LEVEL ${effect.newLevel} REACHED", ToastTone.Signal),
+                    )
             }
         }
     }
@@ -110,7 +116,9 @@ fun InternshipDetailScreen(
     Scaffold(
         containerColor = scheme.background,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        // The toast keeps the snackbar slot: Scaffold bottom-centers it and
+        // offsets it above any bottom chrome, so only the plate changes.
+        snackbarHost = { NexusToastHost(toastState) },
         topBar = {
             InternshipDetailTopBar(
                 internship = internship,

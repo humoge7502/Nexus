@@ -39,7 +39,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.InstrumentGauge
+import com.nexus.domain.model.UserStats
+import kotlin.math.roundToInt
 import com.nexus.designsystem.component.NexusIconButton
+import com.nexus.designsystem.component.CareerIntelligenceOrbit
+import com.nexus.designsystem.component.OrbitDimension
 import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.SignalField
 import com.nexus.designsystem.component.TelemetryItem
@@ -106,6 +110,15 @@ fun HomeScreen(
                         certs = uiState.stats.completedCerts,
                         streak = uiState.stats.currentStreak,
                         interviews = uiState.stats.interviewsScheduled,
+                    )
+                }
+            }
+
+            item {
+                RevealOnLoad(delayMillis = 150) {
+                    CareerOrbitSection(
+                        stats = uiState.stats,
+                        modifier = Modifier.padding(horizontal = 24.dp),
                     )
                 }
             }
@@ -299,6 +312,57 @@ private fun GreetingSection(
             }
         }
     }
+}
+
+/**
+ * The orbit renders the same five readings the telemetry strip states, as
+ * fractions of stated campaign milestones — five applications tracked, five
+ * certifications earned, a seven-day consistency week, three interviews
+ * booked — so a half-full satellite is a milestone half-met, never a score
+ * the readiness model never produced.
+ */
+@Composable
+private fun CareerOrbitSection(stats: UserStats, modifier: Modifier = Modifier) {
+    val dimensions = listOf(
+        OrbitDimension(
+            id = "readiness",
+            label = stringResource(R.string.home_orbit_readiness),
+            fraction = stats.careerReadinessScore.coerceIn(0f, 1f),
+            reading = "${(stats.careerReadinessScore * 100).roundToInt()}%",
+        ),
+        OrbitDimension(
+            id = "applications",
+            label = stringResource(R.string.home_applications),
+            fraction = (stats.totalApplications / 5f).coerceIn(0f, 1f),
+            reading = stringResource(R.string.home_orbit_reading_tracked, stats.totalApplications),
+        ),
+        OrbitDimension(
+            id = "certs",
+            label = stringResource(R.string.home_certs),
+            fraction = (stats.completedCerts / 5f).coerceIn(0f, 1f),
+            reading = stringResource(R.string.home_orbit_reading_earned, stats.completedCerts),
+        ),
+        OrbitDimension(
+            id = "streak",
+            label = stringResource(R.string.home_day_streak),
+            fraction = (stats.currentStreak / 7f).coerceIn(0f, 1f),
+            reading = stringResource(R.string.home_orbit_reading_streak, stats.currentStreak),
+        ),
+        OrbitDimension(
+            id = "interviews",
+            label = stringResource(R.string.home_interviews),
+            fraction = (stats.interviewsScheduled / 3f).coerceIn(0f, 1f),
+            reading = stringResource(R.string.home_orbit_reading_scheduled, stats.interviewsScheduled),
+        ),
+    )
+    CareerIntelligenceOrbit(
+        dimensions = dimensions,
+        centerValue = "${(stats.careerReadinessScore * 100).roundToInt()}",
+        centerLabel = stringResource(R.string.home_orbit_readiness),
+        hint = stringResource(R.string.home_orbit_hint),
+        contentDescription = dimensions.joinToString(separator = ", ") { "${it.label}: ${it.reading}" },
+        modifier = modifier,
+    )
 }
 
 @Composable
