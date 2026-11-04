@@ -208,7 +208,11 @@ private fun ReadingRow(reading: ProgressionReading, ease: Float) {
                 .height(3.dp)
                 // The rule restates the numbers beside it; a screen reader would
                 // hear the same figure twice.
-                .clearAndSetSemantics { },
+                .clearAndSetSemantics { }
+                // The ink track anchors the fill: a sliver like 1/200 must read
+                // as a rule barely started, not a stray mark floating on the
+                // plate. Same idiom as the gauges' lit arc on its ink track.
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)),
         ) {
             Box(
                 modifier = Modifier

@@ -37,6 +37,9 @@ val title: String,
 val description: String,
 val impact: String,
 val category: String,
+/** The quantified need, split out of [description] so instruments can render
+ *  figures in their own register instead of buried in a sentence. */
+val metric: String = "",
 )
 
 suspend fun calculate(): PlacementReadiness {
@@ -95,16 +98,16 @@ val totalScore = (dsaScore + skillScore + consistencyScore + applicationScore + 
 
 val actionItems = mutableListOf<PlacementAction>()
 if (dsaScore < 12f) {
-actionItems.add(PlacementAction(priority = 1, title = "Solve more DSA problems", description = "You need ${maxOf(0, 50 - dsaSolved)} more problems for basic placement readiness", impact = "HIGH", category = "DSA"))
+actionItems.add(PlacementAction(priority = 1, title = "Solve more DSA problems", description = "You need ${maxOf(0, 50 - dsaSolved)} more problems for basic placement readiness", metric = "${maxOf(0, 50 - dsaSolved)} more problems", impact = "HIGH", category = "DSA"))
 }
 if (skillScore < 12f) {
-actionItems.add(PlacementAction(priority = 2, title = "Add more skills", description = "Add ${maxOf(0, 5 - userSkillCount)} more skills to your profile", impact = "MEDIUM", category = "SKILLS"))
+actionItems.add(PlacementAction(priority = 2, title = "Add more skills", description = "Add ${maxOf(0, 5 - userSkillCount)} more skills to your profile", metric = "${maxOf(0, 5 - userSkillCount)} more skills", impact = "MEDIUM", category = "SKILLS"))
 }
 if (consistencyScore < 9f) {
-actionItems.add(PlacementAction(priority = 3, title = "Build a daily streak", description = "A 7-day streak significantly increases your readiness score", impact = "HIGH", category = "CONSISTENCY"))
+actionItems.add(PlacementAction(priority = 3, title = "Build a daily streak", description = "A 7-day streak significantly increases your readiness score", metric = "a 7-day streak", impact = "HIGH", category = "CONSISTENCY"))
 }
 if (applicationScore < 10f) {
-actionItems.add(PlacementAction(priority = 4, title = "Apply to more opportunities", description = "Track at least 5 applications to show active job search", impact = "MEDIUM", category = "APPLICATIONS"))
+actionItems.add(PlacementAction(priority = 4, title = "Apply to more opportunities", description = "Track at least 5 applications to show active job search", metric = "5 tracked applications", impact = "MEDIUM", category = "APPLICATIONS"))
 }
 
 return PlacementReadiness(

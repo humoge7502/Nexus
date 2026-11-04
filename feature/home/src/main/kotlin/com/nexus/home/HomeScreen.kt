@@ -98,6 +98,7 @@ fun HomeScreen(
                     CareerReadinessCard(
                         score = uiState.stats.careerReadinessScore,
                         caption = uiState.careerNextStep,
+                        metric = uiState.careerNextStepMetric,
                         modifier = Modifier.padding(horizontal = 24.dp)
                     )
                 }
@@ -369,6 +370,7 @@ private fun CareerOrbitSection(stats: UserStats, modifier: Modifier = Modifier) 
 private fun CareerReadinessCard(
     score: Float,
     caption: String,
+    metric: String,
     modifier: Modifier = Modifier,
 ) {
     val ext = MaterialTheme.nexus
@@ -437,11 +439,24 @@ private fun CareerReadinessCard(
                     .size(width = 2.dp, height = 11.dp)
                     .background(ext.signal),
             )
-            Text(
-                text = caption.ifBlank { readinessCaption },
-                style = NexusTypography.EditorialBody,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            // The figure and the sentence travel in separate registers: the
+            // metric reads first in mono, the caption speaks beneath it. One
+            // merged sentence made the number something to skim past.
+            Column {
+                if (metric.isNotBlank()) {
+                    Text(
+                        text = metric.uppercase(Locale.ROOT),
+                        style = NexusTypography.Telemetry,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+                Text(
+                    text = caption.ifBlank { readinessCaption },
+                    style = NexusTypography.EditorialBody,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

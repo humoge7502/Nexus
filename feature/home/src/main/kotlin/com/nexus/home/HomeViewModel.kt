@@ -34,6 +34,10 @@ data class HomeUiState(
     val streakDays: Int = 0,
     val dailyQuote: DailyQuote? = null,
     val careerNextStep: String = "",
+    /** The quantified need behind [careerNextStep], kept separate so the hero
+     *  card can render figures and words in their own registers. Empty when the
+     *  caption is plain voice copy. */
+    val careerNextStepMetric: String = "",
     val isOpportunitiesLoading: Boolean = true,
     val opportunitiesError: String? = null,
 )
@@ -80,11 +84,16 @@ class HomeViewModel @Inject constructor(
             _uiState.update {
                 it.copy(
                     stats = it.stats.copy(careerReadinessScore = readiness.score / 100f),
+                    // The caption carries the action in words; the figure that
+                    // quantifies it travels in its own field so the card can
+                    // set the two apart instead of burying the number in a
+                    // sentence.
                     careerNextStep = when {
-                        nextStep != null -> nextStep.description
+                        nextStep != null -> nextStep.title
                         readiness.score >= 80 -> "You're placement ready. Keep the momentum going."
                         else -> readiness.level
                     },
+                    careerNextStepMetric = nextStep?.metric.orEmpty(),
                 )
             }
         }
