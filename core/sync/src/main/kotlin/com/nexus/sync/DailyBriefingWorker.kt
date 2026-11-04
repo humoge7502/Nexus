@@ -28,7 +28,7 @@ return try {
 val content = smartNotificationContentBuilder.buildMorningContent()
 NotificationHelper.showNotification(
 context = applicationContext,
-title = "☀️ ${Constants.APP_NAME} Daily Briefing",
+title = "${Constants.APP_NAME} Daily Briefing",
 body = content.body,
 channelId = NotificationHelper.CHANNEL_AI,
 )

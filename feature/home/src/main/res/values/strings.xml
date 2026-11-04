@@ -27,7 +27,7 @@
     <string name="home_certs">Certs</string>
     <string name="home_day_streak">Day Streak</string>
     <string name="home_interviews">Interviews</string>
-    <string name="home_tap_to_reveal_xp">Tap to reveal +%1$d XP ⭐</string>
+    <string name="home_tap_to_reveal_xp">Tap to reveal +%1$d XP</string>
     <string name="text_career_readiness">Career Readiness</string>
     <string name="text_daily_career_hit">Daily Career Hit</string>
     <string name="text_in_review">In Review</string>

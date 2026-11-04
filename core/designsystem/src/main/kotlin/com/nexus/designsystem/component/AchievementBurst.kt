@@ -11,7 +11,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -122,10 +126,11 @@ fun AchievementBurst(
                 .padding(28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = "★",
-                style = MaterialTheme.typography.headlineMedium,
-                color = extended.signal,
+            Icon(
+                imageVector = Icons.Default.Star,
+                contentDescription = null,
+                tint = extended.signal,
+                modifier = Modifier.size(28.dp),
             )
             Text(
                 text = "Achievement unlocked",

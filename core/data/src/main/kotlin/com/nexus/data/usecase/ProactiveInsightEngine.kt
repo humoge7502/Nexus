@@ -36,7 +36,7 @@ class ProactiveInsightEngine @Inject constructor(
           id = "streak_${System.currentTimeMillis()}",
           category = InsightCategory.GROWTH,
           priority = InsightPriority.HIGH,
-          title = "🔥 Day ${streakData.currentStreak} Streak!",
+          title = "Day ${streakData.currentStreak} Streak!",
           body = when {
             streakData.currentStreak >= 14 -> "Incredible! 2 weeks of consistency. Don't break the chain!"
             streakData.currentStreak >= 7 -> "One week strong! Real habits forming."
@@ -54,7 +54,7 @@ class ProactiveInsightEngine @Inject constructor(
           id = "applications_${System.currentTimeMillis()}",
           category = InsightCategory.APPLICATION,
           priority = if (applicationCounts.total == 0) InsightPriority.CRITICAL else InsightPriority.NORMAL,
-          title = if (applicationCounts.total == 0) "📋 No applications this week" else "📊 ${applicationCounts.total} applications",
+          title = if (applicationCounts.total == 0) "No applications this week" else "${applicationCounts.total} applications",
           body = when {
             applicationCounts.total == 0 -> "Applying is what gets you hired. Start with 2 today!"
             applicationCounts.interviewing > 0 -> "You have ${applicationCounts.interviewing} interviews lined up!"
@@ -71,7 +71,7 @@ class ProactiveInsightEngine @Inject constructor(
           id = "goals_${System.currentTimeMillis()}",
           category = InsightCategory.GOAL,
           priority = InsightPriority.NORMAL,
-          title = if (activeGoals.isEmpty()) "🎯 No goals yet" else "🎯 ${activeGoals.size} goal(s) active",
+          title = if (activeGoals.isEmpty()) "No goals yet" else "${activeGoals.size} goal(s) active",
           body = if (activeGoals.isEmpty()) {
             "Setting goals triples your success rate. Create one now."
           } else {
@@ -93,7 +93,7 @@ class ProactiveInsightEngine @Inject constructor(
           id = "readiness_${System.currentTimeMillis()}",
           category = InsightCategory.GROWTH,
           priority = InsightPriority.NORMAL,
-          title = "📈 Readiness: ${placement.score}% — ${placement.level}",
+          title = "Readiness: ${placement.score}% — ${placement.level}",
           body = placement.actionItems.firstOrNull()?.description ?: "Keep going — daily practice moves the needle.",
           actionText = placement.actionItems.firstOrNull()?.title,
           generatedAt = System.currentTimeMillis(),
@@ -106,7 +106,7 @@ class ProactiveInsightEngine @Inject constructor(
           id = "tip_${System.currentTimeMillis()}",
           category = InsightCategory.LEARNING,
           priority = InsightPriority.LOW,
-          title = "💡 Career Tip",
+          title = "Career Tip",
           body = careerMemoryManager.buildLongitudinalContext().take(200).ifBlank {
             "Consistency beats intensity. 30 min focused daily > cramming on weekends."
           },
