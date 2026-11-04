@@ -59,6 +59,16 @@ class SyncScheduler @Inject constructor(
                 .setRequiresBatteryNotLow(true)
                 .build(),
         )
+        // Warms the GitHub/Codeforces/LeetCode caches behind the Profile
+        // screen. Handles live in DataStore; with none connected the worker
+        // exits immediately, so the schedule is unconditional like the rest.
+        schedule<PlatformSyncWorker>(
+            PlatformSyncWorker.WORK_NAME, 12, TimeUnit.HOURS,
+            Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .setRequiresBatteryNotLow(true)
+                .build(),
+        )
         schedule<StreakWorker>(
             "streak_check", 24, TimeUnit.HOURS,
             Constraints.Builder()

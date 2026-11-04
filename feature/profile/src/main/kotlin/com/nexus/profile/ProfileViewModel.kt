@@ -3,11 +3,12 @@ package com.nexus.profile
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nexus.common.ApiResult
 import com.nexus.common.Constants
 import com.nexus.data.repository.AchievementRepository
 import com.nexus.data.repository.ApplicationRepository
 import com.nexus.data.repository.GoalRepository
-import com.nexus.data.repository.GitHubRepository
+import com.nexus.data.repository.PlatformRepository
 import com.nexus.data.repository.StreakRepository
 import com.nexus.data.repository.UserXpRepository
 import com.nexus.datastore.UserPreferences
@@ -57,7 +58,7 @@ data class ProfileUiState(
 class ProfileViewModel @Inject constructor(
     private val userPreferences: UserPreferences,
     private val xpRepository: UserXpRepository,
-    private val gitHubRepository: GitHubRepository,
+    private val platformRepository: PlatformRepository,
     private val applicationRepository: ApplicationRepository,
     private val goalRepository: GoalRepository,
     private val skillGraphRepository: ISkillGraphRepository,
@@ -78,9 +79,14 @@ class ProfileViewModel @Inject constructor(
     private val _declaredSkills = MutableStateFlow<List<String>>(emptyList())
     val declaredSkills: StateFlow<List<String>> = _declaredSkills.asStateFlow()
 
+    /** Live numbers pulled from the handles connected in Settings. */
+    private val _platformStats = MutableStateFlow(PlatformStatsUiState())
+    val platformStats: StateFlow<PlatformStatsUiState> = _platformStats.asStateFlow()
+
     init {
         loadProfile()
         loadSkillSuggestions()
+        loadPlatformStats()
         awardProfileCompletionOnce()
         viewModelScope.launch {
             userPreferences.userSkills.collect { _declaredSkills.value = it.toList().sorted() }
@@ -113,13 +119,18 @@ class ProfileViewModel @Inject constructor(
     private fun loadProfile() {
         viewModelScope.launch {
             val identity = combine(
-                userPreferences.displayName,
-                userPreferences.userId,
-                userPreferences.githubUsername,
+                combine(
+                    userPreferences.displayName,
+                    userPreferences.userId,
+                    userPreferences.githubUsername,
+                    userPreferences.linkedinUrl,
+                ) { displayName, userId, githubUsername, linkedinUrl ->
+                    IdentityCore(displayName, userId, githubUsername, linkedinUrl)
+                },
                 userPreferences.userCollege,
                 userPreferences.userYear,
-            ) { displayName, userId, githubUsername, college, year ->
-                Identity(displayName, userId, githubUsername, college, year)
+            ) { core, college, year ->
+                Identity(core.displayName, core.userId, core.githubUsername, college, year, core.linkedinUrl)
             }
 
             val progression = combine(
@@ -163,6 +174,7 @@ class ProfileViewModel @Inject constructor(
                     university = id.college,
                     year = id.year,
                     githubUsername = id.githubUsername.ifBlank { null },
+                    linkedinUrl = id.linkedinUrl.ifBlank { null },
                     level = prog.level,
                     totalXP = prog.totalXP,
                     streakDays = prog.streak,
@@ -207,7 +219,81 @@ class ProfileViewModel @Inject constructor(
         val githubUsername: String,
         val college: String,
         val year: Int,
+        val linkedinUrl: String,
     )
+
+    private data class IdentityCore(
+        val displayName: String,
+        val userId: String,
+        val githubUsername: String,
+        val linkedinUrl: String,
+    )
+
+    /**
+     * Fetches each connected platform once per screen entry through the
+     * platform façade. Repositories carry a 10-minute TTL cache and
+     * PlatformSyncWorker keeps it warm in the background, so re-entries are
+     * cheap. A per-platform failure leaves that card off quietly — never a
+     * fake zero.
+     */
+    private fun loadPlatformStats() {
+        viewModelScope.launch {
+            val github = userPreferences.githubUsername.first().trim().trimStart('@')
+            val leetcode = userPreferences.leetcodeUsername.first().trim()
+            val codeforces = userPreferences.codeforcesUsername.first().trim()
+            if (github.isBlank() && leetcode.isBlank() && codeforces.isBlank()) return@launch
+
+            val snap = platformRepository.snapshot(
+                githubHandle = github,
+                leetcodeHandle = leetcode,
+                codeforcesHandle = codeforces,
+            )
+
+            snap.github?.let { g ->
+                val profile = g.profile as? ApiResult.Success ?: return@let
+                val repos = g.repos as? ApiResult.Success ?: return@let
+                _platformStats.value = _platformStats.value.copy(
+                    github = GitHubStats(
+                        handle = profile.data.login,
+                        publicRepos = profile.data.publicRepos,
+                        followers = profile.data.followers,
+                        totalStars = repos.data.sumOf { it.stars },
+                        recentCommits = g.activity.dataOrNull?.totalCommits ?: 0,
+                        streakDays = g.activity.dataOrNull?.currentStreakDays ?: 0,
+                    ),
+                )
+            }
+
+            (snap.leetcode as? ApiResult.Success)?.let { stats ->
+                _platformStats.value = _platformStats.value.copy(
+                    leetcode = LeetCodeCard(
+                        handle = leetcode,
+                        totalSolved = stats.data.totalSolved,
+                        easySolved = stats.data.easySolved,
+                        mediumSolved = stats.data.mediumSolved,
+                        hardSolved = stats.data.hardSolved,
+                        ranking = stats.data.ranking,
+                    ),
+                )
+            }
+
+            snap.codeforces?.let { c ->
+                val profile = c.profile as? ApiResult.Success ?: return@let
+                val points = (c.ratingHistory as? ApiResult.Success)?.data.orEmpty()
+                _platformStats.value = _platformStats.value.copy(
+                    codeforces = CodeforcesCard(
+                        handle = profile.data.handle,
+                        rating = profile.data.rating,
+                        maxRating = profile.data.maxRating,
+                        rank = profile.data.rank,
+                        lastDelta = points.lastOrNull()?.delta,
+                        trend = points.map { it.newRating.toFloat() },
+                        contestsCounted = points.size,
+                    ),
+                )
+            }
+        }
+    }
 
     private data class Progression(
         val totalXP: Int,
@@ -225,3 +311,45 @@ class ProfileViewModel @Inject constructor(
         val skills: List<Skill>,
     )
 }
+
+@Immutable
+data class PlatformStatsUiState(
+    val github: GitHubStats? = null,
+    val leetcode: LeetCodeCard? = null,
+    val codeforces: CodeforcesCard? = null,
+) {
+    val hasAny: Boolean get() = github != null || leetcode != null || codeforces != null
+}
+
+@Immutable
+data class GitHubStats(
+    val handle: String,
+    val publicRepos: Int,
+    val followers: Int,
+    val totalStars: Int,
+    /** Commits observed in the public events feed (tokenless GitHub has no calendar). */
+    val recentCommits: Int,
+    val streakDays: Int,
+)
+
+@Immutable
+data class LeetCodeCard(
+    val handle: String,
+    val totalSolved: Int,
+    val easySolved: Int,
+    val mediumSolved: Int,
+    val hardSolved: Int,
+    val ranking: Int,
+)
+
+@Immutable
+data class CodeforcesCard(
+    val handle: String,
+    val rating: Int?,
+    val maxRating: Int?,
+    val rank: String?,
+    val lastDelta: Int?,
+    /** Contest rating series, oldest first — rendered as the trend line. */
+    val trend: List<Float> = emptyList(),
+    val contestsCounted: Int = 0,
+)

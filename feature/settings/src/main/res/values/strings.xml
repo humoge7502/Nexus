@@ -44,4 +44,16 @@
     <string name="settings_push_notifications_subtitle">Internship alerts, deadline reminders</string>
     <string name="settings_privacy_title">Privacy</string>
     <string name="settings_privacy_subtitle">Manage your data and privacy settings</string>
+
+    <string name="settings_connections">Connect your accounts</string>
+    <string name="settings_connections_caption">Handles sync on their own — your profile and growth stats update without opening anything.</string>
+    <string name="settings_github_label">GitHub username</string>
+    <string name="settings_github_support">Public repos, stars and activity appear on your profile</string>
+    <string name="settings_leetcode_label">LeetCode username</string>
+    <string name="settings_leetcode_support">Solved counts feed your growth stats</string>
+    <string name="settings_codeforces_label">Codeforces handle</string>
+    <string name="settings_codeforces_support">Rating and contest trend appear on your profile</string>
+    <string name="settings_linkedin_label">LinkedIn profile link</string>
+    <string name="settings_linkedin_support">Shown on your profile — LinkedIn offers no automatic read</string>
+    <string name="settings_connection_save">Save</string>
 </resources>

@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Handshake
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.MilitaryTech
 import androidx.compose.material.icons.filled.RocketLaunch
@@ -76,6 +77,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.AnimatedStatCard
+import com.nexus.designsystem.component.MomentumChart
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.SectionHeader
@@ -209,6 +211,9 @@ fun ProfileScreen(
                 }
                 Spacer(modifier = Modifier.height(18.dp))
                 ProfileStats(uiState = uiState)
+
+                val platformStats by viewModel.platformStats.collectAsStateWithLifecycle()
+                ConnectedPlatformsSection(stats = platformStats)
 
                 val declaredSkills by viewModel.declaredSkills.collectAsStateWithLifecycle()
                 val skillSuggestions by viewModel.skillSuggestions.collectAsStateWithLifecycle()
@@ -612,6 +617,7 @@ private fun ProfileIdentity(
                 IdentitySpec(Icons.Default.Star, stringResource(R.string.profile_level, uiState.level))
                 IdentitySpec(Icons.Default.Code, stringResource(R.string.profile_xp, uiState.totalXP))
                 uiState.githubUsername?.let { IdentitySpec(Icons.Default.AccountCircle, "@$it") }
+                uiState.linkedinUrl?.let { IdentitySpec(Icons.Default.Link, stringResource(R.string.profile_linkedin_chip)) }
             }
         }
     }
@@ -633,6 +639,133 @@ private fun IdentitySpec(icon: ImageVector, value: String) {
             color = NexusColors.SignalInk.copy(alpha = 0.92f),
             maxLines = 1,
         )
+    }
+}
+
+/**
+ * The live numbers behind the handles connected in Settings. Cards appear
+ * as their data lands; a platform that fails stays quiet — never a fake
+ * zero. Codeforces gets the rating trend as a MomentumChart line.
+ */
+@Composable
+private fun ConnectedPlatformsSection(stats: PlatformStatsUiState) {
+    if (!stats.hasAny) return
+
+    SectionHeader(title = stringResource(R.string.profile_connections_title))
+    Spacer(modifier = Modifier.height(12.dp))
+
+    NexusCard(modifier = Modifier.fillMaxWidth()) {
+        stats.github?.let {
+            PlatformRow(
+                platform = stringResource(R.string.profile_platform_github),
+                handle = it.handle,
+                primary = stringResource(
+                    R.string.profile_github_stats,
+                    it.publicRepos,
+                    it.totalStars,
+                    it.followers,
+                ),
+                secondary = stringResource(
+                    R.string.profile_github_activity,
+                    it.recentCommits,
+                    it.streakDays,
+                ),
+            )
+        }
+        stats.leetcode?.let {
+            PlatformRow(
+                platform = stringResource(R.string.profile_platform_leetcode),
+                handle = it.handle,
+                primary = stringResource(
+                    R.string.profile_leetcode_stats,
+                    it.totalSolved,
+                    it.easySolved,
+                    it.mediumSolved,
+                    it.hardSolved,
+                ),
+                secondary = if (it.ranking > 0) {
+                    stringResource(R.string.profile_leetcode_rank, it.ranking)
+                } else {
+                    null
+                },
+            )
+        }
+        stats.codeforces?.let { cf ->
+            PlatformRow(
+                platform = stringResource(R.string.profile_platform_codeforces),
+                handle = cf.handle,
+                primary = stringResource(
+                    R.string.profile_codeforces_stats,
+                    cf.rating ?: 0,
+                    cf.maxRating ?: 0,
+                    cf.rank ?: "—",
+                ),
+                secondary = cf.lastDelta?.let { delta ->
+                    stringResource(R.string.profile_codeforces_delta, delta)
+                },
+            )
+            if (cf.trend.size >= 2) {
+                MomentumChart(
+                    values = cf.trend,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .height(52.dp),
+                )
+                Text(
+                    text = stringResource(R.string.profile_codeforces_trend_caption, cf.contestsCounted),
+                    style = NexusTypography.TelemetryMicro,
+                    color = NexusColors.SignalInk.copy(alpha = 0.55f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, bottom = 14.dp),
+                )
+            }
+        }
+    }
+    Spacer(modifier = Modifier.height(18.dp))
+}
+
+@Composable
+private fun PlatformRow(
+    platform: String,
+    handle: String,
+    primary: String,
+    secondary: String?,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = platform,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = "@$handle",
+                style = NexusTypography.TelemetryMicro,
+                color = NexusColors.SignalInk.copy(alpha = 0.62f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = primary,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        secondary?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

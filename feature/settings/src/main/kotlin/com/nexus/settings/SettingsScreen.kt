@@ -25,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material.icons.filled.BrightnessMedium
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.PlayCircleOutline
@@ -33,6 +34,7 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -53,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusColors
 
@@ -217,6 +220,44 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            Text(text = stringResource(R.string.settings_connections),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+            Text(text = stringResource(R.string.settings_connections_caption),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            ConnectField(
+                savedValue = uiState.githubUsername,
+                label = stringResource(R.string.settings_github_label),
+                supporting = stringResource(R.string.settings_github_support),
+                onSave = viewModel::saveGithubUsername,
+            )
+            ConnectField(
+                savedValue = uiState.leetcodeUsername,
+                label = stringResource(R.string.settings_leetcode_label),
+                supporting = stringResource(R.string.settings_leetcode_support),
+                onSave = viewModel::saveLeetcodeUsername,
+            )
+            ConnectField(
+                savedValue = uiState.codeforcesUsername,
+                label = stringResource(R.string.settings_codeforces_label),
+                supporting = stringResource(R.string.settings_codeforces_support),
+                onSave = viewModel::saveCodeforcesUsername,
+            )
+            ConnectField(
+                savedValue = uiState.linkedinUrl,
+                label = stringResource(R.string.settings_linkedin_label),
+                supporting = stringResource(R.string.settings_linkedin_support),
+                onSave = viewModel::saveLinkedinUrl,
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             Text(text = stringResource(R.string.settings_account),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
@@ -307,4 +348,40 @@ private fun SettingsItem(
             trailing()
         }
     }
+}
+
+/**
+ * One connected-platform field. The draft re-seeds from the saved value, a
+ * check appears only when the draft differs, and saving clears it — no
+ * separate edit screen, no save bar.
+ */
+@Composable
+private fun ConnectField(
+    savedValue: String,
+    label: String,
+    supporting: String,
+    onSave: (String) -> Unit,
+) {
+    var draft by remember(savedValue) { mutableStateOf(savedValue) }
+    val dirty = draft.trim() != savedValue.trim()
+    NexusTextField(
+        value = draft,
+        onValueChange = { draft = it },
+        label = label,
+        supportingText = supporting,
+        singleLine = true,
+        trailingIcon = {
+            if (dirty) {
+                IconButton(onClick = { onSave(draft.trim()) }) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = stringResource(R.string.settings_connection_save),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+        },
+        modifier = Modifier.fillMaxWidth(),
+    )
+    Spacer(modifier = Modifier.height(8.dp))
 }

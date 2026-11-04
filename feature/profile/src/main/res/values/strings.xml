@@ -50,4 +50,17 @@
     <string name="profile_tool_tribe_desc">Small accountability group</string>
     <string name="profile_tool_leaderboard">Leaderboard</string>
     <string name="profile_tool_leaderboard_desc">Compete on the Sagitta score</string>
+
+    <string name="profile_connections_title">Connected platforms</string>
+    <string name="profile_platform_github">GitHub</string>
+    <string name="profile_platform_leetcode">LeetCode</string>
+    <string name="profile_platform_codeforces">Codeforces</string>
+    <string name="profile_linkedin_chip">LinkedIn</string>
+    <string name="profile_github_stats">%1$d public repos · %2$d stars earned · %3$d followers</string>
+    <string name="profile_github_activity">%1$d commits in the public feed · %2$d-day active streak</string>
+    <string name="profile_leetcode_stats">%1$d solved · %2$d easy · %3$d medium · %4$d hard</string>
+    <string name="profile_leetcode_rank">Global rank %1$d</string>
+    <string name="profile_codeforces_stats">Rating %1$d · max %2$d · %3$s</string>
+    <string name="profile_codeforces_delta">Last contest: %1$d rating</string>
+    <string name="profile_codeforces_trend_caption">Last %1$d rated contests</string>
 </resources>

@@ -19,6 +19,9 @@ import javax.inject.Singleton
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "nexus_prefs")
 
+/** Which external account a [UserPreferences.saveExternalAccount] call writes. */
+enum class ExternalAccount { GITHUB, LEETCODE, CODEFORCES, LINKEDIN }
+
 @Singleton
 class UserPreferences @Inject constructor(
     @ApplicationContext private val context: Context
@@ -34,6 +37,8 @@ class UserPreferences @Inject constructor(
         val EMAIL = stringPreferencesKey("email")
         val AUTH_TOKEN = stringPreferencesKey("auth_token")
         val GITHUB_USERNAME = stringPreferencesKey("github_username")
+        val CODEFORCES_USERNAME = stringPreferencesKey("codeforces_username")
+        val LINKEDIN_URL = stringPreferencesKey("linkedin_url")
         val IS_PRO = booleanPreferencesKey("is_pro")
         val USER_YEAR = intPreferencesKey("user_year")
         val USER_COLLEGE = stringPreferencesKey("user_college")
@@ -176,6 +181,15 @@ class UserPreferences @Inject constructor(
         prefs[LEETCODE_USERNAME] ?: ""
     }
 
+    val codeforcesUsername: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[CODEFORCES_USERNAME] ?: ""
+    }
+
+    /** LinkedIn profile link — manual only; LinkedIn offers no public API. */
+    val linkedinUrl: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[LINKEDIN_URL] ?: ""
+    }
+
     val latestInsightTitle: Flow<String> = context.dataStore.data.map { prefs ->
         prefs[LATEST_INSIGHT_TITLE] ?: ""
     }
@@ -215,8 +229,20 @@ class UserPreferences @Inject constructor(
         context.dataStore.edit { prefs -> prefs[AUTH_TOKEN] = encrypted }
     }
 
-    suspend fun saveGithubUsername(username: String) {
-        context.dataStore.edit { prefs -> prefs[GITHUB_USERNAME] = username }
+    /**
+     * Connected external accounts (Settings → Connect your accounts).
+     * One saver keeps the preferences class inside its function budget;
+     * [ExternalAccount] says which key receives the value.
+     */
+    suspend fun saveExternalAccount(kind: ExternalAccount, value: String) {
+        context.dataStore.edit { prefs ->
+            when (kind) {
+                ExternalAccount.GITHUB -> prefs[GITHUB_USERNAME] = value
+                ExternalAccount.LEETCODE -> prefs[LEETCODE_USERNAME] = value
+                ExternalAccount.CODEFORCES -> prefs[CODEFORCES_USERNAME] = value
+                ExternalAccount.LINKEDIN -> prefs[LINKEDIN_URL] = value
+            }
+        }
     }
 
     suspend fun saveIsPro(pro: Boolean) {
@@ -261,10 +287,6 @@ class UserPreferences @Inject constructor(
             prefs[TRIBE_GOAL] = goal.trim()
             prefs[TRIBE_POD_SIZE] = podSize.coerceIn(3, 7)
         }
-    }
-
-    suspend fun saveLeetcodeUsername(username: String) {
-        context.dataStore.edit { prefs -> prefs[LEETCODE_USERNAME] = username }
     }
 
     suspend fun saveLatestInsight(
