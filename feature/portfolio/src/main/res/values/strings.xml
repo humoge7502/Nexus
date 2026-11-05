@@ -10,6 +10,11 @@
     <string name="portfolio_add_first">Add your first project</string>
     <string name="portfolio_empty_title">No projects yet</string>
     <string name="portfolio_empty_body">Add your shipped work to build a portfolio you can share</string>
+    <string name="portfolio_empty_voice">A portfolio is only proof in order — one shipped thing, written down, is already a beginning.</string>
+    <string name="portfolio_loading_projects">Loading your projects...</string>
+    <string name="portfolio_unable_to_load">Couldn\'t load your projects</string>
+    <string name="portfolio_error_reason">The project list lives in this device\'s database and the read failed. Nothing was deleted and nothing was shared or submitted for you.</string>
+    <string name="portfolio_try_again">Try again</string>
     <string name="portfolio_new_project">New project</string>
     <string name="portfolio_project_title">Project title</string>
     <string name="portfolio_project_description">What it does (optional)</string>

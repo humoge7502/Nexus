@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.WorkspacePremium
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +42,10 @@ import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusOutlineButton
 import com.nexus.designsystem.component.SectionHeader
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
+import com.nexus.designsystem.component.feedback.EditorialStatusBand
+import com.nexus.designsystem.component.feedback.StatusTone
 import com.nexus.designsystem.component.hairline
 import com.nexus.designsystem.component.instrumentGrid
 import com.nexus.designsystem.component.sheen
@@ -137,34 +140,70 @@ fun PaywallScreen(
             )
             Spacer(modifier = Modifier.height(14.dp))
 
+            val fault = uiState.billingFault
             if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 32.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
-                }
+                EditorialSkeletonList(
+                    count = 3,
+                    loadingLabel = stringResource(R.string.paywall_loading_prices),
+                )
+            } else if (!uiState.pricesReady) {
+                // No Play catalogue means no purchasable plan. Showing the old
+                // indicative numbers here would quote a price we cannot charge.
+                EditorialErrorState(
+                    headline = stringResource(R.string.paywall_prices_unavailable),
+                    reason = stringResource(R.string.paywall_prices_reason),
+                    actionLabel = stringResource(R.string.paywall_try_again),
+                    onAction = viewModel::retryBilling,
+                    secondaryHint = uiState.billingFault,
+                )
             } else {
+                if (fault != null) {
+                    EditorialStatusBand(
+                        label = stringResource(R.string.paywall_purchase_not_completed),
+                        detail = fault,
+                        tone = StatusTone.Fault,
+                        modifier = Modifier.padding(bottom = 10.dp),
+                    )
+                }
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    // The season pass leads because the simulated cohort's
+                    // rejection was about the *commitment window*, not the
+                    // amount — a pass that ends with placement season is the
+                    // framing they said they could actually accept.
                     PlanCard(
                         index = "01",
-                        price = uiState.yearlyPrice.ifBlank { "$49.99/yr" },
-                        badge = stringResource(R.string.paywall_save_percent, 58),
-                        actionLabel = stringResource(R.string.paywall_subscribe_yearly),
-                        onAction = { viewModel.purchaseYearly(activity) },
+                        price = uiState.seasonPrice.ifBlank { PLACEHOLDER_PRICE },
+                        enabled = uiState.seasonPrice.isNotBlank(),
+                        badge = stringResource(R.string.paywall_season_badge),
+                        caption = stringResource(R.string.paywall_season_caption),
+                        actionLabel = stringResource(R.string.paywall_subscribe_season),
+                        onAction = { viewModel.purchaseSeason(activity) },
                         featured = true,
                     )
                     PlanCard(
                         index = "02",
-                        price = uiState.monthlyPrice.ifBlank { "$9.99/mo" },
+                        price = uiState.yearlyPrice.ifBlank { PLACEHOLDER_PRICE },
+                        enabled = uiState.yearlyPrice.isNotBlank(),
+                        // Derived from the two Play prices, and absent when the
+                        // arithmetic doesn't hold — a fixed "Save 58%" would be
+                        // the one badge a student can check by hand.
+                        badge = uiState.yearlySavingPercent?.let {
+                            stringResource(R.string.paywall_save_percent, it)
+                        },
+                        actionLabel = stringResource(R.string.paywall_subscribe_yearly),
+                        onAction = { viewModel.purchaseYearly(activity) },
+                    )
+                    PlanCard(
+                        index = "03",
+                        price = uiState.monthlyPrice.ifBlank { PLACEHOLDER_PRICE },
+                        enabled = uiState.monthlyPrice.isNotBlank(),
                         actionLabel = stringResource(R.string.paywall_subscribe_monthly),
                         onAction = { viewModel.purchaseMonthly(activity) },
                     )
                     PlanCard(
-                        index = "03",
-                        price = uiState.lifetimePrice.ifBlank { "$99.99" },
+                        index = "04",
+                        price = uiState.lifetimePrice.ifBlank { PLACEHOLDER_PRICE },
+                        enabled = uiState.lifetimePrice.isNotBlank(),
                         caption = stringResource(R.string.paywall_one_time),
                         actionLabel = stringResource(R.string.paywall_lifetime_access),
                         onAction = { viewModel.purchaseLifetime(activity) },
@@ -257,6 +296,7 @@ private fun PlanCard(
     featured: Boolean = false,
     badge: String? = null,
     caption: String? = null,
+    enabled: Boolean = true,
 ) {
     val shape = RoundedCornerShape(22.dp)
     val borderColor = if (featured) {
@@ -299,7 +339,7 @@ private fun PlanCard(
                         )
                     }
                 }
-                if (badge != null) {
+                if (badge != null && enabled) {
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
@@ -318,7 +358,16 @@ private fun PlanCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (featured) {
+            if (!enabled) {
+                // A plan Play did not price is not for sale this session; say so
+                // instead of offering a button that cannot complete.
+                Text(
+                    text = stringResource(R.string.paywall_plan_unavailable),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            } else if (featured) {
                 NexusButton(
                     text = actionLabel,
                     onClick = onAction,
@@ -334,3 +383,6 @@ private fun PlanCard(
         }
     }
 }
+
+/** Rendered in place of a price Play has not supplied — never a made-up figure. */
+private const val PLACEHOLDER_PRICE = "—"

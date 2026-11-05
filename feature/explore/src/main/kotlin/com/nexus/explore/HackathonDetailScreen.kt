@@ -38,11 +38,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
@@ -86,17 +88,28 @@ fun HackathonDetailScreen(
         )
 
         if (hackathon == null) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                when (state) {
-                    is UiState.Loading -> LoadingState()
-                    is UiState.Error -> Text(
-                        (state as UiState.Error).message,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(24.dp),
-                    )
-                    else -> Text(stringResource(R.string.explore_hackathon_not_found), style = MaterialTheme.typography.bodyLarge)
-                }
+            when (val s = state) {
+                is UiState.Loading -> EditorialSkeletonList(
+                    count = 2,
+                    loadingLabel = stringResource(R.string.explore_loading_hackathon),
+                    modifier = Modifier.fillMaxSize().padding(24.dp),
+                )
+
+                is UiState.Error -> EditorialErrorState(
+                    headline = stringResource(R.string.explore_unable_to_load),
+                    reason = stringResource(R.string.explore_error_reason),
+                    actionLabel = stringResource(R.string.explore_retry),
+                    onAction = viewModel::retry,
+                    secondaryHint = s.message.takeIf { it.isNotBlank() },
+                    modifier = Modifier.fillMaxSize().padding(24.dp),
+                )
+
+                else -> EmptyState(
+                    title = stringResource(R.string.explore_hackathon_not_found),
+                    description = stringResource(R.string.explore_hackathon_missing_hint),
+                    voice = stringResource(R.string.explore_hackathon_missing_voice),
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
             return
         }

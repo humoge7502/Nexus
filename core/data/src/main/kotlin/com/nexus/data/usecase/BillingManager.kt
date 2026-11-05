@@ -38,6 +38,7 @@ class BillingManager @Inject constructor(
     override val billingState: Flow<BillingState> = _billingState.asStateFlow()
 
     private val skuMapping = mapOf(
+        "nexus_pro_season" to ProductTier.PRO_SEASON,
         "nexus_pro_monthly" to ProductTier.PRO_MONTHLY,
         "nexus_pro_yearly" to ProductTier.PRO_YEARLY,
         "nexus_lifetime" to ProductTier.LIFETIME,
@@ -77,17 +78,17 @@ class BillingManager @Inject constructor(
 
         billingClient = client
 
-        suspendCancellableCoroutine<Unit> { continuation ->
+        val connected = suspendCancellableCoroutine { continuation ->
             client.startConnection(object : BillingClientStateListener {
                 override fun onBillingSetupFinished(billingResult: BillingResult) {
                     if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                         Timber.d("Billing connected")
-                        _billingState.value = BillingState.Loaded(emptyList())
+                        continuation.resume(true)
                     } else {
                         Timber.w("Billing setup failed: ${billingResult.debugMessage}")
                         _billingState.value = BillingState.Unavailable
+                        continuation.resume(false)
                     }
-                    continuation.resume(Unit)
                 }
 
                 override fun onBillingServiceDisconnected() {
@@ -96,6 +97,59 @@ class BillingManager @Inject constructor(
                 }
             })
         }
+        if (!connected) return
+        // Prices used to be fetched only inside purchase(), i.e. after the
+        // student had already decided — so the paywall could never show a
+        // real number and had nothing to sell against.
+        _billingState.value = BillingState.Loaded(loadCatalogue(client))
+    }
+
+    /** One request for every SKU. A plan Play does not price is left out of the
+     *  list, which the paywall renders as unavailable rather than guessed at. */
+    private suspend fun loadCatalogue(client: BillingClient): List<ProductListing> {
+        val params = QueryProductDetailsParams.newBuilder()
+            .setProductList(
+                skuMapping.keys.map { sku ->
+                    QueryProductDetailsParams.Product.newBuilder()
+                        .setProductId(sku)
+                        .setProductType(BillingClient.ProductType.SUBS)
+                        .build()
+                },
+            )
+            .build()
+
+        val (result, details) = suspendCancellableCoroutine<Pair<BillingResult, List<ProductDetails>>> { continuation ->
+            client.queryProductDetailsAsync(params) { billingResult, productDetailsList ->
+                continuation.resume(billingResult to productDetailsList)
+            }
+        }
+
+        if (result.responseCode != BillingClient.BillingResponseCode.OK) {
+            Timber.w("Catalogue query failed: ${result.debugMessage}")
+            return emptyList()
+        }
+        return details.mapNotNull(::toListing)
+    }
+
+    private fun toListing(details: ProductDetails): ProductListing? {
+        val tier = skuMapping[details.productId] ?: return null
+        // Subscriptions and one-time products hang their price off different
+        // objects, and the lifetime SKU has been registered as either.
+        val phase = details.subscriptionOfferDetails
+            ?.firstOrNull()?.pricingPhases?.pricingPhaseList?.firstOrNull()
+        val oneTime = details.oneTimePurchaseOfferDetails
+        val micros = phase?.priceAmountMicros ?: oneTime?.priceAmountMicros ?: return null
+        val currency = phase?.priceCurrencyCode ?: oneTime?.priceCurrencyCode ?: return null
+        val formatted = phase?.formattedPrice ?: oneTime?.formattedPrice ?: return null
+        return ProductListing(
+            sku = details.productId,
+            tier = tier,
+            title = details.title,
+            description = details.description,
+            price = formatted,
+            priceMicros = micros,
+            currencyCode = currency,
+        )
     }
 
     override suspend fun purchase(tier: ProductTier, activity: android.app.Activity) {
@@ -205,7 +259,8 @@ QueryPurchasesParams.newBuilder()
 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
 val hasPro = purchasesList.any { purchase ->
 purchase.purchaseState == Purchase.PurchaseState.PURCHASED &&
-(purchase.products.contains("nexus_pro_monthly") ||
+(purchase.products.contains("nexus_pro_season") ||
+purchase.products.contains("nexus_pro_monthly") ||
 purchase.products.contains("nexus_pro_yearly") ||
 purchase.products.contains("nexus_lifetime"))
 }

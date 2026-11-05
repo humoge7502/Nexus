@@ -199,7 +199,10 @@ internal val DarkExtendedColors = NexusExtendedColors(
 )
 
 internal val LightExtendedColors = NexusExtendedColors(
-    signal = NexusColors.SignalDeep,
+    // SignalDeep (#6B8A10) measured 3.73:1 on the pearl grounds, and this token
+    // carries text — section indices, telemetry counts, verdict lines — so it
+    // needs the normal-text floor, not the large-text one. Same olive, darker.
+    signal = Color(0xFF566600),
     structure = NexusColors.Structure,
     attention = Color(0xFFC2410C),
     positive = Color(0xFF0E7A58),

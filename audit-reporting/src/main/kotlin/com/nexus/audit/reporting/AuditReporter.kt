@@ -35,12 +35,12 @@ object AuditReporter {
         appendLine("- Estimated effort: ${d.estimatedEffort.developerDays} dev-days (${d.estimatedEffort.complexity})")
         appendLine()
         if (d.blockers.isNotEmpty()) {
-            appendLine("### 🚫 Blockers (must fix)")
+            appendLine("### Blockers (must fix)")
             d.blockers.forEach { appendLine("- $it") }
             appendLine()
         }
         if (d.highRiskSystems.isNotEmpty()) {
-            appendLine("### ⚠️ High-risk systems")
+            appendLine("### High-risk systems")
             d.highRiskSystems.forEach { appendLine("- $it") }
             appendLine()
         }

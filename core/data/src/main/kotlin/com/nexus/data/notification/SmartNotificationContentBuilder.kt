@@ -27,13 +27,13 @@ val totalXP = userXpRepository.totalXP.first()
 val level = userXpRepository.levelName(userXpRepository.currentLevel.first())
 
 val title = when {
-streak == 0 -> "Start your streak today \uD83D\uDE80"
-streak == 1 -> "Day 2 begins! Keep it going \uD83D\uDD25"
-streak in 2..6 -> "Day ${streak + 1} — building momentum \uD83D\uDD25"
-streak == 7 -> "One week streak! You're in the top 20% \uD83C\uDFAF"
-streak in 8..29 -> "$streak days strong! Don't break the chain \uD83D\uDD25"
-streak == 30 -> "30-DAY STREAK! Exceptional \uD83C\uDFC6"
-else -> "$streak days! Legendary \uD83C\uDFC6"
+streak == 0 -> "Start your streak today"
+streak == 1 -> "Day 2 begins — keep it going"
+streak in 2..6 -> "Day ${streak + 1} — building momentum"
+streak == 7 -> "One week streak — you're in the top 20%"
+streak in 8..29 -> "$streak days strong — don't break the chain"
+streak == 30 -> "30-day streak — exceptional"
+else -> "$streak days — legendary"
 }
 
 val body = if (!todayHitCompleted) {
@@ -52,10 +52,10 @@ val hitCompleted = careerHitRepository.isHitViewedToday()
 val level = userXpRepository.levelName(userXpRepository.currentLevel.first())
 
 val title = when {
-!hitCompleted && streak > 7 -> "\u26A0\uFE0F $streak-day streak at risk!"
+!hitCompleted && streak > 7 -> "$streak-day streak at risk"
 !hitCompleted -> "Your career hit is still waiting"
-todayXP > 200 -> "Excellent day — $todayXP XP! \u2B50"
-todayXP > 50 -> "Good progress today — $todayXP XP \uD83D\uDCC8"
+todayXP > 200 -> "Excellent day — $todayXP XP"
+todayXP > 50 -> "Good progress today — $todayXP XP"
 else -> "Today's recap"
 }
 
@@ -73,7 +73,7 @@ return NotificationContent(title = title, body = body)
 
 suspend fun buildDeadlineContent(company: String, role: String, daysLeft: Int): NotificationContent {
 return NotificationContent(
-title = "\u23F0 $daysLeft day${if (daysLeft > 1) "s" else ""} left — $company",
+title = "$daysLeft day${if (daysLeft > 1) "s" else ""} left — $company",
 body = "The $role deadline at $company is approaching. Tap to get an AI interview prep plan.",
 )
 }

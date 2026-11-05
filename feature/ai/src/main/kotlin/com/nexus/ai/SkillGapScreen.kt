@@ -5,9 +5,9 @@ import com.nexus.ai.R
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -18,17 +18,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.common.AIRateLimiter
 import com.nexus.common.RateLimitResult
 import com.nexus.datastore.UserPreferences
-import com.nexus.designsystem.component.LoadingState
 import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.network.ai.AIOpenRouterService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,7 +41,7 @@ data class SkillGapUiState(
     val targetRole: String = "",
     val analysis: String = "",
     val error: String? = null,
-    val rateLimited: Boolean = false,
+    val isLimitReached: Boolean = false,
 )
 
 @HiltViewModel
@@ -53,11 +55,11 @@ class SkillGapViewModel @Inject constructor(
     val uiState: StateFlow<SkillGapUiState> = _uiState.asStateFlow()
 
     fun updateCurrentSkills(skills: String) {
-        _uiState.value = _uiState.value.copy(currentSkills = skills)
+        _uiState.update { it.copy(currentSkills = skills) }
     }
 
     fun updateTargetRole(role: String) {
-        _uiState.value = _uiState.value.copy(targetRole = role)
+        _uiState.update { it.copy(targetRole = role) }
     }
 
     fun analyze() {
@@ -67,17 +69,17 @@ class SkillGapViewModel @Inject constructor(
         viewModelScope.launch {
             val isPro = userPreferences.isPro.first()
             if (rateLimiter.canMakeCall(isPro) is RateLimitResult.LimitExceeded) {
-                _uiState.value = _uiState.value.copy(rateLimited = true, error = "Daily AI limit reached. Upgrade to Pro for unlimited access.")
+                _uiState.update { it.copy(isLimitReached = true, error = null) }
                 return@launch
             }
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            _uiState.update { it.copy(isLoading = true, error = null, isLimitReached = false) }
             try {
                 val prompt = "Analyze the skill gap between current skills ($skills) and requirements for a $role. List: 1. Skills I already have. 2. Skills I need to learn (prioritized). 3. Recommended resources. 4. Estimated timeline."
                 val response = aiService.sendMessage(prompt)
                 rateLimiter.recordCall()
-                _uiState.value = _uiState.value.copy(isLoading = false, analysis = response)
+                _uiState.update { it.copy(isLoading = false, analysis = response) }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(isLoading = false, error = e.message ?: "Analysis failed")
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
     }
@@ -86,6 +88,7 @@ class SkillGapViewModel @Inject constructor(
 @Composable
 fun SkillGapScreen(
     onBack: () -> Unit = {},
+    onGoPro: () -> Unit,
     viewModel: SkillGapViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -120,28 +123,55 @@ fun SkillGapScreen(
             )
             Spacer(Modifier.height(16.dp))
             NexusButton(
-                text = if (uiState.isLoading) "Analyzing..." else "Analyze Gap",
+                text = stringResource(
+                    if (uiState.isLoading) R.string.ai_analyzing_button else R.string.ai_analyze_gap_button,
+                ),
                 onClick = { viewModel.analyze() },
-                enabled = uiState.currentSkills.isNotBlank() && uiState.targetRole.isNotBlank() && !uiState.isLoading,
+                enabled = uiState.currentSkills.isNotBlank() &&
+                    uiState.targetRole.isNotBlank() &&
+                    !uiState.isLoading,
             )
-            Spacer(Modifier.height(16.dp))
-
-            if (uiState.isLoading) {
-                LoadingState()
-            }
-
-            uiState.error?.let { error ->
-                Text(text = error, color = MaterialTheme.colorScheme.error)
-            }
-
             if (uiState.analysis.isNotBlank()) {
-                NexusCard(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = uiState.analysis,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
+                Spacer(Modifier.height(16.dp))
             }
+            SkillGapOutcome(uiState = uiState, onRetry = viewModel::analyze, onGoPro = onGoPro)
+        }
+    }
+}
+
+@Composable
+private fun SkillGapOutcome(
+    uiState: SkillGapUiState,
+    onRetry: () -> Unit,
+    onGoPro: () -> Unit,
+) {
+    when {
+        uiState.isLoading -> EditorialSkeletonList(
+            count = 2,
+            loadingLabel = stringResource(R.string.ai_analyzing_gap_loading),
+        )
+
+        uiState.isLimitReached -> EditorialErrorState(
+            headline = stringResource(R.string.ai_daily_limit_headline),
+            reason = stringResource(R.string.ai_daily_limit_shared_reason),
+            actionLabel = stringResource(R.string.ai_unlock_pro),
+            onAction = onGoPro,
+            isRecoverable = false,
+        )
+
+        uiState.error != null -> EditorialErrorState(
+            headline = stringResource(R.string.ai_fault_headline),
+            reason = stringResource(R.string.ai_fault_reason_inputs),
+            actionLabel = stringResource(R.string.ai_retry),
+            onAction = onRetry,
+            secondaryHint = uiState.error,
+        )
+
+        uiState.analysis.isNotBlank() -> NexusCard(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = uiState.analysis,
+                style = MaterialTheme.typography.bodyMedium,
+            )
         }
     }
 }

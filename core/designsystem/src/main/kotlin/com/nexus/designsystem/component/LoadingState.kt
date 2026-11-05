@@ -24,7 +24,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.nexus.designsystem.R
 
 @Composable
 fun Modifier.shimmer(): Modifier = composed {
@@ -61,16 +65,31 @@ fun Modifier.shimmer(): Modifier = composed {
     )
 }
 
+/**
+ * A page-level placeholder.
+ *
+ * [loadingLabel] defaults to "Loading" so that every call site is announced by
+ * TalkBack without the caller having to remember; pass a module-specific phrase
+ * when the wait has a name ("Loading your streak").
+ */
 @Composable
-fun LoadingState(modifier: Modifier = Modifier) {
-    ShimmerCard(modifier = modifier)
+fun LoadingState(
+    modifier: Modifier = Modifier,
+    loadingLabel: String? = stringResource(R.string.ds_loading),
+) {
+    ShimmerCard(modifier = modifier, loadingLabel = loadingLabel)
 }
 
 @Composable
 fun ShimmerCard(
     modifier: Modifier = Modifier,
+    loadingLabel: String? = stringResource(R.string.ds_loading),
 ) {
-    Column(modifier = modifier.padding(16.dp)) {
+    Column(
+        modifier = modifier.padding(16.dp).semantics(mergeDescendants = true) {
+            if (loadingLabel != null) contentDescription = loadingLabel
+        },
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()

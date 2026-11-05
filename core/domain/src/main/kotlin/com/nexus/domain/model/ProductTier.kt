@@ -1,7 +1,7 @@
 package com.nexus.domain.model
 
 enum class ProductTier {
-    FREE, PRO_MONTHLY, PRO_YEARLY, LIFETIME
+    FREE, PRO_SEASON, PRO_MONTHLY, PRO_YEARLY, LIFETIME
 }
 
 data class ProductListing(

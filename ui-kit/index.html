@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sagitta · UI Adoption Board</title>
+<style>
+/* Tokens mirror core/designsystem/theme/Color.kt — declared once, consumed everywhere. */
+:root{
+  --void:#08060B; --deep:#0F0B14; --carbon:#17121E; --graphite:#201A28; --slate:#2C2537;
+  --pearl:#FAF7F3; --cloud:#E9E2DA; --mist:#B9AFBE; --muted:#8C8394;
+  --signal:#C3F53C; --signal-bright:#D6FF5E; --signal-deep:#6B8A10; --signal-ink:#0F1405;
+  --structure:#7C8CFF; --attention:#FF6A3D; --positive:#3FE0B0;
+  --hair:rgba(250,247,243,.10); --hair-strong:rgba(250,247,243,.20);
+  --grid:rgba(124,140,255,.10);
+  --sans:"Plus Jakarta Sans",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --serif:"Newsreader",Georgia,"Times New Roman",serif;
+  --gut:clamp(20px,4vw,56px);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--void);color:var(--pearl);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;line-height:1.55}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:64px 64px;mask-image:linear-gradient(180deg,rgba(0,0,0,.55),transparent 70%)}
+button,input{font:inherit}
+a{color:inherit}
+.wrap{position:relative;z-index:1;max-width:1360px;margin:0 auto;padding:0 var(--gut)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.rule{height:1px;background:var(--hair);border:0;margin:0}
+
+/* ---------- top bar ---------- */
+.top{position:sticky;top:0;z-index:20;backdrop-filter:blur(18px);
+  background:rgba(8,6,11,.86);border-bottom:1px solid var(--hair)}
+.top .wrap{display:flex;align-items:center;gap:24px;height:62px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:15px}
+.mark{width:22px;height:22px;display:grid;place-items:center;background:var(--signal);
+  color:var(--signal-ink);clip-path:polygon(50% 0,100% 100%,0 100%);font-size:10px;font-family:var(--mono)}
+.nav{display:flex;gap:20px;margin-left:auto;flex-wrap:wrap}
+.nav a{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);text-decoration:none;transition:color .15s}
+.nav a:hover{color:var(--signal)}
+.toggle{display:flex;align-items:center;gap:8px;cursor:pointer;border:1px solid var(--hair);
+  background:var(--deep);color:var(--mist);padding:7px 11px;border-radius:999px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.toggle .dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.toggle[aria-pressed="true"] .dot{background:var(--signal);box-shadow:0 0 10px var(--signal)}
+.toggle[aria-pressed="true"]{border-color:var(--signal-deep);color:var(--signal)}
+
+/* ---------- hero ---------- */
+.hero{padding:88px 0 64px;position:relative}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);gap:64px;align-items:end}
+.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(42px,6.2vw,84px);
+  line-height:1.02;letter-spacing:-.035em;margin:22px 0 24px}
+.hero h1 em{font-style:italic;color:var(--signal)}
+.hero p{max-width:58ch;color:var(--mist);font-size:16px;margin:0}
+.hero .stamp{font-family:var(--mono);font-size:11px;color:var(--signal);letter-spacing:.16em;text-transform:uppercase}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--hair);border:1px solid var(--hair)}
+.stat{background:var(--deep);padding:20px 18px}
+.stat b{display:block;font-family:var(--mono);font-size:30px;color:var(--pearl);font-variant-numeric:tabular-nums;line-height:1}
+.stat span{display:block;margin-top:8px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted)}
+
+/* ---------- section shell ---------- */
+section{padding:72px 0;border-top:1px solid var(--hair)}
+.sec-head{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin-bottom:12px}
+.sec-head .idx{font-family:var(--mono);font-size:12px;color:var(--signal)}
+.sec-head h2{font-family:var(--serif);font-weight:400;font-size:clamp(28px,3.4vw,44px);
+  letter-spacing:-.025em;margin:0;line-height:1.1}
+.sec-note{max-width:76ch;color:var(--mist);font-size:15px;margin:0 0 36px}
+.sec-note strong{color:var(--pearl);font-weight:600}
+
+/* ---------- verdict columns ---------- */
+.verdicts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.vcard{border:1px solid var(--hair);background:var(--deep);padding:22px;position:relative;overflow:hidden}
+.vcard::after{content:"";position:absolute;top:0;left:0;width:44px;height:2px;background:var(--accent)}
+.vcard h3{margin:8px 0 4px;font-family:var(--mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.vcard .count{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.vcard ul{list-style:none;padding:0;margin:18px 0 0;font-size:13px;color:var(--mist)}
+.vcard li{padding:9px 0;border-top:1px solid var(--hair);display:flex;gap:10px}
+.vcard li::before{content:"·";color:var(--accent);font-family:var(--mono)}
+
+/* ---------- live lab ---------- */
+.lab-tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;align-items:center}
+.btn{border:1px solid var(--hair-strong);background:var(--carbon);color:var(--pearl);
+  padding:9px 15px;border-radius:6px;cursor:pointer;font-family:var(--mono);font-size:11px;
+  letter-spacing:.06em;text-transform:uppercase;transition:transform .09s,border-color .15s,color .15s}
+.btn:hover{border-color:var(--signal-deep);color:var(--signal)}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--signal);color:var(--signal-ink);border-color:var(--signal);font-weight:700}
+.btn.primary:hover{background:var(--signal-bright);color:var(--signal-ink)}
+.btn.tiny{padding:5px 9px;font-size:10px;border-radius:4px}
+.lab{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.demo{border:1px solid var(--hair);background:var(--deep);display:flex;flex-direction:column;min-height:280px}
+.demo-top{padding:14px 16px;border-bottom:1px solid var(--hair);display:flex;gap:10px;align-items:flex-start}
+.demo-top .n{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.demo-top h4{margin:0;font-size:14px;font-weight:700;letter-spacing:-.01em}
+.badge{margin-left:auto;white-space:nowrap;font-family:var(--mono);font-size:9px;letter-spacing:.1em;
+  padding:3px 7px;border-radius:3px;text-transform:uppercase;border:1px solid currentColor}
+.badge.ship{color:var(--signal)} .badge.translate{color:var(--structure)} .badge.skip{color:var(--attention)}
+.demo-stage{flex:1;padding:22px 18px;display:flex;flex-direction:column;justify-content:center;
+  align-items:center;gap:12px;position:relative;overflow:hidden;min-height:150px}
+.demo-foot{padding:11px 16px;border-top:1px solid var(--hair);display:flex;justify-content:space-between;
+  gap:10px;align-items:center;flex-wrap:wrap}
+.src-chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:9px;color:var(--mist);border:1px solid var(--hair);
+  padding:2px 6px;border-radius:3px;white-space:nowrap}
+.demo-note{font-size:12px;color:var(--muted);padding:0 16px 14px;margin:0}
+
+/* individual demos */
+.ticker{font-family:var(--mono);font-size:clamp(34px,5vw,52px);font-variant-numeric:tabular-nums;
+  letter-spacing:-.04em;line-height:1;color:var(--signal)}
+.ticker-cap{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.reveal-rows{width:100%;display:flex;flex-direction:column;gap:7px}
+.rrow{font-family:var(--mono);font-size:11px;color:var(--mist);border-left:2px solid var(--hair-strong);
+  padding:7px 10px;background:rgba(255,255,255,.025);opacity:0;transform:translateY(10px);
+  transition:opacity .42s ease,transform .42s cubic-bezier(.23,1,.32,1)}
+.rrow.in{opacity:1;transform:none}
+.rrow b{color:var(--signal);margin-right:10px}
+.gauge{width:112px;height:112px;border-radius:50%;display:grid;place-items:center;position:relative;
+  background:conic-gradient(var(--signal) var(--p,0deg),var(--graphite) 0)}
+.gauge::before{content:"";position:absolute;inset:9px;border-radius:50%;background:var(--deep)}
+.gauge span{position:relative;font-family:var(--mono);font-size:22px;font-variant-numeric:tabular-nums;color:var(--pearl)}
+.reflow{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;width:100%}
+.pill{font-family:var(--mono);font-size:10px;padding:6px 10px;border:1px solid var(--hair-strong);
+  border-radius:999px;color:var(--mist);background:var(--carbon);transition:transform .28s cubic-bezier(.23,1,.32,1)}
+.press-demo{width:100%;display:grid;place-items:center;gap:14px}
+.press-target{border:0;background:var(--signal);color:var(--signal-ink);font-weight:800;font-size:13px;
+  padding:13px 26px;border-radius:8px;cursor:pointer;transition:transform 90ms cubic-bezier(.23,1,.32,1);touch-action:manipulation}
+.press-target.down{transform:scale(.97)}
+.press-readout{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em}
+.skel{width:100%;display:flex;flex-direction:column;gap:9px}
+.skel i{display:block;height:11px;border-radius:3px;background:linear-gradient(90deg,var(--graphite) 0%,var(--slate) 42%,var(--graphite) 84%);
+  background-size:220% 100%;animation:shimmer 1.35s linear infinite}
+.skel i:nth-child(1){width:78%} .skel i:nth-child(2){width:96%} .skel i:nth-child(3){width:58%}
+@keyframes shimmer{from{background-position:120% 0}to{background-position:-120% 0}}
+.spotlight{width:100%;height:120px;border:1px solid var(--hair);border-radius:8px;display:grid;place-items:center;
+  color:var(--muted);font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  background:radial-gradient(180px circle at var(--mx,50%) var(--my,50%),rgba(195,245,60,.16),transparent 70%),var(--carbon)}
+.palette{width:100%;display:flex;flex-direction:column;gap:8px}
+.palette input{width:100%;background:var(--carbon);border:1px solid var(--hair-strong);color:var(--pearl);
+  padding:9px 11px;border-radius:6px;outline:none;font-family:var(--mono);font-size:11px}
+.palette input:focus{border-color:var(--signal)}
+.palette ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.palette li{font-family:var(--mono);font-size:10px;color:var(--mist);padding:5px 8px;border-left:2px solid var(--hair-strong)}
+.palette li.hit{border-left-color:var(--signal);color:var(--pearl)}
+.palette li.hide{display:none}
+.shader{width:100%;height:120px;border-radius:8px;position:relative;overflow:hidden;
+  background:linear-gradient(125deg,#4B5BD6,#8A4BD6,#C3F53C,#FF6A3D);background-size:300% 300%;
+  animation:drift 6s ease infinite;display:grid;place-items:center}
+.shader span{position:relative;font-family:var(--mono);font-size:10px;background:rgba(8,6,11,.78);
+  padding:6px 10px;border:1px solid var(--hair-strong);color:var(--pearl);letter-spacing:.08em}
+@keyframes drift{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
+
+/* ---------- app mock ---------- */
+.mock-wrap{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:56px;align-items:center}
+.phone{border:1px solid var(--hair-strong);border-radius:36px;background:var(--deep);padding:12px;
+  box-shadow:0 30px 80px rgba(0,0,0,.55);max-width:340px;width:100%;margin:0 auto}
+.screen{background:var(--void);border-radius:27px;padding:24px 18px 18px;min-height:540px;position:relative;overflow:hidden}
+.screen::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px);background-size:28px 28px;opacity:.6}
+.phone-bar{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--muted);position:relative}
+.scr-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--signal);margin-top:26px;position:relative}
+.scr-serif{font-family:var(--serif);font-size:27px;line-height:1.1;margin:6px 0 2px;position:relative}
+.scr-name{font-size:22px;font-weight:800;letter-spacing:-.03em;position:relative}
+.plate{position:relative;margin-top:22px;border:1px solid var(--hair-strong);padding:18px 16px 16px;
+  background:linear-gradient(180deg,rgba(250,247,243,.035),transparent 60%)}
+.plate .tick{position:absolute;width:9px;height:9px;border-color:var(--signal);border-style:solid}
+.plate .t1{top:-1px;left:-1px;border-width:1px 0 0 1px}.plate .t2{top:-1px;right:-1px;border-width:1px 1px 0 0}
+.plate .t3{bottom:-1px;left:-1px;border-width:0 0 1px 1px}.plate .t4{bottom:-1px;right:-1px;border-width:0 1px 1px 0}
+.plate-label{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.plate-value{font-family:var(--mono);font-size:44px;line-height:1;font-variant-numeric:tabular-nums;
+  color:var(--signal);letter-spacing:-.05em;margin:10px 0 4px}
+.plate-sub{font-family:var(--mono);font-size:9px;color:var(--mist)}
+.calibrated{height:8px;margin-top:14px;position:relative;border-bottom:1px solid var(--hair-strong)}
+.calibrated .fill{position:absolute;left:0;bottom:-1px;height:2px;background:var(--signal);width:0;transition:width .6s cubic-bezier(.23,1,.32,1)}
+.calibrated .ticks{position:absolute;inset:0;display:flex;justify-content:space-between}
+.calibrated .ticks i{width:1px;height:5px;background:var(--hair-strong)}
+.scr-rows{margin-top:18px;position:relative}
+.scr-row{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--hair);
+  font-family:var(--mono);font-size:10px;color:var(--mist)}
+.scr-row b{color:var(--pearl);font-weight:500;font-variant-numeric:tabular-nums}
+.voice{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--cloud);margin-top:18px;position:relative}
+.scr-cta{position:relative;margin-top:20px;width:100%;border:0;background:var(--signal);color:var(--signal-ink);
+  font-weight:800;font-size:12px;padding:13px;border-radius:7px;cursor:pointer}
+.bottombar{position:relative;display:flex;justify-content:space-around;margin-top:20px;padding-top:14px;border-top:1px solid var(--hair);
+  font-family:var(--mono);font-size:9px;color:var(--muted)}
+.bottombar .on{color:var(--signal)}
+.mock-notes{display:flex;flex-direction:column;gap:0}
+.note{padding:18px 0;border-top:1px solid var(--hair);display:grid;grid-template-columns:38px 1fr;gap:16px}
+.note:first-child{border-top:0}
+.note .k{font-family:var(--mono);font-size:11px;color:var(--signal)}
+.note h4{margin:0 0 5px;font-size:14px}
+.note p{margin:0;font-size:13px;color:var(--mist)}
+.note code{font-family:var(--mono);font-size:11px;color:var(--structure)}
+
+/* ---------- source catalog ---------- */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.filters .btn.active{background:var(--signal);color:var(--signal-ink);border-color:var(--signal)}
+.catalog{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.src{border:1px solid var(--hair);background:var(--deep);padding:18px;display:flex;flex-direction:column;gap:10px;
+  transition:border-color .2s,transform .2s}
+.src:hover{border-color:var(--hair-strong);transform:translateY(-2px)}
+.src .row{display:flex;align-items:flex-start;gap:10px}
+.src .num{font-family:var(--mono);font-size:10px;color:var(--muted);padding-top:3px;min-width:20px}
+.src h4{margin:0;font-size:14px;letter-spacing:-.01em}
+.src .url{font-family:var(--mono);font-size:10px;color:var(--structure);text-decoration:none;word-break:break-all}
+.src .url:hover{text-decoration:underline}
+.src .meta{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.src p{margin:0;font-size:12px;color:var(--mist);line-height:1.6}
+.src .best{font-size:12px;color:var(--cloud);border-left:2px solid var(--signal);padding-left:10px;margin:0}
+.src .files{font-family:var(--mono);font-size:9px;color:var(--positive);margin-top:auto;padding-top:8px}
+.src .files.none{color:var(--muted)}
+.src.hidden{display:none}
+.vtag{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  padding:3px 7px;border:1px solid currentColor;border-radius:3px;white-space:nowrap;margin-left:auto}
+.vtag.adopt{color:var(--signal)} .vtag.adapt{color:var(--structure)} .vtag.reference{color:var(--attention)}
+
+/* ---------- references ---------- */
+.gallery{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.shot{border:1px solid var(--hair);background:var(--deep);overflow:hidden}
+.shot img{width:100%;height:150px;object-fit:cover;display:block;background:var(--carbon)}
+.shot .cap{padding:10px 12px;font-family:var(--mono);font-size:9px;color:var(--muted);
+  letter-spacing:.05em;line-height:1.5;word-break:break-word}
+.shot .cap b{display:block;color:var(--cloud);font-weight:500;margin-bottom:3px}
+
+/* ---------- table ---------- */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th,.tbl td{text-align:left;padding:13px 14px;border-bottom:1px solid var(--hair);vertical-align:top}
+.tbl th{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.tbl td:first-child{font-family:var(--mono);font-size:11px;color:var(--signal)}
+.tbl td{color:var(--mist)}
+.tbl code{font-family:var(--mono);font-size:11px;color:var(--structure)}
+
+/* ---------- footer ---------- */
+footer{padding:48px 0 72px;border-top:1px solid var(--hair);color:var(--muted);font-size:12px}
+footer .inv{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0 34px}
+footer .inv div{border:1px solid var(--hair);background:var(--deep);padding:16px}
+footer .inv b{display:block;font-family:var(--mono);font-size:20px;color:var(--pearl);margin-bottom:6px}
+footer .inv span{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+
+/* reduced motion */
+body.reduced *,body.reduced *::before,body.reduced *::after{animation-duration:.001ms!important;
+  animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;animation-iteration-count:1!important;
+  transition-duration:.001ms!important}}
+:focus-visible{outline:2px solid var(--signal);outline-offset:3px}
+
+@media (max-width:1080px){.lab,.catalog{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hero-grid,.mock-wrap{grid-template-columns:1fr;gap:36px}.gallery{grid-template-columns:repeat(3,1fr)}
+  .verdicts{grid-template-columns:1fr}.inv{grid-template-columns:repeat(2,1fr)!important}}
+@media (max-width:640px){.lab,.catalog,.gallery{grid-template-columns:1fr}.nav{display:none}
+  .hero{padding:56px 0 44px}section{padding:52px 0}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><span class="mark">S</span> SAGITTA / NEXUS</div>
+    <nav class="nav" aria-label="Sections">
+      <a href="#verdict">Verdict</a><a href="#lab">Live lab</a><a href="#mock">App mock</a>
+      <a href="#catalog">17 sources</a><a href="#refs">References</a><a href="#map">Motion map</a>
+    </nav>
+    <button class="toggle" id="rmToggle" aria-pressed="false"><span class="dot"></span>Reduced motion</button>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div class="hero-grid">
+      <div>
+        <div class="stamp mono">01 / Research sweep · 06 Nov 2026 · 17 sites, 0 skipped</div>
+        <h1>The best UI is not the <em>loudest</em> one.</h1>
+        <p>Every site on your list was visited. Their real source files were downloaded, their
+           licenses checked, and each idea was judged against <strong>DESIGN_DIRECTION.md</strong> —
+           which bans glassmorphism-everywhere, generic gradients, floating glows and identical
+           icon-title-description cards. What survives is below, translated into Jetpack Compose.</p>
+      </div>
+      <div class="stats">
+        <div class="stat"><b>17</b><span>Sites visited</span></div>
+        <div class="stat"><b>39</b><span>Source files</span></div>
+        <div class="stat"><b>12</b><span>Ref images</span></div>
+        <div class="stat"><b>6/6/5</b><span>Adopt / adapt / reference</span></div>
+      </div>
+    </div>
+  </div>
+
+  <section id="verdict">
+    <div class="wrap">
+      <div class="sec-head"><span class="idx mono">02</span><h2>One honest verdict</h2></div>
+      <p class="sec-note">Sagitta is a <strong>precision instrument with an editorial voice</strong>, not a
+        marketing landing page. Roughly 80% of what these galleries sell would actively damage it.
+        The valuable 20% is the <strong>motion engineering</strong>: one clock per reveal, springs that
+        carry velocity, layout changes that animate automatically, exits faster than entrances,
+        reduced motion by construction. Take that. Leave the shaders.</p>
+      <div class="verdicts">
+        <div class="vcard" style="--accent:var(--signal)"><div class="eyebrow">A · code you can port</div>
+          <h3>Adopt · 6</h3><div class="count">MIT / free · source downloaded</div>
+          <ul><li>Magic UI — number ticker, gauge, blur fade, scroll progress</li>
+          <li>React Bits — count-up, split text, animated content</li>
+          <li>Motion Primitives — sliding number, text morph, in-view</li>
+          <li>Animate UI — the motion <em>rules</em>, not the components</li>
+          <li>Motion — layoutId, springs, AnimatePresence</li>
+          <li>AutoAnimate — add/remove/move in one line</li></ul></div>
+        <div class="vcard" style="--accent:var(--structure)"><div class="eyebrow">B · borrow the pattern</div>
+          <h3>Adapt · 5</h3><div class="count">Pro/paid or wrong platform</div>
+          <ul><li>21st.dev — semantic icon search, shader builder</li>
+          <li>GSAP — timeline choreography, Flip, SplitText</li>
+          <li>Origin UI → coss ui — accessible primitive behaviour spec</li>
+          <li>Kibo UI — Gantt/roadmap, marquee, code block</li>
+          <li>ReUI — Data Grid, sparkline, empty states, MCP registry idea</li></ul></div>
+        <div class="vcard" style="--accent:var(--attention)"><div class="eyebrow">C · research only</div>
+          <h3>Reference · 6</h3><div class="count">No shippable code · screenshots</div>
+          <ul><li>Aceternity UI — beautiful, but 90% banned by §7</li>
+          <li>Godly → now recent.design — rebranded feed</li>
+          <li>Awwwards — SOTD &amp; collections, art direction</li>
+          <li>Mobbin — 600k real mobile screens, the most useful</li>
+          <li>Dribbble — concepts, weak on production states</li>
+          <li>Refero — real screens &amp; flows, link-only</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="lab">
+    <div class="wrap">
+      <div class="sec-head"><span class="idx mono">03</span><h2>Live lab</h2></div>
+      <p class="sec-note">Working demos of the selected effects, in Sagitta skin. Each card names the
+        sites it came from and a verdict: <strong style="color:var(--signal)">SHIP</strong> (port it),
+        <strong style="color:var(--structure)">TRANSLATE</strong> (port the idea, not the code),
+        <strong style="color:var(--attention)">SKIP</strong> (breaks the direction). Try them.</p>
+      <div class="lab-tools">
+        <button class="btn primary" id="runAll">▶ Replay all</button>
+        <button class="btn" id="stopMotion">Toggle reduced motion</button>
+        <span class="eyebrow" style="margin-left:auto">Hover / tap / type inside the cards</span>
+      </div>
+      <div class="lab" id="labGrid"></div>
+    </div>
+  </section>
+
+  <section id="mock">
+    <div class="wrap">
+      <div class="sec-head"><span class="idx mono">04</span><h2>What it looks like in the app</h2></div>
+      <p class="sec-note">A Home/Growth plate with only the adopted ideas applied. No card grid, no glow,
+        no second hue. The lime is the single signal; every number is tabular mono; the only prose is the
+        serif aside. <button class="btn tiny" id="replayMock" style="margin-left:8px">▶ Replay arrival</button></p>
+      <div class="mock-wrap">
+        <div class="phone"><div class="screen">
+          <div class="phone-bar"><span>9:41</span><span>SAGITTA · ●●●</span></div>
+          <div class="scr-eyebrow">01 / TODAY'S READING</div>
+          <div class="scr-serif">Good evening,</div>
+          <div class="scr-name">Devesh.</div>
+          <div class="plate">
+            <span class="tick t1"></span><span class="tick t2"></span><span class="tick t3"></span><span class="tick t4"></span>
+            <div class="plate-label">Placement readiness</div>
+            <div class="plate-value" id="mockValue">0.0</div>
+            <div class="plate-sub">+4.2 PTS · 30-DAY MOMENTUM</div>
+            <div class="calibrated"><div class="fill" id="mockFill"></div>
+              <div class="ticks"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+          </div>
+          <div class="scr-rows">
+            <div class="scr-row"><span>ASSESSMENTS CLEARED</span><b>18 / 24</b></div>
+            <div class="scr-row"><span>STREAK</span><b>12 DAYS</b></div>
+            <div class="scr-row"><span>NEXT REVIEW</span><b>09 NOV</b></div>
+          </div>
+          <div class="voice">The dial only moves when something real moved.</div>
+          <button class="scr-cta">CONTINUE PRACTICE →</button>
+          <div class="bottombar"><span class="on">● HOME</span><span>EXPLORE</span><span>AI HUB</span><span>GROWTH</span><span>PROFILE</span></div>
+        </div></div>
+        <div class="mock-notes">
+          <div class="note"><span class="k">01</span><div><h4>Counting number, one clock</h4>
+            <p>Magic UI's <code>Number Ticker</code> + Animate UI's <code>Sliding Number</code> become
+            <code>sweepValue()</code>. The gauge arc and the digits are the same value drawn twice — they can never disagree.</p></div></div>
+          <div class="note"><span class="k">02</span><div><h4>Ranked stagger, not random stagger</h4>
+            <p>Motion's <code>AnimatePresence</code> + GSAP timeline become <code>revealClock()</code> with
+            <code>NexusReveal.Window</code>. Hero → readings → footnote. Peers land together.</p></div></div>
+          <div class="note"><span class="k">03</span><div><h4>Calibrated rule, not a spinner</h4>
+            <p>Magic UI's <code>Scroll Progress</code> becomes <code>CalibratedRule</code>: graduated ticks,
+            lit only where the value has passed. A tick is real scale, never decoration.</p></div></div>
+          <div class="note"><span class="k">04</span><div><h4>Automatic layout motion</h4>
+            <p>AutoAnimate's one-line add/remove/move becomes <code>Modifier.animateItemPlacement()</code>
+            in every <code>LazyColumn</code>. No per-row choreography to maintain.</p></div></div>
+          <div class="note"><span class="k">05</span><div><h4>Everything collapses to zero</h4>
+            <p>Animate UI and AutoAnimate both gate on reduced motion by default, matching
+            <code>LocalReducedMotion</code>. Try the toggle in the top bar — the whole board obeys it.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="catalog">
+    <div class="wrap">
+      <div class="sec-head"><span class="idx mono">05</span><h2>All 17 sources</h2></div>
+      <p class="sec-note">Every URL you gave, visited and accounted for. Two redirects found:
+        <strong>godly.website → recent.design</strong> and <strong>originui.com → coss.com/ui</strong>.
+        Licenses were read from the downloaded files, not assumed.</p>
+      <div class="filters" id="filters">
+        <button class="btn active" data-f="all">All · 17</button>
+        <button class="btn" data-f="adopt">Adopt · 6</button>
+        <button class="btn" data-f="adapt">Adapt · 5</button>
+        <button class="btn" data-f="reference">Reference · 6</button>
+        <button class="btn" data-f="redirect">Redirects · 2</button>
+      </div>
+      <div class="catalog" id="catalogGrid"></div>
+    </div>
+  </section>
+
+  <section id="refs">
+    <div class="wrap">
+      <div class="sec-head"><span class="idx mono">06</span><h2>Downloaded reference imagery</h2></div>
+      <p class="sec-note">Saved locally in <code class="mono" style="color:var(--structure)">ui-kit/references/</code>
+        with a per-image source manifest. Personal moodboard use only — these remain the creators' work.
+        Sites that gate downloads behind login (Mobbin, Refero, Awwwards galleries) are catalogued with
+        curated links instead of scraped assets.</p>
+      <div class="gallery" id="gallery"></div>
+    </div>
+  </section>
+
+  <section id="map">
+    <div class="wrap">
+      <div class="sec-head"><span class="idx mono">07</span><h2>Web → Compose translation map</h2></div>
+      <p class="sec-note">The actual port. Nothing here introduces a second hue, a raw hex literal in
+        feature code, a new infinite animation, or an animation that ignores
+        <code class="mono" style="color:var(--structure)">LocalReducedMotion</code>.</p>
+      <table class="tbl">
+        <thead><tr><th>Web pattern</th><th>Compose home</th><th>Spec</th><th>Verdict</th></tr></thead>
+        <tbody>
+          <tr><td>Number Ticker / CountUp / Sliding Number</td><td><code>sweepValue()</code> → <code>TelemetryDisplay</code></td><td>NexusAnimation.Tween.numberCount · 280ms</td><td>SHIP</td></tr>
+          <tr><td>layoutId / Flip / autoAnimate(parent)</td><td><code>Modifier.animateItemPlacement()</code>, shared-element bounds</td><td>NexusAnimation.Springs.list</td><td>SHIP</td></tr>
+          <tr><td>AnimatePresence / exit-first transitions</td><td><code>AnimatedVisibility</code> + <code>NexusTransitions</code></td><td>exit 140ms &lt; enter 220ms</td><td>SHIP</td></tr>
+          <tr><td>Blur Fade / SplitText / stagger</td><td><code>revealClock()</code> + <code>revealFraction()</code> windows</td><td>700ms master, linear clock</td><td>TRANSLATE</td></tr>
+          <tr><td>Scroll Progress / ScrollTrigger</td><td><code>CalibratedRule</code>, <code>MomentumChart</code> wipe</td><td>480ms hero sweep</td><td>TRANSLATE</td></tr>
+          <tr><td>Spring velocity / drag momentum</td><td><code>NexusSpring.Snappy</code>, <code>NexusAnimation.Springs.button</code></td><td>damping 0.82, StiffnessHigh</td><td>SHIP</td></tr>
+          <tr><td>Morphing dialog / transition panel</td><td><code>NexusCommandPalette</code>, detail open/close</td><td>forward/backward 28%/16% slide</td><td>TRANSLATE</td></tr>
+          <tr><td>Confetti / Cool Mode / ClickSpark</td><td><code>AchievementBurst</code> — milestones only, skippable</td><td>700ms one-shot</td><td>TRANSLATE</td></tr>
+          <tr><td>Shaders, WebGL, aurora, meteors, marquee</td><td>—</td><td>§7 anti-generic: decorative glows banned</td><td>SKIP</td></tr>
+          <tr><td>Bento grids, 3D tilt, hover spotlight, magnetic</td><td>—</td><td>touch has no hover; §4 editorial asymmetry</td><td>SKIP</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="eyebrow">Inventory · everything is local and offline</div>
+    <div class="inv">
+      <div><b>SOURCES.md</b><span>All 17 sites, licenses, links</span></div>
+      <div><b>COMPOSE_PORTS.md</b><span>Kotlin against real APIs</span></div>
+      <div><b>sources/</b><span>39 files · licenses checked</span></div>
+      <div><b>references/</b><span>12 images + manifest.tsv</span></div>
+    </div>
+    <p style="margin:0">Built for Sagitta / Nexus. Source code in <span class="mono">ui-kit/sources/</span>
+      carries its original upstream license — see each subfolder's LICENSE file before shipping any of it.
+      React Bits is <strong>MIT + Commons Clause</strong>: fine inside an app, not redistributable as a
+      component pack. GSAP is 100% free (Webflow) but is a licensed library, not OSI open source.</p>
+  </div>
+</footer>
+
+<script>
+const REDUCED = () => document.body.classList.contains('reduced') ||
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const easeOut = t => 1 - Math.pow(1 - Math.max(0, Math.min(1, t)), 3);
+function tween(ms, onStep, onDone){
+  if (REDUCED()) { onStep(1); onDone && onDone(); return; }
+  const t0 = performance.now();
+  (function frame(now){
+    const t = Math.max(0, Math.min(1, (now - t0) / ms));
+    onStep(easeOut(t));
+    if (t < 1) requestAnimationFrame(frame); else onDone && onDone();
+  })(t0);
+}
+
+/* ---------- Live lab data ---------- */
+const DEMOS = [
+  { n:'01', title:'Number ticker', verdict:'ship', label:'SHIP', sources:['magicui','reactbits','motion-primitives','animate-ui'],
+    note:'One value, one clock. Ports directly to sweepValue() → TelemetryDisplay.',
+    html:`<div class="ticker" id="d-ticker">0.0</div><div class="ticker-cap">PLACEMENT READINESS · tnum</div>`,
+    btn:'Replay', run:()=>tween(700,p=>{document.getElementById('d-ticker').textContent=(87.4*p).toFixed(1)}) },
+
+  { n:'02', title:'Ranked reveal', verdict:'translate', label:'TRANSLATE', sources:['motion.dev','gsap.com','magicui','21st.dev'],
+    note:'Stagger only where reading order is real; peers land together. → revealClock().',
+    html:`<div class="reveal-rows" id="d-reveal"><div class="rrow"><b>01</b>HERO INSTRUMENT</div><div class="rrow"><b>02</b>HEADLINE / VOICE</div><div class="rrow"><b>03</b>READINGS</div><div class="rrow"><b>04</b>FOOTNOTE</div></div>`,
+    btn:'Replay', run:()=>{const rows=[...document.querySelectorAll('#d-reveal .rrow')];rows.forEach(r=>r.classList.remove('in'));
+      rows.forEach((r,i)=>setTimeout(()=>r.classList.add('in'), REDUCED()?0:i*110));} },
+
+  { n:'03', title:'Gauge sweep', verdict:'ship', label:'SHIP', sources:['magicui','motion.dev'],
+    note:'Arc and digits are the same value drawn twice — InstrumentGauge already does this.',
+    html:`<div class="gauge" id="d-gauge"><span id="d-gauge-n">0</span></div><div class="ticker-cap">SWEEP / 480MS</div>`,
+    btn:'Replay', run:()=>tween(600,p=>{document.getElementById('d-gauge').style.setProperty('--p',(360*p*0.874)+'deg');
+      document.getElementById('d-gauge-n').textContent=Math.round(87.4*p);}) },
+
+  { n:'04', title:'Automatic layout motion', verdict:'ship', label:'SHIP', sources:['auto-animate','motion.dev','gsap.com'],
+    note:'Add / remove / move without choreographing each row. → animateItemPlacement().',
+    html:`<div class="reflow" id="d-reflow"><span class="pill">DSA · 18</span><span class="pill">SYSTEM DESIGN · 07</span><span class="pill">RESUME · 03</span><span class="pill">MOCK · 11</span><span class="pill">BEHAVIOURAL · 05</span></div>`,
+    btn:'Shuffle', run:()=>{
+      const box=document.getElementById('d-reflow');const kids=[...box.children];
+      for(let i=kids.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[kids[i],kids[j]]=[kids[j],kids[i]];}
+      kids.forEach(k=>box.appendChild(k));
+      if(REDUCED())return;
+      // FLIP: invert to the stored pre-shuffle position, then play back to zero.
+      kids.forEach(k=>{const before=window.pos.get(k);if(!before)return;
+        const after=k.getBoundingClientRect();
+        k.style.transition='none';
+        k.style.transform=`translate(${before.left-after.left}px,${before.top-after.top}px)`;
+        requestAnimationFrame(()=>{k.style.transition='';k.style.transform='';});});} },
+
+  { n:'05', title:'Press feedback', verdict:'ship', label:'SHIP', sources:['animate-ui','motion.dev','reactbits'],
+    note:'90ms scale-and-settle + haptic tick. Already in NexusButton; keep it identical everywhere.',
+    html:`<div class="press-demo"><button class="press-target" id="d-press">CONTINUE PRACTICE</button><div class="press-readout" id="d-press-out">SCALE 1.00 · 90MS</div></div>`,
+    btn:'Replay', run:()=>{const b=document.getElementById('d-press');b.classList.add('down');
+      document.getElementById('d-press-out').textContent='SCALE 0.97 · 90MS';
+      setTimeout(()=>{b.classList.remove('down');document.getElementById('d-press-out').textContent='SCALE 1.00 · SETTLED';},REDUCED()?0:180);} },
+
+  { n:'06', title:'Skeleton shimmer', verdict:'translate', label:'TRANSLATE', sources:['magicui','originui','reui.io'],
+    note:'Page-level loading only. Static under reduced motion — already true in LoadingState.',
+    html:`<div class="skel"><i></i><i></i><i></i></div>`, btn:'Replay',
+    run:()=>{const s=document.querySelector('.skel');s.style.animation='none';void s.offsetWidth;s.style.animation='';} },
+
+  { n:'07', title:'Command palette', verdict:'ship', label:'SHIP', sources:['reui.io','originui','kibo-ui'],
+    note:'NexusCommandPalette already exists; borrow ReUI’s MCP-style semantic destination index.',
+    html:`<div class="palette"><input id="d-pal" placeholder="Search destinations…" aria-label="Search destinations"><ul id="d-pal-list"><li>Home · today's reading</li><li>Explore · opportunities</li><li>AI Hub · editorial conversation</li><li>Growth · momentum &amp; skills</li><li>Profile · preferences</li></ul></div>`,
+    btn:'Clear', run:()=>{const i=document.getElementById('d-pal');i.value='';i.dispatchEvent(new Event('input'));i.focus();} },
+
+  { n:'08', title:'Hover spotlight', verdict:'skip', label:'SKIP', sources:['21st.dev','aceternity','reactbits'],
+    note:'Pointer-driven. Android touch has no hover state, so the effect cannot exist honestly.',
+    html:`<div class="spotlight" id="d-spot">POINTER-ONLY INTERACTION</div>`, btn:'Move pointer',
+    run:()=>{const s=document.getElementById('d-spot');const r=s.getBoundingClientRect();
+      s.style.setProperty('--mx','68%');s.style.setProperty('--my','36%');
+      setTimeout(()=>{s.style.setProperty('--mx','50%');s.style.setProperty('--my','50%');},900);} },
+
+  { n:'09', title:'Animated shader gradient', verdict:'skip', label:'SKIP', sources:['21st.dev','aceternity','magicui','godly'],
+    note:'§7 bans generic indigo-violet ramps, floating glows and infinite decorative motion.',
+    html:`<div class="shader"><span>INFINITE · DECORATIVE · BANNED</span></div>`, btn:'Replay',
+    run:()=>{const s=document.querySelector('.shader');s.style.animation='none';void s.offsetWidth;s.style.animation='';} }
+];
+
+const lab = document.getElementById('labGrid');
+lab.innerHTML = DEMOS.map((d,i)=>`
+  <article class="demo">
+    <div class="demo-top"><span class="n">${d.n}</span><h4>${d.title}</h4>
+      <span class="badge ${d.verdict}">${d.label}</span></div>
+    <div class="demo-stage" id="stage-${i}">${d.html}</div>
+    <p class="demo-note">${d.note}</p>
+    <div class="demo-foot"><div class="src-chips">${d.sources.map(s=>`<span class="chip">${s}</span>`).join('')}</div>
+      <button class="btn tiny" data-run="${i}">${d.btn}</button></div>
+  </article>`).join('');
+// fix FLIP prep by capturing positions before each shuffle
+window.pos = new Map();
+function captureReflow(){const box=document.getElementById('d-reflow');if(!box)return;
+  [...box.children].forEach(k=>window.pos.set(k,k.getBoundingClientRect()));}
+function runDemo(i){ if(i===3)captureReflow(); DEMOS[i].run(); }
+lab.addEventListener('click',e=>{const b=e.target.closest('[data-run]');if(b)runDemo(+b.dataset.run);});
+document.getElementById('runAll').addEventListener('click',()=>DEMOS.forEach((_,i)=>setTimeout(()=>runDemo(i),i*130)));
+
+// command palette filtering
+document.getElementById('d-pal').addEventListener('input',e=>{
+  const q=e.target.value.trim().toLowerCase();
+  document.querySelectorAll('#d-pal-list li').forEach(li=>{
+    const hit=!q||li.textContent.toLowerCase().includes(q);
+    li.classList.toggle('hide',!hit);li.classList.toggle('hit',!!q&&hit);
+  });
+});
+// live pointer spotlight
+const spot=document.getElementById('d-spot');
+spot.addEventListener('pointermove',e=>{const r=spot.getBoundingClientRect();
+  spot.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
+  spot.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');});
+// press interaction
+const press=document.getElementById('d-press');
+['pointerdown','touchstart'].forEach(ev=>press.addEventListener(ev,()=>press.classList.add('down')));
+['pointerup','pointerleave','touchend'].forEach(ev=>press.addEventListener(ev,()=>press.classList.remove('down')));
+
+/* ---------- Source catalog ---------- */
+const SOURCES = [
+ {u:'https://21st.dev/',n:'21st.dev',g:'Advanced components',v:'adapt',lic:'Mixed · free tier + paid',
+  best:'Semantic icon search (29k), 366 live shaders, shader builder, 965 themes, 371 templates, MCP/CLI install. Best items: Liquid Metal Hero, Hover Preview, Hero ASCII, Background Paths.',
+  why:'Huge and agent-installable, but it is a React/Tailwind landing-page registry. Keep the semantic icon search and the "copy real source into your repo" workflow; skip the hero shaders.',
+  files:'4 posters', redirect:false},
+ {u:'https://ui.aceternity.com/',n:'Aceternity UI',g:'Advanced components',v:'reference',lic:'118 free components · blocks/templates paid',
+  best:'3D Card Effect, Apple Cards Carousel, Wobble Card, Hero Highlight, Background Beams, 3D Marquee, 183 blocks, 17 templates, 5 full pages.',
+  why:'The best-looking of the nine, and the least shippable here: 3D tilt, beams and spotlight are hover/pointer effects; bento grids and glows are explicitly banned by §4 and §7.',
+  files:'5 reference images', redirect:false},
+ {u:'https://magicui.design/',n:'Magic UI',g:'Advanced components',v:'adopt',lic:'MIT · 150+ free & open source',
+  best:'Number Ticker, Animated Circular Progress Bar, Blur Fade, Text Animate, Scroll Progress, Animated List, Grid Pattern, Animated Beam, Word Rotate, Bento Grid, Dither Field. React + TS + Tailwind + Motion.',
+  why:'Highest signal-to-noise for an instrument UI. The numeric, progress and reveal components are direct inputs to TelemetryDisplay, InstrumentGauge, CalibratedRule and revealClock. Ignore meteors/aurora/sparkles.',
+  files:'10 .tsx + LICENSE.md', redirect:false},
+ {u:'https://reactbits.dev/',n:'React Bits',g:'Advanced components',v:'adopt',lic:'MIT + Commons Clause v1.0',
+  best:'CountUp, SplitText, BlurText, AnimatedContent, FadeContent, Stepper, Magnet, ClickSpark, TrueFocus, plus new Flying Button, Flux Lines, Holo Card, Dither Veil. JS/TS × CSS/Tailwind, CLI install.',
+  why:'Excellent text-animation source for the serif voice. Commons Clause allows use inside a commercial app but forbids selling/redistributing the components or a port as a component pack — fine for Sagitta, note it in NOTICE.',
+  files:'8 .tsx + LICENSE.md', redirect:false},
+ {u:'https://motion-primitives.com/',n:'Motion Primitives',g:'Advanced components',v:'adopt',lic:'MIT · open source (ibelick)',
+  best:'Sliding Number, Animated Number, Text Morph, In-View, Transition Panel, Scroll Progress, Morphing Dialog, Cursor. Built on Motion + Tailwind, copy-paste source.',
+  why:'The most restrained library of the nine — small, purposeful primitives rather than hero spectacles. Sliding Number and In-View are the closest web equivalents of Sagitta’s reveal+sweep model.',
+  files:'8 .tsx + LICENCE.md', redirect:false},
+ {u:'https://animate-ui.com/',n:'Animate UI',g:'Advanced components',v:'adopt',lic:'Free CLI · animated Radix / Base UI / React Aria primitives',
+  best:'Drop-in animated primitives: Switch, Accordion, Progress, Sliding Number. One command: npx @animate-ui/cli@latest animate all. Also ships an AI "skill" for motion.',
+  why:'Adopt the RULES, which read like they were written for §5: springs and short tweens on strong ease-out, exits quicker than entrances, transform/opacity only, interruptible, nothing on keyboard nav, reduced motion everywhere by default.',
+  files:'Motion spec in SOURCES.md', redirect:false},
+ {u:'https://originui.com/',n:'Origin UI → coss ui',g:'Advanced components',v:'adapt',lic:'Base UI primitives · free',
+  best:'Full primitive catalog: Command, Composer, Meter, Progress, Segmented Control, Drawer, Toast, Scroll Area, Preview Card, Skeleton, Table, Toolbar. 55+ components.',
+  why:'The domain now redirects to coss.com/ui — record that. Use it as an accessibility/behaviour specification for NexusCommandPalette, EmptyState and adaptive navigation, not as a visual source.',
+  files:'Behaviour spec in SOURCES.md', redirect:true},
+ {u:'https://www.kibo-ui.com/',n:'Kibo UI',g:'Advanced components',v:'adapt',lic:'MIT-style · free forever (shadcnblocks)',
+  best:'Color Picker, Image Zoom, QR Code, Code Block, Dropzone, Marquee, Gantt/Roadmap block, Collaborative Canvas, Form block, 1000+ patterns. npx kibo-ui add.',
+  why:'Complex composed components are the value here. The Gantt/Roadmap is a genuine candidate pattern for MomentumChart / learning timelines; the marquee and canvas are not.',
+  files:'4 .tsx + license.md', redirect:false},
+ {u:'https://reui.io/',n:'ReUI',g:'Advanced components',v:'adapt',lic:'1,264 free components · 678 Pro blocks · $249 all-access',
+  best:'87 free component categories (Data Grid 34, Stepper 44, Gantt 7, Sparkline 11, Empty State 20), AI Chat / Agent Activity blocks, 667 animated icons, free MCP server + agent skills.',
+  why:'The MCP/agent registry idea is the most interesting thing on this whole list for an AI-assisted codebase. For UI: steal the Data Grid filtering, sparkline and empty-state patterns. License for Pro blocks is not stated publicly.',
+  files:'Catalog in SOURCES.md', redirect:false},
+ {u:'https://motion.dev/',n:'Motion (prev. Framer Motion)',g:'Animation',v:'adopt',lic:'MIT · free & open source',
+  best:'Layout animations (layoutId), AnimatePresence exit, physics springs carrying velocity, scroll-linked values via ScrollTimeline, gestures, hardware acceleration, 3.2kb mini animate. npm install motion. Motion+ is paid.',
+  why:'The single best motion model on the list. layoutId → shared-element bounds; AnimatePresence → AnimatedVisibility; springs → NexusSpring. All four map onto designsystem/theme without new tokens.',
+  files:'LICENSE.md + package.json', redirect:false},
+ {u:'https://gsap.com/',n:'GSAP',g:'Animation',v:'adapt',lic:'100% free (Webflow) · licensed, not OSI open source',
+  best:'Timeline choreography, ScrollTrigger, Flip, SplitText, ScrambleText, DrawSVG, MorphSVG, MotionPath, Draggable, Observer. All previously-Club plugins now free.',
+  why:'The timeline model is the web equivalent of revealClock — one master clock, windows per element. Port the choreography discipline, not the library. Verify the current GSAP license text before any redistribution.',
+  files:'License note in SOURCES.md', redirect:false},
+ {u:'https://auto-animate.formkit.com/',n:'AutoAnimate',g:'Animation',v:'adopt',lic:'MIT (FormKit)',
+  best:'One function: autoAnimate(parent). Animates immediate children on add / remove / move. React, Vue, Svelte, Solid, Angular, Preact, Marko, plain JS. Respects prefers-reduced-motion automatically.',
+  why:'The most transferable idea of all. In Compose it is Modifier.animateItemPlacement() on LazyColumn items plus AnimatedVisibility — one modifier replaces every hand-written list transition.',
+  files:'index.ts + LICENSE + package.json', redirect:false},
+ {u:'https://godly.website/',n:'Godly → recent.design',g:'Design inspiration',v:'reference',lic:'Curated gallery · no downloadable code',
+  best:'Now redirects to recent.design — a feed of motion inspo, brand identity slides, design jobs and community posts. No stable component catalog.',
+  why:'The URL in the list is no longer the product it was. Useful as a trend feed, not as a source of shippable material. Recorded so nothing is silently dropped.',
+  files:'Link + redirect note', redirect:true},
+ {u:'https://www.awwwards.com/',n:'Awwwards',g:'Design inspiration',v:'reference',lic:'Awards platform · Pro membership',
+  best:'Site of the Day (05 Nov 2026: Agrumea Farm by Studio K95, 7.33/10), winners, nominees, themed collections, directory of 6,123 studios, academy courses.',
+  why:'Use for art direction and craft benchmarks, not components. Winning sites are pointer-driven, scroll-theatre experiences — the opposite of a measured mobile instrument.',
+  files:'Link + SOTD record', redirect:false},
+ {u:'https://mobbin.com/',n:'Mobbin',g:'Design inspiration',v:'reference',lic:'Freemium · 600,000+ shipped screens',
+  best:'Apps, Sites, Screens, Flows, Animations, UI Elements. Real shipped mobile screens from Linear, Strava, Perplexity, Duolingo, Cash App, Headspace, Claude and hundreds more.',
+  why:'The most useful of the five inspiration sites for an Android app: real production screens, real empty/loading states, real flows. Use it to benchmark the five tabs. Downloads are gated, so links are curated rather than scraped.',
+  files:'Curated links', redirect:false},
+ {u:'https://dribbble.com/',n:'Dribbble',g:'Design inspiration',v:'reference',lic:'Community platform · shots are creators’ work',
+  best:'Popular shots, tags (mobile app design, dashboard, ui ux, branding, animation), designer profiles. Current popular feed is logo/branding-heavy.',
+  why:'High visual polish, low production truth — shots rarely show error, empty or loading states, and §9 requires those. Use filtered tags, never treat a shot as a spec.',
+  files:'2 reference images', redirect:false},
+ {u:'https://refero.design/',n:'Refero',g:'Design inspiration',v:'reference',lic:'Freemium design-research library',
+  best:'Real product screens, flows and patterns, positioned as "design research for the AI era". Search by app, screen type and pattern.',
+  why:'Good for pattern research on onboarding and empty states. Gated content means nothing downloadable; captured as a curated research link.',
+  files:'Curated links', redirect:false}
+];
+const catalog=document.getElementById('catalogGrid');
+catalog.innerHTML=SOURCES.map((s,i)=>`
+  <article class="src" data-v="${s.v}" data-r="${s.redirect}">
+    <div class="row"><span class="num">${String(i+1).padStart(2,'0')}</span>
+      <div style="min-width:0"><h4>${s.n}</h4><a class="url" href="${s.u}" target="_blank" rel="noopener">${s.u}</a></div>
+      <span class="vtag ${s.v}">${s.v}</span></div>
+    <div class="meta">${s.g} · ${s.lic}</div>
+    <div class="best">${s.best}</div>
+    <p>${s.why}</p>
+    <div class="files ${s.redirect?'none':''}">${s.redirect?'↳ REDIRECT RECORDED':'↳ LOCAL: '+s.files}</div>
+  </article>`).join('');
+document.getElementById('filters').addEventListener('click',e=>{
+  const b=e.target.closest('[data-f]');if(!b)return;
+  document.querySelectorAll('#filters .btn').forEach(x=>x.classList.toggle('active',x===b));
+  const f=b.dataset.f;
+  document.querySelectorAll('.src').forEach(c=>{
+    const show = f==='all' || (f==='redirect'? c.dataset.r==='true' : c.dataset.v===f);
+    c.classList.toggle('hidden',!show);
+  });
+});
+
+/* ---------- Reference gallery ---------- */
+const REFS=[
+ ['21st-liquid-metal-hero.jpg','21st.dev','Liquid Metal Hero · top component today'],
+ ['21st-hero-ascii.jpg','21st.dev','Hero ASCII One · shader/text trend'],
+ ['21st-hover-preview.jpg','21st.dev','Hover Preview · pointer-only pattern'],
+ ['21st-background-paths.jpg','21st.dev','Background Paths'],
+ ['aceternity-3d-card.webp','ui.aceternity.com','3D Card Effect'],
+ ['aceternity-background-beams.webp','ui.aceternity.com','Background Beams'],
+ ['aceternity-wobble-card.webp','ui.aceternity.com','Wobble Card'],
+ ['aceternity-hero-highlight.webp','ui.aceternity.com','Hero Highlight'],
+ ['aceternity-saas-template.webp','ui.aceternity.com','Simplistic SaaS template'],
+ ['motion-lime-example.webp','motion.dev','Motion example · lime study'],
+ ['dribbble-cricket-app.jpg','dribbble.com','Cricket app · match schedule UI'],
+ ['dribbble-bovine.jpg','dribbble.com','Bovine · popular shot']];
+document.getElementById('gallery').innerHTML=REFS.map(([f,s,c])=>`
+  <figure class="shot" style="margin:0"><img src="references/${f}" alt="${c}" loading="lazy">
+    <figcaption class="cap"><b>${c}</b>${s} · ${f}</figcaption></figure>`).join('');
+
+/* ---------- reduced motion + mock ---------- */
+function setReduced(on){
+  document.body.classList.toggle('reduced',on);
+  document.getElementById('rmToggle').setAttribute('aria-pressed',String(on));
+}
+document.getElementById('rmToggle').addEventListener('click',()=>setReduced(!document.body.classList.contains('reduced')));
+document.getElementById('stopMotion').addEventListener('click',()=>setReduced(!document.body.classList.contains('reduced')));
+if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)setReduced(true);
+
+function replayMock(){
+  const v=document.getElementById('mockValue'),f=document.getElementById('mockFill');
+  tween(700,p=>{v.textContent=(87.4*p).toFixed(1);f.style.width=(87.4*p)+'%';});
+}
+document.getElementById('replayMock').addEventListener('click',replayMock);
+
+/* first paint */
+window.addEventListener('load',()=>{setTimeout(()=>{DEMOS.forEach((_,i)=>{if(i!==3)runDemo(i);});replayMock();},220);});
+</script>
+</body>
+</html>

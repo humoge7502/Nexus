@@ -17,13 +17,43 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
+private const val MONTHS_PER_YEAR = 12
+
 data class PaywallUiState(
     val isLoading: Boolean = true,
+    val seasonPrice: String = "",
     val monthlyPrice: String = "",
     val yearlyPrice: String = "",
     val lifetimePrice: String = "",
+    val monthlyMicros: Long = 0L,
+    val yearlyMicros: Long = 0L,
     val isPro: Boolean = false,
-)
+    /** Null only while Play Billing has answered with a usable price list. */
+    val billingFault: String? = null,
+) {
+    /** True when Play returned at least one real price. A plan without one is
+     *  shown as unavailable rather than given an invented figure. */
+    val pricesReady: Boolean
+        get() = seasonPrice.isNotBlank() || monthlyPrice.isNotBlank() ||
+            yearlyPrice.isNotBlank() || lifetimePrice.isNotBlank()
+
+    /** Null unless Play priced both plans and yearly genuinely beats twelve
+     *  months. A hardcoded discount reads as a real one, and the price card
+     *  is the one place a student checks the arithmetic. */
+    val yearlySavingPercent: Int?
+        get() = twelveMonthlyMicros?.let { twelve ->
+            if (yearlyMicros in 1 until twelve) {
+                // Floored on the saving itself, so the badge can only ever
+                // understate the discount rather than round it up.
+                ((twelve - yearlyMicros) * 100 / twelve).toInt()
+            } else {
+                null
+            }
+        }
+
+    private val twelveMonthlyMicros: Long?
+        get() = monthlyMicros.takeIf { it > 0L }?.let { it * MONTHS_PER_YEAR }
+}
 
 @HiltViewModel
 class PaywallViewModel @Inject constructor(
@@ -45,19 +75,32 @@ class PaywallViewModel @Inject constructor(
         viewModelScope.launch {
             billingManager.billingState.collect { state ->
                 when (state) {
-                    is BillingState.Loaded -> _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        monthlyPrice = state.products.find { it.tier == ProductTier.PRO_MONTHLY }?.price ?: "",
-                        yearlyPrice = state.products.find { it.tier == ProductTier.PRO_YEARLY }?.price ?: "",
-                        lifetimePrice = state.products.find { it.tier == ProductTier.LIFETIME }?.price ?: "",
-                    )
+                    is BillingState.Loaded -> {
+                        val byTier = state.products.associateBy { it.tier }
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            billingFault = null,
+                            seasonPrice = byTier[ProductTier.PRO_SEASON]?.price.orEmpty(),
+                            monthlyPrice = byTier[ProductTier.PRO_MONTHLY]?.price.orEmpty(),
+                            yearlyPrice = byTier[ProductTier.PRO_YEARLY]?.price.orEmpty(),
+                            lifetimePrice = byTier[ProductTier.LIFETIME]?.price.orEmpty(),
+                            monthlyMicros = byTier[ProductTier.PRO_MONTHLY]?.priceMicros ?: 0L,
+                            yearlyMicros = byTier[ProductTier.PRO_YEARLY]?.priceMicros ?: 0L,
+                        )
+                    }
                     is BillingState.Loading -> _uiState.value = _uiState.value.copy(isLoading = true)
-                    is BillingState.Unavailable -> _uiState.value = _uiState.value.copy(isLoading = false)
+                    is BillingState.Unavailable -> _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        billingFault = "Play Billing isn't reachable on this device.",
+                    )
                     is BillingState.Purchased -> {
                         _uiState.value = _uiState.value.copy(isPro = true)
                         userPreferences.saveIsPro(true)
                     }
-                    is BillingState.Error -> _uiState.value = _uiState.value.copy(isLoading = false)
+                    is BillingState.Error -> _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        billingFault = state.message,
+                    )
                 }
             }
         }
@@ -66,17 +109,41 @@ class PaywallViewModel @Inject constructor(
     private fun startBilling() {
         viewModelScope.launch {
             // Billing may never answer on devices without Play; the screen must still
-            // resolve so its indicative prices render instead of an endless spinner.
-            withTimeoutOrNull(BILLING_TIMEOUT_MS) {
+            // resolve so the user is not left staring at a spinner — but it resolves
+            // to "prices unavailable", never to a figure we invented.
+            val answered = withTimeoutOrNull(BILLING_TIMEOUT_MS) {
                 try {
                     billingManager.initialize()
+                    true
                 } catch (e: CancellationException) {
                     throw e
                 } catch (_: Exception) {
-                    // Billing unavailable; the indicative prices stay on screen.
+                    false
                 }
             }
-            _uiState.update { it.copy(isLoading = false) }
+            _uiState.update { state ->
+                state.copy(
+                    isLoading = false,
+                    billingFault = when {
+                        state.pricesReady || state.isPro || state.billingFault != null -> state.billingFault
+                        answered == true -> "Play Billing returned no prices."
+                        answered == null -> "Play Billing didn't answer in time."
+                        else -> "Play Billing could not start."
+                    },
+                )
+            }
+        }
+    }
+
+    fun retryBilling() {
+        _uiState.update { it.copy(isLoading = true, billingFault = null) }
+        startBilling()
+    }
+
+    fun purchaseSeason(activity: Activity) {
+        viewModelScope.launch {
+            analyticsTracker.track("paywall_purchase", mapOf("tier" to "season"))
+            billingManager.purchase(ProductTier.PRO_SEASON, activity)
         }
     }
 

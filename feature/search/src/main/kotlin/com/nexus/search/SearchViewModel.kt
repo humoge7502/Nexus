@@ -25,6 +25,8 @@ data class SearchUiState(
     val isSearching: Boolean = false,
     val searchMode: SearchMode = SearchMode.HYBRID,
     val recentSearches: List<String> = emptyList(),
+    val error: String? = null,
+    val lastQuery: String = "",
 )
 
 @HiltViewModel
@@ -70,7 +72,11 @@ class SearchViewModel @Inject constructor(
 
     private fun performSearch(query: String) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isSearching = true)
+            _uiState.value = _uiState.value.copy(
+                isSearching = true,
+                error = null,
+                lastQuery = query,
+            )
             try {
                 val internships = internshipRepository.getAllInternships().first()
                 val skills = skillGraphRepository.getUserSkills()
@@ -86,8 +92,19 @@ class SearchViewModel @Inject constructor(
                     "mode" to _uiState.value.searchMode.name
                 ))
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(isSearching = false)
+                // A failed search is not "no results". Reporting an empty list here
+                // teaches the user that their query matched nothing.
+                _uiState.value = _uiState.value.copy(
+                    results = emptyList(),
+                    isSearching = false,
+                    error = e.message ?: "Search failed",
+                )
             }
         }
+    }
+
+    fun retrySearch() {
+        val query = _uiState.value.lastQuery
+        if (query.length >= 2) performSearch(query)
     }
 }

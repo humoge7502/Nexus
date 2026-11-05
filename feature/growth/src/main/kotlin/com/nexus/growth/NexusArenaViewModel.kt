@@ -33,6 +33,8 @@ data class NexusArenaUiState(
     val isPublishing: Boolean = false,
     val actionFailed: Boolean = false,
     val topPercent: Int = 0,
+    /** Non-null when the board itself could not be fetched. */
+    val loadFault: String? = null,
 ) {
     val currentUser: LeaderboardEntry?
         get() = entries.find { it.isCurrentUser }
@@ -137,17 +139,30 @@ class NexusArenaViewModel @Inject constructor(
     }
 
     private suspend fun reloadBoard(published: Boolean) {
-        val entries = leaderboardRepository.getLeaderboard(LeaderboardTab.GLOBAL)
-        val ranking = if (published) leaderboardRepository.getGlobalRanking() else null
-        val me = entries.find { it.isCurrentUser }
-        _uiState.update {
-            it.copy(
-                isLoading = false,
-                entries = entries,
-                isPublished = published,
-                topPercent = ranking?.let { r -> topPercentOf(r.rank, r.total) }
-                    ?: topPercentOf(me?.rank ?: 0, entries.size),
-            )
+        // A board that failed to arrive must not leave the screen spinning, and
+        // must not crash the scope — both are worse than saying it didn't load.
+        try {
+            val entries = leaderboardRepository.getLeaderboard(LeaderboardTab.GLOBAL)
+            val ranking = if (published) leaderboardRepository.getGlobalRanking() else null
+            val me = entries.find { it.isCurrentUser }
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    entries = entries,
+                    loadFault = null,
+                    isPublished = published,
+                    topPercent = ranking?.let { r -> topPercentOf(r.rank, r.total) }
+                        ?: topPercentOf(me?.rank ?: 0, entries.size),
+                )
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Leaderboard failed to load")
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    loadFault = e.message ?: "The leaderboard couldn't be fetched.",
+                )
+            }
         }
     }
 

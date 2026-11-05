@@ -1,5 +1,6 @@
 package com.nexus.careermirror
 
+import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -19,19 +20,41 @@ class CareerMirrorScreenTest {
     @get:Rule
     val composeRule = createComposeRule()
 
-    private fun setContent(state: CareerMirrorUiState, onBack: () -> Unit = {}) {
+    private fun setContent(
+        state: CareerMirrorUiState,
+        onBack: () -> Unit = {},
+        onRetry: () -> Unit = {},
+    ) {
         composeRule.setContent {
             NexusTheme(dynamicColor = false) {
-                CareerMirrorContent(uiState = state, onBack = onBack)
+                CareerMirrorContent(uiState = state, onBack = onBack, onRetry = onRetry)
             }
         }
     }
 
     @Test
-    fun loading_showsGeneratingMessage() {
+    fun loading_showsLayoutShapedSkeleton() {
         setContent(CareerMirrorUiState())
 
-        composeRule.onNodeWithText("Generating your Career Mirror...").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Generating your Career Mirror")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun error_isAFaultNotAnEmptyMirror() {
+        var retried = false
+        setContent(
+            CareerMirrorUiState(isLoading = false, error = "room transaction failed"),
+            onRetry = { retried = true },
+        )
+
+        composeRule.onNodeWithText("Your mirror didn't generate").assertIsDisplayed()
+        // The old bug: a failed generation fell through to the no-data branch.
+        composeRule.onNodeWithText("Not enough data yet").assertDoesNotExist()
+        composeRule.onNodeWithText("room transaction failed").assertIsDisplayed()
+
+        composeRule.onNodeWithText("Try again").performClick()
+        assertTrue(retried)
     }
 
     @Test

@@ -2,7 +2,6 @@
 <resources>
     <string name="app_tagline">Engineer Your Future.</string>
     <string name="auth_google">Continue with Google</string>
-    <string name="auth_github">Continue with GitHub</string>
     <string name="auth_email">Continue with Email</string>
     <string name="auth_privacy_prefix">By continuing, you agree to our </string>
     <string name="auth_terms">Terms of Service</string>
@@ -30,4 +29,9 @@
     <string name="auth_create_account">Create account</string>
     <string name="auth_show_password">Show password</string>
     <string name="auth_hide_password">Hide password</string>
+    <string name="auth_failure_label">Sign-in</string>
+    <string name="auth_failure_cancelled">Google sign-in was closed before it finished. Nothing was saved.</string>
+    <string name="auth_failure_unavailable">Google sign-in did not complete. Try it again, or continue with email.</string>
+    <string name="auth_failed_sign_in">Couldn\'t sign in</string>
+    <string name="auth_failed_sign_up">Couldn\'t create account</string>
 </resources>

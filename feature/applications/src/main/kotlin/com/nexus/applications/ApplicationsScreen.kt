@@ -31,28 +31,35 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.CalibratedRule
 import com.nexus.designsystem.component.EditorialTimeline
+import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusOutlineButton
+import com.nexus.designsystem.component.NexusToastData
+import com.nexus.designsystem.component.NexusToastHost
 import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.SignalTag
 import com.nexus.designsystem.component.SignalTone
 import com.nexus.designsystem.component.TelemetryItem
 import com.nexus.designsystem.component.TelemetryStrip
 import com.nexus.designsystem.component.TimelineEntry
+import com.nexus.designsystem.component.ToastTone
 import com.nexus.designsystem.component.hairline
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
+import com.nexus.designsystem.component.rememberNexusToastState
 import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
@@ -68,6 +75,24 @@ fun ApplicationsScreen(
   onApplicationClick: (String) -> Unit = {},
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+  val toastState = rememberNexusToastState()
+
+  // Resolved here because a toast is composed copy: the ViewModel reports which
+  // write failed, the screen says so in the student's language.
+  val statusFaultMessage = stringResource(R.string.applications_error_status_update_failed)
+  val removeFaultMessage = stringResource(R.string.applications_error_remove_failed)
+
+  LaunchedEffect(Unit) {
+    viewModel.effect.collect { effect ->
+      val message = when (effect) {
+        ApplicationsEffect.StatusUpdateFailed -> statusFaultMessage
+        ApplicationsEffect.RemoveFailed -> removeFaultMessage
+      }
+      toastState.show(NexusToastData(message, ToastTone.Critical))
+    }
+  }
+
+  val loadFault = uiState.error
 
   Scaffold(
     topBar = {
@@ -75,35 +100,62 @@ fun ApplicationsScreen(
         title = stringResource(R.string.applications_my_applications),
         onBack = onNavigateBack,
       )
-    }
+    },
+    // The toast keeps the snackbar slot: Scaffold bottom-centers it and offsets
+    // it above any bottom chrome, so only the plate changes.
+    snackbarHost = { NexusToastHost(toastState) },
   ) { padding ->
     Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-      TelemetryStrip(
-        items = listOf(
-          TelemetryItem(stringResource(R.string.applications_stat_applied), uiState.counts.applied),
-          TelemetryItem(
-            stringResource(R.string.applications_stat_interviewing),
-            uiState.counts.interviewing,
-            accent = MaterialTheme.nexus.attention,
+      // The strip counts the rows below it. While the read is in flight or has
+      // failed those counts are unknown, not zero, and zero is a figure the
+      // input cannot justify.
+      if (!uiState.isLoading && loadFault == null) {
+        TelemetryStrip(
+          items = listOf(
+            TelemetryItem(stringResource(R.string.applications_stat_applied), uiState.counts.applied),
+            TelemetryItem(
+              stringResource(R.string.applications_stat_interviewing),
+              uiState.counts.interviewing,
+              accent = MaterialTheme.nexus.attention,
+            ),
+            TelemetryItem(
+              stringResource(R.string.applications_stat_offered),
+              uiState.counts.offered,
+              accent = MaterialTheme.nexus.positive,
+            ),
           ),
-          TelemetryItem(
-            stringResource(R.string.applications_stat_offered),
-            uiState.counts.offered,
-            accent = MaterialTheme.nexus.positive,
-          ),
-        ),
-        modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 12.dp),
-      )
+          modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 12.dp),
+        )
+      }
 
       ApplicationTabs(
         selected = uiState.selectedTab,
         onSelect = viewModel::selectTab,
       )
 
-      if (uiState.applications.isEmpty()) {
-        EmptyApplicationsState(selectedTab = uiState.selectedTab)
-      } else {
-        LazyColumn(
+      when {
+        // Read before the empty branch: a failed read carries no list, and an
+        // empty list would otherwise be served as "you have applied to nothing".
+        uiState.isLoading -> EditorialSkeletonList(
+          count = 3,
+          loadingLabel = stringResource(R.string.applications_loading_your_applications),
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 12.dp),
+        )
+
+        loadFault != null -> EditorialErrorState(
+          headline = stringResource(R.string.applications_unable_to_load),
+          reason = stringResource(R.string.applications_error_reason),
+          actionLabel = stringResource(R.string.applications_try_again),
+          onAction = viewModel::retry,
+          secondaryHint = loadFault.takeIf { it.isNotBlank() },
+          modifier = Modifier.padding(start = 24.dp, top = 12.dp, end = 24.dp),
+        )
+
+        uiState.applications.isEmpty() -> EmptyApplicationsState(selectedTab = uiState.selectedTab)
+
+        else -> LazyColumn(
           contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 4.dp, bottom = 24.dp),
           verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -357,39 +409,27 @@ private fun StatusActions(
 
 @Composable
 private fun EmptyApplicationsState(selectedTab: ApplicationTab) {
-  Column(
+  EmptyState(
+    title = when (selectedTab) {
+      ApplicationTab.ALL -> stringResource(R.string.applications_empty_all)
+      ApplicationTab.APPLIED -> stringResource(R.string.applications_empty_applied)
+      ApplicationTab.INTERVIEWING -> stringResource(R.string.applications_empty_interviewing)
+      ApplicationTab.OUTCOMES -> stringResource(R.string.applications_empty_outcomes)
+    },
+    description = stringResource(R.string.text_save_an_opportunity_and_track_your_progress_here),
+    voice = stringResource(R.string.applications_empty_voice),
+    icon = {
+      Icon(
+        imageVector = Icons.Filled.BusinessCenter,
+        contentDescription = null,
+        modifier = Modifier.size(40.dp),
+        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
+      )
+    },
     modifier = Modifier
-      .fillMaxSize()
-      .padding(32.dp),
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.Center,
-  ) {
-    Icon(
-      imageVector = Icons.Filled.BusinessCenter,
-      contentDescription = null,
-      modifier = Modifier.size(40.dp),
-      tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
-    )
-    Spacer(Modifier.height(14.dp))
-    Text(
-      text = when (selectedTab) {
-        ApplicationTab.ALL -> stringResource(R.string.applications_empty_all)
-        ApplicationTab.APPLIED -> stringResource(R.string.applications_empty_applied)
-        ApplicationTab.INTERVIEWING -> stringResource(R.string.applications_empty_interviewing)
-        ApplicationTab.OUTCOMES -> stringResource(R.string.applications_empty_outcomes)
-      },
-      style = MaterialTheme.typography.titleMedium,
-      fontWeight = FontWeight.SemiBold,
-      color = MaterialTheme.colorScheme.onSurface,
-      textAlign = TextAlign.Center,
-    )
-    Spacer(Modifier.height(6.dp))
-    Text(text = stringResource(R.string.text_save_an_opportunity_and_track_your_progress_here),
-      style = MaterialTheme.typography.bodyMedium,
-      color = MaterialTheme.colorScheme.onSurfaceVariant,
-      textAlign = TextAlign.Center,
-    )
-  }
+      .fillMaxWidth()
+      .padding(top = NexusSpacing.huge),
+  )
 }
 
 /**

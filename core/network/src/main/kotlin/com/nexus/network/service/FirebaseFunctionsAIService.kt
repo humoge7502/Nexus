@@ -33,7 +33,7 @@ class FirebaseFunctionsAIService @Inject constructor(
 
     suspend fun proxyAI(request: AIProxyRequest): Result<AIProxyResult> = runCatching {
         val uid = firebaseAuth.currentUser?.uid
-            ?: throw IllegalStateException("User must be authenticated for AI proxy")
+            ?: throw RequiresSignInException("User must be authenticated for AI proxy")
 
         val result = functions
             .getHttpsCallable("proxyAI")
@@ -104,7 +104,7 @@ class FirebaseFunctionsAIService @Inject constructor(
         depth: String = "standard",
     ): Result<ResearchResult> = runCatching {
         val uid = firebaseAuth.currentUser?.uid
-            ?: throw IllegalStateException("Sign in to use Deep Research")
+            ?: throw RequiresSignInException("Sign in to use Deep Research")
         val payload = mapOf("question" to question, "depth" to depth)
         val result = functions
             .getHttpsCallable("deepResearchFn")
@@ -211,4 +211,13 @@ data class ResearchResult(
     val followUps: List<String> = emptyList(),
     val usedLiveSearch: Boolean = false,
 )
+
+/**
+ * The call was never sent, because this device holds no signed-in user.
+ *
+ * A transport failure and a missing local precondition read the same way if both
+ * surface as a generic exception, and the screen then offers Retry on the one
+ * thing Retry cannot fix. Students who tap "Skip" on the sign-in screen land here.
+ */
+class RequiresSignInException(message: String) : Exception(message)
 

@@ -7,4 +7,14 @@
     <string name="cohortintelligence_semester">Semester: %1$s</string>
     <string name="cohortintelligence_tier">Tier: %1$s</string>
     <string name="cd_back">Back</string>
+    <string name="cohortintelligence_loading">Reading your cohort\'s placement records</string>
+    <string name="cohortintelligence_unable_to_load">Can\'t read your cohort</string>
+    <string name="cohortintelligence_error_reason">The placement records for your college didn\'t come back. Nothing on this screen has been estimated or filled in.</string>
+    <string name="cohortintelligence_try_again">Try again</string>
+    <string name="cohortintelligence_no_college_title">No college on your profile</string>
+    <string name="cohortintelligence_no_college_body">Cohort placements are grouped by college. Add yours in Settings and this screen has something to count.</string>
+    <string name="cohortintelligence_no_college_voice">We can\'t group you with people we don\'t know the school of.</string>
+    <string name="cohortintelligence_no_data_title">No cohort placements yet</string>
+    <string name="cohortintelligence_no_data_body">Nobody from your college has a tracked placement outcome recorded so far.</string>
+    <string name="cohortintelligence_no_data_voice">An empty cohort is a real answer, not a missing one — the read succeeded.</string>
 </resources>

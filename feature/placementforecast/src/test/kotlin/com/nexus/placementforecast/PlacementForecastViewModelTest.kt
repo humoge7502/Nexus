@@ -42,6 +42,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
@@ -315,5 +316,21 @@ class PlacementForecastViewModelTest {
         assertEquals(false, state.isLoading)
         assertEquals("score backend down", state.error)
         assertEquals(0, state.currentScore)
+    }
+
+    @Test
+    fun `no stored score means nothing is generated and nothing is saved`() = runTest(testDispatcher) {
+        whenever(scoreRepository.getRecentSnapshots(any(), anyInt())).thenReturn(flowOf(emptyList()))
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals(false, state.isLoading)
+        assertTrue(state.scoreIsPlaceholder)
+        assertEquals(0, state.currentScore)
+        assertTrue(state.forecasts.isEmpty())
+        assertNull(state.modelReadinessPct)
+        verify(predictionEngine, never()).generateForecasts(any(), any(), any(), any(), any())
+        verify(repository, never()).insertAll(any())
     }
 }

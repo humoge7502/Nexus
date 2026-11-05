@@ -5,6 +5,9 @@
     <string name="paywall_restore_purchases">Restore purchases</string>
     <string name="paywall_subscribe_monthly">Subscribe monthly</string>
     <string name="paywall_subscribe_yearly">Subscribe yearly</string>
+    <string name="paywall_subscribe_season">Get the Season Pass</string>
+    <string name="paywall_season_badge">Fits placement season</string>
+    <string name="paywall_season_caption">3 months — starts and ends with your season</string>
     <string name="paywall_pro_label">Sagitta Pro</string>
     <string name="paywall_choose_plan">Choose a plan</string>
     <string name="paywall_one_time">One-time purchase</string>
@@ -18,4 +21,10 @@
     <string name="paywall_feature_resume_optimization">Resume optimization with AI</string>
     <string name="paywall_feature_skill_gap">Custom skill gap analysis</string>
     <string name="paywall_feature_ad_free">Ad-free experience</string>
+    <string name="paywall_loading_prices">Loading prices</string>
+    <string name="paywall_prices_unavailable">Prices aren\'t available</string>
+    <string name="paywall_prices_reason">Google Play hasn\'t returned a price list, so we can\'t quote or charge anything. Nothing has been billed.</string>
+    <string name="paywall_try_again">Try again</string>
+    <string name="paywall_purchase_not_completed">That purchase didn\'t complete</string>
+    <string name="paywall_plan_unavailable">Not priced right now — try again later</string>
 </resources>

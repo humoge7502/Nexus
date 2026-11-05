@@ -56,4 +56,6 @@
     <string name="settings_linkedin_label">LinkedIn profile link</string>
     <string name="settings_linkedin_support">Shown on your profile — LinkedIn offers no automatic read</string>
     <string name="settings_connection_save">Save</string>
+    <string name="settings_sign_in_again_to_delete">Sign in again before deleting</string>
+    <string name="settings_reauth_reason">Google requires a recent sign-in before an account can be deleted, so this one is still open. Data cleared earlier in the run can\'t be recovered.</string>
 </resources>

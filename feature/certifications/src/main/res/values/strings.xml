@@ -21,7 +21,16 @@
     <string name="certifications_review_course">Review course</string>
     <string name="certifications_continue_course">Continue course</string>
     <string name="certifications_start_course">Start course</string>
-    <string name="certifications_no_certifications_available_yet">No certifications available yet.</string>
+    <string name="certifications_loading">Loading the certification catalogue</string>
+    <string name="certifications_fault_headline">The catalogue didn\'t come back</string>
+    <string name="certifications_fault_reason">Nothing was loaded, so nothing on this screen is out of date either.</string>
+    <string name="certifications_detail_loading">Loading this certification</string>
+    <string name="certifications_detail_fault_headline">Couldn\'t open this certification</string>
+    <string name="certifications_detail_gone_title">This certification is gone</string>
+    <string name="certifications_empty_title">No certifications to browse</string>
+    <string name="certifications_empty_body">The catalogue answered, and it had zero courses in it. That is a real answer, not a loading problem.</string>
+    <string name="certifications_empty_voice">Checking again takes a second.</string>
+    <string name="certifications_check_again">Check again</string>
     <string name="certifications_this_certification_is_no_longer_available">This certification is no longer available.</string>
     <string name="cd_back">Back</string>
     <string name="text_featured">Featured</string>

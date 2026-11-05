@@ -18,10 +18,10 @@ class ShareManager @Inject constructor(
         streak: Int? = null,
     ) {
         val text = buildString {
-            append("\uD83C\uDFC6 $title\n")
+            append("$title\n")
             append("$description\n\n")
-            if (score != null) append("\uD83D\uDCCA Career Score: $score/1000\n")
-            if (streak != null) append("\uD83D\uDD25 Streak: $streak days\n")
+            if (score != null) append("Career Score: $score/1000\n")
+            if (streak != null) append("Streak: $streak days\n")
             append("\nTrack your career growth on Sagitta!")
             append("\n${Constants.PLAY_STORE_URL}")
         }
@@ -57,7 +57,7 @@ class ShareManager @Inject constructor(
 
     fun shareStreakMilestone(days: Int, score: Int) {
         shareAchievement(
-            title = "$days-Day Career Streak! \uD83D\uDD25",
+            title = "$days-Day Career Streak",
             description = "I've maintained a $days-day career growth streak on Sagitta!",
             score = score,
             streak = days,

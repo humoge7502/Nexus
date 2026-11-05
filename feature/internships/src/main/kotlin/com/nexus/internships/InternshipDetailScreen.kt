@@ -29,7 +29,6 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,10 +39,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.InstrumentPlate
 import com.nexus.designsystem.component.LoadingState
 import com.nexus.designsystem.component.NexusButton
@@ -53,6 +52,7 @@ import com.nexus.designsystem.component.NexusToastData
 import com.nexus.designsystem.component.NexusToastHost
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.component.ToastTone
+import com.nexus.designsystem.component.feedback.EditorialErrorState
 import com.nexus.designsystem.component.rememberNexusToastState
 import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusSpacing
@@ -175,32 +175,22 @@ private fun DetailPlaceholder(
     uiState: UiState<List<Internship>>,
     onRetry: () -> Unit,
 ) {
-    val ext = MaterialTheme.nexus
-    val scheme = MaterialTheme.colorScheme
-
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         when (uiState) {
             is UiState.Loading -> LoadingState()
-            is UiState.Error -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    uiState.message,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = scheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = NexusSpacing.xxl),
-                )
-                TextButton(onClick = onRetry) {
-                    Text(
-                        text = stringResource(R.string.internships_retry).uppercase(Locale.ROOT),
-                        style = NexusTypography.DataLabel,
-                        color = ext.signal,
-                    )
-                }
-            }
-            else -> Text(
-                stringResource(R.string.internships_this_internship_is_no_longer_available),
-                style = MaterialTheme.typography.bodyLarge,
-                color = scheme.onSurfaceVariant,
+            is UiState.Error -> EditorialErrorState(
+                headline = stringResource(R.string.internships_unable_to_load),
+                reason = stringResource(R.string.internships_detail_error_reason),
+                actionLabel = stringResource(R.string.internships_retry),
+                onAction = onRetry,
+                secondaryHint = uiState.message.takeIf { it.isNotBlank() },
+                modifier = Modifier.padding(horizontal = NexusSpacing.xxl),
+            )
+            else -> EmptyState(
+                title = stringResource(R.string.internships_this_internship_is_no_longer_available),
+                description = stringResource(R.string.internships_gone_hint),
+                voice = stringResource(R.string.internships_gone_voice),
+                modifier = Modifier.padding(horizontal = NexusSpacing.xxl),
             )
         }
     }

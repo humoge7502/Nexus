@@ -6,11 +6,15 @@
     <string name="cd_settings">Settings</string>
     <string name="text_badges">Badges</string>
     <string name="text_badges_unlock_as_you_apply_learn_and_keep_your">Badges unlock as you apply, learn and keep your streak.</string>
+    <string name="achievements_badges_voice">Badges are proof, not promises. They arrive once something has actually happened.</string>
+    <string name="achievements_badges_loading">Loading badges</string>
+    <string name="achievements_badges_unable">Couldn\'t load your badges</string>
+    <string name="achievements_badges_error_reason">Your XP, streak and score are still real — only the badge catalog failed to read.</string>
+    <string name="achievements_try_again">Try again</string>
     <string name="text_locked">Locked</string>
     <string name="text_nexus">Sagitta</string>
     <string name="text_nexus_score">Sagitta Score</string>
     <string name="text_recent_unlocks">Recent Unlocks</string>
-    <string name="text_ud83d_ude80">\uD83D\uDE80</string>
     <string name="achievements_level_title">L%1$d %2$s</string>
     <string name="achievements_top_percentile">Top %1$d%% of public profiles</string>
     <string name="achievements_percentile_unavailable">Join Sagitta Arena to see your percentile</string>

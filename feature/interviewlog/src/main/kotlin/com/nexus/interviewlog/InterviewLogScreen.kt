@@ -19,9 +19,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.designsystem.theme.nexus
 import com.nexus.domain.model.InterviewOutcome
 
@@ -32,13 +34,18 @@ fun InterviewLogScreen(
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-  InterviewLogContent(uiState = uiState, onBack = onBack)
+  InterviewLogContent(
+    uiState = uiState,
+    onBack = onBack,
+    onRetry = viewModel::retry,
+  )
 }
 
 @Composable
 fun InterviewLogContent(
   uiState: InterviewLogUiState,
   onBack: () -> Unit,
+  onRetry: () -> Unit = {},
 ) {
   Scaffold(
     topBar = {
@@ -48,10 +55,39 @@ fun InterviewLogContent(
       )
     }
   ) { padding ->
-    if (uiState.isLoading) {
-      LoadingState(modifier = Modifier.fillMaxSize())
-    } else {
-      LazyColumn(
+    // Read before the empty branch: a failed read carries no outcomes, so
+    // `outcomes.isEmpty()` alone would render an outage as "nothing logged yet".
+    val loadFault = uiState.error
+
+    when {
+      uiState.isLoading -> EditorialSkeletonList(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(padding)
+          .padding(16.dp),
+        count = 3,
+        loadingLabel = stringResource(R.string.interviewlog_loading_log),
+      )
+
+      // The statistics plate counts rounds out of the same read that failed, so
+      // this branch carries the fault alone rather than asserting a count the
+      // input can no longer justify.
+      loadFault != null -> Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(padding)
+          .padding(16.dp),
+      ) {
+        EditorialErrorState(
+          headline = stringResource(R.string.interviewlog_unable_to_load),
+          reason = stringResource(R.string.interviewlog_error_reason),
+          actionLabel = stringResource(R.string.interviewlog_try_again),
+          onAction = onRetry,
+          secondaryHint = loadFault.takeIf { it.isNotBlank() },
+        )
+      }
+
+      else -> LazyColumn(
         modifier = Modifier
           .fillMaxSize()
           .padding(padding)
@@ -71,8 +107,19 @@ fun InterviewLogContent(
           }
         }
 
-        items(uiState.outcomes) { outcome ->
-          InterviewOutcomeRow(outcome)
+        if (uiState.outcomes.isEmpty()) {
+          item {
+            EmptyState(
+              title = stringResource(R.string.interviewlog_empty_title),
+              description = stringResource(R.string.interviewlog_empty_body),
+              voice = stringResource(R.string.interviewlog_empty_voice),
+              modifier = Modifier.padding(top = 24.dp, bottom = 8.dp),
+            )
+          }
+        } else {
+          items(uiState.outcomes) { outcome ->
+            InterviewOutcomeRow(outcome)
+          }
         }
       }
     }

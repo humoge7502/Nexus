@@ -20,6 +20,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -60,13 +61,13 @@ class PaywallViewModelTest {
 
     private fun viewModel() = PaywallViewModel(billingManager, analyticsTracker, userPreferences)
 
-    private fun listing(tier: ProductTier, price: String) = ProductListing(
+    private fun listing(tier: ProductTier, price: String, micros: Long = 0L) = ProductListing(
         sku = "nexus_${tier.name.lowercase()}",
         tier = tier,
         title = tier.name,
         description = "",
         price = price,
-        priceMicros = 0L,
+        priceMicros = micros,
         currencyCode = "INR",
     )
 
@@ -114,6 +115,46 @@ class PaywallViewModelTest {
         assertEquals("₹299", viewModel.uiState.value.monthlyPrice)
         assertEquals("", viewModel.uiState.value.yearlyPrice)
         assertEquals("", viewModel.uiState.value.lifetimePrice)
+    }
+
+    @Test
+    fun `the yearly discount is derived from the real prices`() = runTest(testDispatcher) {
+        billingState.value = BillingState.Loaded(
+            listOf(
+                listing(ProductTier.PRO_MONTHLY, "₹299", 299_000_000L),
+                listing(ProductTier.PRO_YEARLY, "₹1,999", 1_999_000_000L),
+            )
+        )
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        // 12 × ₹299 = ₹3,588, so ₹1,999 is 44.3% below it and the badge says 44.
+        assertEquals(44, viewModel.uiState.value.yearlySavingPercent)
+    }
+
+    @Test
+    fun `a yearly plan with nothing to compare against carries no discount`() = runTest(testDispatcher) {
+        billingState.value = BillingState.Loaded(
+            listOf(listing(ProductTier.PRO_YEARLY, "₹1,999", 1_999_000_000L))
+        )
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        assertNull(viewModel.uiState.value.yearlySavingPercent)
+    }
+
+    @Test
+    fun `a yearly plan that is not cheaper claims no saving`() = runTest(testDispatcher) {
+        billingState.value = BillingState.Loaded(
+            listOf(
+                listing(ProductTier.PRO_MONTHLY, "₹99", 99_000_000L),
+                listing(ProductTier.PRO_YEARLY, "₹1,999", 1_999_000_000L),
+            )
+        )
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        assertNull(viewModel.uiState.value.yearlySavingPercent)
     }
 
     @Test

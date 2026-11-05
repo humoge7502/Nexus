@@ -16,8 +16,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -31,10 +29,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.MomentumChart
 import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.designsystem.component.intelligence.ReadinessFactor
 import com.nexus.designsystem.component.intelligence.ReadinessFactorCard
 import com.nexus.designsystem.theme.NexusSpacing
@@ -61,6 +62,7 @@ fun PlacementForecastScreen(
     onBack = onBack,
     onRefresh = viewModel::refresh,
     onWhatIfChange = viewModel::updateWhatIfMocks,
+    onRetry = viewModel::retry,
   )
 }
 
@@ -70,6 +72,7 @@ fun PlacementForecastContent(
   onBack: () -> Unit,
   onRefresh: () -> Unit,
   onWhatIfChange: (Int) -> Unit,
+  onRetry: () -> Unit = {},
 ) {
   Scaffold(
     topBar = {
@@ -77,16 +80,33 @@ fun PlacementForecastContent(
         title = stringResource(R.string.placementforecast_placement_forecast),
         onBack = onBack,
         actions = {
-          IconButton(onClick = onRefresh, enabled = !uiState.isLoading) {
-            Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.cd_recalculate_forecast))
-          }
+          NexusIconButton(
+            icon = Icons.Default.Refresh,
+            contentDescription = stringResource(R.string.cd_recalculate_forecast),
+            onClick = onRefresh,
+            enabled = !uiState.isLoading,
+          )
         },
       )
     }
   ) { padding ->
     val error = uiState.error
+    // The engine projects from a score. With no stored snapshot it substitutes a
+    // placeholder, so every figure it returns describes a student who does not
+    // exist — the gate below holds them back instead of dressing the guess up.
+    val scoreIsGuess = uiState.scoreIsPlaceholder
     when {
-      uiState.isLoading -> LoadingState(modifier = Modifier.fillMaxSize())
+      uiState.isLoading -> EditorialSkeletonList(
+        count = 3,
+        loadingLabel = stringResource(R.string.placementforecast_loading_your_forecast),
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(padding)
+          .padding(horizontal = 16.dp),
+      )
+
+      // Ahead of the empty branch: a faulted read carries no forecast list, and
+      // without this an outage reads as a student who has done nothing yet.
       error != null -> Box(
         modifier = Modifier
           .fillMaxSize()
@@ -94,24 +114,32 @@ fun PlacementForecastContent(
           .padding(24.dp),
         contentAlignment = Alignment.Center,
       ) {
-        Text(
-          text = error,
-          style = MaterialTheme.typography.bodyLarge,
-          color = MaterialTheme.colorScheme.error,
+        EditorialErrorState(
+          headline = stringResource(R.string.placementforecast_unable_to_load),
+          reason = stringResource(R.string.placementforecast_error_reason),
+          actionLabel = stringResource(R.string.placementforecast_try_again),
+          onAction = onRetry,
+          secondaryHint = error.takeIf { it.isNotBlank() },
         )
       }
-      uiState.forecasts.isEmpty() -> Box(
+
+      scoreIsGuess || uiState.forecasts.isEmpty() -> Box(
         modifier = Modifier
           .fillMaxSize()
           .padding(padding)
           .padding(24.dp),
         contentAlignment = Alignment.Center,
       ) {
-        Text(text = stringResource(R.string.text_not_enough_activity_yet_solve_problems_log),
-          style = MaterialTheme.typography.bodyMedium,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        EmptyState(
+          title = stringResource(R.string.placementforecast_no_forecast_yet),
+          description = stringResource(
+            if (scoreIsGuess) R.string.placementforecast_no_score_snapshot
+            else R.string.text_not_enough_activity_yet_solve_problems_log,
+          ),
+          voice = stringResource(R.string.placementforecast_empty_voice),
         )
       }
+
       else -> LazyColumn(
         modifier = Modifier
           .fillMaxSize()

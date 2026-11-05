@@ -30,6 +30,13 @@
     <string name="applications_timeline_empty_detail">Milestones appear here as you record application, interview, and outcome dates.</string>
     <string name="applications_timeline_empty_voice">Dates turn a list of companies into a story.</string>
     <string name="applications_timeline_outcome_other">Outcome</string>
+    <string name="applications_unable_to_load">Couldn\'t load your applications</string>
+    <string name="applications_error_reason">Your applications are stored on this device, and reading them failed. Nothing was deleted and no application was lost.</string>
+    <string name="applications_try_again">Try again</string>
+    <string name="applications_loading_your_applications">Loading your applications...</string>
+    <string name="applications_empty_voice">A pipeline you can\'t see is a pipeline you can\'t talk about in an interview.</string>
+    <string name="applications_error_status_update_failed">That status didn\'t save. The application is still on its old stage.</string>
+    <string name="applications_error_remove_failed">That application wasn\'t removed. It\'s still on your list.</string>
     <string name="cd_navigate_back">Navigate back</string>
     <string name="text_save_an_opportunity_and_track_your_progress_here">Save an opportunity and track your progress here</string>
 </resources>

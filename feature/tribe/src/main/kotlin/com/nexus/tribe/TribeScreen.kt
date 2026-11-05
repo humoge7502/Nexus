@@ -31,12 +31,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusOutlineButton
 import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.domain.model.CohortEntry
 import kotlin.math.roundToInt
 
@@ -54,6 +56,7 @@ fun TribeScreen(
     onBack = onBack,
     onSetup = viewModel::createOrJoinTribe,
     onLeave = viewModel::leaveTribe,
+    onRetry = viewModel::retry,
   )
 }
 
@@ -63,6 +66,7 @@ fun TribeContent(
   onBack: () -> Unit,
   onSetup: (college: String, goal: String, podSize: Int) -> Unit,
   onLeave: () -> Unit,
+  onRetry: () -> Unit = {},
 ) {
   var showSetupForm by remember { mutableStateOf(false) }
 
@@ -75,9 +79,35 @@ fun TribeContent(
     }
   ) { padding ->
     if (uiState.isLoading) {
-      LoadingState(modifier = Modifier.fillMaxSize().padding(padding))
+      EditorialSkeletonList(
+        count = 3,
+        loadingLabel = stringResource(R.string.tribe_loading_your_tribe),
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(padding)
+          .padding(horizontal = 16.dp, vertical = 20.dp),
+      )
       return@Scaffold
     }
+
+    // Ahead of the "no tribe yet" branch: a failed read carries no tribe id, so
+    // without this an outage renders the join card and reads as a student who has
+    // simply never set one up.
+    val loadFault = uiState.loadError
+    if (loadFault != null) {
+      EditorialErrorState(
+        headline = stringResource(R.string.tribe_unable_to_load),
+        reason = stringResource(R.string.tribe_error_reason),
+        actionLabel = stringResource(R.string.tribe_try_again),
+        onAction = onRetry,
+        secondaryHint = loadFault.takeIf { it.isNotBlank() },
+        modifier = Modifier
+          .padding(padding)
+          .padding(horizontal = 16.dp, vertical = 20.dp),
+      )
+      return@Scaffold
+    }
+
     Column(
       modifier = Modifier
         .fillMaxSize()
@@ -102,8 +132,24 @@ fun TribeContent(
           },
           onDismiss = { showSetupForm = false },
         )
-        !uiState.isInTribe -> TribeJoinCard(onJoin = { showSetupForm = true })
-        else -> TribeHome(uiState = uiState, onLeave = onLeave)
+        // No tribe on record and the read succeeded: that is a real empty state.
+        !uiState.isInTribe -> EmptyState(
+          title = stringResource(R.string.tribe_join_your_campus_tribe),
+          description = stringResource(R.string.tribe_accountability_pods_of_57_students_from),
+          voice = stringResource(R.string.tribe_empty_voice),
+          icon = {
+            Icon(
+              Icons.Default.Group,
+              null,
+              modifier = Modifier.padding(8.dp),
+              tint = MaterialTheme.colorScheme.primary,
+            )
+          },
+          actionLabel = stringResource(R.string.tribe_create_or_join_tribe),
+          onAction = { showSetupForm = true },
+          modifier = Modifier.fillMaxWidth(),
+        )
+        else -> TribeHome(uiState = uiState, onLeave = onLeave, onRetry = onRetry)
       }
       Spacer(modifier = Modifier.height(80.dp))
     }
@@ -111,25 +157,7 @@ fun TribeContent(
 }
 
 @Composable
-private fun TribeJoinCard(onJoin: () -> Unit) {
-  NexusCard(modifier = Modifier.fillMaxWidth()) {
-    Column(modifier = Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-      Icon(Icons.Default.Group, null, modifier = Modifier.padding(8.dp),
-        tint = MaterialTheme.colorScheme.primary)
-      Spacer(modifier = Modifier.height(8.dp))
-      Text(stringResource(R.string.tribe_join_your_campus_tribe), style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.Bold)
-      Spacer(modifier = Modifier.height(4.dp))
-      Text(stringResource(R.string.tribe_accountability_pods_of_57_students_from),
-        style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-      Spacer(modifier = Modifier.height(16.dp))
-      NexusButton(text = stringResource(R.string.tribe_create_or_join_tribe), onClick = onJoin)
-    }
-  }
-}
-
-@Composable
-private fun TribeHome(uiState: TribeUiState, onLeave: () -> Unit) {
+private fun TribeHome(uiState: TribeUiState, onLeave: () -> Unit, onRetry: () -> Unit) {
   NexusCard {
     Text(stringResource(R.string.tribe_your_tribe), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
     Spacer(modifier = Modifier.height(8.dp))
@@ -143,6 +171,7 @@ private fun TribeHome(uiState: TribeUiState, onLeave: () -> Unit) {
   }
 
   val cohort = uiState.cohort
+  val cohortFault = uiState.cohortError
   if (cohort != null) {
     NexusCard {
       Text(stringResource(R.string.tribe_campus_cohort), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
@@ -163,6 +192,16 @@ private fun TribeHome(uiState: TribeUiState, onLeave: () -> Unit) {
           style = MaterialTheme.typography.bodySmall)
       }
     }
+  } else if (cohortFault != null) {
+    // Before the missing-data copy: a read that failed is not a college with too
+    // few students on it, and the benchmarks above stay off screen until one lands.
+    EditorialErrorState(
+      headline = stringResource(R.string.tribe_cohort_unable_to_load),
+      reason = stringResource(R.string.tribe_cohort_error_reason),
+      actionLabel = stringResource(R.string.tribe_try_again),
+      onAction = onRetry,
+      secondaryHint = cohortFault.takeIf { it.isNotBlank() },
+    )
   } else {
     NexusCard {
       Text(stringResource(R.string.tribe_campus_cohort), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)

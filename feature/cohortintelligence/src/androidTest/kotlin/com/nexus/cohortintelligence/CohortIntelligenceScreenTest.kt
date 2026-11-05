@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.nexus.designsystem.theme.NexusTheme
 import com.nexus.domain.model.CohortEntry
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -21,10 +22,18 @@ class CohortIntelligenceScreenTest {
     @get:Rule
     val composeRule = createComposeRule()
 
-    private fun setContent(state: CohortUiState, onBack: () -> Unit = {}) {
+    private fun setContent(
+        state: CohortUiState,
+        onBack: () -> Unit = {},
+        onRetry: () -> Unit = {},
+    ) {
         composeRule.setContent {
             NexusTheme(dynamicColor = false) {
-                CohortIntelligenceContent(uiState = state, onBack = onBack)
+                CohortIntelligenceContent(
+                    uiState = state,
+                    onBack = onBack,
+                    onRetry = onRetry,
+                )
             }
         }
     }
@@ -55,13 +64,41 @@ class CohortIntelligenceScreenTest {
     }
 
     @Test
-    fun emptyCohort_showsCollegeWithoutRateOrRows() {
+    fun emptyCohort_namesTheAbsenceInsteadOfLeavingTheHeaderStandingAlone() {
         setContent(CohortUiState(isLoading = false, collegeId = "IIT Bombay"))
 
-        composeRule.onNodeWithText("College: IIT Bombay").assertIsDisplayed()
+        composeRule.onNodeWithText("No cohort placements yet").assertIsDisplayed()
+        composeRule.onAllNodesWithText("College: IIT Bombay").assertCountEquals(0)
         composeRule.onAllNodesWithText("Estimated Placement Rate", substring = true)
             .assertCountEquals(0)
         composeRule.onAllNodesWithText("Semester:", substring = true).assertCountEquals(0)
+    }
+
+    @Test
+    fun missingCollege_saysSoRatherThanReportingAnEmptyCohort() {
+        setContent(CohortUiState(isLoading = false, collegeId = ""))
+
+        composeRule.onNodeWithText("No college on your profile").assertIsDisplayed()
+        composeRule.onAllNodesWithText("No cohort placements yet").assertCountEquals(0)
+    }
+
+    @Test
+    fun faultedRead_offersRetryInsteadOfSpinningForever() {
+        var retries = 0
+        setContent(
+            CohortUiState(
+                isLoading = false,
+                collegeId = "IIT Bombay",
+                error = "database connection failed",
+            ),
+            onRetry = { retries++ },
+        )
+
+        composeRule.onNodeWithText("Can't read your cohort").assertIsDisplayed()
+        composeRule.onNodeWithText("database connection failed").assertIsDisplayed()
+        composeRule.onNodeWithText("Try again").performClick()
+
+        assertEquals(1, retries)
     }
 
     @Test

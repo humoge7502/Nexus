@@ -6,5 +6,10 @@
     <string name="cd_clear">Clear</string>
     <string name="text_no_results_found">No results found</string>
     <string name="text_recent_searches">Recent Searches</string>
-    <string name="text_searching">Searching...</string>
+    <string name="search_loading_results">Searching</string>
+    <string name="search_unable_to_search">Search didn\'t finish</string>
+    <string name="search_error_reason">The search engine didn\'t answer, so we have nothing to show. Your query is still in the field.</string>
+    <string name="search_try_again">Try again</string>
+    <string name="search_no_results_hint">Nothing matched those words. Try a skill name, a company, or a shorter phrase.</string>
+    <string name="search_empty_voice">An empty result is an honest answer — it isn\'t the same as a broken search.</string>
 </resources>

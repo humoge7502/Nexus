@@ -37,7 +37,7 @@ class AccountDeletionViewModel @Inject constructor(
 
     fun confirmDeletion() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isDeleting = true) }
+            _uiState.update { it.copy(isDeleting = true, error = null, requiresReauth = false) }
 
             try {
                 val userId = firebaseAuth.currentUser?.uid
@@ -55,7 +55,12 @@ class AccountDeletionViewModel @Inject constructor(
                 Timber.e(e, "Account deletion failed")
 
                 if (e is FirebaseAuthRecentLoginRequiredException) {
-                    _effects.emit(AccountDeletionEffect.RequiresReAuthentication)
+                    // The button is still spinning when this arrives. Leaving
+                    // isDeleting set makes the screen look like the deletion is
+                    // still running after it has already been refused, and the
+                    // refusal is a state the screen must keep showing — not a
+                    // one-shot event that ejects the user from the flow.
+                    _uiState.update { it.copy(isDeleting = false, requiresReauth = true) }
                 } else {
                     _uiState.update { it.copy(
                         isDeleting = false,
@@ -115,9 +120,11 @@ class AccountDeletionViewModel @Inject constructor(
 data class AccountDeletionUiState(
     val isDeleting: Boolean = false,
     val error: String? = null,
+    /** Firebase refused the delete as too long since sign-in. The screen says so
+     *  instead of ejecting the user from the flow. */
+    val requiresReauth: Boolean = false,
 )
 
 sealed interface AccountDeletionEffect {
     data object DeletionComplete : AccountDeletionEffect
-    data object RequiresReAuthentication : AccountDeletionEffect
 }

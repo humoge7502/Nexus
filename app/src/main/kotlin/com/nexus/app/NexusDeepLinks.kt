@@ -37,6 +37,35 @@ object NexusDeepLinks {
         }
     }
 
+    /**
+     * The group-chat bridge: extracts searchable text from an ACTION_SEND
+     * share so a forwarded listing can be checked against the verified
+     * catalog. Returns null for non-share intents or empty shares.
+     *
+     * Shared listing text is noisy (appended "Forwarded as received" lines,
+     * emoji, trailing URLs). The URL is dropped because the verified catalog
+     * is searched by company/role keywords, not by external link.
+     */
+    fun extractShareQuery(intent: Intent?): String? {
+        if (intent == null) return null
+        if (intent.action != Intent.ACTION_SEND) return null
+        val raw = intent.getStringExtra(Intent.EXTRA_TEXT) ?: return null
+        val cleaned = raw
+            .lineSequence()
+            // Share chains carry forward-counters and forwarding noise;
+            // both are stripped before the text becomes a search query.
+            .filterNot { line ->
+                val l = line.trim()
+                l.isEmpty() || l.startsWith("http") || l.startsWith("www.") ||
+                    l.equals("Forwarded as received", ignoreCase = true) ||
+                    Regex("^[\\p{So}\\p{Sk}\\p{Cf}\\s]+$").matches(l)
+            }
+            .joinToString(" ") { it.trim() }
+            .replace(Regex("\\s+"), " ")
+            .trim()
+        return cleaned.takeIf { it.length >= 3 }?.take(120)
+    }
+
     private fun resolveRoute(head: String, id: String?): NexusDestination? = when (head) {
         "internship", "internships", "opportunity" ->
             id?.let { NexusDestination.InternshipDetail(it) } ?: NexusDestination.InternshipList

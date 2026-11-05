@@ -7,7 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.nexus.common.ApiResult
@@ -21,6 +23,15 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Named
 
+/**
+ * Why a social sign-in ended without a session.
+ *
+ * The screen needs the reason, not the status: an interrupted Google prompt
+ * surfaces as `ApiException(statusCode=12501)` whose message is the literal
+ * string "Task:canceled", and repeating that to a student is not feedback.
+ */
+enum class AuthFailure { Cancelled, Unavailable }
+
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val userPreferences: UserPreferences,
@@ -32,6 +43,9 @@ class AuthViewModel @Inject constructor(
 
     private val _authState = MutableStateFlow<ApiResult<Boolean>>(ApiResult.Loading)
     val authState: StateFlow<ApiResult<Boolean>> = _authState.asStateFlow()
+
+    private val _failure = MutableStateFlow<AuthFailure?>(null)
+    val failure: StateFlow<AuthFailure?> = _failure.asStateFlow()
 
     init {
         checkExistingAuth()
@@ -46,6 +60,7 @@ class AuthViewModel @Inject constructor(
     }
 
     fun initGoogleSignIn(activity: Activity) {
+        _failure.value = null
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(googleWebClientId)
             .requestEmail()
@@ -64,21 +79,38 @@ class AuthViewModel @Inject constructor(
             val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
             val authResult = auth.signInWithCredential(credential).await()
             authResult.user?.let { saveUserData(it.uid, it.displayName ?: "", it.email ?: "") }
+            _failure.value = null
             if (authResult.user != null) {
                 _authState.value = ApiResult.Success(true)
                 true
             } else {
                 _authState.value = ApiResult.Error("Google sign-in returned no user")
+                _failure.value = AuthFailure.Unavailable
                 false
             }
+        } catch (e: ApiException) {
+            // Closing the account picker is a choice, not a fault worth an error
+            // tone; the prompt simply having nothing to return is a different one.
+            val cancelled = e.statusCode == CommonStatusCodes.CANCELED ||
+                e.statusCode == GoogleSignInStatusCodes.SIGN_IN_CANCELLED
+            _failure.value = if (cancelled) AuthFailure.Cancelled else AuthFailure.Unavailable
+            _authState.value = ApiResult.Error(e.message ?: "Google sign-in failed")
+            false
         } catch (e: Exception) {
+            _failure.value = AuthFailure.Unavailable
             _authState.value = ApiResult.Error(e.message ?: "Google sign-in failed")
             false
         }
     }
 
+    /** The band is about one attempt; a new one, or moving on, retires it. */
+    fun dismissFailure() {
+        _failure.value = null
+    }
+
     fun signInWithEmail(email: String, password: String) {
         viewModelScope.launch {
+            _failure.value = null
             _authState.value = ApiResult.Loading
             try {
                 val result = auth.signInWithEmailAndPassword(email, password).await()
@@ -92,6 +124,7 @@ class AuthViewModel @Inject constructor(
 
     fun signUpWithEmail(email: String, password: String) {
         viewModelScope.launch {
+            _failure.value = null
             _authState.value = ApiResult.Loading
             try {
                 val result = auth.createUserWithEmailAndPassword(email, password).await()
@@ -118,6 +151,7 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             userPreferences.clearAuth()
         }
+        _failure.value = null
         _authState.value = ApiResult.Success(false)
     }
 

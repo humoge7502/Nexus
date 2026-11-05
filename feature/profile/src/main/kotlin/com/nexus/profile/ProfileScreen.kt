@@ -82,13 +82,18 @@ import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.SignalField
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonCard
+import com.nexus.designsystem.component.feedback.EditorialSkeletonLine
 import com.nexus.designsystem.component.hairline
 import com.nexus.designsystem.component.instrumentGrid
 import com.nexus.designsystem.component.sheen
+import com.nexus.designsystem.component.shimmer
 import com.nexus.designsystem.effect.RevealOnLoad
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
 import com.nexus.designsystem.theme.nexus
 import com.nexus.domain.model.Achievement
@@ -202,39 +207,103 @@ fun ProfileScreen(
                     .padding(horizontal = 24.dp),
             ) {
                 Spacer(modifier = Modifier.height(4.dp))
-                RevealOnLoad {
-                    ProfileIdentity(
+                when {
+                    uiState.isLoading -> ProfileSkeleton()
+
+                    uiState.error != null -> EditorialErrorState(
+                        headline = stringResource(R.string.profile_unable_to_load),
+                        reason = stringResource(R.string.profile_error_reason),
+                        actionLabel = stringResource(R.string.profile_try_again),
+                        onAction = viewModel::retry,
+                        secondaryHint = uiState.error?.takeIf { it.isNotBlank() },
+                    )
+
+                    else -> ProfileSections(
+                        uiState = uiState,
+                        ratedSkills = ratedSkills,
                         displayName = displayName,
                         avatarInitial = avatarInitial,
-                        uiState = uiState,
+                        viewModel = viewModel,
+                        onAchievements = onAchievements,
                     )
                 }
+
+                // The toolkit is navigation, not data — a failed profile read
+                // must not strand the user on a page with no way forward.
                 Spacer(modifier = Modifier.height(18.dp))
-                ProfileStats(uiState = uiState)
-
-                val platformStats by viewModel.platformStats.collectAsStateWithLifecycle()
-                ConnectedPlatformsSection(stats = platformStats)
-
-                val declaredSkills by viewModel.declaredSkills.collectAsStateWithLifecycle()
-                val skillSuggestions by viewModel.skillSuggestions.collectAsStateWithLifecycle()
-
-                ProfileSkillsSection(
-                    ratedSkills = ratedSkills,
-                    allSkills = uiState.skills,
-                    declared = declaredSkills,
-                    suggestions = skillSuggestions,
-                    onSaveSkills = viewModel::saveSkills,
-                )
-
-                ProfileAchievementsSection(
-                    achievements = uiState.achievements,
-                    onAchievements = onAchievements,
-                )
-
                 ProfileToolkitSection(toolkit = toolkit)
                 Spacer(modifier = Modifier.height(32.dp))
             }
         }
+    }
+}
+
+@Composable
+private fun ProfileSections(
+    uiState: ProfileUiState,
+    ratedSkills: List<Skill>,
+    displayName: String,
+    avatarInitial: String,
+    viewModel: ProfileViewModel,
+    onAchievements: () -> Unit,
+) {
+    RevealOnLoad {
+        ProfileIdentity(
+            displayName = displayName,
+            avatarInitial = avatarInitial,
+            uiState = uiState,
+        )
+    }
+    Spacer(modifier = Modifier.height(18.dp))
+    ProfileStats(uiState = uiState)
+
+    val platformStats by viewModel.platformStats.collectAsStateWithLifecycle()
+    ConnectedPlatformsSection(stats = platformStats)
+
+    val declaredSkills by viewModel.declaredSkills.collectAsStateWithLifecycle()
+    val skillSuggestions by viewModel.skillSuggestions.collectAsStateWithLifecycle()
+
+    ProfileSkillsSection(
+        ratedSkills = ratedSkills,
+        allSkills = uiState.skills,
+        declared = declaredSkills,
+        suggestions = skillSuggestions,
+        onSaveSkills = viewModel::saveSkills,
+    )
+
+    ProfileAchievementsSection(
+        achievements = uiState.achievements,
+        onAchievements = onAchievements,
+    )
+}
+
+@Composable
+private fun ProfileSkeleton() {
+    val loadingLabel = stringResource(R.string.profile_loading)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics { contentDescription = loadingLabel },
+        verticalArrangement = Arrangement.spacedBy(NexusSpacing.md),
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(NexusSpacing.md),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                Modifier
+                    .size(76.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f))
+                    .shimmer()
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(NexusSpacing.xs)) {
+                EditorialSkeletonLine(width = 150.dp, height = 18.dp)
+                EditorialSkeletonLine(width = 104.dp, height = 12.dp)
+            }
+        }
+        EditorialSkeletonCard(lines = 1)
+        EditorialSkeletonCard(lines = 3)
     }
 }
 

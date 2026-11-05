@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -36,13 +37,11 @@ import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Science
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.Composable
@@ -54,6 +53,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusChip
 import com.nexus.designsystem.component.NexusIconButton
@@ -61,6 +61,8 @@ import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.SignalField
 import com.nexus.designsystem.component.SignalTag
 import com.nexus.designsystem.component.SignalTone
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.designsystem.component.pressScale
 import com.nexus.designsystem.effect.RevealOnLoad
 import com.nexus.designsystem.theme.NexusShapes
@@ -429,31 +431,24 @@ private fun LazyListScope.certificationCards(
 
 private fun LazyListScope.loadingRow() {
     item {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(24.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-            Spacer(Modifier.width(12.dp))
-            Text(stringResource(R.string.explore_loading_opportunities),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+        EditorialSkeletonList(
+            count = 3,
+            loadingLabel = stringResource(R.string.explore_loading_opportunities),
+            modifier = Modifier.padding(horizontal = 24.dp),
+        )
     }
 }
 
 private fun LazyListScope.errorRow(message: String, onRetry: () -> Unit) {
     item {
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp)) {
-            Text(
-                message,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            TextButton(onClick = onRetry) { Text(stringResource(R.string.explore_retry)) }
-        }
+        EditorialErrorState(
+            headline = stringResource(R.string.explore_unable_to_load),
+            reason = stringResource(R.string.explore_error_reason),
+            actionLabel = stringResource(R.string.explore_retry),
+            onAction = onRetry,
+            secondaryHint = message.takeIf { it.isNotBlank() },
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+        )
     }
 }
 
@@ -463,21 +458,18 @@ private fun LazyListScope.emptyRow(
     onClear: () -> Unit,
 ) {
     item {
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp)) {
-            Text(
-                if (hasActiveSearch) {
-                    "Nothing in $category matches your search. Try a broader query or clear the filters."
-                } else {
-                    "No $category listings yet — this feed is refreshed as new opportunities open."
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            if (hasActiveSearch) {
-                Spacer(modifier = Modifier.height(4.dp))
-                TextButton(onClick = onClear) { Text(stringResource(R.string.explore_clear_search_filters)) }
-            }
-        }
+        EmptyState(
+            title = stringResource(R.string.explore_nothing_yet),
+            description = if (hasActiveSearch) {
+                stringResource(R.string.explore_empty_after_search, category)
+            } else {
+                stringResource(R.string.explore_empty_feed, category)
+            },
+            voice = stringResource(R.string.explore_empty_voice, category),
+            actionLabel = if (hasActiveSearch) stringResource(R.string.explore_clear_search_filters) else null,
+            onAction = if (hasActiveSearch) onClear else null,
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+        )
     }
 }
 
@@ -507,6 +499,11 @@ private fun CategoryChip(
     Row(
         modifier = Modifier
             .pressScale()
+            // A category is the primary way this page is filtered, and the chip
+            // was 40dp tall - the shortest target on the screen. The minimum is
+            // paid for here rather than in the padding so the whole box, not
+            // just the glyph row, answers the press.
+            .heightIn(min = 48.dp)
             .clip(shape)
             .background(bgColor)
             .border(NexusSpacing.hairline, borderColor, shape)

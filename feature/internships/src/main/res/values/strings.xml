@@ -8,6 +8,14 @@
     <string name="internships_feed_meta">FEED 01</string>
     <string name="internships_results">%1$d results</string>
     <string name="internships_empty_feed">No open roles right now. Sagitta re-checks verified sources every six hours.</string>
+    <string name="internships_empty_title">Nothing open here</string>
+    <string name="internships_empty_widen_hint">Drop a filter or widen the search — the verified feed keeps arriving on its own.</string>
+    <string name="internships_empty_voice">An empty feed is not an empty market. It usually means the filters are narrower than the openings.</string>
+    <string name="internships_unable_to_load">Couldn\'t fetch the feed</string>
+    <string name="internships_error_reason">No openings were hidden or removed — the verified list just didn\'t arrive this time.</string>
+    <string name="internships_detail_error_reason">The role is still listed where it was verified — this screen just couldn\'t read the feed to show it.</string>
+    <string name="internships_gone_hint">It is no longer in the verified feed, so Sagitta won\'t guess at a new state for it.</string>
+    <string name="internships_gone_voice">Listings close. Saved ones stay in your track record either way.</string>
     <string name="internships_no_matches">No matches for \"%1$s\"</string>
     <string name="internships_no_filter_matches">No openings match these filters.</string>
     <string name="internships_clear_filters">Clear filters</string>
