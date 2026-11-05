@@ -44,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.CalibratedRule
 import com.nexus.designsystem.component.EditorialTimeline
 import com.nexus.designsystem.component.EmptyState
+import com.nexus.designsystem.component.EmptyStateArt
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusOutlineButton
 import com.nexus.designsystem.component.NexusToastData
@@ -410,6 +411,7 @@ private fun StatusActions(
 @Composable
 private fun EmptyApplicationsState(selectedTab: ApplicationTab) {
   EmptyState(
+    art = EmptyStateArt.Ledger,
     title = when (selectedTab) {
       ApplicationTab.ALL -> stringResource(R.string.applications_empty_all)
       ApplicationTab.APPLIED -> stringResource(R.string.applications_empty_applied)
@@ -418,14 +420,6 @@ private fun EmptyApplicationsState(selectedTab: ApplicationTab) {
     },
     description = stringResource(R.string.text_save_an_opportunity_and_track_your_progress_here),
     voice = stringResource(R.string.applications_empty_voice),
-    icon = {
-      Icon(
-        imageVector = Icons.Filled.BusinessCenter,
-        contentDescription = null,
-        modifier = Modifier.size(40.dp),
-        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
-      )
-    },
     modifier = Modifier
       .fillMaxWidth()
       .padding(top = NexusSpacing.huge),

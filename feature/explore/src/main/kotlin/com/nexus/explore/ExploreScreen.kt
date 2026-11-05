@@ -54,6 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.component.EmptyState
+import com.nexus.designsystem.component.EmptyStateArt
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusChip
 import com.nexus.designsystem.component.NexusIconButton
@@ -459,6 +460,7 @@ private fun LazyListScope.emptyRow(
 ) {
     item {
         EmptyState(
+            art = EmptyStateArt.Radar,
             title = stringResource(R.string.explore_nothing_yet),
             description = if (hasActiveSearch) {
                 stringResource(R.string.explore_empty_after_search, category)

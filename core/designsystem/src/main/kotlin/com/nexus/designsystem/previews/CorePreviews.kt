@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.component.CalibratedRule
 import com.nexus.designsystem.component.EmptyState
+import com.nexus.designsystem.component.EmptyStateArt
 import com.nexus.designsystem.component.InstrumentGauge
 import com.nexus.designsystem.component.MomentumChart
 import com.nexus.designsystem.component.NexusButton
@@ -163,6 +164,12 @@ private fun EffectsBoard() {
                 style = NexusTypography.EditorialBody,
             )
         }
+        Spacer(Modifier.height(12.dp))
+        EmptyState(
+            art = EmptyStateArt.Radar,
+            title = "Nothing here yet",
+            description = "The radar keeps sweeping.",
+        )
     }
 }
 

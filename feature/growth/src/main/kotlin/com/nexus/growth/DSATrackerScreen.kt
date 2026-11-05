@@ -46,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.AnimatedStatCard
 import com.nexus.designsystem.component.CalibratedRule
 import com.nexus.designsystem.component.EmptyState
+import com.nexus.designsystem.component.EmptyStateArt
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.component.SignalTag
@@ -296,6 +297,7 @@ private fun EmptyStateItem(
     onAction: (() -> Unit)?,
 ) {
     EmptyState(
+        art = EmptyStateArt.Progress,
         title = title,
         description = description,
         voice = voice,

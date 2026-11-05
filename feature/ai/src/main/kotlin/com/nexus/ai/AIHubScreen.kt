@@ -38,9 +38,9 @@ import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.SignalField
+import com.nexus.designsystem.component.borderBeam
 import com.nexus.designsystem.component.hairline
 import com.nexus.designsystem.component.instrumentGrid
-import com.nexus.designsystem.component.sheen
 import com.nexus.designsystem.effect.RevealOnLoad
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
@@ -165,7 +165,10 @@ private fun AssistantHero(
                 color = NexusColors.Bone.copy(alpha = 0.14f),
                 cornerRadiusDp = 18f,
             )
-            .sheen(alpha = 0.06f)
+            // The beam is the plate's one light gesture — the signal tracing
+            // its outline — and replaces the sheen so the hero carries a
+            // single loop, not two (§5: motion communicates, never decorates).
+            .borderBeam(shape = NexusShapes.lg)
             .padding(20.dp)
     ) {
         // No floating ornament sits on the plate: the measurement grid, the

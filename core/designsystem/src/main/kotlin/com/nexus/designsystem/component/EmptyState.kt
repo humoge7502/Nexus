@@ -19,6 +19,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import kotlin.math.cos
+import kotlin.math.sin
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieAnimation
@@ -36,6 +38,7 @@ fun EmptyState(
     modifier: Modifier = Modifier,
     lottieResId: Int? = null,
     icon: @Composable (() -> Unit)? = null,
+    art: EmptyStateArt? = null,
     /** The aside in the product's serif voice — why this space is quiet, in
      *  one sentence. Null keeps the empty state purely informational. */
     voice: String? = null,
@@ -63,6 +66,7 @@ fun EmptyState(
                 )
             }
             icon != null -> icon()
+            art != null -> EmptyArtPlate(art)
             else -> EmptyMark()
         }
 
@@ -133,6 +137,115 @@ private fun EmptyMark() {
                 style = stroke,
             )
             drawCircle(color = signal, radius = 3.dp.toPx())
+        }
+    }
+}
+
+/** Named instrument drawings for the three recurring quiet states. Each is
+ *  hairline ink with exactly one signal mark — the illustration equivalent
+ *  of the empty state's voice: it says what the space is FOR, not that it
+ *  is empty. Static by construction, so reduced motion needs no gate. */
+enum class EmptyStateArt {
+    /** The applications ledger before its first entry: ruled rows, the
+     *  first checkbox drawn in signal, waiting. */
+    Ledger,
+    /** The opportunity radar mid-sweep: rings and graticule, no blips yet. */
+    Radar,
+    /** The learning dial at zero: graduated ticks, the first one lit. */
+    Progress,
+}
+
+@Composable
+private fun EmptyArtPlate(art: EmptyStateArt) {
+    val track = MaterialTheme.colorScheme.outlineVariant
+    val faint = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
+    val signal = MaterialTheme.colorScheme.primary
+
+    Box(modifier = Modifier.size(72.dp), contentAlignment = Alignment.Center) {
+        Canvas(modifier = Modifier.size(72.dp)) {
+            val ink = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round)
+            when (art) {
+                EmptyStateArt.Ledger -> {
+                    val left = size.width * 0.14f
+                    val right = size.width * 0.86f
+                    listOf(0.28f, 0.52f, 0.76f).forEachIndexed { index, fraction ->
+                        val y = size.height * fraction
+                        drawLine(
+                            color = if (index == 0) faint else track,
+                            start = Offset(left, y),
+                            end = Offset(right, y),
+                            strokeWidth = ink.width,
+                            cap = StrokeCap.Round,
+                        )
+                    }
+                    // The first row's checkbox: signal-outlined, empty —
+                    // the ledger asking for its first entry.
+                    val box = size.minDimension * 0.13f
+                    drawRoundRect(
+                        color = signal,
+                        topLeft = Offset(left, size.height * 0.28f - box / 2),
+                        size = Size(box, box),
+                        style = ink,
+                    )
+                }
+                EmptyStateArt.Radar -> {
+                    val inset = ink.width / 2
+                    val ring = Size(size.width - ink.width, size.height - ink.width)
+                    drawArc(track, 0f, 360f, false, Offset(inset, inset), ring, style = ink)
+                    val inner = Size(ring.width * 0.55f, ring.height * 0.55f)
+                    val innerOffset = Offset(
+                        (size.width - inner.width) / 2f,
+                        (size.height - inner.height) / 2f,
+                    )
+                    drawArc(faint, 0f, 360f, false, innerOffset, inner, style = ink)
+                    val cx = size.width / 2f
+                    drawLine(
+                        color = faint,
+                        start = Offset(cx, inset),
+                        end = Offset(cx, size.height - inset),
+                        strokeWidth = 1f,
+                    )
+                    // The sweep itself: a signal arc frozen mid-rotation,
+                    // the instrument doing its work before anything appears.
+                    drawArc(
+                        color = signal,
+                        startAngle = -60f,
+                        sweepAngle = 42f,
+                        useCenter = false,
+                        topLeft = Offset(inset, inset),
+                        size = ring,
+                        style = ink,
+                    )
+                }
+                EmptyStateArt.Progress -> {
+                    val inset = ink.width / 2
+                    val ring = Size(size.width - ink.width, size.height - ink.width)
+                    val radius = ring.minDimension / 2f
+                    val cx = size.width / 2f
+                    val cy = size.height / 2f
+                    // Graduated ticks around the dial, the first three lit:
+                    // the instrument at zero, already calibrated.
+                    val tickCount = 24
+                    repeat(tickCount) { tick ->
+                        val angle = Math.toRadians((tick * 360.0 / tickCount) - 90.0)
+                        val inner = radius * 0.82f
+                        val outer = radius * (if (tick < 3) 0.98f else 0.92f)
+                        drawLine(
+                            color = if (tick < 3) signal else track,
+                            start = Offset(
+                                cx + inner * cos(angle).toFloat(),
+                                cy + inner * sin(angle).toFloat(),
+                            ),
+                            end = Offset(
+                                cx + outer * cos(angle).toFloat(),
+                                cy + outer * sin(angle).toFloat(),
+                            ),
+                            strokeWidth = if (tick < 3) ink.width else 1.5f,
+                            cap = StrokeCap.Round,
+                        )
+                    }
+                }
+            }
         }
     }
 }
