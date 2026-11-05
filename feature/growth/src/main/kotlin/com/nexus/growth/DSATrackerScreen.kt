@@ -45,10 +45,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.AnimatedStatCard
 import com.nexus.designsystem.component.CalibratedRule
+import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.component.SignalTag
 import com.nexus.designsystem.component.SignalTone
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
@@ -99,6 +102,8 @@ fun DSATrackerScreen(
         is UiState.Success -> s.data.map { it.toDisplay() }
         else -> emptyList()
     }
+    val problemsLoading = uiState.problems is UiState.Loading
+    val problemsFault = (uiState.problems as? UiState.Error)?.message
 
     val solvedCount = problems.count { it.isSolved }
     val totalCount = problems.size
@@ -123,99 +128,183 @@ fun DSATrackerScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(NexusSpacing.sm),
         ) {
-            item {
-                // The one lime slab on this screen: ink figures on a lit rule.
-                NexusCard(
-                    gradient = NexusGradients.SignalSweep,
-                    shape = NexusShapes.lg,
-                ) {
-                    val ink = NexusColors.SignalInk
-                    Column {
-                        Text(
-                            stringResource(R.string.growth_dsa_progress).uppercase(Locale.ROOT),
-                            style = NexusTypography.DataLabel,
-                            color = ink.copy(alpha = 0.62f),
-                        )
-                        Spacer(Modifier.height(NexusSpacing.xxs))
-                        Text(
-                            stringResource(
-                                R.string.growth_solvedcount_totalcount,
-                                solvedCount,
-                                totalCount,
-                            ),
-                            style = NexusTypography.TelemetryDisplay,
-                            color = ink,
-                            maxLines = 1,
-                        )
-                        Text(
-                            stringResource(R.string.growth_problems_solved),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = ink.copy(alpha = 0.58f),
-                        )
-                        Spacer(Modifier.height(NexusSpacing.sm))
-                        // One graduation per problem, so the tick field is the
-                        // syllabus itself rather than a texture.
-                        CalibratedRule(
+            when {
+                problemsLoading -> item {
+                    EditorialSkeletonList(
+                        count = 4,
+                        loadingLabel = stringResource(R.string.dsa_loading_problems),
+                    )
+                }
+
+                // Before "no problems": an unread problem set is not an empty one.
+                problemsFault != null -> item {
+                    EditorialErrorState(
+                        headline = stringResource(R.string.dsa_unable_to_load),
+                        reason = stringResource(R.string.dsa_error_reason),
+                        actionLabel = stringResource(R.string.dsa_try_again),
+                        onAction = viewModel::refresh,
+                        secondaryHint = problemsFault.takeIf { it.isNotBlank() },
+                    )
+                }
+
+                else -> {
+                    item {
+                        SolvedProgressSlab(
+                            solvedCount = solvedCount,
+                            totalCount = totalCount,
                             progress = solvedProgress,
-                            divisions = totalCount,
-                            accent = ink,
-                            trackColor = ink.copy(alpha = 0.18f),
-                            tickColor = ink.copy(alpha = 0.40f),
-                            height = 18.dp,
-                            contentDescription = stringResource(
-                                R.string.growth_solvedcount_totalcount,
-                                solvedCount,
-                                totalCount,
-                            ),
                         )
+                    }
+
+                    item {
+                        DsaStatRow(
+                            solvedCount = solvedCount,
+                            totalCount = totalCount,
+                            streak = uiState.currentStreak,
+                        )
+                    }
+
+                    item {
+                        DsaFilterTabs(
+                            selected = selectedFilter,
+                            onSelect = { selectedFilter = it },
+                        )
+                    }
+
+                    if (filteredProblems.isEmpty()) {
+                        val hiddenByFilter = selectedFilter.difficulty != null && problems.isNotEmpty()
+                        item(key = "empty") {
+                            EmptyStateItem(
+                                title = if (hiddenByFilter) {
+                                    stringResource(R.string.dsa_no_filter_matches)
+                                } else {
+                                    stringResource(R.string.dsa_no_problems_title)
+                                },
+                                description = if (hiddenByFilter) {
+                                    stringResource(R.string.dsa_empty_filter_hint)
+                                } else {
+                                    stringResource(R.string.dsa_empty_feed_hint)
+                                },
+                                voice = stringResource(R.string.dsa_empty_voice),
+                                actionLabel = if (hiddenByFilter) {
+                                    stringResource(R.string.dsa_show_all)
+                                } else {
+                                    null
+                                },
+                                onAction = if (hiddenByFilter) {
+                                    { selectedFilter = DsaFilter.ALL }
+                                } else {
+                                    null
+                                },
+                            )
+                        }
+                    } else {
+                        items(filteredProblems, key = { it.id }) { problem ->
+                            DSAProblemCard(
+                                problem = problem,
+                                onToggleSolved = {
+                                    viewModel.updateProblemStatus(
+                                        problem.id,
+                                        if (problem.isSolved) com.nexus.domain.model.DsaStatus.ATTEMPTED
+                                        else com.nexus.domain.model.DsaStatus.SOLVED,
+                                    )
+                                },
+                            )
+                        }
                     }
                 }
             }
-
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(NexusSpacing.xs),
-                ) {
-                    AnimatedStatCard(
-                        value = solvedCount,
-                        label = stringResource(R.string.dsa_solved),
-                        modifier = Modifier.weight(1f),
-                    )
-                    AnimatedStatCard(
-                        value = totalCount - solvedCount,
-                        label = stringResource(R.string.dsa_remaining),
-                        modifier = Modifier.weight(1f),
-                    )
-                    AnimatedStatCard(
-                        value = 5,
-                        label = stringResource(R.string.dsa_day_streak),
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-            }
-
-            item {
-                DsaFilterTabs(
-                    selected = selectedFilter,
-                    onSelect = { selectedFilter = it },
-                )
-            }
-
-            items(filteredProblems, key = { it.id }) { problem ->
-                DSAProblemCard(
-                    problem = problem,
-                    onToggleSolved = {
-                        viewModel.updateProblemStatus(
-                            problem.id,
-                            if (problem.isSolved) com.nexus.domain.model.DsaStatus.ATTEMPTED
-                            else com.nexus.domain.model.DsaStatus.SOLVED,
-                        )
-                    },
-                )
-            }
         }
     }
+}
+
+/** The three counters under the slab, in the order a student reads them. */
+@Composable
+private fun DsaStatRow(solvedCount: Int, totalCount: Int, streak: Int) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(NexusSpacing.xs),
+    ) {
+        AnimatedStatCard(
+            value = solvedCount,
+            label = stringResource(R.string.dsa_solved),
+            modifier = Modifier.weight(1f),
+        )
+        AnimatedStatCard(
+            value = totalCount - solvedCount,
+            label = stringResource(R.string.dsa_remaining),
+            modifier = Modifier.weight(1f),
+        )
+        AnimatedStatCard(
+            value = streak,
+            label = stringResource(R.string.dsa_day_streak),
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+/** The one lime slab on this screen: ink figures on a lit rule. */
+@Composable
+private fun SolvedProgressSlab(solvedCount: Int, totalCount: Int, progress: Float) {
+    val ink = NexusColors.SignalInk
+    val count = stringResource(R.string.growth_solvedcount_totalcount, solvedCount, totalCount)
+    NexusCard(
+        gradient = NexusGradients.SignalSweep,
+        shape = NexusShapes.lg,
+    ) {
+        Column {
+            Text(
+                stringResource(R.string.growth_dsa_progress).uppercase(Locale.ROOT),
+                style = NexusTypography.DataLabel,
+                color = ink.copy(alpha = 0.62f),
+            )
+            Spacer(Modifier.height(NexusSpacing.xxs))
+            Text(
+                count,
+                style = NexusTypography.TelemetryDisplay,
+                color = ink,
+                maxLines = 1,
+            )
+            Text(
+                stringResource(R.string.growth_problems_solved),
+                style = MaterialTheme.typography.bodySmall,
+                color = ink.copy(alpha = 0.58f),
+            )
+            Spacer(Modifier.height(NexusSpacing.sm))
+            // One graduation per problem, so the tick field is the
+            // syllabus itself rather than a texture.
+            CalibratedRule(
+                progress = progress,
+                divisions = totalCount,
+                accent = ink,
+                trackColor = ink.copy(alpha = 0.18f),
+                tickColor = ink.copy(alpha = 0.40f),
+                height = 18.dp,
+                contentDescription = count,
+            )
+        }
+    }
+}
+
+/** An empty page is a layout, not a row — it sits outside the list it replaces. */
+@Composable
+private fun EmptyStateItem(
+    title: String,
+    description: String,
+    voice: String,
+    actionLabel: String?,
+    onAction: (() -> Unit)?,
+) {
+    EmptyState(
+        title = title,
+        description = description,
+        voice = voice,
+        actionLabel = actionLabel,
+        onAction = onAction,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = NexusSpacing.xxl),
+    )
 }
 
 @Composable

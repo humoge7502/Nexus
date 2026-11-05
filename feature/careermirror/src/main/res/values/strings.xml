@@ -6,6 +6,11 @@
     <string name="careermirror_next_quarter_actions">Next Quarter Actions</string>
     <string name="careermirror_not_enough_data_yet">Not enough data yet</string>
     <string name="careermirror_use_nexus_for_90_days_to">Use Sagitta for 90 days to generate your first mirror</string>
+    <string name="careermirror_empty_voice">A mirror needs a season of activity before it has anything honest to say.</string>
+    <string name="careermirror_unable_to_generate">Your mirror didn\'t generate</string>
+    <string name="careermirror_error_reason">Nothing was lost. The generator stopped before it finished.</string>
+    <string name="careermirror_try_again">Try again</string>
+    <string name="careermirror_loading">Generating your Career Mirror</string>
     <string name="careermirror_score_with_delta">Score: %1$d (%2$s)</string>
     <string name="cd_back">Back</string>
 </resources>

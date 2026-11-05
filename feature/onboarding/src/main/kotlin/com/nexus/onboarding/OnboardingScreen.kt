@@ -50,6 +50,8 @@ import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusWordmark
 import com.nexus.designsystem.component.SignalChoice
 import com.nexus.designsystem.component.SignalField
+import com.nexus.designsystem.component.feedback.EditorialStatusBand
+import com.nexus.designsystem.component.feedback.StatusTone
 import com.nexus.designsystem.theme.LocalReducedMotion
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
@@ -143,53 +145,79 @@ fun OnboardingScreen(
                 }
             }
 
-            Column(
-                modifier = Modifier
-                    .navigationBarsPadding()
-                    .padding(
-                        start = NexusSpacing.xl,
-                        end = NexusSpacing.xl,
-                        top = NexusSpacing.xs,
-                        bottom = NexusSpacing.md,
-                    ),
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    CalibratedPageScale(
-                        pageCount = ofPages,
-                        currentPage = pagerState.currentPage,
-                    )
-                    Text(
-                        text = stepLabel.uppercase(Locale.ROOT),
-                        style = NexusTypography.TelemetryMicro,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(NexusSpacing.md))
-
-                NexusButton(
-                    text = stringResource(
-                        if (isLastPage) R.string.onboarding_finish_setup else R.string.onboarding_continue,
-                    ),
-                    onClick = {
-                        if (isLastPage) {
-                            viewModel.saveAndComplete(onComplete)
-                        } else {
-                            scope.launch {
-                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                            }
-                        }
-                    },
-                    icon = if (isLastPage) Icons.Default.Check else null,
-                    gradient = NexusGradients.SignalSweep,
-                    modifier = Modifier.height(56.dp),
-                )
-            }
+            OnboardingFooter(
+                state = state,
+                isLastPage = isLastPage,
+                pageCount = ofPages,
+                currentPage = pagerState.currentPage,
+                stepLabel = stepLabel,
+                onFinish = { viewModel.saveAndComplete(onComplete) },
+                onContinue = {
+                    scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+                },
+            )
         }
+    }
+}
+
+@Composable
+private fun OnboardingFooter(
+    state: OnboardingUiState,
+    isLastPage: Boolean,
+    pageCount: Int,
+    currentPage: Int,
+    stepLabel: String,
+    onFinish: () -> Unit,
+    onContinue: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .navigationBarsPadding()
+            .padding(
+                start = NexusSpacing.xl,
+                end = NexusSpacing.xl,
+                top = NexusSpacing.xs,
+                bottom = NexusSpacing.md,
+            ),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            CalibratedPageScale(
+                pageCount = pageCount,
+                currentPage = currentPage,
+            )
+            Text(
+                text = stepLabel.uppercase(Locale.ROOT),
+                style = NexusTypography.TelemetryMicro,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(NexusSpacing.md))
+
+        state.saveFault?.let {
+            EditorialStatusBand(
+                label = stringResource(R.string.onboarding_setup_not_saved),
+                detail = stringResource(R.string.onboarding_save_retry_hint),
+                tone = StatusTone.Fault,
+            )
+            Spacer(modifier = Modifier.height(NexusSpacing.sm))
+        }
+
+        NexusButton(
+            text = stringResource(
+                if (isLastPage) R.string.onboarding_finish_setup else R.string.onboarding_continue,
+            ),
+            onClick = if (isLastPage) onFinish else onContinue,
+            enabled = !state.isSaving,
+            loading = state.isSaving,
+            icon = if (isLastPage) Icons.Default.Check else null,
+            gradient = NexusGradients.SignalSweep,
+            modifier = Modifier.height(56.dp),
+        )
     }
 }
 

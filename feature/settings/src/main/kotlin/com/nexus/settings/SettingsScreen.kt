@@ -34,7 +34,6 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -55,6 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusColors
@@ -372,13 +372,12 @@ private fun ConnectField(
         singleLine = true,
         trailingIcon = {
             if (dirty) {
-                IconButton(onClick = { onSave(draft.trim()) }) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = stringResource(R.string.settings_connection_save),
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                }
+                NexusIconButton(
+                    icon = Icons.Default.Check,
+                    contentDescription = stringResource(R.string.settings_connection_save),
+                    onClick = { onSave(draft.trim()) },
+                    tint = MaterialTheme.colorScheme.primary,
+                )
             }
         },
         modifier = Modifier.fillMaxWidth(),

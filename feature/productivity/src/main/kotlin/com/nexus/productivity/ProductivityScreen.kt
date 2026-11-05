@@ -186,7 +186,7 @@ fun ProductivityScreen(
             NexusCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        stringResource(R.string.productivity_today_s_progress),
+                        stringResource(R.string.productivity_session_progress),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -210,11 +210,6 @@ fun ProductivityScreen(
                             ),
                             label = stringResource(R.string.productivity_minutes),
                             color = MaterialTheme.nexus.positive,
-                        )
-                        TodayStat(
-                            value = stringResource(R.string.productivity_12),
-                            label = stringResource(R.string.productivity_streak),
-                            color = MaterialTheme.nexus.attention,
                         )
                     }
                 }

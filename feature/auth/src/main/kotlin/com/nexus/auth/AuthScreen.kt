@@ -3,6 +3,7 @@ package com.nexus.auth
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,12 +27,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -63,6 +61,7 @@ import com.nexus.common.Constants
 import com.nexus.designsystem.component.CalibratedRule
 import com.nexus.designsystem.component.InstrumentGauge
 import com.nexus.designsystem.component.NexusButton
+import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusMark
 import com.nexus.designsystem.component.NexusOutlineButton
 import com.nexus.designsystem.component.NexusWordmark
@@ -75,18 +74,20 @@ import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
 import com.nexus.designsystem.theme.nexus
+import com.nexus.designsystem.component.feedback.EditorialStatusBand
+import com.nexus.designsystem.component.feedback.StatusTone
 import java.util.Locale
 
 @Composable
 fun AuthScreen(
     onGoogleSignIn: () -> Unit = {},
-    onGitHubSignIn: () -> Unit = {},
     onSkip: () -> Unit = {},
     viewModel: AuthViewModel = hiltViewModel(),
 ) {
     var showEmailDialog by remember { mutableStateOf(false) }
     var visible by remember { mutableStateOf(false) }
     val authState by viewModel.authState.collectAsStateWithLifecycle()
+    val failure by viewModel.failure.collectAsStateWithLifecycle()
     val reducedMotion = LocalReducedMotion.current
     LaunchedEffect(Unit) { visible = true }
 
@@ -148,16 +149,11 @@ fun AuthScreen(
                 Spacer(modifier = Modifier.height(NexusSpacing.sm))
 
                 NexusOutlineButton(
-                    text = stringResource(R.string.auth_github),
-                    onClick = onGitHubSignIn,
-                    icon = Icons.Default.Code,
-                )
-
-                Spacer(modifier = Modifier.height(NexusSpacing.sm))
-
-                NexusOutlineButton(
                     text = stringResource(R.string.auth_email),
-                    onClick = { showEmailDialog = true },
+                    onClick = {
+                        viewModel.dismissFailure()
+                        showEmailDialog = true
+                    },
                     icon = Icons.Default.Email,
                 )
 
@@ -176,8 +172,44 @@ fun AuthScreen(
 
                 Spacer(modifier = Modifier.height(NexusSpacing.xs))
 
+                // The Google prompt leaves composition for a browser tab, so a
+                // cancelled or failed return has nowhere to report to unless this
+                // screen carries it. Hidden while the email dialog is up - that
+                // dialog has its own fault line, and two at once reads as noise.
+                SignInFailure(failure = failure, hidden = showEmailDialog, reducedMotion = reducedMotion)
+
                 AuthPrivacyNotice()
             }
+        }
+    }
+}
+
+@Composable
+private fun SignInFailure(
+    failure: AuthFailure?,
+    hidden: Boolean,
+    reducedMotion: Boolean,
+) {
+    val enter = if (reducedMotion) tween(0) else NexusAnimation.Tween.screenEnter
+    val exit = if (reducedMotion) tween(0) else NexusAnimation.Tween.screenExit
+    AnimatedVisibility(
+        visible = failure != null && !hidden,
+        enter = fadeIn(enter),
+        exit = fadeOut(exit),
+    ) {
+        val detail = when (failure) {
+            AuthFailure.Cancelled -> stringResource(R.string.auth_failure_cancelled)
+            AuthFailure.Unavailable -> stringResource(R.string.auth_failure_unavailable)
+            null -> ""
+        }
+        Column {
+            Spacer(modifier = Modifier.height(NexusSpacing.sm))
+            EditorialStatusBand(
+                label = stringResource(R.string.auth_failure_label),
+                detail = detail,
+                tone = StatusTone.Fault,
+                modifier = Modifier.padding(bottom = NexusSpacing.sm),
+            )
         }
     }
 }
@@ -378,10 +410,16 @@ private fun EmailSignInDialog(
                     )
 
                     if (errorMessage != null) {
-                        Text(
-                            text = errorMessage,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
+                        // The provider's own sentence is the reason - "There is no
+                        // user record corresponding to this identifier" is what the
+                        // account table actually said - so it is kept, but framed as
+                        // a fault rather than floated as unlabelled red text.
+                        EditorialStatusBand(
+                            label = stringResource(
+                                if (isSignUp) R.string.auth_failed_sign_up else R.string.auth_failed_sign_in,
+                            ),
+                            detail = errorMessage,
+                            tone = StatusTone.Fault,
                         )
                     }
 
@@ -446,13 +484,13 @@ private fun EmailDialogHeader(
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
-        IconButton(onClick = onDismiss, enabled = dismissEnabled) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = stringResource(R.string.auth_cancel),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+        NexusIconButton(
+            icon = Icons.Default.Close,
+            contentDescription = stringResource(R.string.auth_cancel),
+            onClick = onDismiss,
+            enabled = dismissEnabled,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -478,19 +516,18 @@ private fun EmailPasswordField(
         },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         trailingIcon = {
-            IconButton(onClick = onToggleVisible) {
-                Icon(
-                    imageVector = if (visible) {
-                        Icons.Default.VisibilityOff
-                    } else {
-                        Icons.Default.Visibility
-                    },
-                    contentDescription = stringResource(
-                        if (visible) R.string.auth_hide_password else R.string.auth_show_password,
-                    ),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            NexusIconButton(
+                icon = if (visible) {
+                    Icons.Default.VisibilityOff
+                } else {
+                    Icons.Default.Visibility
+                },
+                contentDescription = stringResource(
+                    if (visible) R.string.auth_hide_password else R.string.auth_show_password,
+                ),
+                onClick = onToggleVisible,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         },
     )
 }

@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -38,9 +37,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.nexus.designsystem.component.LoadingState
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.EmptyState
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
@@ -156,26 +157,39 @@ fun CertificationBrowserScreen(
                 }
             }
 
-            uiState is UiState.Loading -> LoadingState(modifier = Modifier.fillMaxSize())
+            uiState is UiState.Loading -> EditorialSkeletonList(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp, vertical = 8.dp),
+                count = 3,
+                loadingLabel = stringResource(R.string.certifications_loading),
+            )
 
-            uiState is UiState.Error -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        (uiState as UiState.Error).message,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 24.dp),
+            uiState is UiState.Error -> {
+                val message = (uiState as UiState.Error).message
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp, vertical = 8.dp),
+                ) {
+                    EditorialErrorState(
+                        headline = stringResource(R.string.certifications_fault_headline),
+                        reason = stringResource(R.string.certifications_fault_reason),
+                        actionLabel = stringResource(R.string.certifications_retry),
+                        onAction = viewModel::refresh,
+                        secondaryHint = message,
                     )
-                    TextButton(onClick = viewModel::refresh) { Text(stringResource(R.string.certifications_retry)) }
                 }
             }
 
-            else -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.certifications_no_certifications_available_yet),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            else -> EmptyState(
+                title = stringResource(R.string.certifications_empty_title),
+                description = stringResource(R.string.certifications_empty_body),
+                voice = stringResource(R.string.certifications_empty_voice),
+                actionLabel = stringResource(R.string.certifications_check_again),
+                onAction = viewModel::refresh,
+                modifier = Modifier.fillMaxSize(),
+            )
         }
     }
 }

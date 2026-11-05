@@ -1,15 +1,18 @@
 Track internships, hackathons and deadlines that actually fit your profile.
 
-Sagitta is a career workspace for college students — one place to find openings worth your time, save them, apply, and keep the deadlines from sneaking past you.
+Sagitta is a career workspace for college students — find openings worth your time, save them, apply, and keep the deadlines from sneaking past you. Your WhatsApp groups stay; the deadline panic goes.
 
-LIVE OPPORTUNITY CATALOG
-Internships and hackathons are refreshed throughout the day, every day. Each listing carries what you actually need to decide: stipend, duration, location, mode, skills asked for, and the closing date. Listings we cannot verify are left out rather than padded in.
+VERIFIED CATALOG, A NUMBER YOU CAN CHECK
+Every listing carries what you need to decide: stipend, duration, location, mode, skills asked for, and the closing date. New verified listings land every day. Listings we cannot verify are left out rather than padded in — you can test that against any internship you already know about.
 
 DEADLINE AND MATCH ALERTS
-Save an opportunity and Sagitta watches it. You get notified when a deadline is close and when something new arrives that fits the skills on your profile — so a form closing on Friday is not a Sunday discovery.
+Save an opportunity and Sagitta watches it. You get notified when a deadline is close and when something new arrives that fits the skills on your profile. A form closing on Friday will not become a Sunday discovery — save it and check the alert yourself.
 
 SKILL-BASED MATCHING
-Your profile is built from the skills you actually have. Match scores are computed against those skills, and a listing with nothing in common with your profile is not shown as a 90% match to make the screen look busy. Edit that list from your profile any time and the skill radar redraws from it.
+Your profile is built from the skills you actually have. Match scores are computed against those skills, and a listing with nothing in common with your profile is not shown as a 90% match to make the screen look busy. Edit that list any time and the skill radar redraws from it — you can verify the match score against real listings on day one.
+
+SHARE INTO SAGITTA
+When a classmate forwards an opportunity in the group, share it straight into Sagitta. The app searches the verified catalog for what was shared so you can save and track it with one tap — the group finds it, Sagitta keeps it.
 
 APPLICATIONS TRACKER
 Every opportunity you apply to moves through stages — applied, interview, offer, rejected — with the date you touched it. Your pipeline is a list you can read, not a pile of browser tabs.
@@ -35,6 +38,4 @@ No ads, no third-party trackers, and your data is never sold. If you sign in and
 BUILT FOR THE WAY STUDENTS ACTUALLY LOOK
 Shortlist on the metro. Check a deadline between lectures. Log an application the minute you submit it. Everything fits in one hand and works on phones from Android 8 upward.
 
-Sagitta is free to use, with no ads and no sponsored listings — an opportunity appears because it matches you, not because someone paid for the slot. Finding, saving, tracking and practising cost nothing. AI answers are capped at 10 a day on the free tier; an optional Pro upgrade lifts that cap. Nothing else is behind a paywall.
-
-Download Sagitta and stop finding opportunities through five group chats.
+Sagitta is free to use, with no ads and no sponsored listings — an opportunity appears because it matches you, not because someone paid for the slot. Finding, saving, tracking and practising cost nothing. AI answers are capped at 10 a day on the free tier; an optional Pro upgrade lifts that cap, with a 3-month Season Pass sized to your placement season.

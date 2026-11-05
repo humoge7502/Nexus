@@ -42,11 +42,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.designsystem.component.hairline
 import com.nexus.designsystem.theme.NexusTypography
 import com.nexus.domain.model.UiState
@@ -103,34 +105,43 @@ fun NotificationsScreen(
             },
         )
 
-        if (notifications.isEmpty()) {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Icon(
-                    Icons.Default.Notifications, contentDescription = null,
-                    modifier = Modifier.size(44.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
-                )
-                Spacer(Modifier.height(14.dp))
-                Text(
-                    stringResource(R.string.notifications_no_notifications_yet),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    stringResource(R.string.notifications_we_ll_notify_you_about_new),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
+        when {
+            uiState is UiState.Loading -> EditorialSkeletonList(
+                count = 4,
+                loadingLabel = stringResource(R.string.notifications_loading),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp, vertical = 10.dp),
+            )
+
+            uiState is UiState.Error -> {
+                val technical = (uiState as UiState.Error).message
+                EditorialErrorState(
+                    headline = stringResource(R.string.notifications_unable_to_load),
+                    reason = stringResource(R.string.notifications_error_reason),
+                    actionLabel = stringResource(R.string.notifications_try_again),
+                    onAction = viewModel::retry,
+                    secondaryHint = technical.takeIf { it.isNotBlank() },
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp),
                 )
             }
-        } else {
-            LazyColumn(
+
+            notifications.isEmpty() -> EmptyState(
+                title = stringResource(R.string.notifications_no_notifications_yet),
+                description = stringResource(R.string.notifications_we_ll_notify_you_about_new),
+                voice = stringResource(R.string.notifications_empty_voice),
+                icon = {
+                    Icon(
+                        Icons.Default.Notifications,
+                        contentDescription = null,
+                        modifier = Modifier.size(44.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
+                    )
+                },
+                modifier = Modifier.fillMaxSize(),
+            )
+
+            else -> LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 10.dp, bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),

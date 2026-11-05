@@ -17,4 +17,11 @@
     <string name="tribe_peer_benchmarks_for_appear_once_enough">Peer benchmarks for %1$s appear once enough students from your college are on Sagitta. We never invent member counts.</string>
     <string name="tribe_pod_size">Pod size: %1$s</string>
     <string name="tribe_top_skills">Top skills: %1$s</string>
+    <string name="tribe_loading_your_tribe">Loading your tribe...</string>
+    <string name="tribe_unable_to_load">Couldn\'t load your tribe</string>
+    <string name="tribe_error_reason">Your pod was not deleted, nobody was notified, and nothing was sent anywhere. The read from this device is what failed.</string>
+    <string name="tribe_cohort_unable_to_load">Couldn\'t load the campus benchmarks</string>
+    <string name="tribe_cohort_error_reason">Your tribe is intact and unread numbers are shown as none, never guessed. Only the peer benchmark failed to arrive.</string>
+    <string name="tribe_try_again">Try again</string>
+    <string name="tribe_empty_voice">A pod is four people who notice when you stop. Joining is the part that takes one tap.</string>
 </resources>

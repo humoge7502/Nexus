@@ -18,10 +18,10 @@ class VariableRewardManager @Inject constructor() {
 
         if (roll < 0.05f) {
             multiplier = 3f
-            message = "JACKPOT! 3x XP bonus! \uD83C\uDF89"
+            message = "Jackpot — 3x XP bonus"
         } else if (roll < 0.15f) {
             multiplier = 2f
-            message = "2x XP bonus activated! \u26A1"
+            message = "2x XP bonus activated"
         }
 
         val bonusXP = if (currentStreak > 0 && currentStreak % 7 == 0 && roll < 0.3f) {
@@ -31,7 +31,7 @@ class VariableRewardManager @Inject constructor() {
         }
 
         if (bonusXP > 0 && message == null) {
-            message = "${currentStreak}-day streak reward: +$bonusXP bonus XP! \uD83C\uDF1F"
+            message = "${currentStreak}-day streak reward: +$bonusXP bonus XP"
         }
 
         return VariableReward(

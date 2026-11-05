@@ -45,6 +45,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -112,12 +113,17 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
 
     private var pendingDestination by mutableStateOf<NexusDestination?>(null)
+    private var pendingShareQuery by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         pendingDestination = NexusDeepLinks.resolve(intent)
+        // The group-chat bridge: a listing shared into Sagitta lands on the
+        // search screen pre-filled with the shared text, so the forward can
+        // be checked against the verified catalog and tracked in one pass.
+        pendingShareQuery = NexusDeepLinks.extractShareQuery(intent)
         setContent {
             val settingsViewModel: SettingsViewModel = hiltViewModel()
             val settings by settingsViewModel.uiState.collectAsStateWithLifecycle()
@@ -137,7 +143,9 @@ class MainActivity : ComponentActivity() {
                 NexusApp(
                     activity = this@MainActivity,
                     pendingDestination = pendingDestination,
+                    pendingShareQuery = pendingShareQuery,
                     onDestinationConsumed = { pendingDestination = null },
+                    onShareConsumed = { pendingShareQuery = null },
                 )
             }
         }
@@ -147,6 +155,7 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         pendingDestination = NexusDeepLinks.resolve(intent)
+        NexusDeepLinks.extractShareQuery(intent)?.let { pendingShareQuery = it }
     }
 }
 
@@ -154,7 +163,9 @@ class MainActivity : ComponentActivity() {
 fun NexusApp(
     activity: MainActivity? = null,
     pendingDestination: NexusDestination? = null,
+    pendingShareQuery: String? = null,
     onDestinationConsumed: () -> Unit = {},
+    onShareConsumed: () -> Unit = {},
 ) {
     val authViewModel: AuthViewModel = hiltViewModel()
     val onboardingViewModel: OnboardingViewModel = hiltViewModel()
@@ -177,10 +188,15 @@ fun NexusApp(
 
     LaunchedEffect(authState, onboardingCompleted) {
         val onboarded = onboardingCompleted
-        if (authState is ApiResult.Loading || onboarded == null) {
+        if (onboarded == null) {
             currentStep = "loading"
             return@LaunchedEffect
         }
+        // Loading is a boot state, not a sign-in state. Once a step is on screen,
+        // an in-flight request must leave it alone: the email dialog lives inside
+        // "auth", and re-targeting AnimatedContent mid-request destroyed it, so a
+        // rejected password wiped the form and never showed its message.
+        if (authState is ApiResult.Loading) return@LaunchedEffect
         currentStep = when {
             onboarded -> "main"
             (authState as? ApiResult.Success)?.data == true -> "onboarding"
@@ -236,7 +252,6 @@ fun NexusApp(
                             googleSignInLauncher.launch(intent)
                         }
                     },
-                    onGitHubSignIn = { currentStep = "onboarding" },
                     onSkip = { currentStep = "onboarding" }
                 )
             }
@@ -252,7 +267,9 @@ fun NexusApp(
             }
             "main" -> NexusMainScaffold(
                 pendingDestination = pendingDestination,
+                pendingShareQuery = pendingShareQuery,
                 onDestinationConsumed = onDestinationConsumed,
+                onShareConsumed = onShareConsumed,
             )
         }
     }
@@ -261,7 +278,9 @@ fun NexusApp(
 @Composable
 fun NexusMainScaffold(
     pendingDestination: NexusDestination? = null,
+    pendingShareQuery: String? = null,
     onDestinationConsumed: () -> Unit = {},
+    onShareConsumed: () -> Unit = {},
 ) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -278,22 +297,18 @@ fun NexusMainScaffold(
         onDestinationConsumed()
     }
 
+    // The shared listing arrives only after the shell exists (NexusMainScaffold
+    // composes only in the main step), so the bridge fires exactly once here.
+    LaunchedEffect(pendingShareQuery) {
+        val query = pendingShareQuery ?: return@LaunchedEffect
+        navController.navigate(NexusDestination.Search(query)) { launchSingleTop = true }
+        onShareConsumed()
+    }
+
     // Compare destinations by route class, never by qualifiedName: R8 renames
     // classes in release builds, so string-based matching silently hides the bar.
-    val topLevelDestinations = listOf(
-        NexusDestination.Home,
-        NexusDestination.Explore,
-        NexusDestination.AIHub,
-        NexusDestination.Growth,
-        NexusDestination.Profile,
-    )
-    val topLevelRoutes = listOf(
-        NexusDestination.Home::class,
-        NexusDestination.Explore::class,
-        NexusDestination.AIHub::class,
-        NexusDestination.Growth::class,
-        NexusDestination.Profile::class,
-    )
+    val topLevelDestinations = topLevelDestinationsList
+    val topLevelRoutes = topLevelRoutesList
     val selectedTab = topLevelRoutes.indexOfFirst { route ->
         backStackEntry?.destination?.hasRoute(route) == true
     }
@@ -351,230 +366,10 @@ fun NexusMainScaffold(
                         )
                         .padding(paddingValues),
                 ) {
-                    // Tab switches are peer-to-peer and fade-lift — sliding a peer
-                    // sideways would claim an order the navigation does not have.
-                    // Only opening or leaving a detail slides. Reduced motion
-                    // collapses every page change to an instant swap.
-                    val reducedMotion = LocalReducedMotion.current
-                    val isTopLevel = { entry: NavBackStackEntry ->
-                        topLevelRoutes.any { entry.destination.hasRoute(it) }
-                    }
-                    NavHost(
+                    NexusDestinationGraph(
                         navController = navController,
-                        startDestination = NexusDestination.Home,
-                        enterTransition = navEnter(reducedMotion, isTopLevel),
-                        exitTransition = navExit(reducedMotion, isTopLevel),
-                        popEnterTransition = navEnter(reducedMotion, isTopLevel, backward = true),
-                        popExitTransition = navExit(reducedMotion, isTopLevel, backward = true),
-                        modifier = Modifier.fillMaxSize(),
-                    ) {
-                // HOME
-                composable<NexusDestination.Home> {
-                    HomeScreen(
-                        onInternshipClick = { id -> navController.navigate(NexusDestination.InternshipDetail(id)) },
-                        onCertificationClick = { id -> navController.navigate(NexusDestination.CertificationDetail(id)) },
-                        onViewAllInternships = { navController.navigate(NexusDestination.InternshipList) },
-                        onNavigateToProductivity = { navController.navigate(NexusDestination.Productivity) },
-                        onNavigateToProfile = { navController.navigate(NexusDestination.Profile) },
-                        onNavigateToNotifications = { navController.navigate(NexusDestination.Notifications) },
                         onOpenCommandPalette = { paletteOpen = true },
                     )
-                }
-
-                // EXPLORE
-                composable<NexusDestination.Explore> {
-                    ExploreScreen(
-                        onInternshipClick = { id -> navController.navigate(NexusDestination.InternshipDetail(id)) },
-                        onHackathonClick = { id -> navController.navigate(NexusDestination.HackathonDetail(id)) },
-                        onCertificationClick = { id -> navController.navigate(NexusDestination.CertificationDetail(id)) },
-                        showBackArrow = false,
-                    )
-                }
-                composable<NexusDestination.HackathonDetail> { entry ->
-                    val dest = entry.toRoute<NexusDestination.HackathonDetail>()
-                    HackathonDetailScreen(hackathonId = dest.hackathonId, onBack = { navController.popBackStack() })
-                }
-
-                // AI HUB
-                composable<NexusDestination.AIHub> {
-                    AIHubScreen(
-                        onToolRoute = { route ->
-                            navController.navigate(
-                                when (route) {
-                                    "chat" -> NexusDestination.AIChat
-                                    "resume" -> NexusDestination.AIResumeAnalyzer
-                                    "research" -> NexusDestination.Research
-                                    "roadmap" -> NexusDestination.Roadmap
-                                    "skillgap" -> NexusDestination.SkillGap
-                                    "linkedin" -> NexusDestination.LinkedInPost
-                                    "interview" -> NexusDestination.InterviewCoach
-                                    else -> NexusDestination.CareerInsights
-                                },
-                            )
-                        },
-                        showBackArrow = false,
-                    )
-                }
-                composable<NexusDestination.AIChat> {
-                    AIChatScreen(onBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.AIResumeAnalyzer> {
-                    AIResumeAnalyzerScreen(onBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.Roadmap> {
-                    RoadmapGeneratorScreen(onBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.SkillGap> {
-                    SkillGapScreen(onBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.LinkedInPost> {
-                    LinkedInPostScreen(onBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.InterviewCoach> {
-                    InterviewCoachScreen(onBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.CareerInsights> {
-                    CareerInsightsScreen(onBack = { navController.popBackStack() })
-                }
-
-                // GROWTH
-                composable<NexusDestination.Growth> {
-                    GrowthScreen(
-                        onDsaTracker = { navController.navigate(NexusDestination.DSATracker) },
-                        onGoals = { navController.navigate(NexusDestination.Goals) },
-                        onOracle = { navController.navigate(NexusDestination.Oracle) },
-                        onArena = { navController.navigate(NexusDestination.Arena) },
-                        onSkills = { navController.navigate(NexusDestination.Profile) },
-                        showBackArrow = false,
-                    )
-                }
-                composable<NexusDestination.DSATracker> {
-                    DSATrackerScreen(onBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.Goals> {
-                    GoalsScreen(onBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.Oracle> {
-                    NexusOracleScreen(onBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.Arena> {
-                    NexusArenaScreen(onBack = { navController.popBackStack() })
-                }
-
-                // LEGACY SCREENS
-                composable<NexusDestination.InternshipList> {
-                    InternshipListScreen(
-                        onInternshipClick = { id -> navController.navigate(NexusDestination.InternshipDetail(id)) },
-                        onBack = { navController.popBackStack() }
-                    )
-                }
-                composable<NexusDestination.InternshipDetail> { entry ->
-                    val dest = entry.toRoute<NexusDestination.InternshipDetail>()
-                    InternshipDetailScreen(internshipId = dest.internshipId, onBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.Profile> {
-                    ProfileScreen(
-                        onBack = { navController.popBackStack() },
-                        onSettings = { navController.navigate(NexusDestination.Settings) },
-                        onAchievements = { navController.navigate(NexusDestination.Achievements) },
-                        onLeaderboard = { navController.navigate(NexusDestination.Leaderboard) },
-                        onGoPro = { navController.navigate(NexusDestination.Paywall) },
-                        onApplications = { navController.navigate(NexusDestination.Applications) },
-                        onPlacementForecast = { navController.navigate(NexusDestination.PlacementForecast) },
-                        onCareerMirror = { navController.navigate(NexusDestination.CareerMirror) },
-                        onCohort = { navController.navigate(NexusDestination.CohortIntelligence) },
-                        onInterviewLog = { navController.navigate(NexusDestination.InterviewLog) },
-                        onPortfolio = { navController.navigate(NexusDestination.Portfolio) },
-                        onSearch = { navController.navigate(NexusDestination.Search()) },
-                        onCommunity = { navController.navigate(NexusDestination.Community) },
-                        onTribe = { navController.navigate(NexusDestination.Tribe) },
-                        showBackArrow = false,
-                    )
-                }
-                composable<NexusDestination.Research> {
-                    ResearchScreen(onBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.Paywall> {
-                    com.nexus.paywall.PaywallScreen(
-                        onDismiss = { navController.popBackStack() },
-                        onPurchased = { navController.popBackStack() },
-                    )
-                }
-                composable<NexusDestination.Achievements> {
-                    AchievementsScreen(
-                        onBack = { navController.popBackStack() },
-                        onSettings = { navController.navigate(NexusDestination.Settings) },
-                    )
-                }
-                composable<NexusDestination.Leaderboard> {
-                    LeaderboardScreen(
-                        onBack = { navController.popBackStack() },
-                        onOpenArena = { navController.navigate(NexusDestination.Arena) },
-                    )
-                }
-                composable<NexusDestination.Notifications> {
-                    NotificationsScreen(onBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.CertificationBrowser> {
-                    CertificationBrowserScreen(
-                        onBack = { navController.popBackStack() },
-                        onCertClick = { id -> navController.navigate(NexusDestination.CertificationDetail(id)) }
-                    )
-                }
-                composable<NexusDestination.Productivity> {
-                    ProductivityScreen(onBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.Settings> {
-                    SettingsScreen(
-                        onBack = { navController.popBackStack() },
-                        onGoPro = { navController.navigate(NexusDestination.Paywall) },
-                    )
-                }
-                composable<NexusDestination.CertificationDetail> { entry ->
-                    val dest = entry.toRoute<NexusDestination.CertificationDetail>()
-                    CertificationDetailScreen(certId = dest.certId, onBack = { navController.popBackStack() })
-                }
-
-                // CAREER INTELLIGENCE & COMMUNITY
-                composable<NexusDestination.Applications> {
-                    ApplicationsScreen(onNavigateBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.CareerMirror> {
-                    CareerMirrorScreen(onBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.CohortIntelligence> {
-                    CohortIntelligenceScreen(onBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.Community> {
-                    CommunityScreen(
-                        onBack = { navController.popBackStack() },
-                        onOpenCohort = { navController.navigate(NexusDestination.CohortIntelligence) },
-                        onOpenTribe = { navController.navigate(NexusDestination.Tribe) },
-                        onOpenHackathon = { hackathonId ->
-                            navController.navigate(NexusDestination.HackathonDetail(hackathonId))
-                        },
-                    )
-                }
-                composable<NexusDestination.InterviewLog> {
-                    InterviewLogScreen(onBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.PlacementForecast> {
-                    PlacementForecastScreen(onBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.Portfolio> {
-                    PortfolioScreen(onBack = { navController.popBackStack() })
-                }
-                composable<NexusDestination.Search> { entry ->
-                    SearchScreen(
-                        onBack = { navController.popBackStack() },
-                        onResultClick = { id -> navController.navigate(NexusDestination.InternshipDetail(id)) },
-                        initialQuery = entry.toRoute<NexusDestination.Search>().initialQuery,
-                    )
-                }
-                composable<NexusDestination.Tribe> {
-                    TribeScreen(onBack = { navController.popBackStack() })
-                }
-            }
                 }
             }
         }
@@ -730,9 +525,297 @@ private fun paletteDestinations(): List<Pair<NexusCommand, NexusDestination>> = 
         NexusDestination.Settings,
 )
 
+// File scope rather than a shell local: the chrome and the extracted
+// destination graph must agree on one definition of "top level".
+private val topLevelDestinationsList = listOf(
+    NexusDestination.Home,
+    NexusDestination.Explore,
+    NexusDestination.AIHub,
+    NexusDestination.Growth,
+    NexusDestination.Profile,
+)
+private val topLevelRoutesList = listOf(
+    NexusDestination.Home::class,
+    NexusDestination.Explore::class,
+    NexusDestination.AIHub::class,
+    NexusDestination.Growth::class,
+    NexusDestination.Profile::class,
+)
+
+/**
+ * The destination graph: every route, its transitions, and the lambdas
+ * that wire screens together — extracted from the shell so the shell stays
+ * about chrome and state rather than 37 route registrations.
+ */
+@Composable
+private fun NexusDestinationGraph(
+    navController: NavHostController,
+    onOpenCommandPalette: () -> Unit,
+) {
+                // Tab switches are peer-to-peer and fade-lift — sliding a peer
+                // sideways would claim an order the navigation does not have.
+                // Only opening or leaving a detail slides. Reduced motion
+                // collapses every page change to an instant swap.
+                val reducedMotion = LocalReducedMotion.current
+                val isTopLevel = { entry: NavBackStackEntry ->
+                    topLevelRoutesList.any { entry.destination.hasRoute(it) }
+                }
+                NavHost(
+                    navController = navController,
+                    startDestination = NexusDestination.Home,
+                    enterTransition = navEnter(reducedMotion, isTopLevel),
+                    exitTransition = navExit(reducedMotion, isTopLevel),
+                    popEnterTransition = navEnter(reducedMotion, isTopLevel, backward = true),
+                    popExitTransition = navExit(reducedMotion, isTopLevel, backward = true),
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+            nexusCoreDestinations(navController, onOpenCommandPalette)
+            nexusLegacyDestinations(navController)
+        }
+}
+
+/** HOME, EXPLORE, AI HUB and GROWTH — separated so the graph reads by section. */
+private fun NavGraphBuilder.nexusCoreDestinations(
+    navController: NavHostController,
+    onOpenCommandPalette: () -> Unit,
+) {
+        // HOME
+        composable<NexusDestination.Home> {
+            HomeScreen(
+                onInternshipClick = { id -> navController.navigate(NexusDestination.InternshipDetail(id)) },
+                onCertificationClick = { id -> navController.navigate(NexusDestination.CertificationDetail(id)) },
+                onViewAllInternships = { navController.navigate(NexusDestination.InternshipList) },
+                onNavigateToProductivity = { navController.navigate(NexusDestination.Productivity) },
+                onNavigateToProfile = { navController.navigate(NexusDestination.Profile) },
+                onNavigateToApplications = { navController.navigate(NexusDestination.Applications) },
+                    onNavigateToNotifications = { navController.navigate(NexusDestination.Notifications) },
+                    onOpenCommandPalette = onOpenCommandPalette,
+            )
+        }
+
+        // EXPLORE
+        composable<NexusDestination.Explore> {
+            ExploreScreen(
+                onInternshipClick = { id -> navController.navigate(NexusDestination.InternshipDetail(id)) },
+                onHackathonClick = { id -> navController.navigate(NexusDestination.HackathonDetail(id)) },
+                onCertificationClick = { id -> navController.navigate(NexusDestination.CertificationDetail(id)) },
+                showBackArrow = false,
+            )
+        }
+        composable<NexusDestination.HackathonDetail> { entry ->
+            val dest = entry.toRoute<NexusDestination.HackathonDetail>()
+            HackathonDetailScreen(hackathonId = dest.hackathonId, onBack = { navController.popBackStack() })
+        }
+
+        // AI HUB
+        composable<NexusDestination.AIHub> {
+            AIHubScreen(
+                onToolRoute = { route ->
+                    navController.navigate(
+                        when (route) {
+                            "chat" -> NexusDestination.AIChat
+                            "resume" -> NexusDestination.AIResumeAnalyzer
+                            "research" -> NexusDestination.Research
+                            "roadmap" -> NexusDestination.Roadmap
+                            "skillgap" -> NexusDestination.SkillGap
+                            "linkedin" -> NexusDestination.LinkedInPost
+                            "interview" -> NexusDestination.InterviewCoach
+                            else -> NexusDestination.CareerInsights
+                        },
+                    )
+                },
+                showBackArrow = false,
+            )
+        }
+        composable<NexusDestination.AIChat> {
+            AIChatScreen(onBack = { navController.popBackStack() })
+        }
+        composable<NexusDestination.AIResumeAnalyzer> {
+            AIResumeAnalyzerScreen(
+                onBack = { navController.popBackStack() },
+                onGoPro = { navController.navigate(NexusDestination.Paywall) },
+            )
+        }
+        composable<NexusDestination.Roadmap> {
+            RoadmapGeneratorScreen(
+                onBack = { navController.popBackStack() },
+                onGoPro = { navController.navigate(NexusDestination.Paywall) },
+            )
+        }
+        composable<NexusDestination.SkillGap> {
+            SkillGapScreen(
+                onBack = { navController.popBackStack() },
+                onGoPro = { navController.navigate(NexusDestination.Paywall) },
+            )
+        }
+        composable<NexusDestination.LinkedInPost> {
+            LinkedInPostScreen(
+                onBack = { navController.popBackStack() },
+                onGoPro = { navController.navigate(NexusDestination.Paywall) },
+            )
+        }
+        composable<NexusDestination.InterviewCoach> {
+            InterviewCoachScreen(
+                onBack = { navController.popBackStack() },
+                onGoPro = { navController.navigate(NexusDestination.Paywall) },
+            )
+        }
+        composable<NexusDestination.CareerInsights> {
+            CareerInsightsScreen(
+                onBack = { navController.popBackStack() },
+                onGoPro = { navController.navigate(NexusDestination.Paywall) },
+            )
+        }
+
+        // GROWTH
+        composable<NexusDestination.Growth> {
+            GrowthScreen(
+                onDsaTracker = { navController.navigate(NexusDestination.DSATracker) },
+                onGoals = { navController.navigate(NexusDestination.Goals) },
+                onOracle = { navController.navigate(NexusDestination.Oracle) },
+                onArena = { navController.navigate(NexusDestination.Arena) },
+                onSkills = { navController.navigate(NexusDestination.Profile) },
+                showBackArrow = false,
+            )
+        }
+        composable<NexusDestination.DSATracker> {
+            DSATrackerScreen(onBack = { navController.popBackStack() })
+        }
+        composable<NexusDestination.Goals> {
+            GoalsScreen(onBack = { navController.popBackStack() })
+        }
+        composable<NexusDestination.Oracle> {
+            NexusOracleScreen(onBack = { navController.popBackStack() })
+        }
+        composable<NexusDestination.Arena> {
+            NexusArenaScreen(onBack = { navController.popBackStack() })
+        }
+
+}
+
+/** Everything past the GROWTH group; the split is by size, not by behaviour. */
+private fun NavGraphBuilder.nexusLegacyDestinations(
+    navController: NavHostController,
+) {
+        // LEGACY SCREENS
+        composable<NexusDestination.InternshipList> {
+            InternshipListScreen(
+                onInternshipClick = { id -> navController.navigate(NexusDestination.InternshipDetail(id)) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable<NexusDestination.InternshipDetail> { entry ->
+            val dest = entry.toRoute<NexusDestination.InternshipDetail>()
+            InternshipDetailScreen(internshipId = dest.internshipId, onBack = { navController.popBackStack() })
+        }
+        composable<NexusDestination.Profile> {
+            ProfileScreen(
+                onBack = { navController.popBackStack() },
+                onSettings = { navController.navigate(NexusDestination.Settings) },
+                onAchievements = { navController.navigate(NexusDestination.Achievements) },
+                onLeaderboard = { navController.navigate(NexusDestination.Leaderboard) },
+                onGoPro = { navController.navigate(NexusDestination.Paywall) },
+                onApplications = { navController.navigate(NexusDestination.Applications) },
+                onPlacementForecast = { navController.navigate(NexusDestination.PlacementForecast) },
+                onCareerMirror = { navController.navigate(NexusDestination.CareerMirror) },
+                onCohort = { navController.navigate(NexusDestination.CohortIntelligence) },
+                onInterviewLog = { navController.navigate(NexusDestination.InterviewLog) },
+                onPortfolio = { navController.navigate(NexusDestination.Portfolio) },
+                onSearch = { navController.navigate(NexusDestination.Search()) },
+                onCommunity = { navController.navigate(NexusDestination.Community) },
+                onTribe = { navController.navigate(NexusDestination.Tribe) },
+                showBackArrow = false,
+            )
+        }
+        composable<NexusDestination.Research> {
+            ResearchScreen(onBack = { navController.popBackStack() })
+        }
+        composable<NexusDestination.Paywall> {
+            com.nexus.paywall.PaywallScreen(
+                onDismiss = { navController.popBackStack() },
+                onPurchased = { navController.popBackStack() },
+            )
+        }
+        composable<NexusDestination.Achievements> {
+            AchievementsScreen(
+                onBack = { navController.popBackStack() },
+                onSettings = { navController.navigate(NexusDestination.Settings) },
+            )
+        }
+        composable<NexusDestination.Leaderboard> {
+            LeaderboardScreen(
+                onBack = { navController.popBackStack() },
+                onOpenArena = { navController.navigate(NexusDestination.Arena) },
+            )
+        }
+        composable<NexusDestination.Notifications> {
+            NotificationsScreen(onBack = { navController.popBackStack() })
+        }
+        composable<NexusDestination.CertificationBrowser> {
+            CertificationBrowserScreen(
+                onBack = { navController.popBackStack() },
+                onCertClick = { id -> navController.navigate(NexusDestination.CertificationDetail(id)) }
+            )
+        }
+        composable<NexusDestination.Productivity> {
+            ProductivityScreen(onBack = { navController.popBackStack() })
+        }
+        composable<NexusDestination.Settings> {
+            SettingsScreen(
+                onBack = { navController.popBackStack() },
+                onGoPro = { navController.navigate(NexusDestination.Paywall) },
+            )
+        }
+        composable<NexusDestination.CertificationDetail> { entry ->
+            val dest = entry.toRoute<NexusDestination.CertificationDetail>()
+            CertificationDetailScreen(certId = dest.certId, onBack = { navController.popBackStack() })
+        }
+
+        // CAREER INTELLIGENCE & COMMUNITY
+        composable<NexusDestination.Applications> {
+            ApplicationsScreen(onNavigateBack = { navController.popBackStack() })
+        }
+        composable<NexusDestination.CareerMirror> {
+            CareerMirrorScreen(onBack = { navController.popBackStack() })
+        }
+        composable<NexusDestination.CohortIntelligence> {
+            CohortIntelligenceScreen(onBack = { navController.popBackStack() })
+        }
+        composable<NexusDestination.Community> {
+            CommunityScreen(
+                onBack = { navController.popBackStack() },
+                onOpenCohort = { navController.navigate(NexusDestination.CohortIntelligence) },
+                onOpenTribe = { navController.navigate(NexusDestination.Tribe) },
+                onOpenHackathon = { hackathonId ->
+                    navController.navigate(NexusDestination.HackathonDetail(hackathonId))
+                },
+            )
+        }
+        composable<NexusDestination.InterviewLog> {
+            InterviewLogScreen(onBack = { navController.popBackStack() })
+        }
+        composable<NexusDestination.PlacementForecast> {
+            PlacementForecastScreen(onBack = { navController.popBackStack() })
+        }
+        composable<NexusDestination.Portfolio> {
+            PortfolioScreen(onBack = { navController.popBackStack() })
+        }
+        composable<NexusDestination.Search> { entry ->
+            SearchScreen(
+                onBack = { navController.popBackStack() },
+                onResultClick = { id -> navController.navigate(NexusDestination.InternshipDetail(id)) },
+                initialQuery = entry.toRoute<NexusDestination.Search>().initialQuery,
+            )
+        }
+        composable<NexusDestination.Tribe> {
+            TribeScreen(onBack = { navController.popBackStack() })
+        }
+}
+
 /** What arrives on a page change: peers fade-lift, a detail slides in from
  *  its parent, and reduced motion swaps instantly — the hop itself carries
- *  the meaning, so no movement is added on top of it. */private fun navEnter(
+ *  the meaning, so no movement is added on top of it. */
+private fun navEnter(
     reducedMotion: Boolean,
     isTopLevel: (NavBackStackEntry) -> Boolean,
     backward: Boolean = false,

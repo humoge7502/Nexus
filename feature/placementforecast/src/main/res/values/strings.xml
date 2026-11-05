@@ -22,4 +22,11 @@
     <string name="placementforecast_factor_lowers">One standard step up in this input removes %1$d points from the model estimate.</string>
     <string name="placementforecast_factor_none">This input has no measurable effect at your current numbers.</string>
     <string name="placementforecast_factor_fixed">Your college tier is part of the model but is not something you can change.</string>
+    <string name="placementforecast_loading_your_forecast">Rebuilding your forecast...</string>
+    <string name="placementforecast_unable_to_load">Couldn\'t load your forecast</string>
+    <string name="placementforecast_error_reason">Nothing was deleted and nobody was notified — your activity history is still on this device, untouched. The recalculation simply could not read it.</string>
+    <string name="placementforecast_try_again">Try again</string>
+    <string name="placementforecast_no_forecast_yet">No forecast yet</string>
+    <string name="placementforecast_no_score_snapshot">A forecast projects from your Sagitta Score history, and there is no stored score to read. Every tier number below it would be a guess, so none are shown.</string>
+    <string name="placementforecast_empty_voice">A number is only worth reading if it was earned. Log a week of practice and the first real forecast replaces this one.</string>
 </resources>

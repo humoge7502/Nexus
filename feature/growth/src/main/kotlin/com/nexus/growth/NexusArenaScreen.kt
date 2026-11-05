@@ -42,6 +42,7 @@ import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.feedback.EditorialErrorState
 import com.nexus.designsystem.effect.StreakIgnition
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusSpacing
@@ -149,6 +150,18 @@ fun NexusArenaContent(
                 items(listed, key = { it.userId }) { entry ->
                     ArenaRow(entry = entry)
                 }
+            }
+
+            // Ahead of the empty branch: a board that never arrived is not a
+            // board with nobody on it.
+            uiState.loadFault != null -> item {
+                EditorialErrorState(
+                    headline = stringResource(R.string.arena_unable_to_load),
+                    reason = stringResource(R.string.arena_load_error_reason),
+                    actionLabel = stringResource(R.string.arena_try_again),
+                    onAction = onRefresh,
+                    secondaryHint = uiState.loadFault,
+                )
             }
 
             else -> item { ArenaEmptyState() }

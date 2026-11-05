@@ -25,6 +25,13 @@ class HackathonDetailViewModel @Inject constructor(
     val hackathons: StateFlow<UiState<List<Hackathon>>> = _hackathons.asStateFlow()
 
     init {
+        load()
+    }
+
+    fun retry() = load()
+
+    private fun load() {
+        _hackathons.value = UiState.Loading
         viewModelScope.launch {
             repository.getAllHackathons()
                 .map<List<Hackathon>, UiState<List<Hackathon>>> { UiState.Success(it) }

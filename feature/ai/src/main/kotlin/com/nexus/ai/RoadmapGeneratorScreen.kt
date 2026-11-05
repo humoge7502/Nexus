@@ -4,7 +4,8 @@ import androidx.compose.ui.res.stringResource
 import com.nexus.ai.R
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -19,11 +20,12 @@ import com.nexus.common.ApiResult
 import com.nexus.common.Constants
 import com.nexus.common.RateLimitResult
 import com.nexus.data.repository.UserXpRepository
-import com.nexus.designsystem.component.LoadingState
 import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.domain.model.AIMessage
 import com.nexus.domain.model.AiMessageRole
 import com.nexus.network.ai.AIOpenRouterService
@@ -35,6 +37,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Instant
 import javax.inject.Inject
@@ -46,6 +49,7 @@ sealed interface RoadmapEffect {
 @Immutable
 data class RoadmapUiState(
     val isLoading: Boolean = false,
+    val isLimitReached: Boolean = false,
     val targetRole: String = "",
     val roadmap: String = "",
     val error: String? = null,
@@ -77,28 +81,32 @@ class RoadmapViewModel @Inject constructor(
     fun generate() {
         val role = _uiState.value.targetRole
         if (role.isBlank()) return
-viewModelScope.launch {
-        val isPro = userPreferences.isPro.first()
-        when (val limitResult = rateLimiter.canMakeCall(isPro)) {
+        viewModelScope.launch {
+            val isPro = userPreferences.isPro.first()
+            when (val limitResult = rateLimiter.canMakeCall(isPro)) {
                 is RateLimitResult.LimitExceeded -> {
-                    _uiState.value = _uiState.value.copy(error = "Daily AI limit reached. Upgrade to Pro for unlimited access.")
+                    // The cap is a state, not an error string: the screen renders
+                    // it as the unrecoverable one it is, with the way out on it.
+                    _uiState.update {
+                        it.copy(isLoading = false, isLimitReached = true, error = null)
+                    }
                     return@launch
                 }
                 is RateLimitResult.Allowed -> Unit
             }
 
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            _uiState.update { it.copy(isLoading = true, isLimitReached = false, error = null) }
             try {
                 val prompt = "Create a detailed career roadmap for becoming a $role. Include phases with timeline, skills to learn, projects to build, certifications to get, and resources. Format with clear sections."
                 val response = aiService.sendMessage(prompt)
                 rateLimiter.recordCall()
-                _uiState.value = _uiState.value.copy(isLoading = false, roadmap = response)
+                _uiState.update { it.copy(isLoading = false, roadmap = response) }
                 analyticsTracker.track("roadmap_generated", mapOf("target_role" to role))
 
                 val result = xpRepository.awardXP(Constants.XP_PER_ROADMAP_MILESTONE, "roadmap_generated")
                 _effect.emit(RoadmapEffect.ShowXPToast(result.xpAwarded))
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(isLoading = false, error = e.message ?: "Generation failed")
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
     }
@@ -107,11 +115,16 @@ viewModelScope.launch {
 @Composable
 fun RoadmapGeneratorScreen(
     onBack: () -> Unit = {},
+    onGoPro: () -> Unit = {},
     viewModel: RoadmapViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+    ) {
         NexusTopBar(
             title = stringResource(R.string.ai_roadmap_generator),
             onBack = onBack,
@@ -127,37 +140,51 @@ fun RoadmapGeneratorScreen(
             )
             Spacer(Modifier.height(12.dp))
             NexusButton(
-                text = if (uiState.isLoading) "Generating..." else "Generate Roadmap",
+                text = stringResource(
+                    if (uiState.isLoading) R.string.ai_generating_button else R.string.ai_generate_roadmap_button,
+                ),
                 onClick = { viewModel.generate() },
                 enabled = uiState.targetRole.isNotBlank() && !uiState.isLoading,
             )
+            Spacer(Modifier.height(20.dp))
+            RoadmapOutcome(uiState = uiState, onRetry = viewModel::generate, onGoPro = onGoPro)
         }
+    }
+}
 
-        if (uiState.isLoading) {
-            LoadingState(modifier = Modifier.fillMaxSize())
-        }
+@Composable
+private fun RoadmapOutcome(
+    uiState: RoadmapUiState,
+    onRetry: () -> Unit,
+    onGoPro: () -> Unit,
+) {
+    when {
+        uiState.isLoading -> EditorialSkeletonList(
+            count = 3,
+            loadingLabel = stringResource(R.string.ai_roadmap_loading),
+        )
 
-        uiState.error?.let { error ->
+        uiState.isLimitReached -> EditorialErrorState(
+            headline = stringResource(R.string.ai_daily_limit_headline),
+            reason = stringResource(R.string.ai_daily_limit_shared_reason),
+            actionLabel = stringResource(R.string.ai_unlock_pro),
+            onAction = onGoPro,
+            isRecoverable = false,
+        )
+
+        uiState.error != null -> EditorialErrorState(
+            headline = stringResource(R.string.ai_fault_headline),
+            reason = stringResource(R.string.ai_fault_reason_inputs),
+            actionLabel = stringResource(R.string.ai_retry),
+            onAction = onRetry,
+            secondaryHint = uiState.error,
+        )
+
+        uiState.roadmap.isNotBlank() -> NexusCard(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = error, color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(16.dp),
+                text = uiState.roadmap,
+                style = MaterialTheme.typography.bodyMedium,
             )
-        }
-
-        if (uiState.roadmap.isNotBlank()) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-            ) {
-                item {
-                    NexusCard(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = uiState.roadmap,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
-                }
-            }
         }
     }
 }

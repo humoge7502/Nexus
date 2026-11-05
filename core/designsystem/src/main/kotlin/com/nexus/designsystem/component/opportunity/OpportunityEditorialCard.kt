@@ -16,8 +16,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +30,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
@@ -373,26 +379,34 @@ fun EligibilitySummary(
 @Composable
 private fun MarkFor(verdict: EligibilityVerdict) {
     val ext = MaterialTheme.nexus
-    val (color, glyph) = when (verdict) {
-        EligibilityVerdict.Met -> ext.positive to "✓"
-        EligibilityVerdict.NotMet -> ext.attention to "×"
-        EligibilityVerdict.Unknown ->
-            MaterialTheme.colorScheme.onSurfaceVariant to "?"
+    val mark = when (verdict) {
+        EligibilityVerdict.Met ->
+            Mark(ext.positive, Icons.Default.Check, "Requirement met")
+        EligibilityVerdict.NotMet ->
+            Mark(ext.attention, Icons.Default.Close, "Requirement not met")
+        EligibilityVerdict.Unknown -> Mark(
+            MaterialTheme.colorScheme.onSurfaceVariant,
+            Icons.AutoMirrored.Filled.HelpOutline,
+            "Not checkable from your profile",
+        )
     }
     Box(
         modifier = Modifier
             .size(16.dp)
             .clip(NexusShapes.tag)
-            .background(color.copy(alpha = 0.14f)),
+            .background(mark.color.copy(alpha = 0.14f)),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = glyph,
-            style = NexusTypography.Telemetry,
-            color = color,
+        Icon(
+            imageVector = mark.icon,
+            contentDescription = mark.description,
+            tint = mark.color,
+            modifier = Modifier.size(11.dp),
         )
     }
 }
+
+private class Mark(val color: Color, val icon: ImageVector, val description: String)
 
 /**
  * A saved listing with its pipeline position attached.

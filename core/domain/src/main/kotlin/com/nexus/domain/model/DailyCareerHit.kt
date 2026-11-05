@@ -13,12 +13,12 @@ data class DailyCareerHit(
     val isViewed: Boolean = false,
 )
 
-enum class CareerHitCategory(val displayName: String, val emoji: String) {
-    CAREER_TIP("Career Tip", "\uD83D\uDE80"),
-    DSA_TIP("DSA Tip", "\uD83D\uDCDA"),
-    INTERVIEW_TIP("Interview Tip", "\uD83C\uDFA4"),
-    PRODUCTIVITY_TIP("Productivity Tip", "\u26A1"),
-    SKILL_TIP("Skill Tip", "\uD83C\uDF93"),
-    NETWORKING_TIP("Networking Tip", "\uD83E\uDD1D"),
-    RESUME_TIP("Resume Tip", "\uD83D\uDCDC"),
+enum class CareerHitCategory(val displayName: String) {
+    CAREER_TIP("Career Tip"),
+    DSA_TIP("DSA Tip"),
+    INTERVIEW_TIP("Interview Tip"),
+    PRODUCTIVITY_TIP("Productivity Tip"),
+    SKILL_TIP("Skill Tip"),
+    NETWORKING_TIP("Networking Tip"),
+    RESUME_TIP("Resume Tip"),
 }

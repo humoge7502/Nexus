@@ -9,8 +9,8 @@ import com.nexus.data.repository.InternshipRepository
 import com.nexus.data.repository.StreakRepository
 import com.nexus.data.usecase.PlacementReadinessCalculator
 import com.nexus.datastore.UserPreferences
+import com.nexus.domain.model.Application
 import com.nexus.domain.model.ApplicationStatus
-import com.nexus.domain.model.Certification
 import com.nexus.domain.model.DailyQuote
 import com.nexus.domain.model.Internship
 import com.nexus.domain.model.UserStats
@@ -25,11 +25,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class HomeUiState(
-    val isLoading: Boolean = true,
     val userName: String = "",
     val stats: UserStats = UserStats(),
-    val activeApplications: List<Internship> = emptyList(),
-    val recommendedCertifications: List<Certification> = emptyList(),
+    /** The applications still moving through the pipeline, newest touch first. */
+    val activeApplications: List<Application> = emptyList(),
     val todayOpportunities: List<Internship> = emptyList(),
     val streakDays: Int = 0,
     val dailyQuote: DailyQuote? = null,
@@ -48,6 +47,7 @@ private data class UserSnapshot(
     val applicationCount: Int,
     val interviewCount: Int,
     val completedCerts: Int,
+    val activeApplications: List<Application>,
 )
 
 @HiltViewModel
@@ -129,12 +129,17 @@ class HomeViewModel @Inject constructor(
                             it.status == ApplicationStatus.INTERVIEWING
                     },
                     completedCerts = certs,
+                    activeApplications = applications
+                        .filter { it.status in OPEN_STATUSES }
+                        .sortedByDescending { it.updatedAt }
+                        .take(HOME_APPLICATION_ROWS),
                 )
             }.collect { snapshot ->
                 _uiState.update {
                     it.copy(
                         userName = snapshot.name.ifBlank { DEFAULT_USER_NAME },
                         streakDays = snapshot.streak,
+                        activeApplications = snapshot.activeApplications,
                         stats = it.stats.copy(
                             totalApplications = snapshot.applicationCount,
                             completedCerts = snapshot.completedCerts,
@@ -153,7 +158,6 @@ class HomeViewModel @Inject constructor(
                 val opportunities = internships.take(5)
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
                         todayOpportunities = opportunities.ifEmpty { it.todayOpportunities },
                         // A cache hit resolves the loading state immediately;
                         // an empty cache keeps the skeleton up until the
@@ -199,5 +203,16 @@ class HomeViewModel @Inject constructor(
         const val DEFAULT_USER_NAME = "Future Engineer"
         const val OFFLINE_MESSAGE =
             "Couldn't reach the Sagitta network. Check your connection and try again."
+        const val HOME_APPLICATION_ROWS = 3
+
+        /** Outcomes are history, not a pipeline: the home strip only lists the
+         *  applications a student still has to act on or wait on. */
+        val OPEN_STATUSES = setOf(
+            ApplicationStatus.APPLIED,
+            ApplicationStatus.IN_REVIEW,
+            ApplicationStatus.INTERVIEW,
+            ApplicationStatus.INTERVIEWING,
+            ApplicationStatus.OFFERED,
+        )
     }
 }

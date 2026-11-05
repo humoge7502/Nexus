@@ -32,6 +32,15 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="sagitta" />
             </intent-filter>
+
+            <!-- The group-chat bridge: a listing shared from WhatsApp or any
+                 app lands here, pre-loading search against the verified
+                 catalog so the forward can become a tracked application. -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
         </activity>
 
         <provider

@@ -20,6 +20,7 @@ import com.nexus.domain.model.ScoreComponent
 import com.nexus.domain.model.UiState
 import com.nexus.domain.usecase.CareerScoreCalculator
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -64,6 +65,11 @@ data class GrowthUiState(
   val placementScore: Int = 0,
   val placementLevel: String = "Getting Started",
   val placementActionItems: List<PlacementReadinessCalculator.PlacementAction> = emptyList(),
+  /** True once the metrics pipeline has produced a reading. Until then every
+   *  figure on this screen is a default, not a measurement. */
+  val metricsLoaded: Boolean = false,
+  /** Set when the metrics pipeline fails; the screen shows it instead of a score of 0. */
+  val metricsFault: String? = null,
 )
 
 @HiltViewModel
@@ -83,6 +89,12 @@ class GrowthViewModel @Inject constructor(
   private val _uiState = MutableStateFlow(GrowthUiState())
   val uiState: StateFlow<GrowthUiState> = _uiState.asStateFlow()
 
+  // One collector per watch. Retrying cancels and restarts rather than stacking
+  // a second collector — the metrics collector also writes a score snapshot.
+  private var problemsJob: Job? = null
+  private var goalsJob: Job? = null
+  private var metricsJob: Job? = null
+
   init {
     loadProblems()
     loadGoals()
@@ -94,13 +106,21 @@ class GrowthViewModel @Inject constructor(
   }
 
   private fun loadProblems() {
-    viewModelScope.launch {
-      problemRepository.getAllProblems().collect { problems ->
-        val unsolved = problems.filter { it.status != DsaStatus.SOLVED }
-        val challenge = unsolved.getOrNull(java.time.LocalDate.now().dayOfYear % unsolved.size.coerceAtLeast(1))
-          ?: problems.firstOrNull()
-        _uiState.update { it.copy(problems = UiState.Success(problems), dailyChallenge = challenge) }
-      }
+    problemsJob?.cancel()
+    problemsJob = viewModelScope.launch {
+      problemRepository.getAllProblems()
+        .catch { e ->
+          Timber.e(e, "DSA problem feed failed to load")
+          _uiState.update {
+            it.copy(problems = UiState.Error(e.message ?: "Couldn't load the problem set"))
+          }
+        }
+        .collect { problems ->
+          val unsolved = problems.filter { it.status != DsaStatus.SOLVED }
+          val challenge = unsolved.getOrNull(java.time.LocalDate.now().dayOfYear % unsolved.size.coerceAtLeast(1))
+            ?: problems.firstOrNull()
+          _uiState.update { it.copy(problems = UiState.Success(problems), dailyChallenge = challenge) }
+        }
     }
   }
 
@@ -140,15 +160,24 @@ class GrowthViewModel @Inject constructor(
   }
 
   private fun loadGoals() {
-    viewModelScope.launch {
-      goalRepository.getAllGoals().collect { goals ->
-        _uiState.update { it.copy(goals = UiState.Success(goals)) }
-      }
+    goalsJob?.cancel()
+    goalsJob = viewModelScope.launch {
+      goalRepository.getAllGoals()
+        .catch { e ->
+          Timber.e(e, "Goals failed to load")
+          _uiState.update {
+            it.copy(goals = UiState.Error(e.message ?: "Couldn't load your goals"))
+          }
+        }
+        .collect { goals ->
+          _uiState.update { it.copy(goals = UiState.Success(goals)) }
+        }
     }
   }
 
   private fun observeMetrics() {
-    viewModelScope.launch {
+    metricsJob?.cancel()
+    metricsJob = viewModelScope.launch {
       combine(
         combine(
           problemRepository.getSolvedCountFlow(),
@@ -202,8 +231,20 @@ class GrowthViewModel @Inject constructor(
           weekActivity = weekActivity,
           lastActiveToday = lastActive == today,
           thisMonthActive = thisMonthActive,
+          metricsLoaded = true,
+          metricsFault = null,
         )
-      }.catch { Timber.e(it, "Growth metrics observation failed") }
+      }.catch { e ->
+        // Logging alone left the screen rendering a score of 0 and "Rookie" as
+        // though the reading had succeeded.
+        Timber.e(e, "Growth metrics observation failed")
+        _uiState.update {
+          it.copy(
+            metricsLoaded = false,
+            metricsFault = e.message ?: "Growth metrics could not be read",
+          )
+        }
+      }
        .collect { state ->
          _uiState.value = state
          xpRepository.recordScoreSnapshot(state.nexusScore)
@@ -265,7 +306,13 @@ class GrowthViewModel @Inject constructor(
   }
 
   fun refresh() {
+    _uiState.update { it.copy(problems = UiState.Loading, goals = UiState.Loading) }
     loadProblems()
     loadGoals()
+  }
+
+  fun retryMetrics() {
+    _uiState.update { it.copy(metricsLoaded = false, metricsFault = null) }
+    observeMetrics()
   }
 }

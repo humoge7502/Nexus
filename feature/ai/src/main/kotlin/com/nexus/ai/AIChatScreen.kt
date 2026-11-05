@@ -15,14 +15,23 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,12 +43,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexus.common.toFormattedDate
+import com.nexus.designsystem.component.EmptyState
+import com.nexus.designsystem.component.NexusCard
+import com.nexus.designsystem.component.NexusIconButton
+import com.nexus.designsystem.component.NexusOutlineButton
 import com.nexus.designsystem.component.NexusToastData
 import com.nexus.designsystem.component.NexusToastHost
 import com.nexus.designsystem.component.NexusTopBar
@@ -60,7 +79,9 @@ import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
 import com.nexus.designsystem.theme.motionMillis
 import com.nexus.designsystem.theme.nexus
+import com.nexus.domain.model.AIConversation
 import com.nexus.domain.usecase.WarningSeverity
+import java.util.Locale
 
 @Composable
 fun AIChatScreen(
@@ -70,6 +91,7 @@ fun AIChatScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val toastState = rememberNexusToastState()
     var inputText by remember { mutableStateOf("") }
+    var showHistory by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val keyboardController = LocalSoftwareKeyboardController.current
     val clipboardManager = LocalClipboardManager.current
@@ -86,15 +108,18 @@ fun AIChatScreen(
 
     // A limit is not a failure — nothing broke — but the user cannot send
     // another message, so it reads on the ember Attention bar, not a neutral one.
+    // getString rather than stringResource: this runs in a coroutine, where
+    // composition-only calls are not available.
+    val resources = LocalContext.current.resources
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 is AIChatEffect.ShowRateLimitDialog -> toastState.show(
                     NexusToastData(
                         if (effect.isPro) {
-                            "Daily AI limit reached. Please try again tomorrow."
+                            resources.getString(R.string.ai_chat_limit_pro)
                         } else {
-                            "Free AI limit reached (${effect.limit}/day). Upgrade to Sagitta Pro for more."
+                            resources.getString(R.string.ai_chat_limit_free, effect.limit)
                         },
                         ToastTone.Attention,
                     ),
@@ -110,6 +135,27 @@ fun AIChatScreen(
         keyboardController?.hide()
     }
 
+    if (showHistory) {
+        // A thread is opened in Room the moment the first message is sent, so an
+        // exchange that never got an answer leaves a row with nothing in it. The
+        // sheet promises saved conversations, so it lists the ones that hold
+        // something - and selecting the thread already on screen reloads it from
+        // the database, which would drop the turn still in memory.
+        ConversationHistorySheet(
+            conversations = uiState.conversations.filter { it.messages.isNotEmpty() },
+            currentId = uiState.currentConversationId,
+            onSelect = { id ->
+                showHistory = false
+                if (id != uiState.currentConversationId) viewModel.loadConversation(id)
+            },
+            onNew = {
+                showHistory = false
+                viewModel.createConversation()
+            },
+            onDismiss = { showHistory = false },
+        )
+    }
+
     Box(modifier = Modifier.fillMaxSize().imePadding()) {
         Column(modifier = Modifier.fillMaxSize()) {
             NexusTopBar(
@@ -117,6 +163,13 @@ fun AIChatScreen(
                 title = stringResource(R.string.ai_nexus_ai_mentor),
                 subtitle = stringResource(R.string.ai_personalized_to_your_career_profile),
                 meta = stringResource(R.string.ai_link_meta),
+                actions = {
+                    NexusIconButton(
+                        icon = Icons.Default.History,
+                        contentDescription = stringResource(R.string.ai_chat_history),
+                        onClick = { showHistory = true },
+                    )
+                },
             )
 
             LazyColumn(
@@ -290,6 +343,146 @@ private fun ThinkingIndicator(byline: String) {
                 style = NexusTypography.DataLabel,
                 color = ext.signal,
             )
+        }
+    }
+}
+
+/**
+ * The threads the device already holds.
+ *
+ * `loadConversation` and `createConversation` have been on this view model since
+ * the screen was written, and nothing on the screen could reach either one - so
+ * every visit started a fresh thread while the saved ones sat unread in Room.
+ */
+@Composable
+private fun ConversationHistorySheet(
+    conversations: List<AIConversation>,
+    currentId: String?,
+    onSelect: (String) -> Unit,
+    onNew: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = NexusSpacing.md),
+            contentAlignment = Alignment.BottomCenter,
+        ) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = NexusShapes.xl,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                tonalElevation = 0.dp,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .padding(NexusSpacing.xl),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.ai_chat_history_title)
+                                    .uppercase(Locale.ROOT),
+                                style = NexusTypography.DataLabel,
+                                color = MaterialTheme.nexus.signal,
+                            )
+                            Spacer(Modifier.height(NexusSpacing.xxs))
+                            Text(
+                                text = stringResource(R.string.ai_chat_history_subtitle),
+                                style = NexusTypography.BodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        NexusIconButton(
+                            icon = Icons.Default.Close,
+                            contentDescription = stringResource(R.string.ai_chat_close),
+                            onClick = onDismiss,
+                        )
+                    }
+
+                    Spacer(Modifier.height(NexusSpacing.md))
+
+                    if (conversations.isEmpty()) {
+                        EmptyState(
+                            title = stringResource(R.string.ai_chat_history_empty_title),
+                            description = stringResource(R.string.ai_chat_history_empty_body),
+                        )
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .heightIn(max = 360.dp)
+                                .verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(NexusSpacing.sm),
+                        ) {
+                            conversations.forEach { conversation ->
+                                ConversationRow(
+                                    conversation = conversation,
+                                    isCurrent = conversation.id == currentId,
+                                    onClick = { onSelect(conversation.id) },
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.height(NexusSpacing.md))
+                    NexusOutlineButton(
+                        text = stringResource(R.string.ai_chat_new_conversation),
+                        onClick = onNew,
+                        icon = Icons.Default.Add,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ConversationRow(
+    conversation: AIConversation,
+    isCurrent: Boolean,
+    onClick: () -> Unit,
+) {
+    val ext = MaterialTheme.nexus
+    val turns = conversation.messages.size
+    NexusCard(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = NexusShapes.sm,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = conversation.title.ifBlank { stringResource(R.string.ai_chat_untitled) },
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(Modifier.height(2.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = pluralStringResource(R.plurals.ai_chat_message_count, turns, turns),
+                        style = NexusTypography.DataLabel,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = " · ${conversation.lastMessageAt.toEpochMilli().toFormattedDate("d MMM")}",
+                        style = NexusTypography.DataLabel,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            if (isCurrent) {
+                Text(
+                    text = stringResource(R.string.ai_chat_current).uppercase(Locale.ROOT),
+                    style = NexusTypography.DataLabel,
+                    color = ext.signal,
+                )
+            }
         }
     }
 }

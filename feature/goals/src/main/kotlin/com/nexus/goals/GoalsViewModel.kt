@@ -41,6 +41,11 @@ class GoalsViewModel @Inject constructor(
         }
     }
 
+    fun retry() {
+        _uiState.value = UiState.Loading
+        loadGoals()
+    }
+
     fun createGoal(goal: Goal) {
         viewModelScope.launch {
             repository.createGoal(goal)

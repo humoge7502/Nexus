@@ -6,7 +6,8 @@ import com.nexus.ai.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -18,12 +19,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.common.AIRateLimiter
 import com.nexus.common.RateLimitResult
 import com.nexus.datastore.UserPreferences
-import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusChip
 import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.domain.usecase.InterviewIntelligenceEngine
 import com.nexus.network.ai.AIOpenRouterService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,8 +34,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+/** Which of the coach's two calls is in flight, so a retry re-runs that one and
+ *  does not quietly throw away the answer typed for the other. */
+enum class CoachOperation { Question, Feedback }
 
 @Immutable
 data class InterviewCoachUiState(
@@ -45,7 +53,8 @@ data class InterviewCoachUiState(
   val userAnswer: String = "",
   val feedback: String = "",
   val error: String? = null,
-  val rateLimited: Boolean = false,
+  val isLimitReached: Boolean = false,
+  val failedOperation: CoachOperation? = null,
 )
 
 @HiltViewModel
@@ -59,30 +68,32 @@ class InterviewCoachViewModel @Inject constructor(
   val uiState: StateFlow<InterviewCoachUiState> = _uiState.asStateFlow()
 
   fun updateTargetRole(role: String) {
-    _uiState.value = _uiState.value.copy(targetRole = role)
+    _uiState.update { it.copy(targetRole = role) }
   }
 
   fun updateTargetCompany(company: String) {
-    _uiState.value = _uiState.value.copy(
-      targetCompany = company,
-      companyIntel = if (company.isBlank()) {
-        null
-      } else {
-        intelligenceEngine.generateCompanyIntel(
-          company = company,
-          userKnownWeaknesses = emptyList(),
-          userDsaHistory = emptyMap(),
-        )
-      },
-    )
+    _uiState.update {
+      it.copy(
+        targetCompany = company,
+        companyIntel = if (company.isBlank()) {
+          null
+        } else {
+          intelligenceEngine.generateCompanyIntel(
+            company = company,
+            userKnownWeaknesses = emptyList(),
+            userDsaHistory = emptyMap(),
+          )
+        },
+      )
+    }
   }
 
   fun updateQuestionType(type: String) {
-    _uiState.value = _uiState.value.copy(questionType = type)
+    _uiState.update { it.copy(questionType = type) }
   }
 
-  suspend fun checkRateLimit(rateLimiter: AIRateLimiter, isPro: Boolean): Boolean {
-    return rateLimiter.canMakeCall(isPro) is RateLimitResult.LimitExceeded
+  fun updateAnswer(answer: String) {
+    _uiState.update { it.copy(userAnswer = answer) }
   }
 
   fun generateQuestion() {
@@ -90,12 +101,21 @@ class InterviewCoachViewModel @Inject constructor(
     val type = _uiState.value.questionType
     if (role.isBlank()) return
     viewModelScope.launch {
-      val isPro = userPreferences.isPro.first()
-      if (checkRateLimit(rateLimiter, isPro)) {
-        _uiState.value = _uiState.value.copy(rateLimited = true, error = "Daily AI limit reached. Upgrade to Pro for unlimited access.")
+      if (limitReached()) {
+        _uiState.update { it.copy(isLimitReached = true, error = null, failedOperation = CoachOperation.Question) }
         return@launch
       }
-      _uiState.value = _uiState.value.copy(isLoading = true, error = null, question = "", userAnswer = "", feedback = "")
+      _uiState.update {
+        it.copy(
+          isLoading = true,
+          error = null,
+          isLimitReached = false,
+          failedOperation = CoachOperation.Question,
+          question = "",
+          userAnswer = "",
+          feedback = "",
+        )
+      }
       try {
         val company = _uiState.value.targetCompany
         val prompt = if (company.isNotBlank()) {
@@ -106,15 +126,11 @@ class InterviewCoachViewModel @Inject constructor(
         }
         val response = aiService.sendMessage(prompt)
         rateLimiter.recordCall()
-        _uiState.value = _uiState.value.copy(isLoading = false, question = response)
+        _uiState.update { it.copy(isLoading = false, question = response, failedOperation = null) }
       } catch (e: Exception) {
-        _uiState.value = _uiState.value.copy(isLoading = false, error = e.message ?: "Generation failed")
+        _uiState.update { it.copy(isLoading = false, error = e.message) }
       }
     }
-  }
-
-  fun updateAnswer(answer: String) {
-    _uiState.value = _uiState.value.copy(userAnswer = answer)
   }
 
   fun getFeedback() {
@@ -122,27 +138,42 @@ class InterviewCoachViewModel @Inject constructor(
     val question = _uiState.value.question
     if (answer.isBlank() || question.isBlank()) return
     viewModelScope.launch {
-      val isPro = userPreferences.isPro.first()
-      if (checkRateLimit(rateLimiter, isPro)) {
-        _uiState.value = _uiState.value.copy(rateLimited = true, error = "Daily AI limit reached. Upgrade to Pro for unlimited access.")
+      if (limitReached()) {
+        _uiState.update { it.copy(isLimitReached = true, error = null, failedOperation = CoachOperation.Feedback) }
         return@launch
       }
-      _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+      _uiState.update {
+        it.copy(isLoading = true, error = null, isLimitReached = false, failedOperation = CoachOperation.Feedback)
+      }
       try {
         val prompt = "Interview question: $question\n\nCandidate's answer: $answer\n\nProvide constructive feedback. Rate out of 10. Suggest improvements and give a model answer."
         val response = aiService.sendMessage(prompt)
         rateLimiter.recordCall()
-        _uiState.value = _uiState.value.copy(isLoading = false, feedback = response)
+        _uiState.update { it.copy(isLoading = false, feedback = response, failedOperation = null) }
       } catch (e: Exception) {
-        _uiState.value = _uiState.value.copy(isLoading = false, error = e.message ?: "Feedback failed")
+        _uiState.update { it.copy(isLoading = false, error = e.message) }
       }
     }
   }
+
+  /** Re-runs whichever call failed, so Retry never costs the user their answer. */
+  fun retry() {
+    when (_uiState.value.failedOperation) {
+      CoachOperation.Question -> generateQuestion()
+      CoachOperation.Feedback -> getFeedback()
+      null -> Unit
+    }
+  }
+
+  private suspend fun limitReached(): Boolean =
+    rateLimiter.canMakeCall(userPreferences.isPro.first()) is RateLimitResult.LimitExceeded
 }
 
 @Composable
+@OptIn(ExperimentalLayoutApi::class)
 fun InterviewCoachScreen(
   onBack: () -> Unit = {},
+  onGoPro: () -> Unit,
   viewModel: InterviewCoachViewModel = hiltViewModel(),
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -195,7 +226,7 @@ fun InterviewCoachScreen(
       Spacer(Modifier.height(12.dp))
       Text(stringResource(R.string.ai_question_type), style = MaterialTheme.typography.labelLarge)
       Spacer(Modifier.height(8.dp))
-      Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+      FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         questionTypes.forEach { type ->
           NexusChip(
             text = type,
@@ -206,21 +237,23 @@ fun InterviewCoachScreen(
       }
       Spacer(Modifier.height(16.dp))
       NexusButton(
-        text = if (uiState.isLoading) "Generating..." else "Generate Question",
+        text = stringResource(
+          if (uiState.isLoading) R.string.ai_generating_button else R.string.ai_generate_question_button,
+        ),
         onClick = { viewModel.generateQuestion() },
         enabled = uiState.targetRole.isNotBlank() && !uiState.isLoading,
       )
       Spacer(Modifier.height(16.dp))
 
-      if (uiState.isLoading) {
-        LoadingState()
-      }
-
-      uiState.error?.let { error ->
-        Text(text = error, color = MaterialTheme.colorScheme.error)
-      }
-
-      if (uiState.question.isNotBlank()) {
+      if (uiState.question.isBlank()) {
+        CoachOutcome(
+          uiState = uiState,
+          onRetry = viewModel::retry,
+          onGoPro = onGoPro,
+          loadingLabel = stringResource(R.string.ai_coach_writing_question),
+          showEmpty = true,
+        )
+      } else {
         NexusCard(modifier = Modifier.fillMaxWidth()) {
           Text(
             text = uiState.question,
@@ -242,17 +275,57 @@ fun InterviewCoachScreen(
           onClick = { viewModel.getFeedback() },
           enabled = uiState.userAnswer.isNotBlank() && !uiState.isLoading,
         )
-      }
-
-      if (uiState.feedback.isNotBlank()) {
         Spacer(Modifier.height(16.dp))
-        NexusCard(modifier = Modifier.fillMaxWidth()) {
-          Text(
-            text = uiState.feedback,
-            style = MaterialTheme.typography.bodyMedium,
-          )
-        }
+        CoachOutcome(
+          uiState = uiState,
+          onRetry = viewModel::retry,
+          onGoPro = onGoPro,
+          loadingLabel = stringResource(R.string.ai_coach_reading_answer),
+          showEmpty = false,
+        )
       }
     }
+  }
+}
+
+@Composable
+private fun CoachOutcome(
+  uiState: InterviewCoachUiState,
+  onRetry: () -> Unit,
+  onGoPro: () -> Unit,
+  loadingLabel: String,
+  showEmpty: Boolean,
+) {
+  when {
+    uiState.isLoading -> EditorialSkeletonList(count = 1, loadingLabel = loadingLabel)
+
+    uiState.isLimitReached -> EditorialErrorState(
+      headline = stringResource(R.string.ai_daily_limit_headline),
+      reason = stringResource(R.string.ai_daily_limit_shared_reason),
+      actionLabel = stringResource(R.string.ai_unlock_pro),
+      onAction = onGoPro,
+      isRecoverable = false,
+    )
+
+    uiState.error != null -> EditorialErrorState(
+      headline = stringResource(R.string.ai_fault_headline),
+      reason = stringResource(R.string.ai_fault_reason_inputs),
+      actionLabel = stringResource(R.string.ai_retry),
+      onAction = onRetry,
+      secondaryHint = uiState.error,
+    )
+
+    uiState.feedback.isNotBlank() -> NexusCard(modifier = Modifier.fillMaxWidth()) {
+      Text(
+        text = uiState.feedback,
+        style = MaterialTheme.typography.bodyMedium,
+      )
+    }
+
+    showEmpty -> EmptyState(
+      title = stringResource(R.string.ai_coach_empty_title),
+      description = stringResource(R.string.ai_coach_empty_body),
+      voice = stringResource(R.string.ai_coach_empty_voice),
+    )
   }
 }

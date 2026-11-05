@@ -24,6 +24,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -33,6 +34,9 @@ data class ForecastUiState(
   val isLoading: Boolean = true,
   val forecasts: List<PlacementForecast> = emptyList(),
   val currentScore: Int = 0,
+  /** True when no stored score snapshot exists, so there is nothing to project
+   *  from. The screen answers with an empty forecast rather than a figure. */
+  val scoreIsPlaceholder: Boolean = false,
   val scoreTrend: List<Float> = emptyList(),
   val modelReadinessPct: Int? = null,
   /** The drivers the model considers strongest, with the real points each one moves. */
@@ -62,17 +66,46 @@ class PlacementForecastViewModel @Inject constructor(
 
   private var lastSignals: PlacementReadinessFeatures.RawSignals? = null
   private var lastModelPct: Int? = null
+  private var observingForecasts = false
 
   init {
     observeForecasts()
     refresh()
   }
 
+  /** Re-reads both halves of the screen: the stored forecast stream and the model pass. */
+  fun retry() {
+    _uiState.update { it.copy(isLoading = true, error = null) }
+    observeForecasts()
+    refresh()
+  }
+
   private fun observeForecasts() {
+    // The stream stays subscribed for the life of the screen, so a retry only
+    // re-binds it when the previous one has actually ended.
+    if (observingForecasts) return
+    observingForecasts = true
     viewModelScope.launch {
-      val userId = userPrefs.userId.first()
-      repository.getForecasts(userId).collect { list ->
-        _uiState.update { it.copy(forecasts = list, isLoading = false) }
+      try {
+        val userId = userPrefs.userId.first()
+        repository.getForecasts(userId)
+          .catch { e ->
+            // The collector used to die here without leaving a trace. With no list
+            // ever arriving, the screen fell through to "not enough activity yet" and
+            // a failed read looked like a student who had done nothing.
+            _uiState.update {
+              it.copy(isLoading = false, error = e.message ?: "Failed to load your forecasts.")
+            }
+          }
+          .collect { list ->
+            _uiState.update { it.copy(forecasts = list, isLoading = false) }
+          }
+      } catch (e: Exception) {
+        _uiState.update {
+          it.copy(isLoading = false, error = e.message ?: "Failed to load your forecasts.")
+        }
+      } finally {
+        observingForecasts = false
       }
     }
   }
@@ -88,7 +121,14 @@ class PlacementForecastViewModel @Inject constructor(
         }
 
         val snapshots = scoreRepository.getRecentSnapshots(userId, limit = 60).first()
-        val currentScore = snapshots.maxByOrNull { it.recordedAt }?.score ?: DEFAULT_SCORE
+        val latestSnapshot = snapshots.maxByOrNull { it.recordedAt }
+        if (latestSnapshot == null) {
+          // The engine used to be handed a standing 500 in this case and wrote
+          // forecast rows about a student who does not exist.
+          markNoScoreSnapshot()
+          return@launch
+        }
+        val currentScore = latestSnapshot.score
         val scoreTrend = snapshots.sortedBy { it.recordedAt }.map { it.score.toFloat() }
         val collegeId = userPrefs.userCollege.first().ifBlank { "unknown" }
         val year = userPrefs.userYear.first()
@@ -185,6 +225,7 @@ class PlacementForecastViewModel @Inject constructor(
           it.copy(
             isLoading = false,
             currentScore = currentScore,
+            scoreIsPlaceholder = false,
             scoreTrend = scoreTrend,
             modelReadinessPct = modelPct,
             modelTopFactors = topFactors,
@@ -200,6 +241,25 @@ class PlacementForecastViewModel @Inject constructor(
     }
   }
 
+  /** No stored score, so every derived figure would describe a student who has
+   *  never been measured: the screen answers with an empty forecast. */
+  private fun markNoScoreSnapshot() {
+    _uiState.update {
+      it.copy(
+        isLoading = false,
+        currentScore = 0,
+        scoreIsPlaceholder = true,
+        scoreTrend = emptyList(),
+        forecasts = emptyList(),
+        modelReadinessPct = null,
+        modelTopFactors = emptyList(),
+        whatIfMocks = 0,
+        whatIfPct = null,
+        error = null,
+      )
+    }
+  }
+
   /** Counterfactual: readiness if the student added N more mock interviews. */
   fun updateWhatIfMocks(count: Int) {
     val signals = lastSignals ?: return
@@ -212,7 +272,6 @@ class PlacementForecastViewModel @Inject constructor(
   }
 
   private companion object {
-    const val DEFAULT_SCORE = 500
     const val DAY_MS = 86_400_000L
     const val MAX_WHAT_IF_MOCKS = 20
   }

@@ -53,6 +53,8 @@ import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
 import com.nexus.designsystem.theme.nexus
+import com.nexus.domain.model.Application
+import com.nexus.domain.model.ApplicationStatus
 import com.nexus.domain.model.DailyQuote
 import com.nexus.domain.model.Internship
 import java.util.Locale
@@ -247,9 +249,19 @@ internal fun OpportunityCard(
 
 @Composable
 internal fun ApplicationSummaryCard(
-    application: Internship,
+    application: Application,
     modifier: Modifier = Modifier,
 ) {
+    val (statusLabel, statusTone) = when (application.status) {
+        ApplicationStatus.APPLIED ->
+            stringResource(R.string.home_status_applied) to SignalTone.Neutral
+        ApplicationStatus.IN_REVIEW ->
+            stringResource(R.string.text_in_review) to SignalTone.Attention
+        ApplicationStatus.INTERVIEW, ApplicationStatus.INTERVIEWING ->
+            stringResource(R.string.home_status_interview) to SignalTone.Signal
+        else ->
+            stringResource(R.string.home_status_offer) to SignalTone.Signal
+    }
     NexusCard(
         modifier = modifier.fillMaxWidth(),
     ) {
@@ -274,17 +286,17 @@ internal fun ApplicationSummaryCard(
             Spacer(modifier = Modifier.width(NexusSpacing.sm))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = application.title,
+                    text = application.role,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = application.company.name,
+                    text = application.company,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            SignalTag(text = stringResource(R.string.text_in_review), tone = SignalTone.Attention)
+            SignalTag(text = statusLabel, tone = statusTone)
         }
     }
 }

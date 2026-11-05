@@ -7,6 +7,8 @@ import com.nexus.data.repository.InternshipRepository
 import com.nexus.data.repository.StreakRepository
 import com.nexus.data.usecase.PlacementReadinessCalculator
 import com.nexus.datastore.UserPreferences
+import com.nexus.domain.model.Application
+import com.nexus.domain.model.ApplicationStatus
 import com.nexus.domain.model.StreakData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -94,6 +96,69 @@ class HomeViewModelTest {
         advanceUntilIdle()
         assertEquals("Test User", viewModel.uiState.value.userName)
     }
+
+    @Test
+    fun `open applications reach the home strip and settled ones do not`() = runTest(testDispatcher) {
+        whenever(applicationRepository.getAllApplications()).thenReturn(
+            flowOf(
+                listOf(
+                    application("applied", ApplicationStatus.APPLIED),
+                    application("rejected", ApplicationStatus.REJECTED),
+                    application("interview", ApplicationStatus.INTERVIEW),
+                )
+            )
+        )
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        assertEquals(
+            listOf("applied", "interview"),
+            viewModel.uiState.value.activeApplications.map { it.id },
+        )
+    }
+
+    @Test
+    fun `the home strip leads with the most recently touched application`() = runTest(testDispatcher) {
+        whenever(applicationRepository.getAllApplications()).thenReturn(
+            flowOf(
+                listOf(
+                    application("oldest", ApplicationStatus.APPLIED, updatedAt = 100L),
+                    application("newest", ApplicationStatus.IN_REVIEW, updatedAt = 300L),
+                    application("middle", ApplicationStatus.OFFERED, updatedAt = 200L),
+                )
+            )
+        )
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        assertEquals(
+            listOf("newest", "middle", "oldest"),
+            viewModel.uiState.value.activeApplications.map { it.id },
+        )
+    }
+
+    private fun application(
+        id: String,
+        status: ApplicationStatus,
+        updatedAt: Long = 0L,
+    ) = Application(
+        id = id,
+        opportunityId = "opportunity-$id",
+        company = "Acme",
+        role = "SDE Intern",
+        opportunityType = "internship",
+        status = status,
+        matchScore = null,
+        appliedDate = null,
+        interviewDate = null,
+        interviewRounds = 0,
+        outcomeDate = null,
+        outcomeNotes = null,
+        salaryOffered = null,
+        preparationNotes = null,
+        createdAt = updatedAt,
+        updatedAt = updatedAt,
+    )
 
     @Test
     fun `streak flows from the shared streak repository`() = runTest(testDispatcher) {

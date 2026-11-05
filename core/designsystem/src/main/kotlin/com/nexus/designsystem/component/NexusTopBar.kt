@@ -5,20 +5,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -97,7 +92,6 @@ private fun NexusTopBarLayout(
     actions: @Composable RowScope.() -> Unit,
     title: @Composable () -> Unit,
 ) {
-    val haptic = LocalHapticFeedback.current
     Column(modifier = modifier.fillMaxWidth().statusBarsPadding()) {
         Row(
             modifier = Modifier
@@ -106,20 +100,17 @@ private fun NexusTopBarLayout(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (onBack != null) {
-                IconButton(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        onBack()
-                    },
-                    modifier = Modifier.padding(end = 2.dp).size(36.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.cd_back),
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.onBackground,
-                    )
-                }
+                // The system's own icon button, not a raw IconButton pinned to 36dp:
+                // it carries Material's 48dp interactive minimum, so the back key is
+                // reachable one-handed, and it repeats the press-scale the rest of the
+                // app's icon buttons already have.
+                NexusIconButton(
+                    icon = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.cd_back),
+                    onClick = onBack,
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(end = 2.dp),
+                )
             }
             Column(modifier = Modifier.weight(1f)) { title() }
             if (meta != null) {

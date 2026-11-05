@@ -20,11 +20,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -40,14 +38,20 @@ import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.conversation.PromptSuggestionRow
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.nexus
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nexus.network.service.FirebaseFunctionsAIService
+import com.nexus.network.service.RequiresSignInException
 import com.nexus.network.service.ResearchResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.asStateFlow
@@ -92,23 +96,85 @@ fun ResearchScreen(
                     placeholder = stringResource(R.string.ai_ask_anything_about_your_career_ne),
                     singleLine = false,
                     trailingIcon = {
-                        if (ui.isLoading) {
-                            CircularProgressIndicator(modifier = Modifier.padding(8.dp).width(20.dp).height(20.dp))
-                        } else {
-                            NexusIconButton(
-                                icon = Icons.Default.Search,
-                                contentDescription = stringResource(R.string.cd_research),
-                                onClick = { run(question) },
-                                enabled = question.isNotBlank() && !ui.isLoading,
-                            )
-                        }
+                        // No spinner here: the skeleton below the field is the
+                        // in-flight signal, so the control only has to say
+                        // "not again yet" while a question is being answered.
+                        NexusIconButton(
+                            icon = Icons.Default.Search,
+                            contentDescription = stringResource(R.string.cd_research),
+                            onClick = { run(question) },
+                            enabled = question.isNotBlank() && !ui.isLoading,
+                        )
                     },
                 )
             }
 
+            // Before a question is asked this screen is a field over a void, which
+            // makes the tool look broken rather than idle. Say what comes back and
+            // hand over a question worth asking.
+            if (ui.result == null && !ui.isLoading && ui.error == null) {
+                item {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(top = NexusSpacing.md),
+                        verticalArrangement = Arrangement.spacedBy(NexusSpacing.sm),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.ai_research_idle_headline),
+                            style = NexusTypography.DataLabel,
+                            color = MaterialTheme.nexus.signal,
+                        )
+                        Text(
+                            text = stringResource(R.string.ai_research_idle_body),
+                            style = NexusTypography.BodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                item {
+                    PromptSuggestionRow(
+                        prompts = listOf(
+                            stringResource(R.string.ai_research_prompt_1),
+                            stringResource(R.string.ai_research_prompt_2),
+                            stringResource(R.string.ai_research_prompt_3),
+                        ),
+                        label = stringResource(R.string.ai_research_starters),
+                        onPrompt = {
+                            question = it
+                            run(it)
+                        },
+                    )
+                }
+            }
+
+            if (ui.isLoading) {
+                item {
+                    EditorialSkeletonList(
+                        count = 2,
+                        loadingLabel = stringResource(R.string.ai_research_loading),
+                    )
+                }
+            }
+
             ui.error?.let { err ->
                 item {
-                    Text(err, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+                    if (ui.requiresSignIn) {
+                        // A missing account is not a dropped request: the question
+                        // never left the phone, so the card says UNAVAILABLE and
+                        // offers no Retry, which could only fail the same way.
+                        EditorialErrorState(
+                            headline = stringResource(R.string.ai_research_signin_headline),
+                            reason = stringResource(R.string.ai_research_signin_reason),
+                            isRecoverable = false,
+                        )
+                    } else {
+                        EditorialErrorState(
+                            headline = stringResource(R.string.ai_fault_headline),
+                            reason = stringResource(R.string.ai_research_fault_reason),
+                            actionLabel = stringResource(R.string.ai_retry),
+                            onAction = { run(ui.question) },
+                            secondaryHint = err,
+                        )
+                    }
                 }
             }
 
@@ -116,14 +182,13 @@ fun ResearchScreen(
 
             if (ui.history.size > 1) {
                 item {
-                    Text(
-                        stringResource(R.string.ai_recent_research),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
+                    // The same rail the starters use: a past question is re-run,
+                    // not edited, so it is a prompt and not a list row.
+                    PromptSuggestionRow(
+                        prompts = ui.history.drop(1).map { it.question },
+                        label = stringResource(R.string.ai_recent_research),
+                        onPrompt = { run(it) },
                     )
-                }
-                items(ui.history.drop(1), key = { it.question + it.hashCode() }) { h ->
-                    TextButton(onClick = { run(h.question) }) { Text(h.question, maxLines = 1) }
                 }
             }
         }
@@ -216,6 +281,10 @@ data class ResearchUiState(
     val question: String = "",
     val isLoading: Boolean = false,
     val error: String? = null,
+    /** The call was never sent because this device has no signed-in user. Kept
+     *  apart from [error] so the screen can drop Retry — pressing it changes
+     *  nothing, and a control that cannot work is not an affordance. */
+    val requiresSignIn: Boolean = false,
     val result: ResearchResult? = null,
     val history: List<ResearchResult> = emptyList(),
 )
@@ -229,7 +298,12 @@ class ResearchViewModel @Inject constructor(
 
     fun research(question: String) {
         if (_uiState.value.isLoading) return
-        _uiState.value = _uiState.value.copy(isLoading = true, error = null, question = question)
+        _uiState.value = _uiState.value.copy(
+            isLoading = true,
+            error = null,
+            requiresSignIn = false,
+            question = question,
+        )
         viewModelScope.launch {
             service.deepResearch(question).fold(
                 onSuccess = { res ->
@@ -240,9 +314,13 @@ class ResearchViewModel @Inject constructor(
                     )
                 },
                 onFailure = { e ->
+                    // Only the cause travels here. The sentence the user reads is
+                    // the screen's, so a null message cannot become an empty red
+                    // line and a provider string cannot become the whole answer.
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = e.message ?: "Research failed. Check your connection.",
+                        error = e.message,
+                        requiresSignIn = e is RequiresSignInException,
                     )
                 },
             )

@@ -62,7 +62,9 @@ private val aiTools = listOf(
     AITool("LinkedIn Post Gen", "Auto-craft achievements", "linkedin"),
     AITool("Skill Gap Analysis", "What to learn next", "skillgap"),
     AITool("Interview Coach", "AI mock interviews", "interview"),
-    AITool("Career Insights", "Predictive analytics", "insights"),
+    // The caption is the claim a student acts on. This tool asks the model for
+    // five reads on the current year; it runs no forecast, so it says that.
+    AITool("Career Insights", "This year's market, read by the model", "insights"),
 )
 
 @Composable

@@ -29,4 +29,6 @@
     <string name="onboarding_module">Module %1$d</string>
     <string name="onboarding_profile_calibration">Profile calibration</string>
     <string name="onboarding_skill_quota">%1$d / %2$d</string>
+    <string name="onboarding_setup_not_saved">Setup wasn\'t saved</string>
+    <string name="onboarding_save_retry_hint">Your answers are still here. Tap Finish setup to try again.</string>
 </resources>

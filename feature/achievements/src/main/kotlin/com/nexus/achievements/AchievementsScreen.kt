@@ -61,9 +61,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.component.AchievementBurst
 import com.nexus.designsystem.component.CalibratedRule
+import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
+import com.nexus.domain.model.Achievement
+import com.nexus.domain.model.UiState
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusTypography
@@ -158,7 +163,11 @@ fun AchievementsScreen(
         }
 
         item {
-            BadgeGallery(badges = badges)
+            BadgeGallery(
+                state = uiState.allAchievements,
+                badges = badges,
+                onRetry = viewModel::retryAchievements,
+            )
         }
 
         item {
@@ -380,7 +389,11 @@ private fun NexusScoreCard(
 }
 
 @Composable
-private fun BadgeGallery(badges: List<AchievementBadge>) {
+private fun BadgeGallery(
+    state: UiState<List<Achievement>>,
+    badges: List<AchievementBadge>,
+    onRetry: () -> Unit,
+) {
     Column {
         Text(text = stringResource(R.string.text_badges),
             style = MaterialTheme.typography.titleMedium,
@@ -388,14 +401,29 @@ private fun BadgeGallery(badges: List<AchievementBadge>) {
             modifier = Modifier.padding(bottom = 12.dp),
         )
 
-        if (badges.isEmpty()) {
-            Text(text = stringResource(R.string.text_badges_unlock_as_you_apply_learn_and_keep_your),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(vertical = 8.dp),
+        when {
+            state is UiState.Loading -> EditorialSkeletonList(
+                count = 2,
+                loadingLabel = stringResource(R.string.achievements_badges_loading),
             )
-        } else {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+
+            state is UiState.Error -> EditorialErrorState(
+                headline = stringResource(R.string.achievements_badges_unable),
+                reason = stringResource(R.string.achievements_badges_error_reason),
+                actionLabel = stringResource(R.string.achievements_try_again),
+                onAction = onRetry,
+                secondaryHint = state.message.takeIf { it.isNotBlank() },
+            )
+
+            badges.isEmpty() -> EmptyState(
+                title = stringResource(R.string.text_badges),
+                description = stringResource(R.string.text_badges_unlock_as_you_apply_learn_and_keep_your),
+                voice = stringResource(R.string.achievements_badges_voice),
+            )
+
+            else -> Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 badges.chunked(2).forEach { rowBadges ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),

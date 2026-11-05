@@ -238,6 +238,8 @@ class AchievementsViewModel @Inject constructor(
         viewModelScope.launch { repository.unlock(id) }
     }
 
+    fun retryAchievements() = loadAchievements()
+
     fun dismissCelebration() {
         _uiState.update { it.copy(celebration = null) }
     }

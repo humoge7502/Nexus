@@ -27,9 +27,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.domain.model.CohortEntry
 
 @Composable
@@ -43,13 +45,18 @@ fun CohortIntelligenceScreen(
     viewModel.loadData()
   }
 
-  CohortIntelligenceContent(uiState = uiState, onBack = onBack)
+  CohortIntelligenceContent(
+    uiState = uiState,
+    onBack = onBack,
+    onRetry = viewModel::loadData,
+  )
 }
 
 @Composable
 fun CohortIntelligenceContent(
   uiState: CohortUiState,
   onBack: () -> Unit,
+  onRetry: () -> Unit = {},
 ) {
   Scaffold(
     topBar = {
@@ -59,14 +66,57 @@ fun CohortIntelligenceContent(
       )
     }
   ) { padding ->
-    if (uiState.isLoading) {
-      LoadingState(modifier = Modifier.fillMaxSize())
-    } else {
-      LazyColumn(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(padding)
-          .padding(16.dp),
+    val body = Modifier
+      .fillMaxSize()
+      .padding(padding)
+
+    when {
+      uiState.isLoading -> EditorialSkeletonList(
+        modifier = body.padding(16.dp),
+        count = 4,
+        loadingLabel = stringResource(R.string.cohortintelligence_loading),
+      )
+
+      // Ahead of the empty branch: a faulted read has no rows either, and a
+      // student must not be told their cohort placed nobody when the query
+      // never came back.
+      uiState.error != null -> Box(
+        modifier = body.padding(24.dp),
+        contentAlignment = Alignment.Center,
+      ) {
+        EditorialErrorState(
+          headline = stringResource(R.string.cohortintelligence_unable_to_load),
+          reason = stringResource(R.string.cohortintelligence_error_reason),
+          actionLabel = stringResource(R.string.cohortintelligence_try_again),
+          onAction = onRetry,
+          secondaryHint = uiState.error,
+        )
+      }
+
+      uiState.collegeId.isBlank() -> Box(
+        modifier = body.padding(24.dp),
+        contentAlignment = Alignment.Center,
+      ) {
+        EmptyState(
+          title = stringResource(R.string.cohortintelligence_no_college_title),
+          description = stringResource(R.string.cohortintelligence_no_college_body),
+          voice = stringResource(R.string.cohortintelligence_no_college_voice),
+        )
+      }
+
+      uiState.entries.isEmpty() -> Box(
+        modifier = body.padding(24.dp),
+        contentAlignment = Alignment.Center,
+      ) {
+        EmptyState(
+          title = stringResource(R.string.cohortintelligence_no_data_title),
+          description = stringResource(R.string.cohortintelligence_no_data_body),
+          voice = stringResource(R.string.cohortintelligence_no_data_voice),
+        )
+      }
+
+      else -> LazyColumn(
+        modifier = body.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
       ) {
         item {

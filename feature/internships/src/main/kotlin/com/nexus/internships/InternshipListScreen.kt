@@ -30,7 +30,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,11 +40,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.InstrumentPlate
 import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTextField
@@ -54,6 +53,8 @@ import com.nexus.designsystem.component.NexusToastHost
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.component.SignalChoice
 import com.nexus.designsystem.component.ToastTone
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.designsystem.component.rememberNexusToastState
 import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusSpacing
@@ -97,6 +98,7 @@ fun InternshipListScreen(
     val allInternships: List<Internship> =
         (uiState as? UiState.Success<List<Internship>>)?.data ?: emptyList()
     val internships: List<Internship> = allInternships.filterInternships(searchQuery, selectedFilters)
+    val loadFault = (uiState as? UiState.Error)?.message
 
 
     Scaffold(
@@ -154,14 +156,18 @@ fun InternshipListScreen(
                 },
             )
 
-            FeedCounter(count = internships.size)
+            // A count of a list we never received is not a fact worth printing.
+            if (uiState is UiState.Success) {
+                FeedCounter(count = internships.size)
+            }
 
             InternshipFeed(
                 loading = uiState is UiState.Loading,
+                fault = loadFault,
+                onRetry = viewModel::refresh,
                 internships = internships,
                 searchQuery = searchQuery,
                 feedEmpty = allInternships.isEmpty(),
-                filterActive = selectedFilters.isNotEmpty(),
                 onClearFilters = { selectedFilters = emptySet() },
                 onInternshipClick = onInternshipClick,
                 onToggleSave = viewModel::toggleSave,
@@ -193,52 +199,61 @@ private fun InternshipFilterChips(
     }
 }
 
-/** Loading, empty and populated states are three different layouts, not one. */
+/** Loading, failed, empty and populated states are four different layouts, not one. */
 @Composable
 private fun InternshipFeed(
     loading: Boolean,
+    fault: String?,
+    onRetry: () -> Unit,
     internships: List<Internship>,
     searchQuery: String,
     feedEmpty: Boolean,
-    filterActive: Boolean,
     onClearFilters: () -> Unit,
     onInternshipClick: (String) -> Unit,
     onToggleSave: (String) -> Unit,
 ) {
+    // Inside the empty branch a non-empty feed means filters or the search
+    // removed everything, so clearing is always the useful action.
+    val canClearFilters = !feedEmpty
     when {
-        loading -> Text(
-            text = stringResource(R.string.internships_loading_internships).uppercase(Locale.ROOT),
-            modifier = Modifier.fillMaxWidth().padding(NexusSpacing.xxl),
-            style = NexusTypography.TelemetryMicro,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        loading -> EditorialSkeletonList(
+            count = 3,
+            loadingLabel = stringResource(R.string.internships_loading_internships),
+            modifier = Modifier.padding(horizontal = NexusSpacing.md),
         )
-        internships.isEmpty() -> Column(
+
+        // Ahead of the empty branch: a failed read carries no list, and without
+        // this an outage would read as "the market has nothing open for you".
+        fault != null -> EditorialErrorState(
+            headline = stringResource(R.string.internships_unable_to_load),
+            reason = stringResource(R.string.internships_error_reason),
+            actionLabel = stringResource(R.string.internships_retry),
+            onAction = onRetry,
+            secondaryHint = fault.takeIf { it.isNotBlank() },
+            modifier = Modifier.padding(horizontal = NexusSpacing.md),
+        )
+
+        internships.isEmpty() -> EmptyState(
+            title = when {
+                feedEmpty -> stringResource(R.string.internships_empty_title)
+                searchQuery.isNotBlank() -> stringResource(R.string.internships_no_matches, searchQuery)
+                else -> stringResource(R.string.internships_no_filter_matches)
+            },
+            description = when {
+                feedEmpty -> stringResource(R.string.internships_empty_feed)
+                else -> stringResource(R.string.internships_empty_widen_hint)
+            },
+            voice = stringResource(R.string.internships_empty_voice),
+            actionLabel = if (canClearFilters) {
+                stringResource(R.string.internships_clear_filters)
+            } else {
+                null
+            },
+            onAction = if (canClearFilters) onClearFilters else null,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(NexusSpacing.xxl),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = when {
-                    feedEmpty -> stringResource(R.string.internships_empty_feed)
-                    searchQuery.isNotBlank() -> stringResource(R.string.internships_no_matches, searchQuery)
-                    else -> stringResource(R.string.internships_no_filter_matches)
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            if (!feedEmpty && filterActive) {
-                TextButton(onClick = onClearFilters) {
-                    Text(
-                        text = stringResource(R.string.internships_clear_filters).uppercase(Locale.ROOT),
-                        style = NexusTypography.DataLabel,
-                        color = MaterialTheme.nexus.signal,
-                    )
-                }
-            }
-        }
+        )
         else -> LazyColumn(
             verticalArrangement = Arrangement.spacedBy(NexusSpacing.sm),
             contentPadding = PaddingValues(

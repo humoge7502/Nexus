@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -40,7 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.CalibratedRule
-import com.nexus.designsystem.component.LoadingState
+import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusOutlineButton
@@ -48,6 +47,8 @@ import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.component.Readout
 import com.nexus.designsystem.component.SignalTag
 import com.nexus.designsystem.component.SignalTone
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
@@ -74,23 +75,36 @@ fun CertificationDetailScreen(
         )
 
         if (cert == null) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                when (uiState) {
-                    is UiState.Loading -> LoadingState(modifier = Modifier.fillMaxSize())
-                    is UiState.Error -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            (uiState as UiState.Error).message,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(horizontal = 24.dp),
-                        )
-                        TextButton(onClick = viewModel::refresh) { Text(stringResource(R.string.certifications_retry)) }
-                    }
-                    else -> Text(stringResource(R.string.certifications_this_certification_is_no_longer_available),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+            when (uiState) {
+                is UiState.Loading -> EditorialSkeletonList(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp, vertical = 8.dp),
+                    count = 2,
+                    loadingLabel = stringResource(R.string.certifications_detail_loading),
+                )
+
+                is UiState.Error -> Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp, vertical = 8.dp),
+                ) {
+                    EditorialErrorState(
+                        headline = stringResource(R.string.certifications_detail_fault_headline),
+                        reason = stringResource(R.string.certifications_fault_reason),
+                        actionLabel = stringResource(R.string.certifications_retry),
+                        onAction = viewModel::refresh,
+                        secondaryHint = (uiState as UiState.Error).message,
                     )
                 }
+
+                // Reaching this branch means the catalogue did load and this id is
+                // not in it - a real answer, so it reads as an empty state, not a fault.
+                else -> EmptyState(
+                    title = stringResource(R.string.certifications_detail_gone_title),
+                    description = stringResource(R.string.certifications_this_certification_is_no_longer_available),
+                    modifier = Modifier.fillMaxSize(),
+                )
             }
             return
         }

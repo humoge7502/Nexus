@@ -11,4 +11,5 @@
     <string name="designsystem_nexus_signal">Sagitta Signal</string>
     <string name="cd_activity_heatmap">Activity calendar over %1$d weeks. %2$d active days, %3$d total sessions</string>
     <string name="cd_back">Back</string>
+    <string name="ds_loading">Loading</string>
 </resources>

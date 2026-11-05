@@ -9,6 +9,9 @@
     <string name="explore_description">Description</string>
     <string name="explore_hackathon">Hackathon</string>
     <string name="explore_hackathon_not_found">Hackathon not found</string>
+    <string name="explore_loading_hackathon">Loading hackathon</string>
+    <string name="explore_hackathon_missing_hint">This listing is no longer in the local cache, so there\'s nothing to show on this page.</string>
+    <string name="explore_hackathon_missing_voice">Listings leave the cache when their window closes — the Explore tab shows what is still open.</string>
     <string name="explore_live">LIVE</string>
     <string name="explore_prize_pool">Prize Pool</string>
     <string name="explore_register_now">Register Now</string>
@@ -17,6 +20,12 @@
     <string name="explore_categories">Categories</string>
     <string name="explore_label">%1$s</string>
     <string name="explore_loading_opportunities">Loading opportunities…</string>
+    <string name="explore_unable_to_load">The feed didn\'t load</string>
+    <string name="explore_error_reason">We couldn\'t reach the opportunity source, so nothing below is a verdict on what\'s out there.</string>
+    <string name="explore_nothing_yet">Nothing here yet</string>
+    <string name="explore_empty_after_search">Nothing in %1$s matches your search. Try a broader query or clear the filters.</string>
+    <string name="explore_empty_feed">No %1$s listings yet — this feed is refreshed as new opportunities open.</string>
+    <string name="explore_empty_voice">A quiet %1$s tab is honest, not broken: the radar only shows what is open right now.</string>
     <string name="explore_prize">Prize: %1$s</string>
     <string name="explore_results">%1$s results</string>
     <string name="explore_match_percent">%1$s%%</string>

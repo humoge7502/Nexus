@@ -63,4 +63,8 @@
     <string name="profile_codeforces_stats">Rating %1$d · max %2$d · %3$s</string>
     <string name="profile_codeforces_delta">Last contest: %1$d rating</string>
     <string name="profile_codeforces_trend_caption">Last %1$d rated contests</string>
+    <string name="profile_loading">Loading profile</string>
+    <string name="profile_unable_to_load">Your profile didn\'t load</string>
+    <string name="profile_error_reason">We couldn\'t read your score, streak and activity from this device. The shortcuts below still work.</string>
+    <string name="profile_try_again">Try again</string>
 </resources>

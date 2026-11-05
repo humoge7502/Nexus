@@ -18,6 +18,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -179,6 +180,28 @@ class OnboardingViewModelTest {
         verify(analyticsTracker).track("onboarding_skipped")
         verify(xpRepository, never()).awardXP(any(), any())
         assertTrue(completed)
+    }
+
+    @Test
+    fun `a failed profile write keeps the user in setup`() = runTest(testDispatcher) {
+        var completed = false
+        runBlocking {
+            whenever(
+                userPreferences.saveOnboardingProfile(any(), any(), any(), any(), any(), any()),
+            ).thenThrow(IllegalStateException("disk full"))
+        }
+        val viewModel = viewModel()
+        viewModel.updateName("Aarav")
+
+        viewModel.saveAndComplete { completed = true }
+        advanceUntilIdle()
+
+        assertEquals("disk full", viewModel.uiState.value.saveFault)
+        assertEquals(false, viewModel.uiState.value.isSaving)
+        assertTrue("Aarav" in viewModel.uiState.value.userName)
+        assertFalse(completed)
+        verify(analyticsTracker).track("onboarding_save_failed", mapOf("path" to "save"))
+        verify(xpRepository, never()).awardXP(any(), any())
     }
 
     @Test

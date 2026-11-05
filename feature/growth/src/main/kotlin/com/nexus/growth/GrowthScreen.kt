@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,9 +34,12 @@ import com.nexus.common.Constants
 import com.nexus.designsystem.component.InstrumentPlate
 import com.nexus.designsystem.component.MomentumChart
 import com.nexus.designsystem.component.ConstellationNode
+import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.SkillConstellation
 import com.nexus.designsystem.component.SignalField
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.designsystem.component.editorial.CareerProgressionReveal
 import com.nexus.designsystem.component.editorial.ProgressionReading
 import com.nexus.designsystem.effect.RevealOnLoad
@@ -76,7 +77,16 @@ fun GrowthScreen(
     // No cohort data yet, so the rank line stays absent rather than implied.
     val percentile: Int? = null
     val radarAxes = uiState.skillAxes.map { RadarAxis(it.label, it.value) }
-    val goals = (uiState.goals as? com.nexus.domain.model.UiState.Success)?.data.orEmpty()
+    val goals = when (val s = uiState.goals) {
+        is com.nexus.domain.model.UiState.Success -> s.data
+        else -> emptyList()
+    }
+    val goalsFault = (uiState.goals as? com.nexus.domain.model.UiState.Error)?.message
+    val metricsFault = uiState.metricsFault
+    // Every figure below is derived from the metrics pipeline. While it is in
+    // flight or has failed, those numbers are defaults — so they stay off
+    // screen instead of reporting a score of 0 as if it were a measurement.
+    val metricsRead = uiState.metricsLoaded && metricsFault == null
 
     Box(modifier = Modifier.fillMaxSize()) {
         SignalField(modifier = Modifier.fillMaxSize())
@@ -90,21 +100,42 @@ fun GrowthScreen(
                 GrowthHeader(showBackArrow = showBackArrow, onBack = onBack)
             }
             item(key = "score_card") {
-                RevealOnLoad(delayMillis = 40) {
-                    ScoreLedger(
-                        score = uiState.nexusScore,
-                        weeklyChange = weeklyChange,
-                        percentile = percentile,
-                        readings = readings,
-                    )
+                when {
+                    metricsFault != null -> RevealOnLoad(delayMillis = 40) {
+                        EditorialErrorState(
+                            headline = stringResource(R.string.growth_unable_to_measure),
+                            reason = stringResource(R.string.growth_metrics_error_reason),
+                            actionLabel = stringResource(R.string.growth_try_again),
+                            onAction = viewModel::retryMetrics,
+                            secondaryHint = metricsFault.takeIf { it.isNotBlank() },
+                        )
+                    }
+
+                    !metricsRead -> RevealOnLoad(delayMillis = 40) {
+                        EditorialSkeletonList(
+                            count = 1,
+                            loadingLabel = stringResource(R.string.growth_loading_metrics),
+                        )
+                    }
+
+                    else -> RevealOnLoad(delayMillis = 40) {
+                        ScoreLedger(
+                            score = uiState.nexusScore,
+                            weeklyChange = weeklyChange,
+                            percentile = percentile,
+                            readings = readings,
+                        )
+                    }
                 }
             }
-            item(key = "momentum") {
-                RevealOnLoad(delayMillis = 110) {
-                    MomentumCard(
-                        values = uiState.scoreMomentum,
-                        weeklyChange = uiState.scoreWeeklyChange,
-                    )
+            if (metricsRead) {
+                item(key = "momentum") {
+                    RevealOnLoad(delayMillis = 110) {
+                        MomentumCard(
+                            values = uiState.scoreMomentum,
+                            weeklyChange = uiState.scoreWeeklyChange,
+                        )
+                    }
                 }
             }
             item(key = "radar") {
@@ -119,22 +150,36 @@ fun GrowthScreen(
                     SkillMapCard(axes = radarAxes)
                 }
             }
-            item(key = "streak") {
-                LearningStreak(
-                    currentStreak = uiState.currentStreak,
-                    longestStreak = uiState.longestStreak,
-                    thisMonthActive = uiState.thisMonthActive,
-                    weekActivity = uiState.weekActivity,
-                )
+            if (metricsRead) {
+                item(key = "streak") {
+                    LearningStreak(
+                        currentStreak = uiState.currentStreak,
+                        longestStreak = uiState.longestStreak,
+                        thisMonthActive = uiState.thisMonthActive,
+                        weekActivity = uiState.weekActivity,
+                    )
+                }
+                item(key = "stats") {
+                    QuickStatsRow(
+                        problemsSolved = uiState.dsaSolved,
+                        goalsCompleted = uiState.completedGoals,
+                        projects = uiState.projectsCount,
+                    )
+                }
             }
-            item(key = "stats") {
-                QuickStatsRow(
-                    problemsSolved = uiState.dsaSolved,
-                    goalsCompleted = uiState.completedGoals,
-                    projects = uiState.projectsCount,
-                )
+            item(key = "goals") {
+                if (goalsFault != null) {
+                    EditorialErrorState(
+                        headline = stringResource(R.string.growth_goals_unavailable),
+                        reason = stringResource(R.string.growth_goals_error_reason),
+                        actionLabel = stringResource(R.string.growth_try_again),
+                        onAction = viewModel::refresh,
+                        secondaryHint = goalsFault.takeIf { it.isNotBlank() },
+                    )
+                } else {
+                    GoalsPreview(goals = goals, onGoals = onGoals)
+                }
             }
-            item(key = "goals") { GoalsPreview(goals = goals, onGoals = onGoals) }
             item(key = "nexus_actions") { NexusActionsRow(onOracle = onOracle, onArena = onArena) }
             item(key = "challenge") {
                 TodaysChallenge(challenge = uiState.dailyChallenge, onStart = onDsaTracker)
@@ -150,13 +195,16 @@ private fun GrowthHeader(showBackArrow: Boolean, onBack: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (showBackArrow) {
-            IconButton(onClick = onBack, modifier = Modifier.padding(end = 4.dp).size(32.dp)) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.cd_back),
-                    modifier = Modifier.size(20.dp),
-                )
-            }
+            // The same control the header in NexusTopBar uses. A raw IconButton
+            // pinned to 32dp is the smallest target in the app, and one-handed
+            // reach is the whole point of a back key.
+            NexusIconButton(
+                icon = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(R.string.cd_back),
+                onClick = onBack,
+                tint = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(end = 4.dp),
+            )
         }
         Text(
             text = stringResource(R.string.growth_growth),

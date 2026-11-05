@@ -68,6 +68,7 @@ fun HomeScreen(
     onViewAllInternships: () -> Unit = {},
     onNavigateToProductivity: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
+    onNavigateToApplications: () -> Unit = {},
     onNavigateToNotifications: () -> Unit = {},
     onOpenCommandPalette: () -> Unit = {},
 ) {
@@ -178,6 +179,7 @@ fun HomeScreen(
                         title = stringResource(R.string.home_your_applications),
                         index = "02",
                         actionText = stringResource(R.string.home_track),
+                        onAction = onNavigateToApplications,
                         modifier = Modifier.padding(horizontal = 24.dp)
                     )
                 }

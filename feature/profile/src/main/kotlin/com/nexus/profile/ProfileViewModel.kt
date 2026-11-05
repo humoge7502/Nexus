@@ -189,8 +189,20 @@ class ProfileViewModel @Inject constructor(
                     referralCode = referralCode,
                     referralLink = "https://nexusapp.in/referral/$referralCode",
                 )
+            }.catch { error ->
+                // Without this, a failed read leaves the skeleton spinning
+                // forever and the coroutine dies silently in the scope.
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = error.message ?: "Profile could not be loaded",
+                )
             }.collect { state -> _uiState.value = state }
         }
+    }
+
+    fun retry() {
+        _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+        loadProfile()
     }
 
     private fun userSkillsFlow(): Flow<List<Skill>> =

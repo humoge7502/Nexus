@@ -33,6 +33,8 @@ import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusOutlineButton
 import com.nexus.designsystem.component.NexusTextField
+import com.nexus.designsystem.component.feedback.EditorialStatusBand
+import com.nexus.designsystem.component.feedback.StatusTone
 import com.nexus.settings.R
 
 @Composable
@@ -48,7 +50,6 @@ fun AccountDeletionScreen(
         viewModel.effects.collect { effect ->
             when (effect) {
                 is AccountDeletionEffect.DeletionComplete -> onDeletionComplete()
-                is AccountDeletionEffect.RequiresReAuthentication -> onNavigateBack()
             }
         }
     }
@@ -115,6 +116,14 @@ fun AccountDeletionScreen(
             label = stringResource(R.string.delete_confirm_hint),
             modifier = Modifier.fillMaxWidth(),
         )
+
+        if (uiState.requiresReauth) {
+            EditorialStatusBand(
+                label = stringResource(R.string.settings_sign_in_again_to_delete),
+                detail = stringResource(R.string.settings_reauth_reason),
+                tone = StatusTone.Fault,
+            )
+        }
 
         uiState.error?.let { error ->
             Text(text = error, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)

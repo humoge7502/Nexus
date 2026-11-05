@@ -34,6 +34,7 @@ class NotificationsViewModel @Inject constructor(
 
     private fun loadNotifications() {
         viewModelScope.launch {
+            _uiState.value = UiState.Loading
             dao.getAll()
                 .map<List<NotificationEntity>, UiState<List<NotificationItem>>> { entities ->
                     UiState.Success(entities.map { it.toDomain() })
@@ -42,6 +43,8 @@ class NotificationsViewModel @Inject constructor(
                 .collect { _uiState.value = it }
         }
     }
+
+    fun retry() = loadNotifications()
 
     fun markAsRead(id: String) {
         viewModelScope.launch { dao.markAsRead(id) }

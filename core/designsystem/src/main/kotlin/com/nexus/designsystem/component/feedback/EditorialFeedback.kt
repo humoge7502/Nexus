@@ -70,9 +70,9 @@ fun EditorialErrorState(
             )
             Spacer(Modifier.width(NexusSpacing.sm))
             Text(
-                text = (if (isRecoverable) "RETRYABLE FAULT" else "FAULT").uppercase(Locale.ROOT),
+                text = (if (isRecoverable) "Couldn't load" else "Unavailable").uppercase(Locale.ROOT),
                 style = NexusTypography.DataLabel,
-                color = ext.onAttentionContainer.copy(alpha = 0.75f),
+                color = ext.onAttentionContainer.copy(alpha = 0.8f),
             )
         }
         Spacer(Modifier.height(NexusSpacing.sm))
@@ -92,7 +92,10 @@ fun EditorialErrorState(
             Text(
                 text = secondaryHint,
                 style = NexusTypography.BodySmall,
-                color = ext.onAttentionContainer.copy(alpha = 0.65f),
+                // 0.65 measured 3.35:1 on the light attention container — under
+                // AA for small text. 0.8 is the floor that clears it in both
+                // themes while keeping this line quieter than the reason.
+                color = ext.onAttentionContainer.copy(alpha = 0.8f),
             )
         }
         if (actionLabel != null && onAction != null) {

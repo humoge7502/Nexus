@@ -28,8 +28,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 
 @Composable
 fun CareerMirrorScreen(
@@ -42,13 +45,18 @@ fun CareerMirrorScreen(
     viewModel.generateMirror()
   }
 
-  CareerMirrorContent(uiState = uiState, onBack = onBack)
+  CareerMirrorContent(
+    uiState = uiState,
+    onBack = onBack,
+    onRetry = viewModel::generateMirror,
+  )
 }
 
 @Composable
 fun CareerMirrorContent(
   uiState: CareerMirrorUiState,
   onBack: () -> Unit,
+  onRetry: () -> Unit = {},
 ) {
   Scaffold(
     topBar = {
@@ -59,21 +67,43 @@ fun CareerMirrorContent(
     }
   ) { padding ->
     if (uiState.isLoading) {
-      Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(stringResource(R.string.careermirror_generating_your_career_mirror), style = MaterialTheme.typography.bodyLarge)
-      }
+      EditorialSkeletonList(
+        count = 3,
+        loadingLabel = stringResource(R.string.careermirror_loading),
+        modifier = Modifier
+          .padding(padding)
+          .padding(horizontal = 16.dp, vertical = 20.dp),
+      )
+      return@Scaffold
+    }
+
+    // The fault has to be checked before the missing-data branch, or a failed
+    // generation is indistinguishable from a user who simply has no history.
+    val error = uiState.error
+    if (error != null) {
+      EditorialErrorState(
+        headline = stringResource(R.string.careermirror_unable_to_generate),
+        reason = stringResource(R.string.careermirror_error_reason),
+        actionLabel = stringResource(R.string.careermirror_try_again),
+        onAction = onRetry,
+        secondaryHint = error.takeIf { it.isNotBlank() },
+        modifier = Modifier
+          .padding(padding)
+          .padding(horizontal = 16.dp, vertical = 20.dp),
+      )
       return@Scaffold
     }
 
     val mirror = uiState.mirror
     if (mirror == null) {
-      Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-          Text(stringResource(R.string.careermirror_not_enough_data_yet), style = MaterialTheme.typography.headlineSmall)
-          Spacer(modifier = Modifier.height(8.dp))
-          Text(stringResource(R.string.careermirror_use_nexus_for_90_days_to))
-        }
-      }
+      EmptyState(
+        title = stringResource(R.string.careermirror_not_enough_data_yet),
+        description = stringResource(R.string.careermirror_use_nexus_for_90_days_to),
+        voice = stringResource(R.string.careermirror_empty_voice),
+        modifier = Modifier
+          .padding(padding)
+          .fillMaxSize(),
+      )
       return@Scaffold
     }
 
@@ -85,72 +115,15 @@ fun CareerMirrorContent(
         .padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-      // Period card
-      NexusCard(
-        modifier = Modifier.fillMaxWidth(),
-        containerColor = MaterialTheme.colorScheme.primaryContainer,
-      ) {
-        Text(
-          text = mirror.periodLabel,
-          style = MaterialTheme.typography.labelLarge,
-          color = MaterialTheme.colorScheme.onPrimaryContainer,
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-          text = stringResource(
-            R.string.careermirror_score_with_delta,
-            uiState.currentScore,
-            if (uiState.scoreDelta >= 0) "+${uiState.scoreDelta}" else uiState.scoreDelta.toString(),
-          ),
-          style = MaterialTheme.typography.headlineMedium,
-          fontWeight = FontWeight.Bold,
-          color = MaterialTheme.colorScheme.onPrimaryContainer,
-        )
-      }
-
-      // Narrative card
-      NexusCard {
-        Text(
-          text = mirror.narrative,
-          style = MaterialTheme.typography.bodyLarge,
-          color = MaterialTheme.colorScheme.onSurface,
-        )
-      }
+      MirrorHeadline(
+        periodLabel = mirror.periodLabel,
+        score = uiState.currentScore,
+        scoreDelta = uiState.scoreDelta,
+        narrative = mirror.narrative,
+      )
 
       // Key Insights
-      if (mirror.keyInsights.isNotEmpty()) {
-        NexusCard {
-          Text(
-            stringResource(R.string.careermirror_key_insights),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-          )
-          Spacer(modifier = Modifier.height(8.dp))
-          mirror.keyInsights.forEach { insight ->
-            Row(
-              modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-              verticalAlignment = Alignment.Top,
-            ) {
-              Box(
-                modifier = Modifier
-                  .size(8.dp)
-                  .background(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = MaterialTheme.shapes.small,
-                  ),
-              )
-              Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-              Text(
-                text = insight,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.weight(1f),
-              )
-            }
-          }
-        }
-      }
+      MirrorInsightsCard(mirror.keyInsights)
 
       // Action Items
       if (mirror.actionItems.isNotEmpty()) {
@@ -186,6 +159,81 @@ fun CareerMirrorContent(
       }
 
       Spacer(modifier = Modifier.height(80.dp))
+    }
+  }
+}
+
+@Composable
+private fun MirrorHeadline(
+  periodLabel: String,
+  score: Int,
+  scoreDelta: Int,
+  narrative: String,
+) {
+  NexusCard(
+    modifier = Modifier.fillMaxWidth(),
+    containerColor = MaterialTheme.colorScheme.primaryContainer,
+  ) {
+    Text(
+      text = periodLabel,
+      style = MaterialTheme.typography.labelLarge,
+      color = MaterialTheme.colorScheme.onPrimaryContainer,
+    )
+    Spacer(modifier = Modifier.height(4.dp))
+    Text(
+      text = stringResource(
+        R.string.careermirror_score_with_delta,
+        score,
+        if (scoreDelta >= 0) "+$scoreDelta" else scoreDelta.toString(),
+      ),
+      style = MaterialTheme.typography.headlineMedium,
+      fontWeight = FontWeight.Bold,
+      color = MaterialTheme.colorScheme.onPrimaryContainer,
+    )
+  }
+
+  NexusCard {
+    Text(
+      text = narrative,
+      style = MaterialTheme.typography.bodyLarge,
+      color = MaterialTheme.colorScheme.onSurface,
+    )
+  }
+}
+
+/** Absent rather than empty: no insights means the card does not appear. */
+@Composable
+private fun MirrorInsightsCard(insights: List<String>) {
+  if (insights.isEmpty()) return
+  NexusCard {
+    Text(
+      stringResource(R.string.careermirror_key_insights),
+      style = MaterialTheme.typography.titleMedium,
+      fontWeight = FontWeight.Bold,
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    insights.forEach { insight ->
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.Top,
+      ) {
+        Box(
+          modifier = Modifier
+            .size(8.dp)
+            .background(
+              color = MaterialTheme.colorScheme.primary,
+              shape = MaterialTheme.shapes.small,
+            ),
+        )
+        Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+        Text(
+          text = insight,
+          style = MaterialTheme.typography.bodyMedium,
+          modifier = Modifier.weight(1f),
+        )
+      }
     }
   }
 }

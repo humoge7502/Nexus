@@ -24,7 +24,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
@@ -52,7 +51,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,11 +61,13 @@ import androidx.lifecycle.viewModelScope
 import com.nexus.common.Constants
 import com.nexus.data.repository.PortfolioRepository
 import com.nexus.data.repository.UserXpRepository
-import com.nexus.designsystem.component.NexusButton
+import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.designsystem.component.hairline
 import com.nexus.designsystem.component.instrumentGrid
 import com.nexus.designsystem.theme.NexusColors
@@ -80,6 +80,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Locale
 import java.util.UUID
@@ -89,6 +91,9 @@ import javax.inject.Inject
 data class PortfolioUiState(
     val projects: List<PortfolioProject> = emptyList(),
     val isLoading: Boolean = true,
+    /** A read that failed, kept apart from `projects.isEmpty()` so the screen can
+     *  tell "nothing added yet" from "nothing could be read". */
+    val error: String? = null,
 )
 
 /** What the add-project dialog collects; only [title] is required. */
@@ -113,10 +118,28 @@ class PortfolioViewModel @Inject constructor(
 
     private fun loadProjects() {
         viewModelScope.launch {
-            portfolioRepository.projects.collect { projects ->
-                _uiState.value = PortfolioUiState(isLoading = false, projects = projects)
-            }
+            portfolioRepository.projects
+                .catch { e ->
+                    // Without this the exception dies inside the scope and the
+                    // page holds its skeleton up forever.
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = e.message ?: "Failed to load your projects",
+                        )
+                    }
+                }
+                .collect { projects ->
+                    _uiState.update {
+                        it.copy(isLoading = false, projects = projects, error = null)
+                    }
+                }
         }
+    }
+
+    fun retry() {
+        _uiState.update { it.copy(isLoading = true, error = null) }
+        loadProjects()
     }
 
     fun addProject(draft: ProjectDraft) {
@@ -144,13 +167,16 @@ fun PortfolioScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var showAddDialog by remember { mutableStateOf(false) }
+    // Read before the empty branch: a failed read carries no projects, so
+    // `projects.isEmpty()` alone would render an outage as "you have none yet".
+    val loadFault = uiState.error
 
     Column(modifier = Modifier.fillMaxSize()) {
         NexusTopBar(
             title = stringResource(R.string.portfolio_portfolio),
             onBack = onBack,
             actions = {
-                if (uiState.projects.isNotEmpty()) {
+                if (uiState.projects.isNotEmpty() && loadFault == null) {
                     NexusIconButton(
                         icon = Icons.Default.Share,
                         contentDescription = stringResource(R.string.portfolio_share),
@@ -183,18 +209,48 @@ fun PortfolioScreen(
             contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item {
-                PortfolioSignature(
-                    projectCount = uiState.projects.size,
-                    onAdd = { showAddDialog = true },
-                )
-            }
-            if (uiState.projects.isEmpty() && !uiState.isLoading) {
+            // The plate is one figure: how many projects are on file. While the
+            // read is in flight or has failed there is no file to count, so it
+            // stays off instead of asserting 0 over a list nobody could load.
+            if (!uiState.isLoading && loadFault == null) {
                 item {
-                    PortfolioEmpty(onAdd = { showAddDialog = true })
+                    PortfolioSignature(
+                        projectCount = uiState.projects.size,
+                        onAdd = { showAddDialog = true },
+                    )
                 }
-            } else {
-                itemsIndexed(uiState.projects, key = { _, project -> project.id }) { index, project ->
+            }
+
+            when {
+                uiState.isLoading -> item {
+                    EditorialSkeletonList(
+                        count = 3,
+                        loadingLabel = stringResource(R.string.portfolio_loading_projects),
+                    )
+                }
+
+                loadFault != null -> item {
+                    EditorialErrorState(
+                        headline = stringResource(R.string.portfolio_unable_to_load),
+                        reason = stringResource(R.string.portfolio_error_reason),
+                        actionLabel = stringResource(R.string.portfolio_try_again),
+                        onAction = viewModel::retry,
+                        secondaryHint = loadFault.takeIf { it.isNotBlank() },
+                    )
+                }
+
+                uiState.projects.isEmpty() -> item {
+                    EmptyState(
+                        title = stringResource(R.string.portfolio_empty_title),
+                        description = stringResource(R.string.portfolio_empty_body),
+                        voice = stringResource(R.string.portfolio_empty_voice),
+                        actionLabel = stringResource(R.string.portfolio_add_first),
+                        onAction = { showAddDialog = true },
+                        modifier = Modifier.padding(top = 24.dp),
+                    )
+                }
+
+                else -> itemsIndexed(uiState.projects, key = { _, project -> project.id }) { index, project ->
                     ProjectCard(index = index + 1, project = project)
                 }
             }
@@ -323,45 +379,6 @@ private fun GlassAddButton(
             text = stringResource(R.string.portfolio_add),
             style = MaterialTheme.typography.labelLarge,
             color = ink,
-        )
-    }
-}
-
-@Composable
-private fun PortfolioEmpty(
-    onAdd: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 56.dp, bottom = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Icon(
-            imageVector = Icons.Default.FolderOpen,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
-            modifier = Modifier.size(44.dp),
-        )
-        Spacer(Modifier.height(16.dp))
-        Text(
-            text = stringResource(R.string.portfolio_empty_title),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = stringResource(R.string.portfolio_empty_body),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(20.dp))
-        NexusButton(
-            text = stringResource(R.string.portfolio_add_first),
-            onClick = onAdd,
         )
     }
 }

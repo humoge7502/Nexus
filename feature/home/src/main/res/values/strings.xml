@@ -24,6 +24,9 @@
     <string name="home_no_opportunities_yet">No opportunities yet</string>
     <string name="home_no_opportunities_message">Fresh internships land here every morning. Explore everything while you wait.</string>
     <string name="home_your_applications">Your Applications</string>
+    <string name="home_status_applied">Applied</string>
+    <string name="home_status_interview">Interview</string>
+    <string name="home_status_offer">Offer</string>
     <string name="home_certs">Certs</string>
     <string name="home_day_streak">Day Streak</string>
     <string name="home_interviews">Interviews</string>

@@ -32,10 +32,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.component.SignalChoice
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.domain.model.SearchMode
 
 @Composable
@@ -125,30 +128,39 @@ fun SearchScreen(
                 }
             }
 
-            if (uiState.isSearching) {
-                Text(text = stringResource(R.string.text_searching),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(16.dp)
+            when {
+                uiState.isSearching -> EditorialSkeletonList(
+                    count = 3,
+                    loadingLabel = stringResource(R.string.search_loading_results),
                 )
-            }
 
-            if (!uiState.isSearching && uiState.query.isNotEmpty() && uiState.results.isEmpty()) {
-                Text(text = stringResource(R.string.text_no_results_found),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(16.dp)
+                uiState.error != null -> EditorialErrorState(
+                    headline = stringResource(R.string.search_unable_to_search),
+                    reason = stringResource(R.string.search_error_reason),
+                    actionLabel = stringResource(R.string.search_try_again),
+                    onAction = viewModel::retrySearch,
+                    secondaryHint = uiState.error?.takeIf { it.isNotBlank() },
                 )
-            }
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(uiState.results) { result ->
-                    SearchResultItem(
-                        result = result,
-                        onClick = { onResultClick(result.id) }
+                !uiState.isSearching && uiState.query.isNotEmpty() && uiState.results.isEmpty() ->
+                    EmptyState(
+                        title = stringResource(R.string.text_no_results_found),
+                        description = stringResource(R.string.search_no_results_hint),
+                        voice = stringResource(R.string.search_empty_voice),
+                        modifier = Modifier.padding(vertical = 24.dp),
                     )
+            }
+
+            if (uiState.results.isNotEmpty()) {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(uiState.results) { result ->
+                        SearchResultItem(
+                            result = result,
+                            onClick = { onResultClick(result.id) }
+                        )
+                    }
                 }
             }
         }

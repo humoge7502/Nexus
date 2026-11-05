@@ -52,19 +52,21 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.CalibratedRule
+import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.component.SignalTag
 import com.nexus.designsystem.component.SignalTone
+import com.nexus.designsystem.component.feedback.EditorialErrorState
+import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.designsystem.theme.NexusShapes
@@ -121,6 +123,9 @@ fun GoalsScreen(
         else -> emptyList()
     }
     val isLoading = uiState is UiState.Loading
+    // Read before the empty branch: an Error carries no list, and goals.isEmpty()
+    // would otherwise render a load failure as "you have no goals".
+    val loadFault = (uiState as? UiState.Error)?.message
     val completedCount = goals.count { it.progress >= 1f }
     val averageProgress = if (goals.isEmpty()) 0f
     else goals.sumOf { it.progress.toDouble() }.toFloat() / goals.size
@@ -145,47 +150,46 @@ fun GoalsScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(NexusSpacing.sm),
             ) {
-                item {
-                    GoalsSummaryPlate(
-                        averageProgress = averageProgress,
-                        total = goals.size,
-                        completed = completedCount,
-                    )
+                // The plate reports figures computed from the list. While the read
+                // is in flight or has failed there is nothing to compute from, so
+                // it stays off instead of asserting 0% over 0 goals.
+                if (!isLoading && loadFault == null) {
+                    item {
+                        GoalsSummaryPlate(
+                            averageProgress = averageProgress,
+                            total = goals.size,
+                            completed = completedCount,
+                        )
+                    }
                 }
 
                 when {
                     isLoading && goals.isEmpty() -> item {
-                        Text(
-                            stringResource(R.string.goals_loading_your_goals),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = NexusSpacing.huge),
-                            textAlign = TextAlign.Center,
+                        EditorialSkeletonList(
+                            count = 3,
+                            loadingLabel = stringResource(R.string.goals_loading_your_goals),
+                        )
+                    }
+
+                    loadFault != null -> item {
+                        EditorialErrorState(
+                            headline = stringResource(R.string.goals_unable_to_load),
+                            reason = stringResource(R.string.goals_error_reason),
+                            actionLabel = stringResource(R.string.goals_try_again),
+                            onAction = viewModel::retry,
+                            secondaryHint = loadFault.takeIf { it.isNotBlank() },
                         )
                     }
 
                     goals.isEmpty() -> item {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
+                        EmptyState(
+                            title = stringResource(R.string.goals_no_goals_yet),
+                            description = stringResource(R.string.goals_tap_to_set_your_first_goal),
+                            voice = stringResource(R.string.goals_empty_voice),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = NexusSpacing.huge),
-                        ) {
-                            Text(
-                                stringResource(R.string.goals_no_goals_yet),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                            Spacer(Modifier.height(NexusSpacing.xxs))
-                            Text(
-                                stringResource(R.string.goals_tap_to_set_your_first_goal),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center,
-                            )
-                        }
+                        )
                     }
 
                     else -> items(goals, key = { it.id }) { goal ->
