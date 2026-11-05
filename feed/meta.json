@@ -1,16 +1,16 @@
 {
   "version": 2,
-  "generatedAt": "2026-11-05T06:37:13.965Z",
-  "durationMs": 33397,
+  "generatedAt": "2026-11-05T19:53:45.813Z",
+  "durationMs": 33011,
   "counts": {
-    "internships": 36,
+    "internships": 34,
     "hackathons": 58,
-    "verifiedInternships": 39,
+    "verifiedInternships": 36,
     "verifiedHackathons": 58
   },
   "verification": {
     "enabled": true,
-    "deadLinksDropped": 2
+    "deadLinksDropped": 3
   },
   "sources": [
     {
