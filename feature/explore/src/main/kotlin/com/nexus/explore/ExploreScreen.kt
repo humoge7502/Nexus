@@ -392,14 +392,16 @@ private fun LazyListScope.internshipCards(
     onClick: (String) -> Unit,
 ) {
     items(internships, key = { "internship_${it.id}" }) { internship ->
-        ExploreOpportunityCard(
-            title = internship.title,
-            org = internship.company.name,
-            matchScore = matchPercents[internship.id],
-            missingSkills = skillGaps[internship.id].orEmpty(),
-            tags = internship.tags.take(3),
-            onClick = { onClick(internship.id) },
-        )
+        Box(modifier = Modifier.animateItem()) {
+            ExploreOpportunityCard(
+                title = internship.title,
+                org = internship.company.name,
+                matchScore = matchPercents[internship.id],
+                missingSkills = skillGaps[internship.id].orEmpty(),
+                tags = internship.tags.take(3),
+                onClick = { onClick(internship.id) },
+            )
+        }
     }
 }
 
@@ -408,7 +410,9 @@ private fun LazyListScope.hackathonCards(
     onClick: (String) -> Unit,
 ) {
     items(hackathons, key = { "hackathon_${it.id}" }) { hackathon ->
-        HackathonCard(hackathon = hackathon, onClick = { onClick(hackathon.id) })
+        Box(modifier = Modifier.animateItem()) {
+            HackathonCard(hackathon = hackathon, onClick = { onClick(hackathon.id) })
+        }
     }
 }
 
@@ -417,7 +421,9 @@ private fun LazyListScope.certificationCards(
     onClick: (String) -> Unit,
 ) {
     items(certifications, key = { "certification_${it.id}" }) { certification ->
-        CertificationCard(certification = certification, onClick = { onClick(certification.id) })
+        Box(modifier = Modifier.animateItem()) {
+            CertificationCard(certification = certification, onClick = { onClick(certification.id) })
+        }
     }
 }
 

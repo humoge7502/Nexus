@@ -3,6 +3,7 @@ package com.nexus.designsystem.component
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
@@ -15,13 +16,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.theme.NexusAnimation
+import com.nexus.designsystem.theme.NexusTypography
 import com.nexus.designsystem.theme.motionMillis
 import com.nexus.designsystem.theme.nexus
+import java.util.Locale
+import kotlin.math.roundToInt
 
 /**
  * The career-momentum instrument: the user's Sagitta-score history drawn as one
@@ -32,6 +43,12 @@ import com.nexus.designsystem.theme.nexus
  * the baseline only — the chart never invents history. The reveal is a single
  * left-to-right wipe driven by [NexusAnimation]; with reduced motion it
  * appears fully drawn immediately.
+ *
+ * The chart is a readable instrument, not a picture: dragging horizontally
+ * scrubs a hairline across the readings with the value in mono — the same
+ * reading the plot itself carries, never a derived one. Scrubbing is direct
+ * manipulation, so it stays available under reduced motion; the readout
+ * simply appears without tweening.
  */
 @Composable
 fun MomentumChart(
@@ -49,22 +66,40 @@ fun MomentumChart(
         ),
         label = "momentumReveal",
     )
+    var scrubX by remember { mutableStateOf<Float?>(null) }
+    val textMeasurer = rememberTextMeasurer()
+    val scrubInk = MaterialTheme.colorScheme.onSurface
 
     val cleanValues = remember(values) { values.filter { it.isFinite() } }
 
     Canvas(
         modifier = modifier
             .fillMaxWidth()
-            .height(120.dp),
+            .height(120.dp)
+            .pointerInput(cleanValues) {
+                // Horizontal intent only: a vertical drag still scrolls the
+                // page; a horizontal one reads the instrument.
+                detectHorizontalDragGestures(
+                    onDragStart = { offset -> scrubX = offset.x },
+                    onHorizontalDrag = { change, _ ->
+                        change.consume()
+                        scrubX = change.position.x
+                    },
+                    onDragEnd = { scrubX = null },
+                    onDragCancel = { scrubX = null },
+                )
+            },
     ) {
         val w = size.width
         val h = size.height
-        val padTop = h * 0.10f
+        // The head band reserves room for the scrub readout so the label never
+        // covers the line it is reading.
+        val padTop = h * 0.16f
         val padBottom = h * 0.12f
         val plotH = h - padTop - padBottom
 
         // Baseline grid: dashed hairlines, per the instrument grid language.
-        val gridEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(6f, 10f))
+        val gridEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 10f))
         drawLine(
             color = extended.gridLine,
             start = Offset(0f, padTop),
@@ -139,5 +174,69 @@ fun MomentumChart(
                 center = last,
             )
         }
+
+        scrubX?.let { x ->
+            val index = (x / stepX).roundToInt().coerceIn(0, cleanValues.lastIndex)
+            val point = pointAt(index)
+            drawScrubReadout(
+                x = point.x,
+                y = point.y,
+                value = cleanValues[index],
+                plotTop = padTop,
+                plotBottom = padTop + plotH,
+                palette = ScrubPalette(
+                    gridLine = extended.gridLine,
+                    signal = extended.signal,
+                    signalContainer = extended.signalContainer,
+                    ink = scrubInk,
+                ),
+                textMeasurer = textMeasurer,
+            )
+        }
     }
+}
+
+/** The scrub layer: a dashed hairline across the plot, the reading picked out
+ *  in the same halo-dot pair the latest reading wears, and the value in mono
+ *  above the plot — the instrument answering a touch with its own number. */
+private data class ScrubPalette(
+    val gridLine: Color,
+    val signal: Color,
+    val signalContainer: Color,
+    val ink: Color,
+)
+
+private fun DrawScope.drawScrubReadout(
+    x: Float,
+    y: Float,
+    value: Float,
+    plotTop: Float,
+    plotBottom: Float,
+    palette: ScrubPalette,
+    textMeasurer: TextMeasurer,
+) {
+    drawLine(
+        color = palette.gridLine,
+        start = Offset(x, plotTop),
+        end = Offset(x, plotBottom),
+        pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 10f)),
+    )
+    drawCircle(color = palette.signalContainer, radius = 7.dp.toPx(), center = Offset(x, y))
+    drawCircle(color = palette.signal, radius = 4.dp.toPx(), center = Offset(x, y))
+    val label = if (value % 1f == 0f) {
+        value.roundToInt().toString()
+    } else {
+        String.format(Locale.US, "%.1f", value)
+    }
+    val layout = textMeasurer.measure(
+        text = label,
+        style = NexusTypography.TelemetryMicro.copy(color = palette.ink),
+    )
+    drawText(
+        textLayoutResult = layout,
+        topLeft = Offset(
+            (x - layout.size.width / 2f).coerceIn(0f, size.width - layout.size.width),
+            (plotTop - layout.size.height - 4.dp.toPx()).coerceAtLeast(0f),
+        ),
+    )
 }

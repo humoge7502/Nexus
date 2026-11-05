@@ -48,9 +48,12 @@ import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.SignalField
 import com.nexus.designsystem.component.TelemetryItem
 import com.nexus.designsystem.component.TelemetryStrip
+import com.nexus.designsystem.component.borderBeam
 import com.nexus.designsystem.component.editorial.EditorialSurface
 import com.nexus.designsystem.effect.RevealOnLoad
+import com.nexus.designsystem.effect.RevealWords
 import com.nexus.designsystem.theme.NexusAnimation
+import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
 import com.nexus.designsystem.theme.motionMillis
@@ -182,10 +185,10 @@ fun HomeScreen(
                     )
                 }
 
-                items(uiState.activeApplications) { application ->
+                items(uiState.activeApplications, key = { "application_${it.id}" }) { application ->
                     ApplicationSummaryCard(
                         application = application,
-                        modifier = Modifier.padding(horizontal = 24.dp)
+                        modifier = Modifier.animateItem().padding(horizontal = 24.dp),
                     )
                 }
             }
@@ -260,7 +263,7 @@ private fun GreetingSection(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
+            RevealWords(
                 text = greeting,
                 // The greeting is the screen's one narrative sentence — the serif
                 // byline above the instrument's loudest readout, not a caption
@@ -389,7 +392,8 @@ private fun CareerReadinessCard(
     // measurement, and a gauge drawn in ink on ink — which is what this was —
     // cannot be read at all. On paper the dial is the only lit thing, so it is
     // the only thing the eye measures.
-    EditorialSurface(modifier = modifier.fillMaxWidth()) {
+    // borderBeam: the hairline, lit — the one signature plate per screen.
+    EditorialSurface(modifier = modifier.fillMaxWidth().borderBeam(shape = NexusShapes.lg)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(

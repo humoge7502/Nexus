@@ -112,13 +112,15 @@ fun ApplicationsScreen(
             key = { it.id },
             contentType = { "application" },
           ) { application ->
-            ApplicationCard(
-              application = application,
-              onStatusChange = { newStatus ->
-                viewModel.updateStatus(application.id, newStatus)
-              },
-              onRemove = { viewModel.remove(application.id) },
-            )
+            Box(modifier = Modifier.animateItem()) {
+              ApplicationCard(
+                application = application,
+                onStatusChange = { newStatus ->
+                  viewModel.updateStatus(application.id, newStatus)
+                },
+                onRemove = { viewModel.remove(application.id) },
+              )
+            }
           }
 
           // The pipeline section reads the same list as the cards above, but

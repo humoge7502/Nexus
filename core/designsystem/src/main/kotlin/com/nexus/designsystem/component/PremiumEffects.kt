@@ -23,6 +23,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.addOutline
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -213,6 +214,66 @@ fun Modifier.instrumentGrid(
                 strokeWidth = 1f,
             )
             x += spacing
+        }
+    }
+}
+
+/** A single beam of the signal color traveling along a shape's outline —
+ *  Magic UI's border-beam cut for the instrument: the hairline, lit. The
+ *  beam hugs the same outline [innerLight] builds, with halo layers that
+ *  obey the arcGlow discipline (light ON the stroke, never a smear beside
+ *  it). The signal is the one loud hue, so this belongs on at most one
+ *  signature plate per screen.
+ *
+ *  Infinite by nature; returns the surface untouched under reduced motion
+ *  (the static hairline remains). */
+fun Modifier.borderBeam(
+    shape: Shape = NexusShapes.md,
+    color: Color? = null,
+    periodMs: Int = 6000,
+    beamFraction: Float = 0.16f,
+): Modifier = composed {
+    if (LocalReducedMotion.current) return@composed this
+    val resolvedColor = color ?: MaterialTheme.nexus.signal
+    val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
+    val strokePx = with(density) { 2.dp.toPx() }
+    val progress by rememberInfiniteTransition(label = "borderBeam").animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = periodMs, easing = LinearEasing),
+        ),
+        label = "borderBeamProgress",
+    )
+    this.drawWithContent {
+        drawContent()
+        if (size.width <= strokePx || size.height <= strokePx) return@drawWithContent
+        val outline = shape.createOutline(
+            size = Size(size.width - strokePx, size.height - strokePx),
+            layoutDirection = layoutDirection,
+            density = density,
+        )
+        val measure = PathMeasure().apply {
+            setPath(Path().apply { addOutline(outline) }, false)
+        }
+        val perimeter = measure.length
+        val beamLength = perimeter * beamFraction
+        val head = progress * perimeter
+        val beam = Path()
+        // getSegment() cannot wrap the seam; a beam crossing it draws in two passes.
+        if (head + beamLength <= perimeter) {
+            measure.getSegment(head, head + beamLength, beam, true)
+        } else {
+            measure.getSegment(head, perimeter, beam, true)
+            measure.getSegment(0f, head + beamLength - perimeter, beam, true)
+        }
+        listOf(2.2f to 0.10f, 1.4f to 0.30f, 1.0f to 0.9f).forEach { (mult, alpha) ->
+            drawPath(
+                path = beam,
+                color = resolvedColor.copy(alpha = alpha),
+                style = Stroke(width = strokePx * mult, cap = StrokeCap.Round),
+            )
         }
     }
 }

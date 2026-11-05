@@ -27,7 +27,11 @@ import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.TelemetryItem
 import com.nexus.designsystem.component.TelemetryStrip
+import com.nexus.designsystem.component.borderBeam
+import com.nexus.designsystem.component.editorial.EditorialSurface
+import com.nexus.designsystem.effect.RevealWords
 import com.nexus.designsystem.theme.NexusGradients
+import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusTheme
 import com.nexus.designsystem.theme.NexusTypography
 
@@ -139,4 +143,37 @@ private fun ChipPreview() {
     NexusTheme(darkTheme = true) {
         NexusChip(text = "Internships", isSelected = true, onToggle = {})
     }
+}
+
+@Composable
+private fun EffectsBoard() {
+    Column(Modifier.padding(16.dp)) {
+        RevealWords(
+            text = "Good night",
+            style = NexusTypography.EditorialTitle,
+        )
+        Spacer(Modifier.height(12.dp))
+        EditorialSurface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .borderBeam(shape = NexusShapes.lg),
+        ) {
+            Text(
+                "The beam is the hairline, lit — one signature plate per screen.",
+                style = NexusTypography.EditorialBody,
+            )
+        }
+    }
+}
+
+@Preview(name = "Effects — light", showBackground = true)
+@Composable
+private fun EffectsBoardLight() {
+    NexusTheme(darkTheme = false) { EffectsBoard() }
+}
+
+@Preview(name = "Effects — dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun EffectsBoardDark() {
+    NexusTheme(darkTheme = true) { EffectsBoard() }
 }
