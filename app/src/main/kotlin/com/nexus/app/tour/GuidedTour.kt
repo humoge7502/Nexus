@@ -164,7 +164,9 @@ internal fun GuidedTour(
                     NexusButton(
                         text = stringResource(if (isLast) R.string.tour_start else R.string.tour_next),
                         onClick = { if (isLast) endTour() else step++ },
-                        gradient = listOf(extended.signal),
+                        // A single-colour ramp: linearGradient rejects a one-stop
+                        // list at draw time, so the tour's CTA died on first frame.
+                        gradient = listOf(extended.signal, extended.signal.copy(alpha = 0.82f)),
                         shape = NexusShapes.sm,
                         expand = false,
                     )

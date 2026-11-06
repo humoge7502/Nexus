@@ -33,7 +33,7 @@
     <string name="cd_warning">Warning</string>
     <string name="text_appearance">Appearance</string>
     <string name="settings_pro_title">Sagitta Pro</string>
-    <string name="settings_pro_subtitle">AI Interview Coach, Oracle, Arena and more</string>
+    <string name="settings_pro_subtitle">AI answers, without the 10-a-day cap</string>
     <string name="settings_dark_mode_subtitle">Use dark theme</string>
     <string name="settings_amoled_title">AMOLED Black</string>
     <string name="settings_amoled_on_subtitle">True-black surfaces that save battery</string>
@@ -58,4 +58,18 @@
     <string name="settings_connection_save">Save</string>
     <string name="settings_sign_in_again_to_delete">Sign in again before deleting</string>
     <string name="settings_reauth_reason">Google requires a recent sign-in before an account can be deleted, so this one is still open. Data cleared earlier in the run can\'t be recovered.</string>
+
+    <!-- Data &amp; privacy rows - the store page promises these; they are wired now. -->
+    <string name="settings_export_subtitle">Save a copy of your Sagitta data as JSON</string>
+    <string name="settings_export_done">Your data export has been saved.</string>
+    <string name="settings_export_failed">The export could not be saved. Nothing was changed.</string>
+    <string name="settings_delete_subtitle">Permanently delete your account and everything on this device</string>
+    <string name="settings_share_help_title">Bring a listing in from your group</string>
+    <string name="settings_share_help_subtitle">Share a forwarded post straight into Sagitta</string>
+    <string name="settings_share_help_intro">Your WhatsApp or placement-cell group stays your discovery channel. When something worth tracking appears, Sagitta can keep it - without retyping anything.</string>
+    <string name="settings_share_help_step_1">1. In the group, long-press the forwarded listing.</string>
+    <string name="settings_share_help_step_2">2. Tap Share, then choose Sagitta.</string>
+    <string name="settings_share_help_step_3">3. Sagitta searches the verified catalog for it - save and track it in one tap.</string>
+    <string name="settings_share_help_footnote">The share goes to your device only. Nothing is posted anywhere.</string>
+    <string name="settings_share_help_done">Got it</string>
 </resources>

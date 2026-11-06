@@ -3,6 +3,8 @@ package com.nexus.settings
 import androidx.compose.ui.res.stringResource
 import com.nexus.settings.R
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,6 +26,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material.icons.filled.BrightnessMedium
 import androidx.compose.material.icons.filled.Check
@@ -33,11 +39,16 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +69,7 @@ import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.theme.NexusColors
+import com.nexus.settings.deletion.AccountDeletionScreen
 
 private data class AccentOption(val name: String, val color: Long?)
 
@@ -74,17 +86,67 @@ private val accentOptions = listOf(
 fun SettingsScreen(
     onBack: () -> Unit,
     onGoPro: () -> Unit = {},
+    /**
+     * What happens when the account and device data are gone. Default clears
+     * the task stack and relaunches the app — the boot flow then lands on the
+     * auth screen because the sign-in preference was wiped with everything
+     * else. The parameter exists so tests can observe the event instead.
+     */
+    onAccountDeleted: (() -> Unit)? = null,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isDarkMode = uiState.themeMode == "DARK"
     val isAmoled = uiState.amoledEnabled && isDarkMode
     val context = LocalContext.current
+    val restartAfterDeletion: () -> Unit = {
+        context.packageManager.getLaunchIntentForPackage(context.packageName)
+            ?.apply {
+                addFlags(
+                    android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
+                        android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK,
+                )
+            }
+            ?.let(context::startActivity)
+    }
     val versionName = remember(context) {
         context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: ""
     }
     var showWalkthrough by remember { mutableStateOf(false) }
+    var showDeleteAccount by remember { mutableStateOf(false) }
+    var showShareHelp by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val exportInFlight by viewModel.exportInFlight.collectAsStateWithLifecycle()
+    val exportFailedText = stringResource(R.string.settings_export_failed)
+    val exportDoneText = stringResource(R.string.settings_export_done)
 
+    LaunchedEffect(Unit) {
+        viewModel.exportEvents.collect { event ->
+            snackbarHostState.showSnackbar(
+                when (event) {
+                    ExportEvent.Exported -> exportDoneText
+                    ExportEvent.Failed -> exportFailedText
+                },
+            )
+        }
+    }
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json"),
+    ) { uri ->
+        if (uri != null) viewModel.exportData(uri)
+    }
+
+    if (showDeleteAccount) {
+        AccountDeletionScreen(
+            onNavigateBack = { showDeleteAccount = false },
+            // Caller-supplied hook first; the launcher-intent restart otherwise.
+            onDeletionComplete = onAccountDeleted ?: restartAfterDeletion,
+        )
+        return
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {
         NexusTopBar(
             title = stringResource(R.string.settings_title),
@@ -279,6 +341,42 @@ fun SettingsScreen(
             )
 
             SettingsItem(
+                icon = Icons.Default.IosShare,
+                title = stringResource(R.string.settings_share_help_title),
+                subtitle = stringResource(R.string.settings_share_help_subtitle),
+                onClick = { showShareHelp = true },
+            )
+
+            SettingsItem(
+                icon = Icons.Default.Download,
+                title = stringResource(R.string.settings_export_data),
+                subtitle = stringResource(R.string.settings_export_subtitle),
+                trailing = if (exportInFlight) {
+                    {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                        )
+                    }
+                } else {
+                    null
+                },
+                onClick = {
+                    if (!exportInFlight) {
+                        exportLauncher.launch("sagitta-export.json")
+                    }
+                },
+            )
+
+            SettingsItem(
+                icon = Icons.Default.Delete,
+                title = stringResource(R.string.settings_delete_account),
+                subtitle = stringResource(R.string.settings_delete_subtitle),
+                iconTint = MaterialTheme.colorScheme.error,
+                onClick = { showDeleteAccount = true },
+            )
+
+            SettingsItem(
                 icon = Icons.Default.Info,
                 title = stringResource(R.string.settings_about),
                 subtitle = stringResource(R.string.settings_version, versionName)
@@ -305,8 +403,42 @@ fun SettingsScreen(
         }
     }
 
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(androidx.compose.ui.Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+        )
+    }
+
     if (showWalkthrough) {
         WalkthroughFilmDialog(onDismiss = { showWalkthrough = false })
+    }
+
+    if (showShareHelp) {
+        AlertDialog(
+            onDismissRequest = { showShareHelp = false },
+            title = { Text(stringResource(R.string.settings_share_help_title)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(stringResource(R.string.settings_share_help_intro))
+                    Text(stringResource(R.string.settings_share_help_step_1))
+                    Text(stringResource(R.string.settings_share_help_step_2))
+                    Text(stringResource(R.string.settings_share_help_step_3))
+                    Text(
+                        stringResource(R.string.settings_share_help_footnote),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showShareHelp = false }) {
+                    Text(stringResource(R.string.settings_share_help_done))
+                }
+            },
+        )
     }
 }
 
@@ -317,6 +449,8 @@ private fun SettingsItem(
     subtitle: String,
     trailing: @Composable (() -> Unit)? = null,
     onClick: (() -> Unit)? = null,
+    /** Overrides the default muted icon tint — used only for destructive actions. */
+    iconTint: androidx.compose.ui.graphics.Color? = null,
 ) {
     Row(
         modifier = Modifier
@@ -328,7 +462,7 @@ private fun SettingsItem(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = iconTint ?: MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(24.dp)
         )
         Spacer(modifier = Modifier.width(16.dp))

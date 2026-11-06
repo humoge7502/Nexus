@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nexus.analytics.AnalyticsTracker
+import com.nexus.data.usecase.LocalDataWiper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.firestore.FirebaseFirestore
@@ -27,6 +28,7 @@ class AccountDeletionViewModel @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val firebaseStorage: FirebaseStorage,
     private val analyticsTracker: AnalyticsTracker,
+    private val localDataWiper: LocalDataWiper,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AccountDeletionUiState())
@@ -41,12 +43,27 @@ class AccountDeletionViewModel @Inject constructor(
 
             try {
                 val userId = firebaseAuth.currentUser?.uid
-                    ?: throw IllegalStateException("Not authenticated")
+                    ?: run {
+                        // Students who never signed in hold no remote rows.
+                        // "Delete my data" still has something to delete, so
+                        // the flow wipes the device and reports done instead
+                        // of failing on an account that does not exist.
+                        localDataWiper.wipe()
+                        analyticsTracker.track("local_data_cleared")
+                        _effects.emit(AccountDeletionEffect.DeletionComplete)
+                        return@launch
+                    }
 
                 deleteFirestoreData(userId)
                 deleteStorageFiles(userId)
 
                 firebaseAuth.currentUser?.delete()?.await()
+
+                // The store page promises the deletion is real. The remote
+                // rows are gone at this point; the device-side record of the
+                // student is not, and leaving it behind would make the
+                // promise quietly false for anyone who reinstalls.
+                localDataWiper.wipe()
 
                 analyticsTracker.track("account_deleted")
                 _effects.emit(AccountDeletionEffect.DeletionComplete)

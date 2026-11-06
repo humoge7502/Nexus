@@ -392,4 +392,13 @@ class UserPreferences @Inject constructor(
             prefs.remove(USER_ID)
         }
     }
+
+    /**
+     * Erase every key this store holds. Used by account deletion: the store
+     * is the device-side record of the student, and "the deletion is real"
+     * only holds if nothing survives it.
+     */
+    suspend fun clearAll() {
+        context.dataStore.edit { prefs -> prefs.clear() }
+    }
 }

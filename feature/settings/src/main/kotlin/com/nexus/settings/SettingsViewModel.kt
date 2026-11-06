@@ -6,15 +6,21 @@ import androidx.lifecycle.viewModelScope
 import com.nexus.analytics.AnalyticsTracker
 import com.nexus.common.Constants
 import com.nexus.data.repository.UserXpRepository
+import com.nexus.data.usecase.DataExporter
 import com.nexus.datastore.ExternalAccount
 import com.nexus.datastore.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import android.net.Uri
 
 @Immutable
 data class SettingsUiState(
@@ -33,7 +39,40 @@ class SettingsViewModel @Inject constructor(
     private val userPreferences: UserPreferences,
     private val analyticsTracker: AnalyticsTracker,
     private val xpRepository: UserXpRepository,
+    private val dataExporter: DataExporter,
 ) : ViewModel() {
+
+    /** One-shot outcome of an export request, consumed by the screen's snackbar. */
+    private val _exportEvents = MutableSharedFlow<ExportEvent>(extraBufferCapacity = 1)
+    val exportEvents: kotlinx.coroutines.flow.SharedFlow<ExportEvent> = _exportEvents.asSharedFlow()
+
+    /** True while the export JSON is being assembled and written. */
+    private val _exportInFlight = MutableStateFlow(false)
+    val exportInFlight: StateFlow<Boolean> = _exportInFlight.asStateFlow()
+
+    /**
+     * Writes the export JSON to the document the student picked through the
+     * Storage Access Framework. The file never transits the network or an
+     * extra copy on disk — the picker is the whole permission model.
+     */
+    fun exportData(uri: Uri) {
+        if (_exportInFlight.value) return
+        viewModelScope.launch {
+            _exportInFlight.value = true
+            try {
+                val result = dataExporter.exportToStream(uri)
+                analyticsTracker.track(
+                    "data_exported",
+                    mapOf("outcome" to if (result.isSuccess) "exported" else "failed"),
+                )
+                _exportEvents.tryEmit(
+                    if (result.isSuccess) ExportEvent.Exported else ExportEvent.Failed,
+                )
+            } finally {
+                _exportInFlight.value = false
+            }
+        }
+    }
     val uiState: StateFlow<SettingsUiState> = combine(
         userPreferences.themeMode,
         userPreferences.amoledEnabled,
@@ -138,4 +177,10 @@ class SettingsViewModel @Inject constructor(
         val codeforces: String,
         val linkedin: String,
     )
+}
+
+/** Outcome of a data-export request; the screen turns it into one snackbar. */
+sealed interface ExportEvent {
+    data object Exported : ExportEvent
+    data object Failed : ExportEvent
 }

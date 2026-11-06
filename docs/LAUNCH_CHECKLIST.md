@@ -15,6 +15,10 @@ require the account owner's money and identity; no tooling can substitute for th
   SHA-1. `google-services.json` is local-only (gitignored — never commit it).
 - App: brand **Sagitta**, a first-launch guided tour that walks the five stations,
   the instrument design system, unit tests green.
+- Data rights wired for real (06-11-2026): Settings → Export My Data and
+  Settings → Delete Account now exist and work — deletion removes remote rows
+  and wipes Room/DataStore/files on device, then relaunches into sign-in.
+  See [MIROFISH-GAP-CLOSURE.md](MIROFISH-GAP-CLOSURE.md).
 - Walkthrough film: Settings → "Watch the walkthrough" plays
   `feature/settings/src/main/res/raw/sagitta_walk.mp4` — 57.6 s of real
   `screenrecord` footage captured from this app running on `NexusApi35`

@@ -35,6 +35,7 @@ import com.nexus.designsystem.component.NexusOutlineButton
 import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.feedback.EditorialStatusBand
 import com.nexus.designsystem.component.feedback.StatusTone
+import com.nexus.designsystem.theme.NexusGradients
 import com.nexus.settings.R
 
 @Composable
@@ -147,7 +148,7 @@ fun AccountDeletionScreen(
                 onClick = { viewModel.confirmDeletion() },
                 enabled = confirmText == "DELETE",
                 loading = uiState.isDeleting,
-                gradient = listOf(MaterialTheme.colorScheme.error),
+                gradient = NexusGradients.Error,
                 modifier = Modifier.weight(1f),
                 expand = false,
             )

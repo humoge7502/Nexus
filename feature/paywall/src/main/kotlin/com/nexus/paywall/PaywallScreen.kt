@@ -68,13 +68,13 @@ fun PaywallScreen(
         return
     }
 
+    // Every line here must be something Pro actually does. The simulation
+    // found students re-verify claims against what they can see — an
+    // inflated bullet costs the whole list its credibility.
     val features = listOf(
         stringResource(R.string.paywall_feature_unlimited_ai_chat),
-        stringResource(R.string.paywall_feature_priority_tracking),
-        stringResource(R.string.paywall_feature_advanced_insights),
-        stringResource(R.string.paywall_feature_resume_optimization),
-        stringResource(R.string.paywall_feature_skill_gap),
-        stringResource(R.string.paywall_feature_ad_free),
+        stringResource(R.string.paywall_feature_same_tools),
+        stringResource(R.string.paywall_feature_free_stays_free),
     )
 
     Column(
