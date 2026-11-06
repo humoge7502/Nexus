@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.unit.IntOffset
 
 /**
  * Motion rules for an instrument, not a showreel.
@@ -61,6 +62,17 @@ object NexusAnimation {
             stiffness = Spring.StiffnessMediumLow
         )
         val list = spring<Float>(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        )
+        /**
+         * AutoAnimate / GSAP Flip / Motion layoutId port: one placement spec
+         * for add / remove / reorder of list children. No-bounce, medium-low
+         * stiffness so a reordered row glides rather than hopping; exits
+         * stay quicker than entrances via NexusTransitions.plateExit().
+         * Callers must supply stable unique Lazy keys (AutoAnimate's rule).
+         */
+        val itemPlacement = spring<IntOffset>(
             dampingRatio = Spring.DampingRatioNoBouncy,
             stiffness = Spring.StiffnessMediumLow
         )

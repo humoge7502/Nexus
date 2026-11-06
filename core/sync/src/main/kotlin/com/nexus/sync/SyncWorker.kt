@@ -27,6 +27,7 @@ class SyncWorker @AssistedInject constructor(
     private val goalRepository: GoalRepository,
     private val dsaProblemRepository: DSAProblemRepository,
     private val networkMonitor: NetworkMonitor,
+    private val syncScheduler: SyncScheduler,
 ) : CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
@@ -47,6 +48,12 @@ class SyncWorker @AssistedInject constructor(
             val failures = results.filterValues { it.isError }
             if (failures.isEmpty()) {
                 Timber.d("Background sync completed successfully")
+                // The fetch just landed fresh arrivals in Room. The Firestore
+                // backup and the new-match notification are consumers of that
+                // fresh data, so chain them immediately instead of letting
+                // them wait for their own independent 6-hour clocks.
+                syncScheduler.triggerFirestoreSyncNow()
+                syncScheduler.triggerNewMatchCheckNow()
                 Result.success()
             } else {
                 Timber.w("Background sync had ${failures.size} failures: ${failures.keys}")

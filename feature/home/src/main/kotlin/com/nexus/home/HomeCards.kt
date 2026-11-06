@@ -158,7 +158,10 @@ internal fun OpportunityCard(
     ) {
         NexusCard(
             onClick = onClick,
-            modifier = Modifier.width(282.dp),
+            // 280dp matches OpportunitySkeletonRow exactly, so the swap from
+            // skeleton to content does not shift the row by 2dp; the peek of
+            // the next card stays ~70dp on a 393dp screen
+            modifier = Modifier.width(280.dp),
             shape = NexusShapes.lg,
         ) {
             Row(

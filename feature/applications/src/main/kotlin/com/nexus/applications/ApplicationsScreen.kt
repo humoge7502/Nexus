@@ -61,6 +61,7 @@ import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.component.feedback.EditorialErrorState
 import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.designsystem.component.rememberNexusToastState
+import com.nexus.designsystem.effect.nexusItemPlacement
 import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
@@ -165,13 +166,14 @@ fun ApplicationsScreen(
             key = { it.id },
             contentType = { "application" },
           ) { application ->
-            Box(modifier = Modifier.animateItem()) {
+            Box(modifier = nexusItemPlacement()) {
               ApplicationCard(
                 application = application,
                 onStatusChange = { newStatus ->
                   viewModel.updateStatus(application.id, newStatus)
                 },
                 onRemove = { viewModel.remove(application.id) },
+                onClick = { onApplicationClick(application.opportunityId) },
               )
             }
           }
@@ -266,10 +268,11 @@ private fun ApplicationCard(
   application: Application,
   onStatusChange: (ApplicationStatus) -> Unit,
   onRemove: () -> Unit,
+  onClick: () -> Unit = {},
   modifier: Modifier = Modifier,
 ) {
   val score = application.matchScore
-  NexusCard(modifier = modifier.fillMaxWidth()) {
+  NexusCard(modifier = modifier.fillMaxWidth().clickable { onClick() }) {
     Column(modifier = Modifier.fillMaxWidth()) {
       Row(
         modifier = Modifier.fillMaxWidth(),

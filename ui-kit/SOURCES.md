@@ -7,6 +7,16 @@ and 12 reference images were saved (660 KB). Licenses were read from the downloa
 assumed. The interactive companion is [`index.html`](index.html); the shippable code is
 [`COMPOSE_PORTS.md`](COMPOSE_PORTS.md).
 
+**Second visit (2026-11-06, same-day re-verify):** all 17 URLs fetched again live.
+17 additional open-source files downloaded (`border-beam`, `dot-pattern`,
+`marquee`, `scroll-based-velocity`, `TrueFocus`, `border-trail`,
+`toolbar-dynamic`, `infinite-slider`, `contribution-graph`, `ticker`,
+`rating`, `comparison`, Animate UI `sliding-number` + `accordion` +
+LICENSE, coss `command` + MIT LICENSE) → 56 source files total (~300 KB).
+Ports 1, 2 and 7-alias shipped as original Kotlin (see below); no React
+code is compiled into the APK. Live deltas recorded in the appendix at
+the end of this file.
+
 ## The one thing to know first
 
 `docs/DESIGN_DIRECTION.md` §7 ("Anti-generic commitments") **bans** generic purple-blue gradients,
@@ -303,5 +313,35 @@ verdict column says which is which.
    accounts. Links are curated instead of scraped.
 3. **Pro/paid assets.** Aceternity blocks, ReUI Pro blocks, 21st.dev paid themes, Motion+ vault.
    Not purchasable or licensable from here.
-4. **Anything into `core/designsystem/`.** No app source file was modified. `COMPOSE_PORTS.md`
-   contains proposed code for review; it is not wired into the build.
+4. **Anything into `core/designsystem/` (first visit).** No app source file was modified on
+   the first visit; `COMPOSE_PORTS.md` then held proposals.
+   On the **second visit (2026-11-06)** the remaining shippable ports
+   were implemented as original Kotlin: `SweepReadout.kt`,
+   `NexusListPlacement.kt`, `NexusDestinationIndex.kt`, plus
+   `NexusAnimation.Springs.itemPlacement` and a `NexusCommand.aliases`
+   addition. They build (`:core:designsystem:assembleDebug` green) and
+   their pure logic is covered by 13 JVM tests. React source stays in
+   `sources/` only; nothing under `app/` / `feature/` / `core/` contains
+   `.tsx`.
+
+## Appendix — second visit live deltas (2026-11-06)
+
+| Site (live fetch) | What changed / confirmed live |
+|---|---|
+| 21st.dev | 12,000+ components, MCP + CLI (`npx @21st-dev/cli init`), 2 free copies/day, registry format confirmed. Behaviour: keep semantic icon search. |
+| Aceternity | Now **200+ components** (was 118), 183+ blocks, 17 templates, 5 pages; Liquid Glass + Text Flipping Board still headline. Still REFERENCE. |
+| Magic UI | 150+ components, 23.1k GitHub stars, MIT confirmed. Downloaded 4 more (`border-beam` ships as `Modifier.borderBeam()`; `marquee`/`scroll-based-velocity` stored as rejected). |
+| React Bits | Text Animations / Animations / Components / Backgrounds / Micro. Downloaded `TrueFocus.tsx` (REJECTED for ship: infinite focus carousel violates §5; stored for review). MIT+Commons Clause still applies — repo-root `NOTICE.md` added. |
+| Motion Primitives | MIT. Downloaded `border-trail` (ships as `borderBeam` sibling), `toolbar-dynamic`, `infinite-slider` (rejected reference). |
+| Animate UI | Now ships Radix + Base UI + React Aria primitives via CLI + AI skill. Downloaded `sliding-number` + Radix `accordion` + LICENSE (**MIT+Commons Clause**, Elliot Sutton). Motion rules adopted as review checklist. |
+| Origin → coss.com | Still 301 → `coss.com/ui`, 530 particles, 10.8k stars, MIT (LICENSE at repo root). Downloaded `command.tsx` as behaviour spec for palette/index. |
+| Kibo UI | 41 components, 28 blocks, 1,101 patterns, 3.8k stars, free/open-source. Downloaded `contribution-graph`, `ticker`, `rating`, `comparison`. |
+| ReUI | **1,264 free components** (87 categories), 678 Pro blocks, 667 icons, MCP + skills; free MIT confirmed on page. Borrow: Data Grid, Sparkline, Empty State. |
+| Motion (motion.dev) | **v14.9.0 (30 Oct 2026)**, MIT. Layout springs / AnimatePresence / scroll springs confirmed. |
+| GSAP | "GSAP is now 100% free for everyone, thanks to Webflow" — confirmed live. Not OSI open source; do not mirror. |
+| AutoAnimate | MIT (FormKit, 2026) confirmed; `autoAnimate(parent)` + `prefers-reduced-motion` confirmed. Ships as `nexusItemPlacement` + `itemPlacement`. |
+| Godly → recent.design | Still redirects. Feed + jobs (pen.dev, Paper, MOMENT). Trend feed only. |
+| Awwwards | SOTD 05 Nov 2026: "Agrumea Farm" (Studio K95, 7.33/10). Winners Grail, DeepBook, Grids, MECHA, etc. Art-direction benchmark only. |
+| Mobbin | 600,000+ screens, llms.txt/MCP/REST API docs live. Most useful inspiration source; downloads still gated. |
+| Dribbble | Root returns empty body (JS-gated); `/shots/popular` not fetchable via simple HTTP — matches first-visit note. Reference only. |
+| Refero | Root fetch empty (JS-gated); search confirms "Refero MCP ... real product interfaces and user flows" + Figma plugin. Reference only. |

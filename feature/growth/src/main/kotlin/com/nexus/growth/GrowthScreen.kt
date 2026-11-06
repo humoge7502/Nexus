@@ -321,7 +321,20 @@ private fun MomentumCard(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 12.dp),
         )
-        MomentumChart(values = values, modifier = Modifier.fillMaxWidth())
+        // Below two readings the chart can only draw its baseline, so a
+        // 120dp canvas reads as a large blank card. Collapse to a 56dp strip
+        // (MomentumChart honours the caller's height as the max) and let the
+        // Voice caption carry the rest. Growth is the only momentum surface
+        // that renders the chart while empty — EditorialMetric/Profile guard
+        // on size >= 2 already.
+        MomentumChart(
+            values = values,
+            modifier = if (values.size < 2) {
+                Modifier.fillMaxWidth().height(56.dp)
+            } else {
+                Modifier.fillMaxWidth()
+            },
+        )
         if (values.isEmpty()) {
             Spacer(Modifier.height(10.dp))
             // The instrument is empty because there is nothing to measure yet, not

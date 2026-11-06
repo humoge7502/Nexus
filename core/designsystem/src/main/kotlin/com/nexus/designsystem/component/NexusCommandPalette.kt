@@ -43,12 +43,16 @@ import com.nexus.designsystem.theme.NexusTypography
 import com.nexus.designsystem.theme.nexus
 
 /** One jumpable target: a destination, or a search hand-off. The palette is
- *  business-logic-free — the app shell decides what is in the list. */
+ *  business-logic-free — the app shell decides what is in the list.
+ *  [aliases] feeds NexusDestinationIndex so "streak" resolves to Growth
+ *  even when the title says otherwise. Defaults preserve every existing
+ *  call site. */
 data class NexusCommand(
     val id: String,
     val title: String,
     val subtitle: String? = null,
     val category: String = "",
+    val aliases: List<String> = emptyList(),
 )
 
 /**
@@ -71,17 +75,7 @@ fun NexusCommandPalette(
     onDismiss: () -> Unit,
 ) {
     val focusRequester = remember { FocusRequester() }
-    val trimmed = query.trim()
-
-    val matches = if (trimmed.isEmpty()) {
-        commands
-    } else {
-        commands.filter {
-            it.title.contains(trimmed, ignoreCase = true) ||
-                it.subtitle?.contains(trimmed, ignoreCase = true) == true ||
-                it.category.contains(trimmed, ignoreCase = true)
-        }
-    }
+    val matches = NexusDestinationIndex.resolveCommands(query, commands)
 
     Dialog(
         onDismissRequest = onDismiss,

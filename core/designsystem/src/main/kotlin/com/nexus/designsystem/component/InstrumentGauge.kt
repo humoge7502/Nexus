@@ -43,22 +43,28 @@ import kotlin.math.sin
  * once the needle has passed it, so the reader can count the scale as well as
  * read the arc. The sweep runs once on first composition; afterwards the arc
  * animates to any new value.
+ *
+ * Set [animateProgress] = false when the caller already animates the value
+ * on the shared reveal clock (e.g. SweepReadout.onArc driving the digits
+ * and the arc from one sweepValue) — re-animating here would lag the arc
+ * behind the digits and break the single-clock invariant.
  */
 @Composable
 fun InstrumentGauge(
     progress: Float,
     modifier: Modifier = Modifier,
     accent: Color = MaterialTheme.nexus.signal,
-    trackColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
-    tickColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.22f),
+    trackColor: Color = MaterialTheme.nexus.gaugeTrack,
+    tickColor: Color = MaterialTheme.nexus.gaugeTick,
     stroke: Dp = 9.dp,
     contentDescription: String? = null,
+    animateProgress: Boolean = true,
     content: @Composable BoxScope.() -> Unit = {},
 ) {
     val target = progress.coerceIn(0f, 1f)
     var started by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { started = true }
-    val value by animateFloatAsState(
+    val swept by animateFloatAsState(
         targetValue = if (started) target else 0f,
         animationSpec = tween(
             durationMillis = motionMillis(NexusAnimation.Duration.long),
@@ -66,6 +72,7 @@ fun InstrumentGauge(
         ),
         label = "gaugeSweep",
     )
+    val value = if (animateProgress) swept else target
 
     val semanticsModifier = if (contentDescription != null) {
         Modifier.semantics {

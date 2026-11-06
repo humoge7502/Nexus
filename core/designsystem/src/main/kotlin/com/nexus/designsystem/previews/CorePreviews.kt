@@ -26,6 +26,7 @@ import com.nexus.designsystem.component.NexusOutlineButton
 import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.component.SectionHeader
+import com.nexus.designsystem.component.SweepReadout
 import com.nexus.designsystem.component.TelemetryItem
 import com.nexus.designsystem.component.TelemetryStrip
 import com.nexus.designsystem.component.borderBeam
@@ -164,6 +165,9 @@ private fun EffectsBoard() {
                 style = NexusTypography.EditorialBody,
             )
         }
+        Spacer(Modifier.height(12.dp))
+        SweepReadout(score = 72.4f)
+        SweepReadout(score = 72.4f, decimals = 0, unit = "%")
         Spacer(Modifier.height(12.dp))
         EmptyState(
             art = EmptyStateArt.Radar,

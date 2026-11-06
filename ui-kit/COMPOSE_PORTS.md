@@ -1,6 +1,12 @@
 # Compose ports — the part that can actually ship
 
-**Status: proposals for review. No file under `app/`, `core/` or `feature/` was modified.**
+**Status: PARTIALLY SHIPPED (2026-11-06 second visit).** Ports 1, 2 and the
+alias half of 7 now live in `core/designsystem` and are covered by JVM
+tests; the rest (3, 4, 5) were already shipped before this visit
+(`borderBeam`, `RevealWords`, `revealClock`, `NexusSpring.Snappy`).
+Sections 1, 2 and 7 below now describe shipped code; the original
+proposals are retained for review history. No React code is compiled
+into the APK.
 
 These are translations of the web patterns that survived the curation in
 [`SOURCES.md`](SOURCES.md). They are written against the APIs that **actually exist** in

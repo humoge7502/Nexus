@@ -39,4 +39,8 @@ dependencies {
     implementation(libs.lottie)
     implementation(libs.coil)
     implementation(libs.konfetti)
+
+    // Unit tests for pure design-system logic (formatSweep,
+    // NexusDestinationIndex). No Compose test rule needed: these are JVM.
+    testImplementation(libs.junit)
 }

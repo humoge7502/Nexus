@@ -5,7 +5,9 @@ import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -199,6 +201,52 @@ class SyncScheduler @Inject constructor(
         workManager.enqueueUniquePeriodicWork(
             workName,
             ExistingPeriodicWorkPolicy.KEEP,
+            request,
+        )
+    }
+
+    /**
+     * Immediate one-time trigger for the Firestore upload/backup job.
+     *
+     * The catalog fetch and the upload run on independent clocks, so a
+     * freshly-synced catalog could sit un-backed-up for a full 6-hour cycle
+     * while its consumers (the notification sweep, the feed table) have
+     * already moved on. Chaining makes a fresh fetch become a fresh backup
+     * within minutes. APPEND tolerates overlapping triggers rather than
+     * dropping the older one.
+     */
+    fun triggerFirestoreSyncNow() {
+        val request = OneTimeWorkRequestBuilder<FirestoreSyncWorker>()
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.UNMETERED)
+                    .setRequiresBatteryNotLow(true)
+                    .setRequiresStorageNotLow(true)
+                    .build(),
+            )
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 15, TimeUnit.MINUTES)
+            .build()
+        workManager.enqueueUniqueWork(
+            "firestore_sync_now",
+            ExistingWorkPolicy.APPEND,
+            request,
+        )
+    }
+
+    /**
+     * Immediate one-time trigger for the new-match notification sweep.
+     * Same reasoning as [triggerFirestoreSyncNow]: the sweep reads the
+     * catalog the fetch just rewrote, so waiting for its own clock would
+     * delay the notification by hours. No network is required — the sweep
+     * reads Room — so it can fire even on a metered connection.
+     */
+    fun triggerNewMatchCheckNow() {
+        val request = OneTimeWorkRequestBuilder<NewMatchAlertWorker>()
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 15, TimeUnit.MINUTES)
+            .build()
+        workManager.enqueueUniqueWork(
+            "new_match_check_now",
+            ExistingWorkPolicy.APPEND,
             request,
         )
     }

@@ -66,6 +66,7 @@ import com.nexus.designsystem.component.feedback.EditorialErrorState
 import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.designsystem.component.pressScale
 import com.nexus.designsystem.effect.RevealOnLoad
+import com.nexus.designsystem.effect.nexusItemPlacement
 import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
@@ -395,7 +396,7 @@ private fun LazyListScope.internshipCards(
     onClick: (String) -> Unit,
 ) {
     items(internships, key = { "internship_${it.id}" }) { internship ->
-        Box(modifier = Modifier.animateItem()) {
+        Box(modifier = nexusItemPlacement()) {
             ExploreOpportunityCard(
                 title = internship.title,
                 org = internship.company.name,
@@ -413,7 +414,7 @@ private fun LazyListScope.hackathonCards(
     onClick: (String) -> Unit,
 ) {
     items(hackathons, key = { "hackathon_${it.id}" }) { hackathon ->
-        Box(modifier = Modifier.animateItem()) {
+        Box(modifier = nexusItemPlacement()) {
             HackathonCard(hackathon = hackathon, onClick = { onClick(hackathon.id) })
         }
     }
@@ -424,7 +425,7 @@ private fun LazyListScope.certificationCards(
     onClick: (String) -> Unit,
 ) {
     items(certifications, key = { "certification_${it.id}" }) { certification ->
-        Box(modifier = Modifier.animateItem()) {
+        Box(modifier = nexusItemPlacement()) {
             CertificationCard(certification = certification, onClick = { onClick(certification.id) })
         }
     }

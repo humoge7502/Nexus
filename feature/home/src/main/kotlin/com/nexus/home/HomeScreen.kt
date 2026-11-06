@@ -1,7 +1,5 @@
 package com.nexus.home
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,7 +26,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
@@ -46,17 +46,17 @@ import com.nexus.designsystem.component.CareerIntelligenceOrbit
 import com.nexus.designsystem.component.OrbitDimension
 import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.SignalField
+import com.nexus.designsystem.component.SweepReadout
 import com.nexus.designsystem.component.TelemetryItem
 import com.nexus.designsystem.component.TelemetryStrip
 import com.nexus.designsystem.component.borderBeam
 import com.nexus.designsystem.component.editorial.EditorialSurface
 import com.nexus.designsystem.effect.RevealOnLoad
 import com.nexus.designsystem.effect.RevealWords
-import com.nexus.designsystem.theme.NexusAnimation
+import com.nexus.designsystem.effect.nexusItemPlacement
 import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
-import com.nexus.designsystem.theme.motionMillis
 import com.nexus.designsystem.theme.nexus
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -190,7 +190,7 @@ fun HomeScreen(
                 items(uiState.activeApplications, key = { "application_${it.id}" }) { application ->
                     ApplicationSummaryCard(
                         application = application,
-                        modifier = Modifier.animateItem().padding(horizontal = 24.dp),
+                        modifier = nexusItemPlacement().padding(horizontal = 24.dp),
                     )
                 }
             }
@@ -379,14 +379,11 @@ private fun CareerReadinessCard(
     modifier: Modifier = Modifier,
 ) {
     val ext = MaterialTheme.nexus
-    val animatedScore by animateFloatAsState(
-        targetValue = score,
-        animationSpec = tween(
-            durationMillis = motionMillis(NexusAnimation.Duration.long),
-            easing = NexusAnimation.Easing.emphasizedDecelerate,
-        ),
-        label = "readiness",
-    )
+    // Single-clock hero: SweepReadout's sweepValue drives both the digits
+    // and the gauge arc (via onArc), so the number can never disagree
+    // with the dial mid-sweep. Gauge runs with animateProgress=false so
+    // it does not re-animate the already-animated value.
+    var arcFraction by remember { mutableFloatStateOf(0f) }
     val readinessCaption = stringResource(R.string.home_readiness_caption)
 
     // Readiness sits on paper, not on a field of its own colour. A saturated
@@ -405,13 +402,15 @@ private fun CareerReadinessCard(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.Bottom) {
-                    Text(
-                        text = "${(animatedScore * 100).toInt()}",
+                    SweepReadout(
+                        score = (score * 100f).coerceIn(0f, 100f),
+                        decimals = 0,
                         style = NexusTypography.TelemetryDisplay.copy(
                             fontSize = 54.sp,
                             lineHeight = 56.sp,
                         ),
                         color = MaterialTheme.colorScheme.onSurface,
+                        onArc = { arcFraction = (it / 100f).coerceIn(0f, 1f) },
                     )
                     Text(
                         text = "%",
@@ -423,10 +422,12 @@ private fun CareerReadinessCard(
             }
             Spacer(modifier = Modifier.width(12.dp))
             // Left on the gauge's own defaults: signal arc, ink track. That is the
-            // one combination that measures cleanly on this surface.
+            // one combination that measures cleanly on this surface. Driven by
+            // the same sweepValue as the digits (animateProgress=false).
             InstrumentGauge(
-                progress = score,
+                progress = arcFraction,
                 modifier = Modifier.size(112.dp),
+                animateProgress = false,
             )
         }
 

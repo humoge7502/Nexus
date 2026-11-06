@@ -157,7 +157,11 @@ object NexusColors {
 
 /**
  * Tokens that must flip with the theme and therefore cannot be plain constants:
- * hairlines, the inner top-light on a card, and the faint measurement grid.
+ * hairlines, the inner top-light on a card, the faint measurement grid, and
+ * the unlit geometry of the gauge (track + tick ring). The gauge pair is
+ * theme-aware because a single `onSurface @ 10%` is visible on plum ink
+ * but near-invisible on warm pearl paper — the lit arc would then sit on
+ * nothing and the dial would read as a floating needle.
  */
 @Immutable
 data class NexusExtendedColors(
@@ -171,6 +175,8 @@ data class NexusExtendedColors(
     val hairlineStrong: Color,
     val innerLight: Color,
     val gridLine: Color,
+    val gaugeTrack: Color,
+    val gaugeTick: Color,
     val signalContainer: Color,
     val onSignalContainer: Color,
     val attentionContainer: Color,
@@ -190,6 +196,10 @@ internal val DarkExtendedColors = NexusExtendedColors(
     hairlineStrong = Color(0xFF4A4052),
     innerLight = Color(0x14FFFFFF),
     gridLine = Color(0x0AFFFFFF),
+    // Bone @ 10% / 22% — the dark look the dial shipped with, now a token
+    // so the light theme can go darker instead of inheriting it.
+    gaugeTrack = Color(0x1AF3EDE6),
+    gaugeTick = Color(0x38F3EDE6),
     signalContainer = Color(0xFF22300A),
     onSignalContainer = Color(0xFFD8FF6E),
     attentionContainer = Color(0xFF3A1B0E),
@@ -212,6 +222,12 @@ internal val LightExtendedColors = NexusExtendedColors(
     hairlineStrong = Color(0xFFC9BEB1),
     innerLight = Color(0x66FFFFFF),
     gridLine = Color(0x0D2E1A47),
+    // Ink @ ~17% / ~38% — roughy double the dark alphas. On pearl paper
+    // 10%/22% composites to a wash the eye skips; 17%/38% keeps the ring
+    // readable without going as heavy as hairlineStrong, which is reserved
+    // for true rules and dividers.
+    gaugeTrack = Color(0x2B171018),
+    gaugeTick = Color(0x61171018),
     signalContainer = Color(0xFFDDF58F),
     onSignalContainer = Color(0xFF2A3300),
     attentionContainer = Color(0xFFFBE3D6),
