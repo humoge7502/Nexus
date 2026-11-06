@@ -97,6 +97,14 @@ test("validateRequest clamps tokens and temperature", () => {
   assert.equal(high.temperature, 2);
 });
 
+test("validateRequest accepts legacy camelCase maxTokens from older Android builds", () => {
+  const out = validateRequest({
+    messages: [{ role: "user", content: "hi" }],
+    maxTokens: 777,
+  });
+  assert.equal(out.max_tokens, 777);
+});
+
 test("validateRequest normalizes non-string content instead of crashing", () => {
   const out = validateRequest({
     messages: [{ role: "user", content: { nested: true } }],

@@ -44,8 +44,24 @@ class BillingManager @Inject constructor(
         "nexus_lifetime" to ProductTier.LIFETIME,
     )
 
+    /** Play registers lifetime as a one-time product; everything else is a subscription. */
+    private fun productTypeFor(sku: String): String =
+        if (sku == "nexus_lifetime") BillingClient.ProductType.INAPP else BillingClient.ProductType.SUBS
+
     override suspend fun initialize() {
-        if (billingClient?.isReady == true) return
+        // Restore calls initialize() on an already-ready client. Reloading the
+        // catalogue and re-checking purchases is the only way restore can
+        // surface a pre-existing purchase; a bare early-return made it a no-op.
+        billingClient?.takeIf { it.isReady }?.let { ready ->
+            _billingState.value = BillingState.Loaded(loadCatalogue(ready))
+            val owned = queryPurchases()
+            if (owned.isNotEmpty()) {
+                _billingState.value = BillingState.Purchased(
+                    PurchaseResult(sku = owned.first(), purchaseToken = "", isAcknowledged = true)
+                )
+            }
+            return
+        }
 
         val client = BillingClient.newBuilder(context)
             .setListener { billingResult, purchases ->
@@ -98,21 +114,31 @@ class BillingManager @Inject constructor(
             })
         }
         if (!connected) return
-        // Prices used to be fetched only inside purchase(), i.e. after the
-        // student had already decided — so the paywall could never show a
-        // real number and had nothing to sell against.
+        // Prices are fetched before the student decides, so the paywall can
+        // show a real number and has something to sell against.
         _billingState.value = BillingState.Loaded(loadCatalogue(client))
     }
 
-    /** One request for every SKU. A plan Play does not price is left out of the
-     *  list, which the paywall renders as unavailable rather than guessed at. */
+    /** One request per Play product type. A plan Play does not price is left
+     *  out of the list, which the paywall renders as unavailable rather than
+     *  guessed at. Lifetime is INAPP while the Pro tiers are SUBS, so a
+     *  single-type query can never return the lifetime price. */
     private suspend fun loadCatalogue(client: BillingClient): List<ProductListing> {
+        val subs = queryCatalogueForType(client, BillingClient.ProductType.SUBS)
+        val oneTime = queryCatalogueForType(client, BillingClient.ProductType.INAPP)
+        return subs + oneTime
+    }
+
+    private suspend fun queryCatalogueForType(
+        client: BillingClient,
+        productType: String,
+    ): List<ProductListing> {
         val params = QueryProductDetailsParams.newBuilder()
             .setProductList(
-                skuMapping.keys.map { sku ->
+                skuMapping.keys.filter { productTypeFor(it) == productType }.map { sku ->
                     QueryProductDetailsParams.Product.newBuilder()
                         .setProductId(sku)
-                        .setProductType(BillingClient.ProductType.SUBS)
+                        .setProductType(productType)
                         .build()
                 },
             )
@@ -134,7 +160,7 @@ class BillingManager @Inject constructor(
     private fun toListing(details: ProductDetails): ProductListing? {
         val tier = skuMapping[details.productId] ?: return null
         // Subscriptions and one-time products hang their price off different
-        // objects, and the lifetime SKU has been registered as either.
+        // objects, and the lifetime SKU may be registered as either.
         val phase = details.subscriptionOfferDetails
             ?.firstOrNull()?.pricingPhases?.pricingPhaseList?.firstOrNull()
         val oneTime = details.oneTimePurchaseOfferDetails
@@ -168,39 +194,43 @@ class BillingManager @Inject constructor(
                 listOf(
                     QueryProductDetailsParams.Product.newBuilder()
                         .setProductId(sku)
-                        .setProductType(BillingClient.ProductType.SUBS)
+                        .setProductType(productTypeFor(sku))
                         .build()
                 )
             )
             .build()
 
-        val productDetailsResult = suspendCancellableCoroutine<Pair<BillingResult, List<ProductDetails>>> { continuation ->
-            client.queryProductDetailsAsync(params) { billingResult, details ->
-                continuation.resume(Pair(billingResult, details))
+        val (queryBillingResult, productDetailsList) =
+            suspendCancellableCoroutine<Pair<BillingResult, List<ProductDetails>>> { continuation ->
+                client.queryProductDetailsAsync(params) { billingResult, details ->
+                    continuation.resume(Pair(billingResult, details))
+                }
             }
-        }
 
-        val (queryBillingResult, productDetailsList) = productDetailsResult
         if (queryBillingResult.responseCode != BillingClient.BillingResponseCode.OK || productDetailsList.isEmpty()) {
             _billingState.value = BillingState.Error("Failed to load product details")
             return
         }
 
         val productDetails = productDetailsList.first()
-        val offerToken = productDetails.subscriptionOfferDetails?.firstOrNull()?.offerToken ?: run {
-            _billingState.value = BillingState.Error("No subscription offer found")
-            return
+        // One-time products carry no subscription offer token; requiring one
+        // here made lifetime purchases fail with "No subscription offer found".
+        val offerToken = if (sku == "nexus_lifetime") {
+            null
+        } else {
+            productDetails.subscriptionOfferDetails?.firstOrNull()?.offerToken ?: run {
+                _billingState.value = BillingState.Error("No subscription offer found")
+                return
+            }
         }
 
+        val productDetailsParams = BillingFlowParams.ProductDetailsParams.newBuilder()
+            .setProductDetails(productDetails)
+        if (offerToken != null) {
+            productDetailsParams.setOfferToken(offerToken)
+        }
         val flowParams = BillingFlowParams.newBuilder()
-            .setProductDetailsParamsList(
-                listOf(
-                    BillingFlowParams.ProductDetailsParams.newBuilder()
-                        .setProductDetails(productDetails)
-                        .setOfferToken(offerToken)
-                        .build()
-                )
-            )
+            .setProductDetailsParamsList(listOf(productDetailsParams.build()))
             .build()
 
         val billingResult = client.launchBillingFlow(activity, flowParams)
@@ -224,51 +254,56 @@ class BillingManager @Inject constructor(
         }
     }
 
-override suspend fun queryPurchases(): List<String> {
-val client = billingClient ?: return emptyList()
-return try {
-suspendCancellableCoroutine { continuation ->
-client.queryPurchasesAsync(
-QueryPurchasesParams.newBuilder()
-.setProductType(BillingClient.ProductType.SUBS)
-.build()
-) { billingResult, purchasesList ->
-if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-val ownedSkus = purchasesList
-    .mapNotNull { it.products.firstOrNull() }
-continuation.resume(ownedSkus)
-} else {
-Timber.w("queryPurchases failed: ${billingResult.debugMessage}")
-continuation.resume(emptyList())
-}
-}
-}
-} catch (e: Exception) {
-Timber.e(e, "queryPurchases exception")
-emptyList()
-}
-}
+    override suspend fun queryPurchases(): List<String> {
+        val client = billingClient ?: return emptyList()
+        return try {
+            val subscriptions = queryPurchasesForType(client, BillingClient.ProductType.SUBS)
+            val oneTime = queryPurchasesForType(client, BillingClient.ProductType.INAPP)
+            (subscriptions + oneTime).distinct()
+        } catch (e: Exception) {
+            Timber.e(e, "queryPurchases exception")
+            emptyList()
+        }
+    }
 
-override fun isPro(): Flow<Boolean> = callbackFlow {
-val client = billingClient ?: run { trySend(false); awaitClose(); return@callbackFlow }
-client.queryPurchasesAsync(
-QueryPurchasesParams.newBuilder()
-.setProductType(BillingClient.ProductType.SUBS)
-.build()
-) { billingResult, purchasesList ->
-if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-val hasPro = purchasesList.any { purchase ->
-purchase.purchaseState == Purchase.PurchaseState.PURCHASED &&
-(purchase.products.contains("nexus_pro_season") ||
-purchase.products.contains("nexus_pro_monthly") ||
-purchase.products.contains("nexus_pro_yearly") ||
-purchase.products.contains("nexus_lifetime"))
-}
-trySend(hasPro)
-} else {
-trySend(false)
-}
-}
-awaitClose()
-}
+    private suspend fun queryPurchasesForType(client: BillingClient, productType: String): List<String> =
+        suspendCancellableCoroutine { continuation ->
+            client.queryPurchasesAsync(
+                QueryPurchasesParams.newBuilder()
+                    .setProductType(productType)
+                    .build()
+            ) { billingResult, purchasesList ->
+                if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                    continuation.resume(purchasesList.mapNotNull { it.products.firstOrNull() })
+                } else {
+                    Timber.w("queryPurchases failed: ${billingResult.debugMessage}")
+                    continuation.resume(emptyList())
+                }
+            }
+        }
+
+    override fun isPro(): Flow<Boolean> = callbackFlow {
+        val client = billingClient ?: run { trySend(false); awaitClose(); return@callbackFlow }
+        // Lifetime is an INAPP purchase, so checking SUBS alone missed every
+        // lifetime buyer. Both types must answer before the verdict is final.
+        val results = mutableListOf<Boolean>()
+        fun query(type: String) {
+            client.queryPurchasesAsync(
+                QueryPurchasesParams.newBuilder()
+                    .setProductType(type)
+                    .build()
+            ) { billingResult, purchasesList ->
+                val hasPro = billingResult.responseCode == BillingClient.BillingResponseCode.OK &&
+                    purchasesList.any { purchase ->
+                        purchase.purchaseState == Purchase.PurchaseState.PURCHASED &&
+                            purchase.products.any(skuMapping::containsKey)
+                    }
+                results.add(hasPro)
+                if (results.size == 2) trySend(results.any { it })
+            }
+        }
+        query(BillingClient.ProductType.SUBS)
+        query(BillingClient.ProductType.INAPP)
+        awaitClose()
+    }
 }

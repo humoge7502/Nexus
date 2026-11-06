@@ -35,9 +35,20 @@ class FirebaseFunctionsAIService @Inject constructor(
         val uid = firebaseAuth.currentUser?.uid
             ?: throw RequiresSignInException("User must be authenticated for AI proxy")
 
+        // The backend reads snake_case (max_tokens). Sending the Kotlin data
+        // class directly serialises `maxTokens`, which the server ignores and
+        // silently resets to its default token budget. Build the payload
+        // explicitly so the wire shape is exact.
+        val payload = mutableMapOf<String, Any?>(
+            "messages" to request.messages.map { mapOf("role" to it.role, "content" to it.content) }
+        ).apply {
+            request.model?.let { put("model", it) }
+            request.maxTokens?.let { put("max_tokens", it) }
+            request.temperature?.let { put("temperature", it) }
+        }
         val result = functions
             .getHttpsCallable("proxyAI")
-            .call(request)
+            .call(payload)
             .await()
         @Suppress("UNCHECKED_CAST")
         (result.getData() as? Map<String, Any?>)?.let { data ->
@@ -57,6 +68,8 @@ class FirebaseFunctionsAIService @Inject constructor(
     }
 
     suspend fun getFeed(request: FeedRequest): Result<FeedResult> = runCatching {
+        firebaseAuth.currentUser?.uid
+            ?: throw RequiresSignInException("Sign in required to load the opportunity feed")
         val result = functions
             .getHttpsCallable("getOpportunityFeed")
             .call(request)
@@ -72,6 +85,8 @@ class FirebaseFunctionsAIService @Inject constructor(
     }
 
     suspend fun getOutcomes(request: OutcomesRequest): Result<OutcomesResult> = runCatching {
+        firebaseAuth.currentUser?.uid
+            ?: throw RequiresSignInException("Sign in required to load interview outcomes")
         val result = functions
             .getHttpsCallable("getIntelligenceOutcomes")
             .call(request)
@@ -86,6 +101,8 @@ class FirebaseFunctionsAIService @Inject constructor(
     }
 
     suspend fun getCohortIntelligence(request: CohortRequest): Result<CohortResult> = runCatching {
+        firebaseAuth.currentUser?.uid
+            ?: throw RequiresSignInException("Sign in required to load cohort intelligence")
         val result = functions
             .getHttpsCallable("getCohortIntelligence")
             .call(request)

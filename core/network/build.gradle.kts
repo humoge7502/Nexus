@@ -22,7 +22,7 @@ android {
         buildConfigField(
             "String",
             "NEXUS_API_URL",
-            "\"${localProps.getProperty("NEXUS_API_URL") ?: "https://api.nexus.app/"}\""
+            "\"${localProps.getProperty("NEXUS_API_URL") ?: localProps.getProperty("NEXUS_BACKEND_URL") ?: "https://api.nexus.app/"}\""
         )
         // Verified opportunity feed, regenerated every 6 hours by feed-refresh.yml.
         buildConfigField(

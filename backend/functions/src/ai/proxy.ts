@@ -35,6 +35,8 @@ export interface AIRequest {
   model?: string;
   messages: Array<{ role: string; content: string }>;
   max_tokens?: number;
+  /** Legacy Android field name; accepted so older clients keep their budget. */
+  maxTokens?: number;
   temperature?: number;
 }
 
@@ -135,7 +137,10 @@ export function validateRequest(data: AIRequest): AIRequest {
     );
   }
 
-  const requestedTokens = Number(data.max_tokens);
+  // Older Android builds serialise the Kotlin field name (maxTokens) rather
+  // than the snake_case the API documents; accept both so a token budget
+  // silently resetting to the server default is impossible.
+  const requestedTokens = Number(data.max_tokens ?? data.maxTokens);
   const requestedTemperature = Number(data.temperature);
   return {
     model,
