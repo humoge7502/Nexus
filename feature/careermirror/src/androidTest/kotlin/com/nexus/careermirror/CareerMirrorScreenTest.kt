@@ -1,8 +1,9 @@
 package com.nexus.careermirror
 
-import androidx.compose.ui.test.assertDoesNotExist
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -50,7 +51,7 @@ class CareerMirrorScreenTest {
 
         composeRule.onNodeWithText("Your mirror didn't generate").assertIsDisplayed()
         // The old bug: a failed generation fell through to the no-data branch.
-        composeRule.onNodeWithText("Not enough data yet").assertDoesNotExist()
+        composeRule.onAllNodesWithText("Not enough data yet").assertCountEquals(0)
         composeRule.onNodeWithText("room transaction failed").assertIsDisplayed()
 
         composeRule.onNodeWithText("Try again").performClick()

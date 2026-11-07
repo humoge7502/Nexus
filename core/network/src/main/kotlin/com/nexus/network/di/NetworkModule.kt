@@ -55,8 +55,11 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideRetrofit(client: OkHttpClient, gson: Gson): Retrofit {
+        // Retrofit's baseUrl must end in '/'. local.properties backend URLs may
+        // not (e.g. https://api.nexusapp.in/v1), and an unnormalised value
+        // crashed process start on every device — the boot test caught this.
         return Retrofit.Builder()
-            .baseUrl(BuildConfig.NEXUS_API_URL)
+            .baseUrl(BuildConfig.NEXUS_API_URL.trimEnd('/') + "/")
             .client(client)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
