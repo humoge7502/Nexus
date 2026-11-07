@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#080B14</color>
-    <color name="nexus_primary">#4F8EF7</color>
+    <!-- Brand ground: plum-black ink (VoidBlack #08060B), not neutral black. -->
+    <color name="ic_launcher_background">#08060B</color>
+    <!-- Brand signal: acid lime (Signal #C3F53C). Lime is a light signal and is
+         only ever filled with ink or bone; never blue. The old #4F8EF7 blue is
+         retired — it matched no theme token and made the launcher feel generic. -->
+    <color name="nexus_bone">#F3EDE6</color>
+    <color name="nexus_signal">#C3F53C</color>
 </resources>
