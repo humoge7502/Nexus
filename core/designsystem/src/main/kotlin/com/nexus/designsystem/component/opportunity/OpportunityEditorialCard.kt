@@ -201,30 +201,38 @@ private fun SaveToggle(
     val scheme = MaterialTheme.colorScheme
     val haptic = LocalHapticFeedback.current
 
+    // The visual mark stays 36dp; the touch surface is the 48dp floor, so the
+    // bookmark is reachable without the card growing any visual weight.
     Box(
         modifier = modifier
-            .size(36.dp)
-            .clip(NexusShapes.xs)
-            .background(
-                if (isSaved) ext.signalContainer else scheme.surfaceContainerLow,
-            )
-            .border(
-                NexusSpacing.hairline,
-                if (isSaved) ext.signal.copy(alpha = 0.5f) else ext.hairlineStrong,
-                NexusShapes.xs,
-            )
+            .size(48.dp)
             .clickable(role = Role.Button) {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 onToggle()
             },
         contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
-            contentDescription = if (isSaved) "Remove from saved" else "Save this listing",
-            tint = if (isSaved) ext.onSignalContainer else scheme.onSurfaceVariant,
-            modifier = Modifier.size(17.dp),
-        )
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(NexusShapes.xs)
+                .background(
+                    if (isSaved) ext.signalContainer else scheme.surfaceContainerLow,
+                )
+                .border(
+                    NexusSpacing.hairline,
+                    if (isSaved) ext.signal.copy(alpha = 0.5f) else ext.hairlineStrong,
+                    NexusShapes.xs,
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+                contentDescription = if (isSaved) "Remove from saved" else "Save this listing",
+                tint = if (isSaved) ext.onSignalContainer else scheme.onSurfaceVariant,
+                modifier = Modifier.size(17.dp),
+            )
+        }
     }
 }
 

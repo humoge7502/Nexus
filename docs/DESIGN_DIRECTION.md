@@ -140,8 +140,9 @@ under `LocalReducedMotion`).
   lights signal on focus, inset well), one chip (`NexusChip`), one card,
   one top bar (`NexusTopBar`), one icon button (`NexusIconButton` —
   description required by signature).
-- Loading: page-level = shimmer `LoadingState`; inline = themed m3 spinner;
-  linear progress = `CalibratedRule` (graduated ticks, lit span).
+- Loading: page-level = shimmer `LoadingState`; inline = themed m3 shell with brand content; linear progress = `CalibratedRule` (graduated ticks, lit span).
+- **Search is a command surface, not a form**: the Explore search keeps its tuned m3 `OutlinedTextField` shell. The one-field rule targets form inputs; the shell carries its own tuned focus/hairline colors and a label would be furniture. Sanctioned exception, re-reviewed each design pass.
+- Touch floor: every interactive surface clears **48dp** (`NexusSpacing.touchTarget`, `AccessibilityDefaults.MIN_TOUCH_TARGET_DP = 48`).
 - Empty states are voice-bearing: `EmptyState(title, description, voice…)`.
   An empty state explains itself in the serif aside; it never shows a bare
   spinner or a naked icon.
@@ -180,3 +181,44 @@ A design change ships only after:
 3. An independent critic pass against this document (the critic's question
    is always: *can this change be argued from the direction, or is it
    decoration?*).
+---
+
+## 9. Trust metadata and the state system
+
+*Added with the design-direction pack pass (2026-11-08). These rules govern
+what a listing shows and what a screen does when the world is imperfect.*
+
+**Trust on every listing, as data.** A surfaced opportunity carries, in the
+mono telemetry register:
+
+- **Deadline instrumentation** — `DeadlineIndicator` renders the door's
+  remaining time (ROLLING / CLOSED / CLOSES TODAY / CLOSES IN N DAYS), with a
+  non-colour urgency tick that survives greyscale and TalkBack. Null deadline
+  means rolling by the domain contract.
+- **Verification provenance** — "LINK CONFIRMED yyyy-mm-dd" only when the
+  pipeline actually confirmed the apply link; an unverified listing shows no
+  date, because "link may be dead" is not a fact anyone checked.
+- **Match as counts, not percentages**, and a "why shown" note where the
+  pipeline ranked the listing.
+
+Absence renders as absence. An unpublished stipend is absent, not a zero; a
+missing verification is absent, not a promise. Nothing here is invented.
+
+**The state system.** Every data screen owns loading (geometry-matched
+skeleton), empty (voice-bearing), error (EditorialErrorState), and — when the
+catalog can age or the device can disconnect — a one-line
+`EditorialStatusBand` directly above the content it describes:
+
+- **Offline** (Fault tone): the cached catalog is shown, not a wall; refresh
+  returns when connectivity does.
+- **Source check** (Neutral → Fault as the freshest `verifiedAt` ages past
+  48h → 7 days): links last confirmed <date>; past 7 days, deadlines may have
+  moved.
+
+A fresh catalog is silence. The band speaks only when the reader should weigh
+what they read against its age.
+
+**Reduced motion is a contract, not a habit.** Every infinite animation gates
+on `LocalReducedMotion`; one-shot reveals settle on the first frame. This now
+covers Lottie empty-state art, the streaming cursor, and entrance reveals —
+audited 2026-11-08.

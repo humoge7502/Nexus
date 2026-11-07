@@ -8,6 +8,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.nexus.analytics.AnalyticsTracker
 import com.nexus.common.Constants
+import com.nexus.common.NetworkMonitor
 import com.nexus.data.repository.CertificationRepository
 import com.nexus.data.repository.HackathonRepository
 import com.nexus.data.repository.InternshipRepository
@@ -56,6 +57,14 @@ data class ExploreUiState(
    * same honest arithmetic as "0%" with something to act on.
    */
   val skillGaps: Map<String, List<String>> = emptyMap(),
+  /** Whether the device currently has a network. False renders the offline band. */
+  val isOnline: Boolean = true,
+  /**
+   * The newest [Internship.verifiedAt] in the catalog — when the pipeline last
+   * confirmed any link. Catalog-level fact (not per-filter), so the status
+   * band reads from the whole listing set, never the filtered view.
+   */
+  val freshestVerifiedAt: java.time.Instant? = null,
 ) {
   val hasActiveSearch: Boolean get() = searchQuery.isNotBlank() || selectedFilters.isNotEmpty()
 }
@@ -69,10 +78,21 @@ class ExploreViewModel @Inject constructor(
   private val analyticsTracker: AnalyticsTracker,
   private val userPreferences: UserPreferences,
   private val matchingEngine: OpportunityMatchingEngine,
+  private val networkMonitor: NetworkMonitor,
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(ExploreUiState())
   val uiState: StateFlow<ExploreUiState> = _uiState.asStateFlow()
+
+  init {
+    // Connectivity annotates the catalog; it never gates it. The offline state
+    // is a band over the cached listings, not a wall in front of them.
+    viewModelScope.launch {
+      networkMonitor.isOnline.collect { online ->
+        _uiState.value = _uiState.value.copy(isOnline = online)
+      }
+    }
+  }
 
   private var searchJob: Job? = null
 
@@ -165,6 +185,10 @@ class ExploreViewModel @Inject constructor(
       },
       matchPercents = fit.first,
       skillGaps = fit.second,
+      freshestVerifiedAt = when (val result = state.internships) {
+        is UiState.Success -> result.data.mapNotNull { it.verifiedAt }.maxOrNull()
+        else -> null
+      },
     )
   }
 

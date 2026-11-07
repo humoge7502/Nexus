@@ -39,6 +39,9 @@ data class HomeUiState(
     val careerNextStepMetric: String = "",
     val isOpportunitiesLoading: Boolean = true,
     val opportunitiesError: String? = null,
+    /** The readiness model's movable levers, highest priority first — the
+     *  week's plan. Empty when the model reports nothing left to move. */
+    val weeklyActions: List<PlacementReadinessCalculator.PlacementAction> = emptyList(),
 )
 
 private data class UserSnapshot(
@@ -94,6 +97,10 @@ class HomeViewModel @Inject constructor(
                         else -> readiness.level
                     },
                     careerNextStepMetric = nextStep?.metric.orEmpty(),
+                    // The week's plan: the three highest-priority levers the
+                    // model can name. The hero card carries the first in words;
+                    // the section carries the rest in full.
+                    weeklyActions = readiness.actionItems.take(3),
                 )
             }
         }

@@ -21,8 +21,9 @@ import kotlinx.coroutines.delay
 
 /**
  * One-time entrance for above-the-fold blocks: a short fade with a spring lift.
- * Animates in the draw phase only, so nothing re-measures, and Compose collapses
- * it when the system animator scale is off.
+ * Animates in the draw phase only, so nothing re-measures. Under reduced motion
+ * the content arrives settled on the first frame — the reveal is explicit here
+ * rather than delegated to the platform's animator-scale collapse.
  */
 @Composable
 fun RevealOnLoad(
@@ -31,8 +32,10 @@ fun RevealOnLoad(
     lift: Dp = 12.dp,
     content: @Composable () -> Unit,
 ) {
-    var visible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
+    val settled = com.nexus.designsystem.theme.LocalReducedMotion.current
+    var visible by remember { mutableStateOf(settled) }
+    LaunchedEffect(settled) {
+        if (settled) return@LaunchedEffect
         if (delayMillis > 0) delay(delayMillis.toLong())
         visible = true
     }

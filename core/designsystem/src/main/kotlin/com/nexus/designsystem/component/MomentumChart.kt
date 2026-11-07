@@ -23,6 +23,8 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -54,6 +56,8 @@ import kotlin.math.roundToInt
 fun MomentumChart(
     values: List<Float>,
     modifier: Modifier = Modifier,
+    /** TalkBack label. Defaults to a summary computed from the real readings. */
+    chartLabel: String? = null,
 ) {
     val extended = MaterialTheme.nexus
     var revealed by remember { mutableStateOf(false) }
@@ -72,10 +76,28 @@ fun MomentumChart(
 
     val cleanValues = remember(values) { values.filter { it.isFinite() } }
 
+    // The plot is a real instrument, so it reads aloud as one: a summary
+    // computed from the actual readings, never invented. Fewer than two
+    // readings is announced as exactly that.
+    val chartSummary = remember(cleanValues, chartLabel) {
+        chartLabel ?: if (cleanValues.size < 2) {
+            "Momentum chart, ${if (cleanValues.isEmpty()) "no" else "one"} reading yet"
+        } else {
+            val first = cleanValues.first()
+            val last = cleanValues.last()
+            val peak = cleanValues.max()
+            "Momentum chart: ${cleanValues.size} readings from " +
+                String.format(Locale.US, "%.1f", first) + " to " +
+                String.format(Locale.US, "%.1f", last) + ", peak " +
+                String.format(Locale.US, "%.1f", peak)
+        }
+    }
+
     Canvas(
         modifier = modifier
             .fillMaxWidth()
             .height(120.dp)
+            .semantics { contentDescription = chartSummary }
             .pointerInput(cleanValues) {
                 // Horizontal intent only: a vertical drag still scrolls the
                 // page; a horizontal one reads the instrument.

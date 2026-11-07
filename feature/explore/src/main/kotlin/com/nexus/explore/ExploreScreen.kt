@@ -46,6 +46,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,6 +66,9 @@ import com.nexus.designsystem.component.SignalTag
 import com.nexus.designsystem.component.SignalTone
 import com.nexus.designsystem.component.feedback.EditorialErrorState
 import com.nexus.designsystem.component.feedback.EditorialSkeletonList
+import com.nexus.designsystem.component.feedback.EditorialStatusBand
+import com.nexus.designsystem.component.feedback.StatusTone
+import com.nexus.designsystem.component.opportunity.DeadlineIndicator
 import com.nexus.designsystem.component.pressScale
 import com.nexus.designsystem.effect.RevealOnLoad
 import com.nexus.designsystem.effect.nexusItemPlacement
@@ -77,6 +81,9 @@ import com.nexus.domain.model.Hackathon
 import com.nexus.domain.model.Internship
 import com.nexus.domain.model.Price
 import com.nexus.domain.model.UiState
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDate
 
 data class ExploreCategory(
     val name: String,
@@ -184,6 +191,13 @@ fun ExploreScreen(
                     selected = uiState.selectedFilters,
                     onToggle = viewModel::toggleFilter,
                 )
+            }
+
+            item {
+                // The catalog's own status line — offline or aging sources —
+                // sits directly above the results it describes. A fresh,
+                // verified catalog says nothing: silence is the trust signal.
+                ExploreStatusBand(uiState = uiState)
             }
 
             exploreResults(
@@ -394,6 +408,60 @@ private fun LazyListScope.sectionHeader(title: String, count: Int) {    item {
     }
 }
 
+/**
+ * The catalog's status line, rendered only when the catalog has something to
+ * say. Fresh confirmed links are silence; the band appears when the reader
+ * should weigh a listing against the age of its source check.
+ */
+@Composable
+private fun ExploreStatusBand(uiState: ExploreUiState) {
+    val hasResults = uiState.filteredInternships.isNotEmpty() ||
+        uiState.filteredHackathons.isNotEmpty() ||
+        uiState.filteredCertifications.isNotEmpty()
+    if (!hasResults) return
+
+    val freshest = uiState.freshestVerifiedAt
+    val ageHours = remember(freshest) {
+        freshest?.let { Duration.between(it, Instant.now()).toHours() }
+    }
+
+    val (label, detail, tone) = when {
+        !uiState.isOnline -> Triple(
+            "OFFLINE",
+            "Showing the cached catalog. Refresh when you reconnect.",
+            StatusTone.Fault,
+        )
+        freshest == null -> Triple(
+            "SOURCE CHECK",
+            "Pipeline verification pending. Deadlines come from the source.",
+            StatusTone.Neutral,
+        )
+        ageHours != null && ageHours > SOURCE_CHECK_STALE_HOURS -> Triple(
+            "SOURCE CHECK",
+            "Links last confirmed ${freshest.toString().take(10)}. Deadlines may have moved.",
+            StatusTone.Fault,
+        )
+        ageHours != null && ageHours > SOURCE_CHECK_QUIET_HOURS -> Triple(
+            "SOURCE CHECK",
+            "Links last confirmed ${freshest.toString().take(10)}.",
+            StatusTone.Neutral,
+        )
+        else -> return
+    }
+
+    EditorialStatusBand(
+        label = label,
+        detail = detail,
+        tone = tone,
+        modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
+    )
+}
+
+/** Freshness the band treats as current: no louder than silence. */
+private const val SOURCE_CHECK_QUIET_HOURS = 48L
+/** Past this age the band turns fault-toned: deadlines may have moved. */
+private const val SOURCE_CHECK_STALE_HOURS = 7L * 24L
+
 private fun LazyListScope.internshipCards(
     internships: List<Internship>,
     matchPercents: Map<String, Int>,
@@ -408,6 +476,8 @@ private fun LazyListScope.internshipCards(
                 matchScore = matchPercents[internship.id],
                 missingSkills = skillGaps[internship.id].orEmpty(),
                 tags = internship.tags.take(3),
+                verifiedAt = internship.verifiedAt,
+                deadline = internship.deadline,
                 onClick = { onClick(internship.id) },
             )
         }
@@ -542,6 +612,12 @@ private fun ExploreOpportunityCard(
     matchScore: Int?,
     missingSkills: List<String>,
     tags: List<String>,
+    // Trust metadata: whether the pipeline's last check confirmed the link,
+    // and how long the door stays open. Rendered as the same mono telemetry
+    // the detail card uses — absent data stays absent; provenance renders on
+    // the detail screen, where the link actually lives.
+    verifiedAt: Instant? = null,
+    deadline: LocalDate? = null,
     onClick: () -> Unit,
 ) {
     NexusCard(
@@ -581,6 +657,25 @@ private fun ExploreOpportunityCard(
                         for (tag in tags.take(2)) {
                             SignalTag(text = tag, tone = SignalTone.Neutral)
                         }
+                    }
+                }
+                Spacer(Modifier.height(4.dp))
+                // Trust line: the door's remaining time and whether the link
+                // behind it was last confirmed — the two facts that decide
+                // whether to act. A null deadline is rolling by the domain
+                // contract; an unverified link shows no date, not a promise.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    DeadlineIndicator(deadline = deadline)
+                    if (verifiedAt != null) {
+                        Text(
+                            text = "LINK CONFIRMED ${verifiedAt.toString().take(10)}",
+                            style = NexusTypography.TelemetryMicro,
+                            color = MaterialTheme.nexus.positive.copy(alpha = 0.8f),
+                            maxLines = 1,
+                        )
                     }
                 }
             }

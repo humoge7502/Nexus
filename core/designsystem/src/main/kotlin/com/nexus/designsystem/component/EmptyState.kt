@@ -55,9 +55,13 @@ fun EmptyState(
         when {
             lottieResId != null -> {
                 val composition = rememberLottieComposition(LottieCompositionSpec.RawRes(lottieResId))
+                // IterateForever is an infinite animation, so it obeys the
+                // design-system rule: under reduced motion the art plays once
+                // and settles on its end frame instead of looping forever.
+                val reducedMotion = com.nexus.designsystem.theme.LocalReducedMotion.current
                 val progress = animateLottieCompositionAsState(
                     composition = composition.value,
-                    iterations = LottieConstants.IterateForever
+                    iterations = if (reducedMotion) 1 else LottieConstants.IterateForever
                 )
                 LottieAnimation(
                     composition = composition.value,

@@ -20,6 +20,8 @@
     <string name="home_offer_received">Offer Received!</string>
     <string name="home_you_have_active_interviews_at">You have active interviews at %1$s</string>
     <string name="home_today_s_opportunities">Today\'s Opportunities</string>
+    <string name="home_movable_this_week">Movable This Week</string>
+    <string name="home_open_plan">Open Plan</string>
     <string name="home_opportunities_offline">Opportunities are offline</string>
     <string name="home_no_opportunities_yet">No opportunities yet</string>
     <string name="home_no_opportunities_message">Fresh internships land here every morning. Explore everything while you wait.</string>

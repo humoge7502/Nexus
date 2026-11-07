@@ -12,10 +12,11 @@ import androidx.compose.ui.unit.dp
 
 @Immutable
 object AccessibilityDefaults {
-    const val MIN_TOUCH_TARGET_DP = 44
+    /** The design direction's floor for every interactive surface. */
+    const val MIN_TOUCH_TARGET_DP = 48
 }
 
-fun Modifier.minimumTouchTarget(size: Dp = 44.dp): Modifier =
+fun Modifier.minimumTouchTarget(size: Dp = 48.dp): Modifier =
     this.sizeIn(minWidth = size, minHeight = size)
 
 fun Modifier.accessibleClickable(

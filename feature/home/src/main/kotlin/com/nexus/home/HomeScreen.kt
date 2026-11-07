@@ -47,6 +47,9 @@ import com.nexus.designsystem.component.CareerIntelligenceOrbit
 import com.nexus.designsystem.component.OrbitDimension
 import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.SignalField
+import com.nexus.designsystem.component.feedback.EditorialStatusBand
+import com.nexus.designsystem.component.feedback.StatusTone
+import com.nexus.designsystem.component.intelligence.CareerActionCard
 import com.nexus.designsystem.component.SweepReadout
 import com.nexus.designsystem.component.TelemetryItem
 import com.nexus.designsystem.component.TelemetryStrip
@@ -89,6 +92,7 @@ fun HomeScreen(
             onInternshipClick = onInternshipClick,
             onViewAllInternships = onViewAllInternships,
             onNavigateToApplications = onNavigateToApplications,
+            onNavigateToProductivity = onNavigateToProductivity,
             onNavigateToNotifications = onNavigateToNotifications,
             onOpenCommandPalette = onOpenCommandPalette,
             onRetryOpportunities = viewModel::retryOpportunities,
@@ -102,6 +106,7 @@ private fun HomeFeed(
     onInternshipClick: (String) -> Unit,
     onViewAllInternships: () -> Unit,
     onNavigateToApplications: () -> Unit,
+    onNavigateToProductivity: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     onOpenCommandPalette: () -> Unit,
     onRetryOpportunities: () -> Unit,
@@ -154,10 +159,39 @@ private fun HomeFeed(
             }
         }
 
+        if (uiState.weeklyActions.isNotEmpty()) {
+            item {
+                SectionHeader(
+                    title = stringResource(R.string.home_movable_this_week),
+                    index = "01",
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
+            }
+            item {
+                RevealOnLoad(delayMillis = 130) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(NexusSpacing.sm),
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                    ) {
+                        for (action in uiState.weeklyActions) {
+                            CareerActionCard(
+                                title = action.title,
+                                detail = action.description,
+                                actionLabel = stringResource(R.string.home_open_plan),
+                                onAct = onNavigateToProductivity,
+                                isUrgent = action.impact == "HIGH",
+                                cost = action.metric.takeIf { it.isNotBlank() },
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
         item {
             SectionHeader(
                 title = stringResource(R.string.home_today_s_opportunities),
-                index = "01",
+                index = "02",
                 actionText = stringResource(R.string.home_view_all),
                 onAction = onViewAllInternships,
                 modifier = Modifier.padding(horizontal = 24.dp)
@@ -166,6 +200,22 @@ private fun HomeFeed(
 
         item {
             RevealOnLoad(delayMillis = 180) {
+                val freshest = uiState.todayOpportunities
+                    .mapNotNull { it.verifiedAt }
+                    .maxOrNull()
+                val staleHours = freshest?.let {
+                    java.time.Duration.between(it, java.time.Instant.now()).toHours()
+                }
+                // The band only speaks when the day's listings carry an aging
+                // source check — fresh verified links render no furniture.
+                if (staleHours != null && staleHours > SOURCE_CHECK_STALE_HOURS) {
+                    EditorialStatusBand(
+                        label = "SOURCE CHECK",
+                        detail = "Links last confirmed ${freshest.toString().take(10)}. Deadlines may have moved.",
+                        tone = StatusTone.Fault,
+                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
+                    )
+                }
                 when {
                     uiState.todayOpportunities.isNotEmpty() -> LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -206,7 +256,7 @@ private fun HomeFeed(
             item {
                 SectionHeader(
                     title = stringResource(R.string.home_your_applications),
-                    index = "02",
+                    index = "03",
                     actionText = stringResource(R.string.home_track),
                     onAction = onNavigateToApplications,
                     modifier = Modifier.padding(horizontal = 24.dp)
@@ -410,6 +460,7 @@ private fun CareerReadinessCard(
     // it does not re-animate the already-animated value.
     var arcFraction by remember { mutableFloatStateOf(0f) }
     val readinessCaption = stringResource(R.string.home_readiness_caption)
+    val readinessLabel = stringResource(R.string.text_career_readiness)
 
     // Readiness sits on paper, not on a field of its own colour. A saturated
     // plate makes the loudest object on the screen the *background* of a
@@ -453,6 +504,10 @@ private fun CareerReadinessCard(
                 progress = arcFraction,
                 modifier = Modifier.size(112.dp),
                 animateProgress = false,
+                // The dial is this plate's semantic anchor. Without a
+                // description TalkBack skips it entirely and the readiness
+                // reading is never announced.
+                contentDescription = "$readinessLabel ${(score * 100f).roundToInt()} of 100",
             )
         }
 
@@ -492,3 +547,6 @@ private fun CareerReadinessCard(
         }
     }
 }
+
+/** Past this age the day's listings get a fault-toned source-check band. */
+private const val SOURCE_CHECK_STALE_HOURS = 7L * 24L

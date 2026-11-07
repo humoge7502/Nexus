@@ -47,12 +47,15 @@ import androidx.compose.ui.unit.sp
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.SignalTag
 import com.nexus.designsystem.component.SignalTone
+import com.nexus.designsystem.component.opportunity.DeadlineIndicator
 import com.nexus.designsystem.component.shimmer
+import com.nexus.designsystem.theme.LocalReducedMotion
 import com.nexus.designsystem.theme.NexusAnimation
 import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
 import com.nexus.designsystem.theme.nexus
+import com.nexus.designsystem.util.minimumTouchTarget
 import com.nexus.domain.model.Application
 import com.nexus.domain.model.ApplicationStatus
 import com.nexus.domain.model.DailyQuote
@@ -70,7 +73,7 @@ internal fun OpportunitySkeletonRow() {
             Box(
                 modifier = Modifier
                     .width(280.dp)
-                    .height(178.dp)
+                    .height(200.dp)
                     .clip(NexusShapes.lg)
                     .shimmer()
             )
@@ -126,6 +129,7 @@ internal fun OpportunityInlineState(
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
+                        .minimumTouchTarget()
                         .clip(NexusShapes.xs)
                         .clickable(role = Role.Button) { onAction() }
                         .padding(horizontal = NexusSpacing.xs, vertical = NexusSpacing.xxs)
@@ -140,7 +144,9 @@ internal fun OpportunityCard(
     internship: Internship,
     onClick: () -> Unit,
 ) {
-    var visible by remember { mutableStateOf(false) }
+    // Reduced motion settles the card on the first frame — no fade-and-lift.
+    val settled = LocalReducedMotion.current
+    var visible by remember { mutableStateOf(settled) }
 
     LaunchedEffect(Unit) {
         visible = true
@@ -233,11 +239,34 @@ internal fun OpportunityCard(
             }
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = internship.location.city,
+                text = listOf(
+                    internship.location.city,
+                    internship.sourceName.takeIf { it.isNotBlank() }?.let { "via $it" },
+                ).filterNotNull().joinToString(" · "),
                 style = NexusTypography.TelemetryMicro,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
+            Spacer(modifier = Modifier.height(6.dp))
+            // Trust line: how long the door stays open, and whether the link
+            // behind it was last confirmed. Absence renders as absence — an
+            // unverified listing shows no date, not a promise.
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                DeadlineIndicator(deadline = internship.deadline)
+                if (internship.verifiedAt != null) {
+                    Text(
+                        text = "LINK CONFIRMED ${internship.verifiedAt.toString().take(10)}",
+                        style = NexusTypography.TelemetryMicro,
+                        color = MaterialTheme.nexus.positive.copy(alpha = 0.8f),
+                        maxLines = 1,
+                    )
+                }
+            }
             if (internship.tags.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(NexusSpacing.xxs)) {

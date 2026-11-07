@@ -17,6 +17,16 @@ import com.nexus.designsystem.theme.NexusColors
 
 @Composable
 fun BlinkingCursor(modifier: Modifier = Modifier) {
+    // An infinite animation, so it gates on reduced motion like every other
+    // loop in the design system: statically lit instead of blinking forever.
+    if (com.nexus.designsystem.theme.LocalReducedMotion.current) {
+        Box(
+            modifier = modifier
+                .size(width = 2.dp, height = 20.dp)
+                .background(NexusColors.NexusBlue),
+        )
+        return
+    }
     val infiniteTransition = rememberInfiniteTransition(label = "blinkingCursor")
     val alpha by infiniteTransition.animateFloat(
         initialValue = 1f,
