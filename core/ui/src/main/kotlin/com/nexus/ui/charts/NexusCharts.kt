@@ -34,9 +34,9 @@ import androidx.compose.ui.unit.dp
 import com.nexus.ui.R
 import kotlin.math.roundToInt
 
-private val nexusPrimary = Color(0xFF4F8EF7)
-private val nexusSecondary = Color(0xFF06B6D4)
-private val nexusAccent = Color(0xFF06B6D4)
+private val nexusPrimary = Color(0xFFC3F53C)
+private val nexusSecondary = Color(0xFF7C8CFF)
+private val nexusAccent = Color(0xFF7C8CFF)
 
 @Composable
 fun NexusLineChart(

@@ -15,7 +15,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import com.nexus.ui.R
 
-private val nexusBlue = Color(0xFF4F8EF7)
+private val nexusBlue = Color(0xFFC3F53C)
 
 @Composable
 fun NexusCareerScoreChart(

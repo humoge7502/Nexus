@@ -77,6 +77,7 @@ import com.nexus.community.CommunityScreen
 import com.nexus.designsystem.component.NexusBottomBar
 import com.nexus.designsystem.component.NexusCommand
 import com.nexus.designsystem.component.NexusCommandPalette
+import com.nexus.designsystem.component.NexusSplash
 import com.nexus.designsystem.component.NexusNavigationLayout
 import com.nexus.designsystem.component.NexusRailBar
 import com.nexus.designsystem.component.NexusSideBar
@@ -235,7 +236,9 @@ fun NexusApp(
         label = "bootFlow",
     ) { step ->
         when (step) {
-            "loading" -> { /* splash screen visible */ }
+            // Branded boot: the system splash hands off to this same mark
+            // composed large, so the wait never reads as a blank window.
+            "loading" -> NexusSplash()
             // Auth and onboarding draw their own decorative layers but no
             // surface, so without this they render on the splash window's
             // black background and light-theme text turns invisible.

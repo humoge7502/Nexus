@@ -14,7 +14,7 @@ import androidx.compose.ui.semantics.contentDescription
 import com.nexus.ui.R
 
 private val auroraGreen = Color(0xFF00D9A3)
-private val todayHighlight = Color(0xFF4F8EF7)
+private val todayHighlight = Color(0xFFC3F53C)
 
 @Composable
 fun NexusWeeklyXPChart(

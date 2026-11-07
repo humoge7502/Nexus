@@ -1,12 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- NEXUS launcher foreground: the same mark as NexusMark.kt, ported to the
+     108dp adaptive-icon viewport. Registration brackets frame a monogram N;
+     the diagonal is split — lower half bone (structure), upper half signal
+     lime (one live reading) ending in a terminal bead. Glyph geometry is
+     kept inside the 72dp safe circle (18-90) so circle/squircle masks never
+     clip the N; brackets sit at the safe edge so a mask crop reads as
+     intentional. At 48dp the 1.2dp brackets are hairlines and the N is the
+     recognition shape. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!-- Registration brackets, bone @ ~55% on ink (#8F8880) -->
     <path
-        android:fillColor="#00000000"
-        android:pathData="M54,32 L69,76 L58.6,76 L55,64.5 L49,64.5 L45.4,76 L35,76 Z"
-        android:strokeWidth="2"
-        android:strokeColor="@color/nexus_primary" />
+        android:pathData="M18,18 h12 M18,18 v12"
+        android:strokeWidth="1.2"
+        android:strokeColor="#8F8880"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M90,18 h-12 M90,18 v12"
+        android:strokeWidth="1.2"
+        android:strokeColor="#8F8880"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M18,90 h12 M18,90 v-12"
+        android:strokeWidth="1.2"
+        android:strokeColor="#8F8880"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M90,90 h-12 M90,90 v-12"
+        android:strokeWidth="1.2"
+        android:strokeColor="#8F8880"
+        android:strokeLineCap="round" />
+    <!-- N rails, bone -->
+    <path
+        android:pathData="M36,76 V32"
+        android:strokeWidth="6"
+        android:strokeColor="@color/nexus_bone"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M72,76 V32"
+        android:strokeWidth="6"
+        android:strokeColor="@color/nexus_bone"
+        android:strokeLineCap="round" />
+    <!-- Diagonal lower: bone structure -->
+    <path
+        android:pathData="M36,76 L50.2,58.2"
+        android:strokeWidth="6"
+        android:strokeColor="@color/nexus_bone"
+        android:strokeLineCap="round" />
+    <!-- Diagonal upper: signal lime, the live reading -->
+    <path
+        android:pathData="M57.8,49.8 L72,32"
+        android:strokeWidth="6"
+        android:strokeColor="@color/nexus_signal"
+        android:strokeLineCap="round" />
+    <!-- Terminal bead -->
+    <path
+        android:fillColor="@color/nexus_signal"
+        android:pathData="M72,27 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" />
 </vector>

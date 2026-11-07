@@ -17,12 +17,15 @@ import com.nexus.designsystem.component.CalibratedRule
 import com.nexus.designsystem.component.EmptyState
 import com.nexus.designsystem.component.EmptyStateArt
 import com.nexus.designsystem.component.InstrumentGauge
+import com.nexus.designsystem.component.LoadingState
 import com.nexus.designsystem.component.MomentumChart
 import com.nexus.designsystem.component.NexusButton
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusChip
 import com.nexus.designsystem.component.NexusIconButton
+import com.nexus.designsystem.component.NexusMark
 import com.nexus.designsystem.component.NexusOutlineButton
+import com.nexus.designsystem.component.NexusSplash
 import com.nexus.designsystem.component.NexusTextField
 import com.nexus.designsystem.component.NexusTopBar
 import com.nexus.designsystem.component.SectionHeader
@@ -174,6 +177,10 @@ private fun EffectsBoard() {
             title = "Nothing here yet",
             description = "The radar keeps sweeping.",
         )
+        Spacer(Modifier.height(12.dp))
+        NexusMark(size = 72.dp)
+        Spacer(Modifier.height(12.dp))
+        LoadingState()
     }
 }
 
@@ -187,4 +194,16 @@ private fun EffectsBoardLight() {
 @Composable
 private fun EffectsBoardDark() {
     NexusTheme(darkTheme = true) { EffectsBoard() }
+}
+
+@Preview(name = "Splash — light", showBackground = true)
+@Composable
+private fun SplashLight() {
+    NexusTheme(darkTheme = false) { NexusSplash() }
+}
+
+@Preview(name = "Splash — dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun SplashDark() {
+    NexusTheme(darkTheme = true) { NexusSplash() }
 }

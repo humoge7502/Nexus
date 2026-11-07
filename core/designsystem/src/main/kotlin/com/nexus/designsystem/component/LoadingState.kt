@@ -29,15 +29,20 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.R
+import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.NexusSpacing
+import com.nexus.designsystem.theme.nexus
 
 @Composable
 fun Modifier.shimmer(): Modifier = composed {
+    val ext = MaterialTheme.nexus
     // The sweep is an infinite animation; with reduced motion it renders as a
-    // static placeholder tone instead of looping forever.
+    // static placeholder tone instead of looping forever. The base is the
+    // theme-aware gauge track (ink @ ~17% on pearl, bone @ ~10% on ink) so
+    // the placeholder is legible in both themes — onSurface @ 7% disappears
+    // on paper and the list looks unpainted.
     if (com.nexus.designsystem.theme.LocalReducedMotion.current) {
-        return@composed this.background(
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f),
-        )
+        return@composed this.background(ext.gaugeTrack)
     }
     val transition = rememberInfiniteTransition(label = "shimmer")
     val translateX by transition.animateFloat(
@@ -53,11 +58,11 @@ fun Modifier.shimmer(): Modifier = composed {
     background(
         brush = Brush.linearGradient(
             colors = listOf(
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f),
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.20f),
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f),
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f),
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.22f),
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f),
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
             ),
             start = Offset(translateX, 0f),
             end = Offset(translateX + 400f, 0f),
@@ -86,16 +91,15 @@ fun ShimmerCard(
     loadingLabel: String? = stringResource(R.string.ds_loading),
 ) {
     Column(
-        modifier = modifier.padding(16.dp).semantics(mergeDescendants = true) {
+        modifier = modifier.padding(NexusSpacing.screenEdge).semantics(mergeDescendants = true) {
             if (loadingLabel != null) contentDescription = loadingLabel
         },
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(24.dp)
                 .width(120.dp)
-                .clip(RoundedCornerShape(4.dp))
+                .height(24.dp)
+                .clip(NexusShapes.sm)
                 .shimmer()
         )
         Spacer(modifier = Modifier.height(12.dp))
@@ -103,7 +107,7 @@ fun ShimmerCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(16.dp)
-                .clip(RoundedCornerShape(4.dp))
+                .clip(NexusShapes.sm)
                 .shimmer()
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -111,7 +115,7 @@ fun ShimmerCard(
             modifier = Modifier
                 .fillMaxWidth(0.6f)
                 .height(16.dp)
-                .clip(RoundedCornerShape(4.dp))
+                .clip(NexusShapes.sm)
                 .shimmer()
         )
         Spacer(modifier = Modifier.height(16.dp))

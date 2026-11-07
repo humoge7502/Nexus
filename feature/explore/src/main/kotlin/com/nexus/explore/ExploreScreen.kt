@@ -58,6 +58,7 @@ import com.nexus.designsystem.component.EmptyStateArt
 import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusChip
 import com.nexus.designsystem.component.NexusIconButton
+import com.nexus.designsystem.component.NexusPullToRefresh
 import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.SignalField
 import com.nexus.designsystem.component.SignalTag
@@ -126,7 +127,11 @@ fun ExploreScreen(
         else -> "For You — $category"
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    NexusPullToRefresh(
+        isRefreshing = isLoading,
+        onRefresh = viewModel::refresh,
+        modifier = Modifier.fillMaxSize(),
+    ) {
         SignalField(modifier = Modifier.fillMaxSize())
 
         LazyColumn(

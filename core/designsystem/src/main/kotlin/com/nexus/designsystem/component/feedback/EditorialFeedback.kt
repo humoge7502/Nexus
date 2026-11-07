@@ -126,7 +126,10 @@ fun EditorialSkeletonLine(
             .fillMaxWidth(fraction)
             .height(height)
             .clip(NexusShapes.xs)
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f))
+            // Gauge track, not a raw onSurface tint: legible on pearl in light
+            // and on ink in dark, using the same theme-aware step the dial
+            // uses for its unlit geometry.
+            .background(MaterialTheme.nexus.gaugeTrack)
             .shimmer(),
     )
 }

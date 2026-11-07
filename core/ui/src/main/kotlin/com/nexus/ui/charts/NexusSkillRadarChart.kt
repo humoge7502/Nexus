@@ -37,9 +37,9 @@ data class RadarAxis(
     val value: Float,
 )
 
-private val nexusGradientStart = Color(0xFF4F8EF7)
-private val nexusGradientEnd = Color(0xFF06B6D4)
-private val strokeColor = Color(0xFF4F8EF7)
+private val nexusGradientStart = Color(0xFFC3F53C)
+private val nexusGradientEnd = Color(0xFF7C8CFF)
+private val strokeColor = Color(0xFFC3F53C)
 
 private const val NUM_GRID_LEVELS = 4
 

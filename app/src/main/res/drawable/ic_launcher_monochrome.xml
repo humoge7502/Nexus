@@ -1,12 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Themed-icon monochrome: single-color N + brackets. System tints this
+     layer; the signal bead merges into the glyph so the one-color shape
+     still reads as N at 48dp. Geometry matches ic_launcher_foreground. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
     <path
-        android:fillColor="#00000000"
-        android:pathData="M34,34 L34,74 L46,74 L46,50 L62,74 L74,74 L74,34 L62,34 L62,58 L46,34 Z"
-        android:strokeWidth="2"
-        android:strokeColor="#000000" />
+        android:pathData="M18,18 h12 M18,18 v12"
+        android:strokeWidth="1.2"
+        android:strokeColor="#000000"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M90,18 h-12 M90,18 v12"
+        android:strokeWidth="1.2"
+        android:strokeColor="#000000"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M18,90 h12 M18,90 v-12"
+        android:strokeWidth="1.2"
+        android:strokeColor="#000000"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M90,90 h-12 M90,90 v-12"
+        android:strokeWidth="1.2"
+        android:strokeColor="#000000"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M36,76 V32 M72,76 V32 M36,76 L72,32"
+        android:strokeWidth="6"
+        android:strokeColor="#000000"
+        android:strokeLineCap="round" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M72,27 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" />
 </vector>
