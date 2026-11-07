@@ -34,6 +34,16 @@ object NexusDestinationIndex {
             .map { it.command }
     }
 
+    /**
+     * Single best answer, or null when nothing matches (or the query is
+     * blank) — callers treat null as "no jump", never as "jump somewhere".
+     */
+    fun resolve(query: String, commands: List<NexusCommand>): NexusCommand? {
+        val needle = query.trim()
+        if (needle.isEmpty()) return null
+        return resolveCommands(needle, commands).firstOrNull()
+    }
+
     private fun scoreOf(needle: String, command: NexusCommand): Int {
         val title = command.title.lowercase()
         val best = when {
@@ -66,3 +76,4 @@ object NexusDestinationIndex {
         val command: NexusCommand,
     )
 }
+

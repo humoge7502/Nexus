@@ -155,3 +155,4 @@ class StationSmokeTest {
         clickIfPresent(composeRule.activity.getString(com.nexus.onboarding.R.string.onboarding_skip))
     }
 }
+

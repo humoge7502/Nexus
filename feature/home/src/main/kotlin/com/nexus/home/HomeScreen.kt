@@ -42,6 +42,7 @@ import com.nexus.designsystem.component.InstrumentGauge
 import com.nexus.domain.model.UserStats
 import kotlin.math.roundToInt
 import com.nexus.designsystem.component.NexusIconButton
+import com.nexus.designsystem.component.NexusPullToRefresh
 import com.nexus.designsystem.component.CareerIntelligenceOrbit
 import com.nexus.designsystem.component.OrbitDimension
 import com.nexus.designsystem.component.SectionHeader
@@ -77,131 +78,155 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    NexusPullToRefresh(
+        isRefreshing = uiState.isOpportunitiesLoading,
+        onRefresh = viewModel::retryOpportunities,
+        modifier = Modifier.fillMaxSize(),
+    ) {
         SignalField(modifier = Modifier.fillMaxSize())
+        HomeFeed(
+            uiState = uiState,
+            onInternshipClick = onInternshipClick,
+            onViewAllInternships = onViewAllInternships,
+            onNavigateToApplications = onNavigateToApplications,
+            onNavigateToNotifications = onNavigateToNotifications,
+            onOpenCommandPalette = onOpenCommandPalette,
+            onRetryOpportunities = viewModel::retryOpportunities,
+        )
+    }
+}
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 16.dp),
-            contentPadding = PaddingValues(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            item {
-                GreetingSection(
-                    userName = uiState.userName,
-                    streakDays = uiState.streakDays,
-                    onNavigateToNotifications = onNavigateToNotifications,
-                    onOpenCommandPalette = onOpenCommandPalette,
+@Composable
+private fun HomeFeed(
+    uiState: HomeUiState,
+    onInternshipClick: (String) -> Unit,
+    onViewAllInternships: () -> Unit,
+    onNavigateToApplications: () -> Unit,
+    onNavigateToNotifications: () -> Unit,
+    onOpenCommandPalette: () -> Unit,
+    onRetryOpportunities: () -> Unit,
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 16.dp),
+        contentPadding = PaddingValues(bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        item {
+            GreetingSection(
+                userName = uiState.userName,
+                streakDays = uiState.streakDays,
+                onNavigateToNotifications = onNavigateToNotifications,
+                onOpenCommandPalette = onOpenCommandPalette,
+                modifier = Modifier.padding(horizontal = 24.dp)
+            )
+        }
+
+        item {
+            RevealOnLoad(delayMillis = 40) {
+                CareerReadinessCard(
+                    score = uiState.stats.careerReadinessScore,
+                    caption = uiState.careerNextStep,
+                    metric = uiState.careerNextStepMetric,
                     modifier = Modifier.padding(horizontal = 24.dp)
                 )
             }
+        }
 
-            item {
-                RevealOnLoad(delayMillis = 40) {
-                    CareerReadinessCard(
-                        score = uiState.stats.careerReadinessScore,
-                        caption = uiState.careerNextStep,
-                        metric = uiState.careerNextStepMetric,
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    )
-                }
+        item {
+            RevealOnLoad(delayMillis = 110) {
+                HomeTelemetry(
+                    applications = uiState.stats.totalApplications,
+                    certs = uiState.stats.completedCerts,
+                    streak = uiState.stats.currentStreak,
+                    interviews = uiState.stats.interviewsScheduled,
+                )
             }
+        }
 
-            item {
-                RevealOnLoad(delayMillis = 110) {
-                    HomeTelemetry(
-                        applications = uiState.stats.totalApplications,
-                        certs = uiState.stats.completedCerts,
-                        streak = uiState.stats.currentStreak,
-                        interviews = uiState.stats.interviewsScheduled,
-                    )
-                }
+        item {
+            RevealOnLoad(delayMillis = 150) {
+                CareerOrbitSection(
+                    stats = uiState.stats,
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                )
             }
+        }
 
-            item {
-                RevealOnLoad(delayMillis = 150) {
-                    CareerOrbitSection(
-                        stats = uiState.stats,
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                    )
+        item {
+            SectionHeader(
+                title = stringResource(R.string.home_today_s_opportunities),
+                index = "01",
+                actionText = stringResource(R.string.home_view_all),
+                onAction = onViewAllInternships,
+                modifier = Modifier.padding(horizontal = 24.dp)
+            )
+        }
+
+        item {
+            RevealOnLoad(delayMillis = 180) {
+                when {
+                    uiState.todayOpportunities.isNotEmpty() -> LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(horizontal = 24.dp)
+                ) {
+                    items(uiState.todayOpportunities) { internship ->
+                        OpportunityCard(
+                            internship = internship,
+                            onClick = { onInternshipClick(internship.id) }
+                        )
+                    }
                 }
-            }
 
-            item {
-                SectionHeader(
-                    title = stringResource(R.string.home_today_s_opportunities),
-                    index = "01",
-                    actionText = stringResource(R.string.home_view_all),
+                uiState.isOpportunitiesLoading -> OpportunitySkeletonRow()
+
+                uiState.opportunitiesError != null -> OpportunityInlineState(
+                    icon = Icons.Default.WifiOff,
+                    title = stringResource(R.string.home_opportunities_offline),
+                    message = uiState.opportunitiesError.orEmpty(),
+                    actionLabel = stringResource(R.string.home_try_again),
+                    onAction = onRetryOpportunities,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
+
+                else -> OpportunityInlineState(
+                    icon = Icons.Default.Search,
+                    title = stringResource(R.string.home_no_opportunities_yet),
+                    message = stringResource(R.string.home_no_opportunities_message),
+                    actionLabel = stringResource(R.string.home_browse_all),
                     onAction = onViewAllInternships,
                     modifier = Modifier.padding(horizontal = 24.dp)
                 )
+                }
             }
+        }
 
+        if (uiState.activeApplications.isNotEmpty()) {
             item {
-                RevealOnLoad(delayMillis = 180) {
-                    when {
-                        uiState.todayOpportunities.isNotEmpty() -> LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        contentPadding = PaddingValues(horizontal = 24.dp)
-                    ) {
-                        items(uiState.todayOpportunities) { internship ->
-                            OpportunityCard(
-                                internship = internship,
-                                onClick = { onInternshipClick(internship.id) }
-                            )
-                        }
-                    }
-
-                    uiState.isOpportunitiesLoading -> OpportunitySkeletonRow()
-
-                    uiState.opportunitiesError != null -> OpportunityInlineState(
-                        icon = Icons.Default.WifiOff,
-                        title = stringResource(R.string.home_opportunities_offline),
-                        message = uiState.opportunitiesError.orEmpty(),
-                        actionLabel = stringResource(R.string.home_try_again),
-                        onAction = viewModel::retryOpportunities,
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    )
-
-                    else -> OpportunityInlineState(
-                        icon = Icons.Default.Search,
-                        title = stringResource(R.string.home_no_opportunities_yet),
-                        message = stringResource(R.string.home_no_opportunities_message),
-                        actionLabel = stringResource(R.string.home_browse_all),
-                        onAction = onViewAllInternships,
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    )
-                    }
-                }
+                SectionHeader(
+                    title = stringResource(R.string.home_your_applications),
+                    index = "02",
+                    actionText = stringResource(R.string.home_track),
+                    onAction = onNavigateToApplications,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
             }
 
-            if (uiState.activeApplications.isNotEmpty()) {
-                item {
-                    SectionHeader(
-                        title = stringResource(R.string.home_your_applications),
-                        index = "02",
-                        actionText = stringResource(R.string.home_track),
-                        onAction = onNavigateToApplications,
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    )
-                }
-
-                items(uiState.activeApplications, key = { "application_${it.id}" }) { application ->
-                    ApplicationSummaryCard(
-                        application = application,
-                        modifier = nexusItemPlacement().padding(horizontal = 24.dp),
-                    )
-                }
+            items(uiState.activeApplications, key = { "application_${it.id}" }) { application ->
+                ApplicationSummaryCard(
+                    application = application,
+                    modifier = nexusItemPlacement().padding(horizontal = 24.dp),
+                )
             }
+        }
 
-            uiState.dailyQuote?.let { quote ->
-                item {
-                    MotivationalQuoteCard(
-                        quote = quote,
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    )
-                }
+        uiState.dailyQuote?.let { quote ->
+            item {
+                MotivationalQuoteCard(
+                    quote = quote,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
             }
         }
     }

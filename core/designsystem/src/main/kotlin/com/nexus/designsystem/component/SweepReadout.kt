@@ -60,7 +60,7 @@ fun SweepReadout(
         label = "sweepReadout",
     )
     val safeScore = score.coerceIn(0f, 100f)
-    val formatted = String.format(Locale.US, "%.${decimals.coerceIn(0, 2)}f", safeScore)
+    val formatted = formatSweep(safeScore, decimals)
     val spoken = contentDescription
         ?: buildString {
             append(formatted)
@@ -131,3 +131,23 @@ fun SweepReadout(
         }
     }
 }
+
+/**
+ * Pure formatting for the readout string, kept free of Compose runtime so
+ * JVM tests can pin the rounding contract. `decimals` is coerced to 0..6;
+ * `Locale.US` pins the decimal separator; negative zero never renders.
+ */
+fun formatSweep(value: Float, decimals: Int = 1, unit: String? = null): String {
+    val safeDecimals = decimals.coerceIn(0, 6)
+    val digits = String.format(Locale.US, "%.${safeDecimals}f", value)
+    val normalized = if (digits.startsWith("-0") && digits.toDoubleOrNull() == 0.0) {
+        digits.removePrefix("-")
+    } else {
+        digits
+    }
+    return if (unit.isNullOrEmpty()) normalized else normalized + unit
+}
+
+/** Half-up integer rendering for percentage-style readouts. */
+fun formatSweepInt(value: Float): String = kotlin.math.round(value).toInt().toString()
+
