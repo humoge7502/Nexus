@@ -156,18 +156,18 @@ the backend is deployed.
 
 | Check | Command | Result |
 |---|---|---|
-| JVM tests | `./gradlew test` | **322 unique tests / 51 suites, 0 failures** |
+| JVM tests | `./gradlew testDebugUnitTest :audit-core:test :audit-scanner:test :audit-rules:test :phase-analyzers:test :audit-reporting:test` | **428 unique tests / 64 suites, 0 failures** (380 Android debug + 48 pure-JVM audit) |
 | Instrumentation | `./gradlew :core:database:connectedDebugAndroidTest` | **12/12 on AVD `NexusApi35`** |
 | Token cipher | `./gradlew :core:datastore:connectedDebugAndroidTest` | **4/4 on AVD `NexusApi35`** (Keystore AES-GCM roundtrip, fresh IV per call, legacy plaintext, tamper fail-closed) |
-| Compose UI tests | six `:feature:*:connectedDebugAndroidTest` suites | **25/25 on AVD `NexusApi35`** (Career Mirror 5, Cohort 3, Interview Log 3, Forecast 5, Tribe 7, Community 2) |
-| App boot smoke test | `./gradlew :app:connectedDebugAndroidTest` | **1/1 on AVD `NexusApi35`** — real Hilt/Firebase/Room graph, cold start to `RESUMED` |
+| Compose UI tests | six `:feature:*:connectedDebugAndroidTest` suites | **28/28 on AVD `NexusApi35`** (Career Mirror 6, Cohort 5, Interview Log 3, Forecast 5, Tribe 7, Community 2) |
+| App boot smoke test | `./gradlew :app:connectedDebugAndroidTest` | **2/2 on AVD `NexusApi35`** — real Hilt/Firebase/Room graph, cold start to `RESUMED` + five-station walk |
 | Macrobenchmark | `./gradlew :macrobenchmark:connectedBenchmarkReleaseAndroidTest` | startup + scroll harnesses green; emulator TTID median **1.35 s**, scroll P95 **816 ms** CPU |
-| Backend tests | `cd backend/functions && npm test` | **21/21** (validation + LeetCode stats + stream bridge), `tsc` clean |
+| Backend tests | `cd backend/functions && npm test` | **28/28** (validation + LeetCode stats + stream bridge + feed refresh + legacy `maxTokens`), `tsc` clean |
 | Firebase emulator | `npm run test:emulator` / `test:rules` | **10/10 emulator checks** (callables + `streamAI` auth/validation/fail-closed), **13/13 rules** (owner-only profiles, server-guarded XP/Pro, opt-in leaderboard schema) |
 | Release build | `./gradlew :app:assembleRelease` | **signed, minified, verified with `apksigner`** |
 | Baseline profile | `./gradlew :app:generateBaselineProfile` | embedded as `assets/dexopt/baseline.prof` |
 | Secret scan | zip/string scan of the release APK | no upstream AI key material |
-| Production audit | `./gradlew runAudit` | **READY, 10.0/10** — all 8 phases 10.0, no CRITICAL/HIGH/MEDIUM/LOW findings; UI copy externalized to string resources |
+| Production audit | `./gradlew runAudit` | **READY, 9.10/10** (Phase 3 Architecture 4.0 — six pre-existing oversized source files) |
 | Static analysis | `./scripts/detekt.sh` | **blocking, exit 0** against a reviewed baseline (`config/detekt/baseline.xml`) |
 
 Full reports: [`docs/NEXUS_COMPREHENSIVE_ANALYSIS.md`](docs/NEXUS_COMPREHENSIVE_ANALYSIS.md),

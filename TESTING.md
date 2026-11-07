@@ -9,9 +9,10 @@ fast layers gate CI on every pull request.
 ./gradlew testDebugUnitTest
 ```
 
-- **322 unique tests / 51 suites** — 274 Android debug tests plus 48 pure-JVM
+- **428 unique tests / 64 suites** — 380 Android debug tests plus 48 pure-JVM
   audit tests (registry, secret/HTTP/allowBackup detection, suppression, and all
-  three report formats) — all green.
+  three report formats) — all green. Verified with the XML counter
+  (`count_jvm_tests.py --root . --min-total 428 --min-suites 64`).
 - Covers ViewModels (Placement Forecast, Onboarding, Tribe, Paywall),
   calculators (NEXUS Score, readiness), the ML feature mapper, streak logic,
   billing product mapping, and the audit engine itself.
@@ -57,10 +58,12 @@ numeric ranking fields enforced).
   **25/25**.
 - `TokenCipher` Keystore suite (4/4): roundtrip, unique IV, legacy passthrough,
   tamper fails closed.
-- App boot smoke test (`:app`, 1/1): launches the real `MainActivity` through
-  the production Hilt/Firebase/Room graph and asserts it reaches `RESUMED` —
-  the one suite that does not use fakes.
-- **42/42** instrumented tests total, run per-module by CI.
+- App boot smoke test (`:app`, 2/2): launches the real `MainActivity` through
+  the production Hilt/Firebase/Room graph, asserts it reaches `RESUMED`, and
+  walks Explore → AI → Growth → Profile → Home without crashing — the one
+  suite that does not use fakes."""
+- **46/46** instrumented tests total (12 Room/DAO + 4 TokenCipher + 28
+  Compose UI + 2 `:app`), run per-module by CI.
 
 Screens expose stateless `*Content` composables so UI tests run without a Hilt
 graph.
