@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -50,6 +51,7 @@ import com.nexus.designsystem.component.SignalField
 import com.nexus.designsystem.component.feedback.EditorialStatusBand
 import com.nexus.designsystem.component.feedback.StatusTone
 import com.nexus.designsystem.component.intelligence.CareerActionCard
+import com.nexus.designsystem.util.minimumTouchTarget
 import com.nexus.designsystem.component.SweepReadout
 import com.nexus.designsystem.component.TelemetryItem
 import com.nexus.designsystem.component.TelemetryStrip
@@ -122,6 +124,7 @@ private fun HomeFeed(
             GreetingSection(
                 userName = uiState.userName,
                 streakDays = uiState.streakDays,
+                careerNextStep = uiState.careerNextStep,
                 onNavigateToNotifications = onNavigateToNotifications,
                 onOpenCommandPalette = onOpenCommandPalette,
                 modifier = Modifier.padding(horizontal = 24.dp)
@@ -134,6 +137,7 @@ private fun HomeFeed(
                     score = uiState.stats.careerReadinessScore,
                     caption = uiState.careerNextStep,
                     metric = uiState.careerNextStepMetric,
+                    onViewDetails = onNavigateToProductivity,
                     modifier = Modifier.padding(horizontal = 24.dp)
                 )
             }
@@ -319,6 +323,7 @@ private fun HomeTelemetry(
 private fun GreetingSection(
     userName: String,
     streakDays: Int,
+    careerNextStep: String,
     onNavigateToNotifications: () -> Unit,
     onOpenCommandPalette: () -> Unit = {},
     modifier: Modifier = Modifier,
@@ -375,6 +380,17 @@ private fun GreetingSection(
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onBackground
         )
+        if (careerNextStep.isNotBlank()) {
+            Spacer(modifier = Modifier.height(4.dp))
+            // The moodboard's milestone aside, in the product's own voice: the
+            // serif italic under the byline. Encouragement, never a metric —
+            // the number itself lives one plate down.
+            Text(
+                text = stringResource(R.string.home_milestone_voice),
+                style = NexusTypography.Voice,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         if (streakDays > 0) {
             Spacer(modifier = Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -451,6 +467,7 @@ private fun CareerReadinessCard(
     score: Float,
     caption: String,
     metric: String,
+    onViewDetails: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val ext = MaterialTheme.nexus
@@ -542,6 +559,28 @@ private fun CareerReadinessCard(
                     text = caption.ifBlank { readinessCaption },
                     style = NexusTypography.EditorialBody,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        if (onViewDetails != null) {
+            Spacer(modifier = Modifier.height(10.dp))
+            // The moodboard's View Details affordance: the tertiary voice
+            // (m3 TextButton) carrying the reader to the full readiness
+            // ledger, where the score decomposes into its inputs.
+            TextButton(
+                onClick = onViewDetails,
+                modifier = Modifier.minimumTouchTarget(),
+            ) {
+                Text(
+                    text = stringResource(R.string.home_view_details).uppercase(Locale.ROOT),
+                    style = NexusTypography.DataLabel,
+                    color = ext.signal,
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "→",
+                    style = NexusTypography.DataLabel,
+                    color = ext.signal,
                 )
             }
         }

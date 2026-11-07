@@ -42,6 +42,7 @@ import com.nexus.designsystem.component.feedback.EditorialErrorState
 import com.nexus.designsystem.component.feedback.EditorialSkeletonList
 import com.nexus.designsystem.component.editorial.CareerProgressionReveal
 import com.nexus.designsystem.component.editorial.ProgressionReading
+import com.nexus.designsystem.component.intelligence.IntelligenceInsight
 import com.nexus.designsystem.effect.RevealOnLoad
 import com.nexus.designsystem.theme.NexusColors
 import com.nexus.designsystem.theme.NexusSpacing
@@ -135,6 +136,30 @@ fun GrowthScreen(
                             values = uiState.scoreMomentum,
                             weeklyChange = uiState.scoreWeeklyChange,
                         )
+                    }
+                }
+            }
+            item(key = "insights") {
+                if (uiState.keyInsights.isNotEmpty()) {
+                    RevealOnLoad(delayMillis = 130) {
+                        // The moodboard's Key Insights, fed by the real
+                        // on-device engine — one insight a day, honestly
+                        // sourced, never a fabricated percentage.
+                        Column(verticalArrangement = Arrangement.spacedBy(NexusSpacing.sm)) {
+                            Text(
+                                text = stringResource(R.string.growth_key_insights),
+                                style = NexusTypography.DataLabel,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            )
+                            for (insight in uiState.keyInsights) {
+                                IntelligenceInsight(
+                                    headline = insight.title,
+                                    evidence = insight.body,
+                                    strength = insight.priority.name.uppercase(Locale.ROOT),
+                                    source = stringResource(R.string.growth_insight_source),
+                                )
+                            }
+                        }
                     }
                 }
             }

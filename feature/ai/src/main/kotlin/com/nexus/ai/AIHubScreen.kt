@@ -38,6 +38,7 @@ import com.nexus.designsystem.component.NexusCard
 import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.SectionHeader
 import com.nexus.designsystem.component.SignalField
+import com.nexus.designsystem.component.intelligence.CareerActionCard
 import com.nexus.designsystem.component.borderBeam
 import com.nexus.designsystem.component.hairline
 import com.nexus.designsystem.component.instrumentGrid
@@ -112,6 +113,22 @@ fun AIHubScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp, vertical = 12.dp),
+                )
+            }
+
+            RevealOnLoad(delayMillis = 80) {
+                // The moodboard's "Your Personalized Learning Plan" plate: a
+                // featured shortcut to the Roadmap Generator, which already
+                // builds the path from the readiness gaps. The one clickable
+                // plate between the hero and the roster.
+                CareerActionCard(
+                    title = stringResource(R.string.ai_learning_plan_title),
+                    detail = stringResource(R.string.ai_learning_plan_detail),
+                    actionLabel = stringResource(R.string.ai_learning_plan_cta),
+                    onAct = { onToolRoute("roadmap") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
                 )
             }
 

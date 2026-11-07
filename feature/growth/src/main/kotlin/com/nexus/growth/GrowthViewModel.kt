@@ -12,10 +12,12 @@ import com.nexus.data.repository.StreakRepository
 import com.nexus.data.repository.UserXpRepository
 import com.nexus.data.repository.SkillGraphRepository
 import com.nexus.data.usecase.PlacementReadinessCalculator
+import com.nexus.data.usecase.ProactiveInsightEngine
 import com.nexus.domain.model.DSAProblem
 import com.nexus.domain.model.DsaDifficulty
 import com.nexus.domain.model.DsaStatus
 import com.nexus.domain.model.Goal
+import com.nexus.domain.model.ProactiveInsight
 import com.nexus.domain.model.ScoreComponent
 import com.nexus.domain.model.UiState
 import com.nexus.domain.usecase.CareerScoreCalculator
@@ -70,6 +72,8 @@ data class GrowthUiState(
   val metricsLoaded: Boolean = false,
   /** Set when the metrics pipeline fails; the screen shows it instead of a score of 0. */
   val metricsFault: String? = null,
+  /** The day's top on-device insight (streak, applications, readiness), or none. */
+  val keyInsights: List<ProactiveInsight> = emptyList(),
 )
 
 @HiltViewModel
@@ -84,6 +88,7 @@ class GrowthViewModel @Inject constructor(
   private val achievementRepository: AchievementRepository,
   private val placementCalculator: PlacementReadinessCalculator,
   private val skillGraphRepository: SkillGraphRepository,
+  private val insightEngine: ProactiveInsightEngine,
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(GrowthUiState())
@@ -102,7 +107,20 @@ class GrowthViewModel @Inject constructor(
     observeSkillAxes()
     observePlacementReadiness()
     observeScoreMomentum()
+    loadKeyInsight()
     analyticsTracker.trackScreenView("growth")
+  }
+
+  /** The moodboard's Key Insights, fed by the real on-device insight engine. */
+  private fun loadKeyInsight() {
+    viewModelScope.launch {
+      val insight = runCatching { insightEngine.generateDailyInsight() }
+        .onFailure { Timber.w(it, "Insight engine failed") }
+        .getOrNull()
+      if (insight != null) {
+        _uiState.value = _uiState.value.copy(keyInsights = listOf(insight))
+      }
+    }
   }
 
   private fun loadProblems() {

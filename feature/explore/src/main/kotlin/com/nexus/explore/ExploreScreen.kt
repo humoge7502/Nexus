@@ -663,19 +663,23 @@ private fun ExploreOpportunityCard(
                 // Trust line: the door's remaining time and whether the link
                 // behind it was last confirmed — the two facts that decide
                 // whether to act. A null deadline is rolling by the domain
-                // contract; an unverified link shows no date, not a promise.
+                // contract; an unverified link shows no badge, not a promise.
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     DeadlineIndicator(deadline = deadline)
                     if (verifiedAt != null) {
-                        Text(
-                            text = "LINK CONFIRMED ${verifiedAt.toString().take(10)}",
-                            style = NexusTypography.TelemetryMicro,
-                            color = MaterialTheme.nexus.positive.copy(alpha = 0.8f),
-                            maxLines = 1,
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(NexusSpacing.xxs)) {
+                            SignalTag(text = "VERIFIED", tone = SignalTone.Signal)
+                            Text(
+                                text = verifiedAt.toString().take(10),
+                                style = NexusTypography.TelemetryMicro,
+                                color = MaterialTheme.nexus.positive.copy(alpha = 0.8f),
+                                maxLines = 1,
+                            )
+                        }
                     }
                 }
             }

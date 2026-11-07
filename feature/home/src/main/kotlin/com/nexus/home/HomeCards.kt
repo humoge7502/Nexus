@@ -251,7 +251,7 @@ internal fun OpportunityCard(
             Spacer(modifier = Modifier.height(6.dp))
             // Trust line: how long the door stays open, and whether the link
             // behind it was last confirmed. Absence renders as absence — an
-            // unverified listing shows no date, not a promise.
+            // unverified listing shows no badge, not a promise.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -259,12 +259,16 @@ internal fun OpportunityCard(
             ) {
                 DeadlineIndicator(deadline = internship.deadline)
                 if (internship.verifiedAt != null) {
-                    Text(
-                        text = "LINK CONFIRMED ${internship.verifiedAt.toString().take(10)}",
-                        style = NexusTypography.TelemetryMicro,
-                        color = MaterialTheme.nexus.positive.copy(alpha = 0.8f),
-                        maxLines = 1,
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(NexusSpacing.xxs)) {
+                        SignalTag(text = "VERIFIED", tone = SignalTone.Signal)
+                        Text(
+                            text = internship.verifiedAt.toString().take(10),
+                            style = NexusTypography.TelemetryMicro,
+                            color = MaterialTheme.nexus.positive.copy(alpha = 0.8f),
+                            maxLines = 1,
+                        )
+                    }
                 }
             }
             if (internship.tags.isNotEmpty()) {

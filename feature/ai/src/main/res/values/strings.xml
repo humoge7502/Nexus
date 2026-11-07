@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ai_hub_title">AI Hub</string>
+    <string name="ai_learning_plan_title">Personalized Learning Plan</string>
+    <string name="ai_learning_plan_detail">A path built from your readiness gaps — modules, milestones and the skills they close.</string>
+    <string name="ai_learning_plan_cta">View Plan</string>
     <string name="ai_mentor_title">AI Mentor</string>
     <string name="ai_ask_anything_about_your_career_ne">Ask anything about your career…\ne.g. What do fintech companies look for in fresher engineers?</string>
     <string name="ai_ask_nexus_anything">Ask Sagitta anything...</string>

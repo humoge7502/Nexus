@@ -110,6 +110,8 @@
     <string name="growth_component_dsa">DSA problems</string>
     <string name="growth_component_achievements">Achievements</string>
     <string name="growth_component_goals">Goals completed</string>
+    <string name="growth_key_insights">Key Insights</string>
+    <string name="growth_insight_source">On-device insight engine</string>
     <string name="growth_unable_to_measure">Your growth reading didn\'t arrive</string>
     <string name="growth_metrics_error_reason">Nothing was reset and no progress was lost — the score, streak and stats just couldn\'t be calculated this time, so they\'re hidden rather than guessed at.</string>
     <string name="growth_try_again">Try again</string>
