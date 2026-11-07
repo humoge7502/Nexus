@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "generatedAt": "2026-11-07T12:53:43.251Z",
-  "durationMs": 29143,
+  "generatedAt": "2026-11-07T21:45:21.765Z",
+  "durationMs": 28943,
   "counts": {
-    "internships": 33,
-    "hackathons": 62,
-    "verifiedInternships": 36,
-    "verifiedHackathons": 62
+    "internships": 31,
+    "hackathons": 65,
+    "verifiedInternships": 34,
+    "verifiedHackathons": 65
   },
   "verification": {
     "enabled": true,
@@ -221,13 +221,13 @@
       "name": "Unstop",
       "ok": true,
       "status": 200,
-      "count": 18
+      "count": 15
     },
     {
       "name": "Devpost",
       "ok": true,
       "status": 200,
-      "count": 52
+      "count": 55
     },
     {
       "name": "Devfolio",
