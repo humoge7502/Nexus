@@ -1,13 +1,46 @@
 {
   "version": 2,
-  "generatedAt": "2026-11-08T13:16:14.435Z",
+  "generatedAt": "2026-11-08T21:59:05.101Z",
   "counts": {
-    "internships": 31,
-    "hackathons": 64,
-    "verifiedInternships": 34,
-    "verifiedHackathons": 64
+    "internships": 30,
+    "hackathons": 61,
+    "verifiedInternships": 33,
+    "verifiedHackathons": 61
   },
   "internships": [
+    {
+      "id": "un-1793447",
+      "kind": "INTERNSHIP",
+      "title": "Flutter Developer Internship",
+      "company": "UKCoSA Bridging Global Futures Pvt Ltd",
+      "location": "Remote",
+      "isRemote": true,
+      "stipendLabel": "Unpaid internship",
+      "duration": "See official page",
+      "deadline": "2026-11-10",
+      "applyUrl": "https://unstop.com/internships/flutter-developer-internship-ukcosa-bridging-global-futures-pvt-ltd-1793447",
+      "description": "UKCoSA Bridging Global Futures Pvt Ltd is hiring for Flutter Developer Intern! About the Company UKCoSA Bridging Global Futures Pvt Ltd builds innovative digital products and technology solutions for global markets. The team works across mobile applications, web platforms, backend systems, and AI-enabled development workflows, giving interns the opportunity to contribute to practical product initiatives in a collaborative remote environment. Responsibilities Develop and maintain cross-platform mobile applications using Flutter and Dart. Integrate REST APIs and connect mobile applications with backend services. Work with Node.js, Express.js, MongoDB, JSON, and related technologies for application integration. Debug, test, and optimize applications for performance, reliability, and usability. Collaborate with the development team on real-world product work and take ownership of assigned…",
+      "postedAt": "2026-11-08T20:08:13.000Z",
+      "sourceName": "Unstop",
+      "verifiedAt": "2026-11-08T21:58:51.169Z",
+      "tags": [
+        "Mobile App Development",
+        "Engineering Students",
+        "Postgraduate",
+        "Undergraduate",
+        "AI/ML",
+        "Web",
+        "Mobile",
+        "Cloud"
+      ],
+      "skills": [
+        "JavaScript",
+        "SQL",
+        "React",
+        "Machine Learning",
+        "Cloud Computing"
+      ]
+    },
     {
       "id": "un-1797752",
       "kind": "INTERNSHIP",
@@ -22,7 +55,7 @@
       "description": "Accesco Living is hiring for AI/ML Intern About the Company Accesco Living Private Limited is a co-living and PropTech startup building smarter, tech-driven living spaces for students and young professionals. We are looking for an AI/ML Intern to apply artificial intelligence and machine learning to real-world challenges in real estate and co-living. This is a remote internship for freshers with zero years of professional experience. The internship is unpaid and will run for six months. Responsibilities Support exploration of AI and machine learning use cases relevant to real estate, property technology, and co-living. Assist with preparing, organizing, and reviewing datasets for analysis and experimentation. Contribute to prototyping and evaluating data-driven approaches under guidance from the team. Document methods, observations, and results clearly, and collaborate remotely with…",
       "postedAt": "2026-11-07T08:56:43.000Z",
       "sourceName": "Unstop",
-      "verifiedAt": "2026-11-08T13:15:59.379Z",
+      "verifiedAt": "2026-11-08T21:58:50.898Z",
       "tags": [
         "Machine Learning Engineering",
         "AI Engineering",
@@ -35,33 +68,6 @@
         "Machine Learning",
         "UI/UX"
       ]
-    },
-    {
-      "id": "un-1791218",
-      "kind": "INTERNSHIP",
-      "title": "QA Testing & Product Tutorial Video Internship",
-      "company": "Havelock Consulting LLP",
-      "location": "Remote",
-      "isRemote": true,
-      "stipendLabel": "₹3,000/month",
-      "duration": "See official page",
-      "deadline": "2026-11-15",
-      "applyUrl": "https://unstop.com/internships/qa-testing-product-tutorial-video-internship-havelock-consulting-llp-1791218",
-      "description": "About ExamLyft AI ExamLyft AI, owned by Havelock Consulting LLP, builds an assessment and practice platform for institutes and learners. Help us test the platform and make it easier to learn through clear English guides and short onboarding videos. Responsibilities: Manually test web and mobile-browser workflows using provided test accounts and sample data. Write test cases and bug reports with reproduction steps, expected and actual results, screenshots, and recordings. Retest fixes and maintain QA checklists. Document institute-admin and learner journeys as user guides, FAQs, and onboarding checklists. Write simple English scripts, record screen walkthroughs, and edit short tutorials and demos with clear narration, captions, and annotations. Check videos against the current product and update documentation when features change. Work with the founder and development team, share…",
-      "postedAt": "2026-11-03T16:26:07.000Z",
-      "sourceName": "Unstop",
-      "verifiedAt": "2026-11-08T13:15:59.802Z",
-      "tags": [
-        "Manual Testing",
-        "Software Testing",
-        "Engineering Students",
-        "Postgraduate",
-        "Undergraduate",
-        "Management",
-        "Medical",
-        "Law"
-      ],
-      "skills": []
     },
     {
       "id": "un-1791051",
@@ -77,7 +83,7 @@
       "description": "Roles &bull; Run go-to-market for three live AI products &mdash; NoteSathi, Geet and TurtleReel &mdash; on your own campus for two months. &bull; About 5&ndash;6 hours a week, work from home. The only in-person part is one demo or activity on your own campus each month. &bull; You work directly with the founder, not a manager. Responsibility &bull; Share your own referral links in class groups and on your social accounts, with an honest line on what the product actually did for you. &bull; Run one live demo a month on campus &mdash; a canteen or library desk-to-desk, a club session, or a fest stall. &bull; Post 4+ stories or posts a month using the content kit we give you. &bull; Send a short weekly update: what you posted, what worked, what flopped. &bull; Promote honestly. No fake reviews, no spam, no paid installs, no self-referrals. Label paid posts as ASCI requires. What you will…",
       "postedAt": "2026-11-02T09:38:48.000Z",
       "sourceName": "Unstop",
-      "verifiedAt": "2026-11-08T13:15:59.829Z",
+      "verifiedAt": "2026-11-08T21:58:51.039Z",
       "tags": [
         "Campus Ambassador",
         "Engineering Students",
@@ -89,40 +95,6 @@
         "Law"
       ],
       "skills": []
-    },
-    {
-      "id": "un-1793487",
-      "kind": "INTERNSHIP",
-      "title": "Mobile/Web Development Internship",
-      "company": "kalachashma Entertainment",
-      "location": "Jogeshwari, Maharashtra, India",
-      "isRemote": false,
-      "stipendLabel": "₹10,000-₹15,000/month",
-      "duration": "See official page",
-      "deadline": "2026-11-16",
-      "applyUrl": "https://unstop.com/internships/mobileweb-development-internship-kalachashma-entertainment-1793487",
-      "description": "Junior Mobile/Web Developer &ndash; Fresher Company: Kala Chashma Location: Jogeshwari West, Mumbai Job Type: Full-time, In-office Experience: Fresher / 0&ndash;1 year Working Days: Monday to Saturday Working Hours: 11:00 AM to 8:00 PM, with applicable breaks Stipend: ₹10,000&ndash;₹15,000 per month Joining: Immediate joiners preferred About the Role Kala Chashma is looking for a Junior Mobile/Web Developer with basic knowledge of Linux, backend development, databases, and open-source software. We are looking for someone who has practical technical knowledge, enjoys problem-solving, and is willing to work on real mobile and web applications. Key Responsibilities Assist in developing, testing, debugging, and maintaining mobile and web applications. Support backend development using Node.js, Python, JavaScript, and REST APIs. Work with SQL and MongoDB databases. Assist in Linux/Ubuntu…",
-      "postedAt": "2026-11-08T11:36:30.000Z",
-      "sourceName": "Unstop",
-      "verifiedAt": "2026-11-08T13:15:59.781Z",
-      "tags": [
-        "Full Stack Development",
-        "Postgraduate",
-        "Undergraduate",
-        "Management",
-        "Arts, Commerce, Sciences & Others",
-        "AI/ML",
-        "Web",
-        "Mobile"
-      ],
-      "skills": [
-        "JavaScript",
-        "React",
-        "DevOps",
-        "Python",
-        "SQL",
-        "Machine Learning"
-      ]
     },
     {
       "id": "un-1792303",
@@ -138,7 +110,7 @@
       "description": "Techphotonsolutions Pvt is hiring for AI Data Creation Intern About the Company Techphotonsolutions Pvt is building practical technology solutions and exploring opportunities in the artificial intelligence ecosystem. The internship offers hands-on exposure to the data workflows that support modern AI products and services. Responsibilities Create, collect, organize, and review data for artificial intelligence projects. Follow detailed guidelines to label, categorize, and maintain high-quality datasets. Identify inconsistencies, duplicates, and errors, and make accurate corrections. Collaborate with the project team to improve data quality and meet daily or weekly targets. Document completed work and share timely updates on progress, challenges, and observations. Requirements Interest in artificial intelligence, data operations, and technology-enabled products. Strong attention to detail…",
       "postedAt": "2026-11-04T10:21:46.000Z",
       "sourceName": "Unstop",
-      "verifiedAt": "2026-11-08T13:15:59.788Z",
+      "verifiedAt": "2026-11-08T21:58:51.117Z",
       "tags": [
         "Model Training & Evaluation",
         "Engineering Students",
@@ -151,38 +123,6 @@
       ],
       "skills": [
         "Machine Learning"
-      ]
-    },
-    {
-      "id": "un-1797417",
-      "kind": "INTERNSHIP",
-      "title": "Software Development Internship",
-      "company": "Lineatemporis Tech LLP",
-      "location": "Kodarma, Jharkhand, India",
-      "isRemote": false,
-      "stipendLabel": "₹5,000/month",
-      "duration": "See official page",
-      "deadline": "2026-11-18",
-      "applyUrl": "https://unstop.com/internships/software-development-internship-lineatemporis-tech-llp-1797417",
-      "description": "About the Company LINEATEMPORIS TECH LLP is a technology-focused organization building practical, high-quality software solutions. The team values innovation, collaboration, and continuous learning, and provides interns with opportunities to contribute ideas, take ownership of meaningful tasks, and develop professional skills in a supportive, inclusive environment. Responsibilities Assist developers with coding, debugging, and testing applications under the guidance of senior team members. Write clear, maintainable, and documented code, and participate in code reviews. Support the integration of new features and improvements while collaborating with colleagues to understand requirements. Prepare basic technical documentation and contribute to troubleshooting and problem-solving activities. Learn and apply industry-standard tools and practices, including version control workflows where…",
-      "postedAt": "2026-11-06T06:27:07.000Z",
-      "sourceName": "Unstop",
-      "verifiedAt": "2026-11-08T13:15:59.511Z",
-      "tags": [
-        "Software Development",
-        "Engineering Students",
-        "Postgraduate",
-        "Undergraduate",
-        "Fresher",
-        "Arts, Commerce, Sciences & Others",
-        "Web",
-        "India"
-      ],
-      "skills": [
-        "Python",
-        "Java",
-        "JavaScript",
-        "C++"
       ]
     },
     {
@@ -199,7 +139,7 @@
       "description": "PhotoGPT AI is hiring for Video Editor & AI Video Generation Intern About the Company PhotoGPT AI builds practical artificial intelligence solutions that help teams create engaging visual content efficiently. The intern will work with the official Instagram page and contribute directly to the brand&rsquo;s daily social media presence. Responsibilities Edit short-form videos for Instagram using strong pacing, transitions, captions, music, and visual storytelling. Use AI video generation and editing tools to develop fresh content concepts and production assets. Create and publish two videos every day on the official Instagram page while following the agreed content calendar. Adapt edits to current social media formats, trends, audience preferences, and platform best practices. Review performance indicators and use learnings to improve future videos. Requirements No prior professional…",
       "postedAt": "2026-11-05T23:54:11.000Z",
       "sourceName": "Unstop",
-      "verifiedAt": "2026-11-08T13:15:59.823Z",
+      "verifiedAt": "2026-11-08T21:58:51.216Z",
       "tags": [
         "Video Editing",
         "Fresher",
@@ -224,7 +164,7 @@
       "description": "About SmartShopz: We're a DPIIT-recognised Bengaluru startup that builds and runs its own consumer brands - StoryPop (storypop.in: personalised photo books, albums and magazines) and PrintPolaroid (printpolaroid.com: polaroid and photo prints). Real customers, real orders every day, and we build almost everything with AI. What you'll do: Create product images, mockups and banners with AI image models Design photo-book, album and magazine templates for StoryPop Produce social creatives and short videos for Instagram/Reels Keep product pages on brand Skills: Canva/Figma/Photoshop, a good eye, a portfolio. Experience with AI image tools (Midjourney, GPT image, Flux etc.) strongly preferred. What you get: Stipend: Rs 3,000-5,000/month Plus Rs 20,000-30,000/month of AI credits (image-generation models, Claude, GPT) to do your work Fully remote, flexible hours, 3 months, certificate + letter…",
       "postedAt": "2026-11-08T07:41:09.000Z",
       "sourceName": "Unstop",
-      "verifiedAt": "2026-11-08T13:15:59.305Z",
+      "verifiedAt": "2026-11-08T21:58:50.837Z",
       "tags": [
         "Graphic Design",
         "Visual Design",
@@ -241,6 +181,33 @@
       ]
     },
     {
+      "id": "un-1798032",
+      "kind": "INTERNSHIP",
+      "title": "AI Campus Ambassador Internship",
+      "company": "Masters' Union School of Business",
+      "location": "Remote",
+      "isRemote": true,
+      "stipendLabel": "Unpaid internship",
+      "duration": "See official page",
+      "deadline": "2026-11-19",
+      "applyUrl": "https://unstop.com/internships/ai-campus-ambassador-internship-campus-ambassador-carnival-masters-union-school-of-business-1798032",
+      "description": "Masters' Union is building India&rsquo;s next generation of Applied AI operators through its flagship program: The program focuses on: Real-world AI deployment LLM application development Agentic systems & autonomous workflows Industry-led, hands-on problem solving We are expanding this AI ecosystem across leading campuses nationwide. Role Overview : As an AI Campus Ambassador, you will represent Masters&rsquo; Union&rsquo;s AI initiatives within your institution.This is a performance-led collaboration designed for students who can mobilize and influence AI-focused communities. You will : Drive awareness around Applied AI and emerging AI careers Promote curated AI webinars, hackathons, and scholarship initiatives Drive qualified registrations through official channels Ensure strong verified live participation Activate and engage your campus AI network Mandatory Step After Applying :…",
+      "postedAt": "2026-11-07T04:39:54.000Z",
+      "sourceName": "Unstop",
+      "verifiedAt": "2026-11-08T21:58:50.916Z",
+      "tags": [
+        "Campus Ambassador",
+        "AI Research",
+        "Engineering Students",
+        "Undergraduate",
+        "AI/ML",
+        "Remote"
+      ],
+      "skills": [
+        "Machine Learning"
+      ]
+    },
+    {
       "id": "un-1797681",
       "kind": "INTERNSHIP",
       "title": "Marketing & Growth Internship - AI (Remote)",
@@ -254,7 +221,7 @@
       "description": "About SmartShopz: We're a DPIIT-recognised Bengaluru startup that builds and runs its own consumer brands - StoryPop (storypop.in: personalised photo books, albums and magazines) and PrintPolaroid (printpolaroid.com: polaroid and photo prints). Real customers, real orders every day, and we build almost everything with AI. What you'll do: Run Instagram and Meta/Google ad experiments for PrintPolaroid and StoryPop SEO: write landing pages and blog content, track rankings Build WhatsApp/email campaigns and analyse what converts Use AI to research competitors and to generate and test ad copy at scale Skills: strong written English, curiosity about numbers, social-media native. Any prior ad, SEO or creator experience is a plus. What you get: Stipend: Rs 3,000-5,000/month Plus Rs 20,000-30,000/month of AI credits (Claude, GPT, image models) to do your work Fully remote, flexible hours, 3…",
       "postedAt": "2026-11-06T04:07:18.000Z",
       "sourceName": "Unstop",
-      "verifiedAt": "2026-11-08T13:15:59.306Z",
+      "verifiedAt": "2026-11-08T21:58:50.682Z",
       "tags": [
         "Digital Marketing",
         "Performance Marketing",
@@ -281,9 +248,9 @@
       "deadline": "2026-11-20",
       "applyUrl": "https://unstop.com/internships/ai-response-evaluator-internship-cicada-1799920",
       "description": "AI Response Evaluator &ndash; Earn Up To ₹1,350 Per Hour Help us teach AI what good looks like, and earn ₹600 an hour doing it. About Cicada: Cicada (cicadaevals.com) checks AI answers for AI companies. We're adding AI response evaluators across India. What You'll Do: Read a question and two AI answers, decide which is better, and write a short reason. On some projects, score each answer against a checklist: Is it correct, complete, clear, and safe? What You Earn: About ₹600 an hour for general tasks, ₹900 for intermediate tasks, and up to ₹1,350 for expert tasks in medicine, law, finance, engineering, and coding. Paid per task, directly to your bank account. No fees. Work from home, at your own convenience. Who We're Looking For: 18 or over and living in India. Good written English. A second Indian language (Hindi, Tamil, Telugu, Bengali, Marathi, Kannada, Malayalam, or Gujarati) is a…",
-      "postedAt": "2026-11-08T11:24:18.000Z",
+      "postedAt": "2026-11-08T18:34:49.000Z",
       "sourceName": "Unstop",
-      "verifiedAt": "2026-11-08T13:15:59.323Z",
+      "verifiedAt": "2026-11-08T21:58:51.082Z",
       "tags": [
         "Model Training & Evaluation",
         "Postgraduate",
@@ -311,7 +278,7 @@
       "description": "Apply Now: skill-me-intern.in/apply Responsibility Complete one project task, following the guide on your intern dashboard Push your code to GitHub, or share a notebook or demo link, for each weekly milestone Use AI tools to build, debug, and improve your project, and explain what you built Act on reviewer feedback and resubmit if a task needs changes Requirements Students or freshers from any background Basic knowledge of Git and GitHub Comfortable using AI tools such as ChatGPT, Claude or Copilot for coding An active LinkedIn profile and willingness to post weekly",
       "postedAt": "2026-11-08T04:23:41.000Z",
       "sourceName": "Unstop",
-      "verifiedAt": "2026-11-08T13:15:59.448Z",
+      "verifiedAt": "2026-11-08T21:58:51.028Z",
       "tags": [
         "Software Development",
         "AI Engineering",
@@ -339,7 +306,7 @@
       "description": "Cumid.store is hiring for Web/Product Development Intern! About the Company cumid.store is building a clean, reliable digital storefront and is strengthening the systems behind its customer and commerce experience. This internship offers freshers an opportunity to work on production-oriented web development across the storefront, customer accounts, order workflows, analytics, and internal administration. Responsibilities Maintain and enhance the Astro website and its Cloudflare deployment. Connect Supabase to support customer accounts, favourites, enquiries, and orders. Build secure customer order-history pages and a protected admin dashboard for products, orders, and enquiries. Implement Google Analytics 4 with consent controls and meaningful ecommerce events. Investigate bugs, test responsive mobile experiences, and improve page performance. Maintain clear documentation for…",
       "postedAt": "2026-11-08T10:50:32.000Z",
       "sourceName": "Unstop",
-      "verifiedAt": "2026-11-08T13:15:59.286Z",
+      "verifiedAt": "2026-11-08T21:58:51.235Z",
       "tags": [
         "Full Stack Development",
         "Web Development",
@@ -369,9 +336,9 @@
       "deadline": "2026-11-22",
       "applyUrl": "https://unstop.com/internships/technical-lead-internship-paintorbit-solutions-pvt-ltd-1801481",
       "description": "Roles Assist in leading the technical development and implementation of PaintOrbit's technology-enabled platform. Work on developing digital solutions to streamline painting, waterproofing, and surface maintenance operations. Collaborate with the business and operations teams to understand technical requirements and translate them into practical solutions. Responsibilities Support the development, testing, and maintenance of web applications and digital tools. Assist in managing technical projects, tracking development progress, and ensuring timely execution. Identify opportunities to automate workflows and improve operational efficiency. Coordinate with developers and cross-functional teams to implement new features and resolve technical challenges. Conduct research on emerging technologies, tools, and software solutions relevant to PaintOrbit's business. Contribute to product…",
-      "postedAt": "2026-11-08T12:29:42.000Z",
+      "postedAt": "2026-11-08T19:46:15.000Z",
       "sourceName": "Unstop",
-      "verifiedAt": "2026-11-08T13:15:59.273Z",
+      "verifiedAt": "2026-11-08T21:58:50.779Z",
       "tags": [
         "Software Development",
         "Engineering Students",
@@ -398,7 +365,7 @@
       "description": "<h2><strong>Who we are</strong></h2> <h3><strong>About Stripe</strong></h3> <p>Stripe is a technology company focused on improving the conditions for economic growth and prosperity. We build programmable financial infrastructure, rethinking from first principles how financial services should work, to make it easier and cheaper for any business to start and scale. More than 10 million <a href=\"https://stripe.com/customers\">businesses</a> build on Stripe, spanning the economic frontier—from solo founders to established enterprises—united by a practical focus on growth. The most ambitious companies in the world use Stripe as core infrastructure to grow faster. They process trillions of dollars a year on Stripe, equivalent to around 1.6% of global GDP. While economic growth makes everyone better off, open markets also enable greater variety. When any business can easily serve a global…",
       "postedAt": "2026-10-29T14:42:09.000Z",
       "sourceName": "Stripe careers (Greenhouse)",
-      "verifiedAt": "2026-11-08T13:15:58.818Z",
+      "verifiedAt": "2026-11-08T21:58:50.637Z",
       "tags": [
         "5112 General University",
         "AI/ML",
@@ -428,7 +395,7 @@
       "description": "<h2><strong>Who we are</strong></h2> <h3><strong>About Stripe</strong></h3> <p>Stripe is a technology company focused on improving the conditions for economic growth and prosperity. We build programmable financial infrastructure, rethinking from first principles how financial services should work, to make it easier and cheaper for any business to start and scale. More than 10 million <a href=\"https://stripe.com/customers\">businesses</a> build on Stripe, spanning the economic frontier—from solo founders to established enterprises—united by a practical focus on growth. The most ambitious companies in the world use Stripe as core infrastructure to grow faster. They process trillions of dollars a year on Stripe, equivalent to around 1.6% of global GDP. While economic growth makes everyone better off, open markets also enable greater variety. When any business can easily serve a global…",
       "postedAt": "2026-10-29T14:42:09.000Z",
       "sourceName": "Stripe careers (Greenhouse)",
-      "verifiedAt": "2026-11-08T13:15:59.000Z",
+      "verifiedAt": "2026-11-08T21:58:50.735Z",
       "tags": [
         "5112 General University",
         "AI/ML",
@@ -457,7 +424,7 @@
       "description": "Talent Acquisition Intern - Noida Noida, Uttar Pradesh HR – Recruitment / Intern / On-site Location: Noida Duration: 6 months Working days: 5 days work from office About Paytm Group: Paytm is India's leading mobile payments and financial services distribution company. Pioneer of the mobile QR payments revolution in India, Paytm builds technologies that help small businesses with payments and commerce. Paytm's mission is to serve half a billion Indians and bring them to the mainstream economy with the help of technology. About the role: A Talent Acquisition (TA) Intern will support the recruitment team in sourcing and screening candidates for technology roles. The role will involve working on real-time tech hiring requirements, coordinating interviews, candidate communication, maintaining recruitment trackers, and supporting hiring drives. Key Responsibilities: * Source and screen…",
       "postedAt": "2026-10-20T06:18:18.447Z",
       "sourceName": "Paytm careers (Lever)",
-      "verifiedAt": "2026-11-08T13:15:58.786Z",
+      "verifiedAt": "2026-11-08T21:58:50.652Z",
       "tags": [
         "Recruitment",
         "AI/ML",
@@ -482,7 +449,7 @@
       "description": "Location: Noida Duration: 3 months Working days: 5 days work from office About Paytm Group: Paytm is India's leading mobile payments and financial services distribution company. Pioneer of the mobile QR payments revolution in India, Paytm builds technologies that help small businesses with payments and commerce. Paytm's mission is to serve half a billion Indians and bring them to the mainstream economy with the help of technology. About the role: A Talent Acquisition (TA) Intern will support the recruitment team in sourcing and screening candidates for technology roles. The role will involve working on real-time tech hiring requirements, coordinating interviews, candidate communication, maintaining recruitment trackers, and supporting hiring drives. Key Responsibilities: * Source and screen candidates for roles through LinkedIn, Naukri and other platforms. * Identify relevant…",
       "postedAt": "2026-10-19T05:47:40.953Z",
       "sourceName": "Paytm careers (Lever)",
-      "verifiedAt": "2026-11-08T13:15:58.731Z",
+      "verifiedAt": "2026-11-08T21:58:55.398Z",
       "tags": [
         "Talent Management",
         "Mobile",
@@ -504,7 +471,7 @@
       "description": "Job Title: HR Onboarding Intern Positions (MBA / Graduate) Location: Noida Mode: Work from Office (5 days a week) Duration: 3 Months About Us: Paytm is India's leading mobile payments and financial services distribution company. Pioneer of the mobile QR payments revolution in India, Paytm builds technologies that help small businesses with payments and commerce. Paytm’s mission is to serve half a billion Indians and bring them to the mainstream economy with the help of technology. Role & Requirements: ● Greet and guide new employees on their first day. ● Support HR in conducting orientation sessions and presentations. ● Ensure completion of joining formalities, forms, and policy acknowledgments. ● Maintain accurate employee records and digital filing systems. ● Update trackers (new joiner status, onboarding progress, etc.). ● Strong verbal and written communication skills…",
       "postedAt": "2026-10-08T05:51:00.902Z",
       "sourceName": "Paytm careers (Lever)",
-      "verifiedAt": "2026-11-08T13:15:58.954Z",
+      "verifiedAt": "2026-11-08T21:58:50.424Z",
       "tags": [
         "Employee Onboarding",
         "Mobile",
@@ -526,7 +493,7 @@
       "description": "The All India Council for Technical Education's official internship portal, listing internships for students across India. Students can search by city, sector, and duration.",
       "postedAt": null,
       "sourceName": "AICTE",
-      "verifiedAt": "2026-11-08T13:16:01.345Z",
+      "verifiedAt": "2026-11-08T21:58:52.579Z",
       "tags": [
         "INTERNSHIP",
         "India",
@@ -549,7 +516,7 @@
       "description": "An Indian open-source mentoring program that places contributors on public-good projects with government and nonprofit partners. Selected contributors work with maintainers on live GovTech products.",
       "postedAt": null,
       "sourceName": "Code for GovTech",
-      "verifiedAt": "2026-11-08T13:16:00.183Z",
+      "verifiedAt": "2026-11-08T21:58:51.493Z",
       "tags": [
         "INTERNSHIP",
         "Open Source",
@@ -573,7 +540,7 @@
       "description": "An open-source contribution program for beginners in India, with mentors, project listings, and rewards for top contributors. Participants make pull requests to real projects over the summer.",
       "postedAt": null,
       "sourceName": "GirlScript Summer of Code",
-      "verifiedAt": "2026-11-08T13:16:01.036Z",
+      "verifiedAt": "2026-11-08T21:58:51.603Z",
       "tags": [
         "PROGRAM",
         "Open Source",
@@ -597,7 +564,7 @@
       "description": "Google's scholarship programs for computer science students, including the Generation Google Scholarship and awards for students with disabilities. Eligibility and award amounts vary by region.",
       "postedAt": null,
       "sourceName": "Google Build Your Future",
-      "verifiedAt": "2026-11-08T13:16:00.624Z",
+      "verifiedAt": "2026-11-08T21:58:52.372Z",
       "tags": [
         "SCHOLARSHIP",
         "Scholarship",
@@ -621,7 +588,7 @@
       "description": "Google's annual program that pairs technical writers with open-source organizations for mentored documentation projects. Writers receive a stipend set by the participating organization.",
       "postedAt": null,
       "sourceName": "Google Season of Docs",
-      "verifiedAt": "2026-11-08T13:16:00.811Z",
+      "verifiedAt": "2026-11-08T21:58:52.494Z",
       "tags": [
         "PROGRAM",
         "Open Source",
@@ -645,7 +612,7 @@
       "description": "Google's annual open-source program that pairs students with mentor organizations for a paid summer project. The organization list is published in February and applications typically open in March.",
       "postedAt": null,
       "sourceName": "Google Summer of Code",
-      "verifiedAt": "2026-11-08T13:15:59.574Z",
+      "verifiedAt": "2026-11-08T21:58:51.173Z",
       "tags": [
         "INTERNSHIP",
         "Open Source",
@@ -669,7 +636,7 @@
       "description": "The Linux Foundation's mentorship program with paid, remote projects across cloud, security, networking, and open-source infrastructure. New terms open several times a year.",
       "postedAt": null,
       "sourceName": "LFX Mentorship",
-      "verifiedAt": "2026-11-08T13:15:59.797Z",
+      "verifiedAt": "2026-11-08T21:58:51.433Z",
       "tags": [
         "INTERNSHIP",
         "Open Source",
@@ -696,7 +663,7 @@
       "description": "A global community program for student leaders who learn and teach Microsoft technologies on campus. Ambassadors get access to learning resources, events, and a global student community.",
       "postedAt": null,
       "sourceName": "Microsoft Learn Student Ambassadors",
-      "verifiedAt": "2026-11-08T13:16:00.871Z",
+      "verifiedAt": "2026-11-08T21:58:52.548Z",
       "tags": [
         "PROGRAM",
         "Community",
@@ -720,7 +687,7 @@
       "description": "A 12-week remote fellowship where students contribute to open-source projects in small pods with mentor support. Tracks include open source, production engineering, and site reliability.",
       "postedAt": null,
       "sourceName": "MLH Fellowship",
-      "verifiedAt": "2026-11-08T13:16:00.291Z",
+      "verifiedAt": "2026-11-08T21:58:51.895Z",
       "tags": [
         "FELLOWSHIP",
         "Open Source",
@@ -744,7 +711,7 @@
       "description": "NVIDIA's PhD fellowship supports graduate research in accelerated computing, AI, graphics, and related fields for one academic year. Fellows are paired with an NVIDIA researcher.",
       "postedAt": null,
       "sourceName": "NVIDIA Research",
-      "verifiedAt": "2026-11-08T13:16:00.699Z",
+      "verifiedAt": "2026-11-08T21:58:52.520Z",
       "tags": [
         "FELLOWSHIP",
         "Research",
@@ -770,7 +737,7 @@
       "description": "Paid, remote open-source internships for people subject to systemic bias and underrepresentation in tech. The program runs twice a year with a mentorship contribution period before the internship.",
       "postedAt": null,
       "sourceName": "Outreachy",
-      "verifiedAt": "2026-11-08T13:16:00.173Z",
+      "verifiedAt": "2026-11-08T21:58:51.496Z",
       "tags": [
         "INTERNSHIP",
         "Open Source",
@@ -794,7 +761,7 @@
       "description": "KDE's annual mentorship program for students and newcomers to contribute to KDE open-source projects with a dedicated mentor. Projects span desktop apps, frameworks, and infrastructure.",
       "postedAt": null,
       "sourceName": "KDE",
-      "verifiedAt": "2026-11-08T13:16:00.560Z",
+      "verifiedAt": "2026-11-08T21:58:51.994Z",
       "tags": [
         "PROGRAM",
         "Open Source",
@@ -818,7 +785,7 @@
       "description": "A global program that pairs students with Bitcoin open-source projects for a paid summer of remote mentorship and contribution. Applicants complete a short online course before project selection.",
       "postedAt": null,
       "sourceName": "Summer of Bitcoin",
-      "verifiedAt": "2026-11-08T13:16:00.744Z",
+      "verifiedAt": "2026-11-08T21:58:51.971Z",
       "tags": [
         "INTERNSHIP",
         "Open Source",
@@ -836,7 +803,7 @@
       "id": "dp-31489",
       "title": "EthnoHack",
       "organizer": "ETHCSTWIN",
-      "description": "Open hackathon on Devpost focused on Databases, Health, Machine Learning/AI. Submissions close in 14 minutes left.",
+      "description": "Open hackathon on Devpost focused on Databases, Health, Machine Learning/AI. Submissions close in 1 minute left.",
       "mode": "ONLINE",
       "location": "Online",
       "startDate": null,
@@ -856,78 +823,29 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.109Z"
+      "verifiedAt": "2026-11-08T21:59:02.428Z"
     },
     {
-      "id": "dp-31022",
-      "title": "GullHacks",
-      "organizer": "Salisbury University",
-      "description": "Open hackathon on Devpost focused on Beginner Friendly, Education, Social Good. Submissions close in about 4 hours left.",
+      "id": "dp-32023",
+      "title": "IBM Db2Hack 2026",
+      "organizer": "IBM",
+      "description": "Open hackathon on Devpost focused on Databases. Submissions close in 1 day left.",
       "mode": "ONLINE",
       "location": "Online",
       "startDate": null,
-      "endDate": "2026-11-08",
-      "registrationDeadline": "2026-11-08",
-      "prizePool": "$ 0",
-      "registrationUrl": "https://gullhacks2026.devpost.com/",
+      "endDate": "2026-11-09",
+      "registrationDeadline": "2026-11-09",
+      "prizePool": "₹ 0",
+      "registrationUrl": "https://ibm-db2hack-2026.devpost.com/",
       "isLive": true,
       "tags": [
-        "Beginner Friendly",
-        "Education",
-        "Social Good",
+        "Databases",
         "Hackathon",
         "Online"
       ],
       "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:12.636Z"
-    },
-    {
-      "id": "dp-32005",
-      "title": "QUX Design-a-thon 2026!",
-      "organizer": "Queen's UX Club",
-      "description": "Open hackathon on Devpost focused on Design, Beginner Friendly. Submissions close in about 6 hours left.",
-      "mode": "ONLINE",
-      "location": "Online",
-      "startDate": null,
-      "endDate": "2026-11-08",
-      "registrationDeadline": "2026-11-08",
-      "prizePool": "$CAD 380",
-      "registrationUrl": "https://qux-design-a-thon-2026.devpost.com/",
-      "isLive": true,
-      "tags": [
-        "Design",
-        "Beginner Friendly",
-        "Hackathon",
-        "Online"
-      ],
-      "skills": [],
-      "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:12.934Z"
-    },
-    {
-      "id": "dp-31711",
-      "title": "UXDC Designathon - 2026",
-      "organizer": "UXDC - Ucalgary design club",
-      "description": "Open hackathon on Devpost focused on Beginner Friendly, Design, Low/No Code. Submissions close in about 6 hours left.",
-      "mode": "ONLINE",
-      "location": "Online",
-      "startDate": null,
-      "endDate": "2026-11-08",
-      "registrationDeadline": "2026-11-08",
-      "prizePool": "$ 200",
-      "registrationUrl": "https://uxdc-designathon-2026.devpost.com/",
-      "isLive": true,
-      "tags": [
-        "Beginner Friendly",
-        "Design",
-        "Low/No Code",
-        "Hackathon",
-        "Online"
-      ],
-      "skills": [],
-      "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:12.370Z"
+      "verifiedAt": "2026-11-08T21:59:03.216Z"
     },
     {
       "id": "dp-31659",
@@ -953,7 +871,7 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:10.731Z"
+      "verifiedAt": "2026-11-08T21:59:02.313Z"
     },
     {
       "id": "dp-31060",
@@ -979,7 +897,7 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.501Z"
+      "verifiedAt": "2026-11-08T21:59:02.631Z"
     },
     {
       "id": "dp-31831",
@@ -1005,7 +923,7 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.962Z"
+      "verifiedAt": "2026-11-08T21:59:03.031Z"
     },
     {
       "id": "dp-31883",
@@ -1029,13 +947,13 @@
       ],
       "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:12.344Z"
+      "verifiedAt": "2026-11-08T21:59:03.050Z"
     },
     {
       "id": "df-40f5203a0b9842038b51dd3f73236690",
       "title": "GeNarrative Clash",
       "organizer": "Devfolio community",
-      "description": "In-person hackathon listed on Devfolio, themed around Design, AI. 1,286 students have registered. Registration closes 2026-11-10.",
+      "description": "In-person hackathon listed on Devfolio, themed around Design, AI. 1,302 students have registered. Registration closes 2026-11-10.",
       "mode": "OFFLINE",
       "location": "India",
       "startDate": "2026-11-21",
@@ -1052,13 +970,13 @@
       ],
       "skills": [],
       "sourceName": "Devfolio",
-      "verifiedAt": "2026-11-08T13:16:13.023Z"
+      "verifiedAt": "2026-11-08T21:59:03.584Z"
     },
     {
       "id": "df-50e23a48e3964f43878279a3bf81339d",
       "title": "haxfinity",
       "organizer": "Devfolio community",
-      "description": "In-person hackathon listed on Devfolio, themed around FinTech, AI, HealthTech. 525 students have registered. Registration closes 2026-11-10.",
+      "description": "In-person hackathon listed on Devfolio, themed around FinTech, AI, HealthTech. 531 students have registered. Registration closes 2026-11-10.",
       "mode": "OFFLINE",
       "location": "India",
       "startDate": "2026-12-12",
@@ -1076,61 +994,18 @@
       ],
       "skills": [],
       "sourceName": "Devfolio",
-      "verifiedAt": "2026-11-08T13:16:14.266Z"
-    },
-    {
-      "id": "dp-32023",
-      "title": "IBM Db2Hack 2026",
-      "organizer": "IBM",
-      "description": "Open hackathon on Devpost focused on Databases. Submissions close in 2 days left.",
-      "mode": "ONLINE",
-      "location": "Online",
-      "startDate": null,
-      "endDate": "2026-11-10",
-      "registrationDeadline": "2026-11-10",
-      "prizePool": "₹ 0",
-      "registrationUrl": "https://ibm-db2hack-2026.devpost.com/",
-      "isLive": true,
-      "tags": [
-        "Databases",
-        "Hackathon",
-        "Online"
-      ],
-      "skills": [],
-      "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:12.474Z"
-    },
-    {
-      "id": "df-0dab52b6085941a6b366b2425310d8b8",
-      "title": "THE BIG HACK 2.0",
-      "organizer": "Devfolio community",
-      "description": "In-person hackathon listed on Devfolio. 481 students have registered. Registration closes 2026-11-10.",
-      "mode": "OFFLINE",
-      "location": "India",
-      "startDate": "2026-11-20",
-      "endDate": "2026-11-20",
-      "registrationDeadline": "2026-11-10",
-      "prizePool": "Prize pool on official page",
-      "registrationUrl": "https://the-big-hack-2.devfolio.co/",
-      "isLive": true,
-      "tags": [
-        "Hackathon",
-        "India"
-      ],
-      "skills": [],
-      "sourceName": "Devfolio",
-      "verifiedAt": "2026-11-08T13:16:14.141Z"
+      "verifiedAt": "2026-11-08T21:59:04.852Z"
     },
     {
       "id": "dp-31664",
       "title": "Herhack",
       "organizer": "Echelon institute of technology",
-      "description": "Open hackathon on Devpost focused on Beginner Friendly, Blockchain, Open Ended. Submissions close in 3 days left.",
+      "description": "Open hackathon on Devpost focused on Beginner Friendly, Blockchain, Open Ended. Submissions close in 2 days left.",
       "mode": "ONLINE",
       "location": "Online",
       "startDate": null,
-      "endDate": "2026-11-11",
-      "registrationDeadline": "2026-11-11",
+      "endDate": "2026-11-10",
+      "registrationDeadline": "2026-11-10",
       "prizePool": "₹ 200,000",
       "registrationUrl": "https://herhack.devpost.com/",
       "isLive": true,
@@ -1145,7 +1020,28 @@
         "Blockchain"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.522Z"
+      "verifiedAt": "2026-11-08T21:59:02.676Z"
+    },
+    {
+      "id": "df-0dab52b6085941a6b366b2425310d8b8",
+      "title": "THE BIG HACK 2.0",
+      "organizer": "Devfolio community",
+      "description": "In-person hackathon listed on Devfolio. 489 students have registered. Registration closes 2026-11-10.",
+      "mode": "OFFLINE",
+      "location": "India",
+      "startDate": "2026-11-20",
+      "endDate": "2026-11-20",
+      "registrationDeadline": "2026-11-10",
+      "prizePool": "Prize pool on official page",
+      "registrationUrl": "https://the-big-hack-2.devfolio.co/",
+      "isLive": true,
+      "tags": [
+        "Hackathon",
+        "India"
+      ],
+      "skills": [],
+      "sourceName": "Devfolio",
+      "verifiedAt": "2026-11-08T21:59:04.512Z"
     },
     {
       "id": "dp-31302",
@@ -1171,13 +1067,13 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:10.650Z"
+      "verifiedAt": "2026-11-08T21:59:02.160Z"
     },
     {
       "id": "df-d957bc2099f945e99edfae0c2972bed9",
       "title": "DevNexus 2.0",
       "organizer": "Devfolio community",
-      "description": "In-person hackathon listed on Devfolio. 1,799 students have registered. Registration closes 2026-11-13.",
+      "description": "In-person hackathon listed on Devfolio. 1,804 students have registered. Registration closes 2026-11-13.",
       "mode": "OFFLINE",
       "location": "India",
       "startDate": "2026-11-27",
@@ -1192,18 +1088,18 @@
       ],
       "skills": [],
       "sourceName": "Devfolio",
-      "verifiedAt": "2026-11-08T13:16:13.387Z"
+      "verifiedAt": "2026-11-08T21:59:04.115Z"
     },
     {
       "id": "dp-30500",
       "title": "DSH Hacks V2 ($100k+ in prizes!)",
       "organizer": "STEMise",
-      "description": "Open hackathon on Devpost focused on Beginner Friendly, Low/No Code, Open Ended. Submissions close in 7 days left.",
+      "description": "Open hackathon on Devpost focused on Beginner Friendly, Low/No Code, Open Ended. Submissions close in 6 days left.",
       "mode": "ONLINE",
       "location": "Online",
       "startDate": null,
-      "endDate": "2026-11-15",
-      "registrationDeadline": "2026-11-15",
+      "endDate": "2026-11-14",
+      "registrationDeadline": "2026-11-14",
       "prizePool": "$ 0",
       "registrationUrl": "https://dsh-hacks-v2.devpost.com/",
       "isLive": true,
@@ -1216,7 +1112,33 @@
       ],
       "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:10.788Z"
+      "verifiedAt": "2026-11-08T21:59:02.171Z"
+    },
+    {
+      "id": "dp-31719",
+      "title": "Scope-AI-Thon 2026 - AI for Detection of Acute Patient Deterioration",
+      "organizer": "mcgill university",
+      "description": "Open hackathon on Devpost focused on Design, Health, Machine Learning/AI. Submissions close in 6 days left.",
+      "mode": "ONLINE",
+      "location": "Online",
+      "startDate": null,
+      "endDate": "2026-11-14",
+      "registrationDeadline": "2026-11-14",
+      "prizePool": "$CAD 1,400",
+      "registrationUrl": "https://scope-ai-thon-2026.devpost.com/",
+      "isLive": true,
+      "tags": [
+        "Design",
+        "Health",
+        "Machine Learning/AI",
+        "Hackathon",
+        "Online"
+      ],
+      "skills": [
+        "Machine Learning"
+      ],
+      "sourceName": "Devpost",
+      "verifiedAt": "2026-11-08T21:59:03.176Z"
     },
     {
       "id": "dp-31666",
@@ -1242,44 +1164,18 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.919Z"
-    },
-    {
-      "id": "dp-31719",
-      "title": "Scope-AI-Thon 2026 - AI for Detection of Acute Patient Deterioration",
-      "organizer": "mcgill university",
-      "description": "Open hackathon on Devpost focused on Design, Health, Machine Learning/AI. Submissions close in 7 days left.",
-      "mode": "ONLINE",
-      "location": "Online",
-      "startDate": null,
-      "endDate": "2026-11-15",
-      "registrationDeadline": "2026-11-15",
-      "prizePool": "$CAD 1,400",
-      "registrationUrl": "https://scope-ai-thon-2026.devpost.com/",
-      "isLive": true,
-      "tags": [
-        "Design",
-        "Health",
-        "Machine Learning/AI",
-        "Hackathon",
-        "Online"
-      ],
-      "skills": [
-        "Machine Learning"
-      ],
-      "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:12.416Z"
+      "verifiedAt": "2026-11-08T21:59:02.855Z"
     },
     {
       "id": "dp-31187",
       "title": "STEMergent Hacks 2026",
       "organizer": "STEMergent",
-      "description": "Open hackathon on Devpost focused on Low/No Code, Machine Learning/AI, Social Good. Submissions close in 8 days left.",
+      "description": "Open hackathon on Devpost focused on Low/No Code, Machine Learning/AI, Social Good. Submissions close in 7 days left.",
       "mode": "ONLINE",
       "location": "Online",
       "startDate": null,
-      "endDate": "2026-11-16",
-      "registrationDeadline": "2026-11-16",
+      "endDate": "2026-11-15",
+      "registrationDeadline": "2026-11-15",
       "prizePool": "$ 0",
       "registrationUrl": "https://stemergent-hacks.devpost.com/",
       "isLive": true,
@@ -1294,44 +1190,42 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.499Z"
+      "verifiedAt": "2026-11-08T21:59:02.633Z"
     },
     {
       "id": "dp-31057",
       "title": "Technology x Health: Amador Valley Girls Who Code Hackathon",
       "organizer": "Amador Valley Girls Who Code",
-      "description": "Open hackathon on Devpost focused on Beginner Friendly, Health, Machine Learning/AI. Submissions close in 8 days left.",
+      "description": "Open hackathon on Devpost focused on Beginner Friendly, Health, Social Good. Submissions close in 7 days left.",
       "mode": "ONLINE",
       "location": "Online",
       "startDate": null,
-      "endDate": "2026-11-16",
-      "registrationDeadline": "2026-11-16",
+      "endDate": "2026-11-15",
+      "registrationDeadline": "2026-11-15",
       "prizePool": "$ 0",
       "registrationUrl": "https://ai-x-health-hackathon-avgwc.devpost.com/",
       "isLive": true,
       "tags": [
         "Beginner Friendly",
         "Health",
-        "Machine Learning/AI",
+        "Social Good",
         "Hackathon",
         "Online"
       ],
-      "skills": [
-        "Machine Learning"
-      ],
+      "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:13.203Z"
+      "verifiedAt": "2026-11-08T21:59:03.603Z"
     },
     {
       "id": "dp-31552",
       "title": "UGREEN Hackathon 2026 on AI NAS",
       "organizer": "UGREEN",
-      "description": "Open hackathon on Devpost focused on Lifehacks, Machine Learning/AI, Productivity. Submissions close in 8 days left.",
+      "description": "Open hackathon on Devpost focused on Lifehacks, Machine Learning/AI, Productivity. Submissions close in 7 days left.",
       "mode": "ONLINE",
       "location": "Online",
       "startDate": null,
-      "endDate": "2026-11-16",
-      "registrationDeadline": "2026-11-16",
+      "endDate": "2026-11-15",
+      "registrationDeadline": "2026-11-15",
       "prizePool": "$ 46,000",
       "registrationUrl": "https://ugreenhackathon.devpost.com/",
       "isLive": true,
@@ -1346,7 +1240,7 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:10.687Z"
+      "verifiedAt": "2026-11-08T21:59:02.087Z"
     },
     {
       "id": "dp-31797",
@@ -1369,13 +1263,13 @@
       ],
       "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.983Z"
+      "verifiedAt": "2026-11-08T21:59:02.896Z"
     },
     {
       "id": "df-8b69c2039a8d4b4085c3869b9b25d9c9",
       "title": "Lean In Hacks 8.0",
       "organizer": "Devfolio community",
-      "description": "In-person hackathon listed on Devfolio. 477 students have registered. Registration closes 2026-11-18.",
+      "description": "In-person hackathon listed on Devfolio. 482 students have registered. Registration closes 2026-11-18.",
       "mode": "OFFLINE",
       "location": "India",
       "startDate": "2026-11-19",
@@ -1390,7 +1284,7 @@
       ],
       "skills": [],
       "sourceName": "Devfolio",
-      "verifiedAt": "2026-11-08T13:16:13.338Z"
+      "verifiedAt": "2026-11-08T21:59:03.668Z"
     },
     {
       "id": "dp-31024",
@@ -1416,7 +1310,7 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:10.681Z"
+      "verifiedAt": "2026-11-08T21:59:02.051Z"
     },
     {
       "id": "dp-31795",
@@ -1440,7 +1334,7 @@
       ],
       "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.621Z"
+      "verifiedAt": "2026-11-08T21:59:02.792Z"
     },
     {
       "id": "dp-26475",
@@ -1467,7 +1361,7 @@
         "Blockchain"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.880Z"
+      "verifiedAt": "2026-11-08T21:59:02.924Z"
     },
     {
       "id": "dp-31773",
@@ -1490,7 +1384,7 @@
       ],
       "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.079Z"
+      "verifiedAt": "2026-11-08T21:59:02.373Z"
     },
     {
       "id": "dp-32044",
@@ -1512,7 +1406,31 @@
       ],
       "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:13.185Z"
+      "verifiedAt": "2026-11-08T21:59:03.653Z"
+    },
+    {
+      "id": "dp-31789",
+      "title": "STEM2Connect AI Hackathon",
+      "organizer": "STEM2Connect",
+      "description": "Open hackathon on Devpost focused on Beginner Friendly, Education, Web. Submissions close in 13 days left.",
+      "mode": "ONLINE",
+      "location": "Online",
+      "startDate": null,
+      "endDate": "2026-11-21",
+      "registrationDeadline": "2026-11-21",
+      "prizePool": "$ 0",
+      "registrationUrl": "https://stem2connect-online-hackathon.devpost.com/",
+      "isLive": true,
+      "tags": [
+        "Beginner Friendly",
+        "Education",
+        "Web",
+        "Hackathon",
+        "Online"
+      ],
+      "skills": [],
+      "sourceName": "Devpost",
+      "verifiedAt": "2026-11-08T21:59:02.640Z"
     },
     {
       "id": "dp-31796",
@@ -1536,31 +1454,54 @@
       ],
       "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.446Z"
+      "verifiedAt": "2026-11-08T21:59:02.576Z"
     },
     {
-      "id": "dp-31789",
-      "title": "STEM2Connect AI Hackathon",
-      "organizer": "STEM2Connect",
-      "description": "Open hackathon on Devpost focused on Beginner Friendly, Education, Web. Submissions close in 14 days left.",
+      "id": "dp-31798",
+      "title": "Taskforge",
+      "organizer": "HackathonForEveryone",
+      "description": "Open hackathon on Devpost focused on Beginner Friendly, Quantum. Submissions close in 16 days left.",
       "mode": "ONLINE",
       "location": "Online",
       "startDate": null,
-      "endDate": "2026-11-22",
-      "registrationDeadline": "2026-11-22",
+      "endDate": "2026-11-24",
+      "registrationDeadline": "2026-11-24",
       "prizePool": "$ 0",
-      "registrationUrl": "https://stem2connect-online-hackathon.devpost.com/",
+      "registrationUrl": "https://taskforge.devpost.com/",
       "isLive": true,
       "tags": [
         "Beginner Friendly",
-        "Education",
-        "Web",
+        "Quantum",
         "Hackathon",
         "Online"
       ],
       "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.195Z"
+      "verifiedAt": "2026-11-08T21:59:02.815Z"
+    },
+    {
+      "id": "dp-31504",
+      "title": "Code For DFW",
+      "organizer": "n/a",
+      "description": "Open hackathon on Devpost focused on Open Ended, Social Good, Beginner Friendly. Submissions close in 17 days left.",
+      "mode": "ONLINE",
+      "location": "Online",
+      "startDate": null,
+      "endDate": "2026-11-25",
+      "registrationDeadline": "2026-11-25",
+      "prizePool": "$ 0",
+      "registrationUrl": "https://code-for-dfw.devpost.com/",
+      "isLive": true,
+      "tags": [
+        "Open Ended",
+        "Social Good",
+        "Beginner Friendly",
+        "Hackathon",
+        "Online"
+      ],
+      "skills": [],
+      "sourceName": "Devpost",
+      "verifiedAt": "2026-11-08T21:59:03.470Z"
     },
     {
       "id": "dp-31820",
@@ -1586,7 +1527,7 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:12.034Z"
+      "verifiedAt": "2026-11-08T21:59:02.888Z"
     },
     {
       "id": "dp-31737",
@@ -1612,30 +1553,7 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:12.016Z"
-    },
-    {
-      "id": "dp-31798",
-      "title": "Taskforge",
-      "organizer": "HackathonForEveryone",
-      "description": "Open hackathon on Devpost focused on Beginner Friendly, Quantum. Submissions close in 17 days left.",
-      "mode": "ONLINE",
-      "location": "Online",
-      "startDate": null,
-      "endDate": "2026-11-25",
-      "registrationDeadline": "2026-11-25",
-      "prizePool": "$ 0",
-      "registrationUrl": "https://taskforge.devpost.com/",
-      "isLive": true,
-      "tags": [
-        "Beginner Friendly",
-        "Quantum",
-        "Hackathon",
-        "Online"
-      ],
-      "skills": [],
-      "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.559Z"
+      "verifiedAt": "2026-11-08T21:59:02.931Z"
     },
     {
       "id": "dp-31626",
@@ -1660,7 +1578,7 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:12.712Z"
+      "verifiedAt": "2026-11-08T21:59:03.362Z"
     },
     {
       "id": "dp-31907",
@@ -1686,31 +1604,31 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.190Z"
+      "verifiedAt": "2026-11-08T21:59:02.424Z"
     },
     {
-      "id": "dp-31504",
-      "title": "Code For DFW",
-      "organizer": "n/a",
-      "description": "Open hackathon on Devpost focused on Open Ended, Social Good, Beginner Friendly. Submissions close in 19 days left.",
+      "id": "dp-31733",
+      "title": "305 Veterans Hackathon Edition November 2026 — 305Hackathons.vercel.app",
+      "organizer": "GOOGLE DEVELOPER GROUP AT FIU",
+      "description": "Open hackathon on Devpost focused on Beginner Friendly, Cybersecurity, Education. Submissions close in 22 days left.",
       "mode": "ONLINE",
       "location": "Online",
       "startDate": null,
-      "endDate": "2026-11-27",
-      "registrationDeadline": "2026-11-27",
+      "endDate": "2026-11-30",
+      "registrationDeadline": "2026-11-30",
       "prizePool": "$ 0",
-      "registrationUrl": "https://code-for-dfw.devpost.com/",
+      "registrationUrl": "https://305veteransnov2026.devpost.com/",
       "isLive": true,
       "tags": [
-        "Open Ended",
-        "Social Good",
         "Beginner Friendly",
+        "Cybersecurity",
+        "Education",
         "Hackathon",
         "Online"
       ],
       "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:12.871Z"
+      "verifiedAt": "2026-11-08T21:59:03.391Z"
     },
     {
       "id": "dp-31682",
@@ -1734,18 +1652,18 @@
       ],
       "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:12.101Z"
+      "verifiedAt": "2026-11-08T21:59:03.166Z"
     },
     {
       "id": "dp-31993",
       "title": "IdeaLab Hacks",
       "organizer": "IdeaLab",
-      "description": "Open hackathon on Devpost focused on Beginner Friendly, Design, Open Ended. Submissions close in 23 days left.",
+      "description": "Open hackathon on Devpost focused on Beginner Friendly, Design, Open Ended. Submissions close in 22 days left.",
       "mode": "ONLINE",
       "location": "Online",
       "startDate": null,
-      "endDate": "2026-12-01",
-      "registrationDeadline": "2026-12-01",
+      "endDate": "2026-11-30",
+      "registrationDeadline": "2026-11-30",
       "prizePool": "$ 0",
       "registrationUrl": "https://idealab-hacks.devpost.com/",
       "isLive": true,
@@ -1758,42 +1676,18 @@
       ],
       "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:13.106Z"
-    },
-    {
-      "id": "dp-31733",
-      "title": "305 Veterans Hackathon Edition November 2026 — 305Hackathons.vercel.app",
-      "organizer": "GOOGLE DEVELOPER GROUP AT FIU",
-      "description": "Open hackathon on Devpost focused on Beginner Friendly, Cybersecurity, Education. Submissions close in 24 days left.",
-      "mode": "ONLINE",
-      "location": "Online",
-      "startDate": null,
-      "endDate": "2026-12-02",
-      "registrationDeadline": "2026-12-02",
-      "prizePool": "$ 0",
-      "registrationUrl": "https://305veteransnov2026.devpost.com/",
-      "isLive": true,
-      "tags": [
-        "Beginner Friendly",
-        "Cybersecurity",
-        "Education",
-        "Hackathon",
-        "Online"
-      ],
-      "skills": [],
-      "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:12.819Z"
+      "verifiedAt": "2026-11-08T21:59:03.463Z"
     },
     {
       "id": "dp-31794",
       "title": "Code for Change",
       "organizer": "HackathonForEveryone",
-      "description": "Open hackathon on Devpost focused on Beginner Friendly, Open Ended, Social Good. Submissions close in 24 days left.",
+      "description": "Open hackathon on Devpost focused on Beginner Friendly, Open Ended, Social Good. Submissions close in 23 days left.",
       "mode": "ONLINE",
       "location": "Online",
       "startDate": null,
-      "endDate": "2026-12-02",
-      "registrationDeadline": "2026-12-02",
+      "endDate": "2026-12-01",
+      "registrationDeadline": "2026-12-01",
       "prizePool": "$ 200",
       "registrationUrl": "https://code-for-change-global.devpost.com/",
       "isLive": true,
@@ -1806,7 +1700,7 @@
       ],
       "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:12.641Z"
+      "verifiedAt": "2026-11-08T21:59:03.261Z"
     },
     {
       "id": "dp-31960",
@@ -1832,7 +1726,33 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:12.260Z"
+      "verifiedAt": "2026-11-08T21:59:03.134Z"
+    },
+    {
+      "id": "dp-32009",
+      "title": "AI for Medicine: A Global Student Hackathon on the Future of Care",
+      "organizer": "Open Health AI Collective",
+      "description": "Open hackathon on Devpost focused on Beginner Friendly, Health, Machine Learning/AI. Submissions close in 26 days left.",
+      "mode": "ONLINE",
+      "location": "Online",
+      "startDate": null,
+      "endDate": "2026-12-04",
+      "registrationDeadline": "2026-12-04",
+      "prizePool": "$ 0",
+      "registrationUrl": "https://ai-for-medicine.devpost.com/",
+      "isLive": true,
+      "tags": [
+        "Beginner Friendly",
+        "Health",
+        "Machine Learning/AI",
+        "Hackathon",
+        "Online"
+      ],
+      "skills": [
+        "Machine Learning"
+      ],
+      "sourceName": "Devpost",
+      "verifiedAt": "2026-11-08T21:59:03.385Z"
     },
     {
       "id": "dp-31667",
@@ -1858,33 +1778,7 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:10.630Z"
-    },
-    {
-      "id": "dp-32009",
-      "title": "AI for Medicine: A Global Student Hackathon on the Future of Care",
-      "organizer": "Open Health AI Collective",
-      "description": "Open hackathon on Devpost focused on Beginner Friendly, Health, Machine Learning/AI. Submissions close in 27 days left.",
-      "mode": "ONLINE",
-      "location": "Online",
-      "startDate": null,
-      "endDate": "2026-12-05",
-      "registrationDeadline": "2026-12-05",
-      "prizePool": "$ 0",
-      "registrationUrl": "https://ai-for-medicine.devpost.com/",
-      "isLive": true,
-      "tags": [
-        "Beginner Friendly",
-        "Health",
-        "Machine Learning/AI",
-        "Hackathon",
-        "Online"
-      ],
-      "skills": [
-        "Machine Learning"
-      ],
-      "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:12.813Z"
+      "verifiedAt": "2026-11-08T21:59:02.027Z"
     },
     {
       "id": "dp-31972",
@@ -1910,7 +1804,7 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:12.382Z"
+      "verifiedAt": "2026-11-08T21:59:03.123Z"
     },
     {
       "id": "dp-31480",
@@ -1936,7 +1830,7 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.536Z"
+      "verifiedAt": "2026-11-08T21:59:02.647Z"
     },
     {
       "id": "dp-31994",
@@ -1962,7 +1856,7 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:12.390Z"
+      "verifiedAt": "2026-11-08T21:59:03.136Z"
     },
     {
       "id": "dp-30789",
@@ -1988,7 +1882,7 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:10.990Z"
+      "verifiedAt": "2026-11-08T21:59:02.513Z"
     },
     {
       "id": "dp-31642",
@@ -2015,7 +1909,7 @@
         "Cloud Computing"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:10.996Z"
+      "verifiedAt": "2026-11-08T21:59:02.383Z"
     },
     {
       "id": "dp-31572",
@@ -2041,7 +1935,7 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:10.578Z"
+      "verifiedAt": "2026-11-08T21:59:02.033Z"
     },
     {
       "id": "dp-31083",
@@ -2067,13 +1961,13 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:10.794Z"
+      "verifiedAt": "2026-11-08T21:59:02.073Z"
     },
     {
       "id": "df-c84b90d65eff4ae083366fc1cc549e81",
       "title": "hackodisha-6.0",
       "organizer": "Devfolio community",
-      "description": "Online hackathon listed on Devfolio. 1,819 students have registered. Registration closes 2026-12-10.",
+      "description": "Online hackathon listed on Devfolio. 1,823 students have registered. Registration closes 2026-12-10.",
       "mode": "ONLINE",
       "location": "Online",
       "startDate": "2026-12-11",
@@ -2088,7 +1982,7 @@
       ],
       "skills": [],
       "sourceName": "Devfolio",
-      "verifiedAt": "2026-11-08T13:16:13.488Z"
+      "verifiedAt": "2026-11-08T21:59:03.995Z"
     },
     {
       "id": "df-409173af22ac40d5aecb47ea06886ab3",
@@ -2109,13 +2003,13 @@
       ],
       "skills": [],
       "sourceName": "Devfolio",
-      "verifiedAt": "2026-11-08T13:16:14.427Z"
+      "verifiedAt": "2026-11-08T21:59:05.093Z"
     },
     {
       "id": "df-6ab81312cb504b4195e46290f44e7191",
       "title": "Hacksprint 3.0",
       "organizer": "Devfolio community",
-      "description": "In-person hackathon listed on Devfolio. 21 students have registered. Registration closes 2026-12-28.",
+      "description": "In-person hackathon listed on Devfolio. 24 students have registered. Registration closes 2026-12-28.",
       "mode": "OFFLINE",
       "location": "India",
       "startDate": "2027-01-29",
@@ -2130,13 +2024,13 @@
       ],
       "skills": [],
       "sourceName": "Devfolio",
-      "verifiedAt": "2026-11-08T13:16:13.611Z"
+      "verifiedAt": "2026-11-08T21:59:03.990Z"
     },
     {
       "id": "df-feaf6d51a5ba4774acf1ccaaa1d4b789",
       "title": "Innerve 11.0",
       "organizer": "Devfolio community",
-      "description": "In-person hackathon listed on Devfolio. 37 students have registered. Registration closes 2026-12-30.",
+      "description": "In-person hackathon listed on Devfolio. 40 students have registered. Registration closes 2026-12-30.",
       "mode": "OFFLINE",
       "location": "India",
       "startDate": "2027-01-29",
@@ -2151,13 +2045,13 @@
       ],
       "skills": [],
       "sourceName": "Devfolio",
-      "verifiedAt": "2026-11-08T13:16:13.897Z"
+      "verifiedAt": "2026-11-08T21:59:04.114Z"
     },
     {
       "id": "df-c163f2c5e7bb4c7bb7acbdb3c572bfa3",
       "title": "HACK WITH GDG S4",
       "organizer": "Devfolio community",
-      "description": "In-person hackathon listed on Devfolio. 974 students have registered. Registration closes 2026-12-31.",
+      "description": "In-person hackathon listed on Devfolio. 975 students have registered. Registration closes 2026-12-31.",
       "mode": "OFFLINE",
       "location": "India",
       "startDate": "2027-01-22",
@@ -2172,13 +2066,13 @@
       ],
       "skills": [],
       "sourceName": "Devfolio",
-      "verifiedAt": "2026-11-08T13:16:13.557Z"
+      "verifiedAt": "2026-11-08T21:59:04.031Z"
     },
     {
       "id": "df-1c56ad13b8b0467ca2c3772566a0fdd2",
       "title": "HACK 6.0",
       "organizer": "Devfolio community",
-      "description": "In-person hackathon listed on Devfolio. 196 students have registered. Registration closes 2027-01-03.",
+      "description": "In-person hackathon listed on Devfolio. 198 students have registered. Registration closes 2027-01-03.",
       "mode": "OFFLINE",
       "location": "India",
       "startDate": "2027-01-22",
@@ -2193,7 +2087,7 @@
       ],
       "skills": [],
       "sourceName": "Devfolio",
-      "verifiedAt": "2026-11-08T13:16:14.312Z"
+      "verifiedAt": "2026-11-08T21:59:04.499Z"
     },
     {
       "id": "dp-30740",
@@ -2219,7 +2113,7 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.057Z"
+      "verifiedAt": "2026-11-08T21:59:02.301Z"
     },
     {
       "id": "dp-31787",
@@ -2245,7 +2139,7 @@
         "Machine Learning"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.898Z"
+      "verifiedAt": "2026-11-08T21:59:02.842Z"
     },
     {
       "id": "dp-32017",
@@ -2269,7 +2163,7 @@
       ],
       "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:13.187Z"
+      "verifiedAt": "2026-11-08T21:59:03.509Z"
     },
     {
       "id": "dp-31108",
@@ -2293,7 +2187,7 @@
       ],
       "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.464Z"
+      "verifiedAt": "2026-11-08T21:59:02.592Z"
     },
     {
       "id": "dp-28603",
@@ -2315,7 +2209,7 @@
       ],
       "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:12.787Z"
+      "verifiedAt": "2026-11-08T21:59:03.435Z"
     },
     {
       "id": "dp-30764",
@@ -2342,7 +2236,7 @@
         "DevOps"
       ],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:11.058Z"
+      "verifiedAt": "2026-11-08T21:59:02.381Z"
     },
     {
       "id": "dp-31873",
@@ -2366,7 +2260,7 @@
       ],
       "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:13.068Z"
+      "verifiedAt": "2026-11-08T21:59:03.447Z"
     },
     {
       "id": "dp-31974",
@@ -2390,7 +2284,7 @@
       ],
       "skills": [],
       "sourceName": "Devpost",
-      "verifiedAt": "2026-11-08T13:16:13.178Z"
+      "verifiedAt": "2026-11-08T21:59:03.702Z"
     }
   ]
 }
