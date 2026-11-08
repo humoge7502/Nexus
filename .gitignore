@@ -84,3 +84,6 @@ brag-output/footage/
 .shots/
 .cache-coil/
 .cache-coil-base/
+
+# wrangler local dev state
+sagitta-ai/.wrangler/
