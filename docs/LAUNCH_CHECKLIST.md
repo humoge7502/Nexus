@@ -64,17 +64,17 @@ longer requires it**: Step 3-alt below deploys the same AI contracts to a free
 Cloudflare Worker. Blaze remains the upgrade path for server-side quota and
 Firestore triggers; the payment method can only be added by the account owner.
 
-## Step 3 — Deploy the AI backend
+## Step 3 — Deploy the AI backend — ✅ DONE (2026-11-08, Blaze-free)
 
-**Step 3-alt, preferred at launch — Blaze-free Cloudflare Worker** (`sagitta-ai/`, see its README):
-~3 minutes, free, no card. `npx wrangler login` → `npx wrangler secret put OPENROUTER_API_KEY`
-→ `npx wrangler secret put FIREBASE_PROJECT_ID` (enter `nexus-app-6acc7`) → `npx wrangler deploy`,
-then set `AI_PROXY_URL=https://sagitta-ai.<subdomain>.workers.dev/proxyAI` in `local.properties`
-and rebuild the AAB. The app routes `proxyAI`, `streamAI`, `deepResearchFn` and `leetcodeStats`
-through the Worker. Free-tier reality: OpenRouter caps free models at 50 requests/day per
-account (<$10 credits); the app's `AIRateLimiter` (10/day per device) sits under that.
+**Deployed via Step 3-alt:** `https://sagitta-ai.sagitta-ai.workers.dev` (Worker
+`sagitta-ai`, account `afcc1045782254ec751ae5e68bc69be8`, subdomain `sagitta-ai`,
+secrets `OPENROUTER_API_KEY` + `FIREBASE_PROJECT_ID` set, email-verified account).
+E2E-verified: Firebase ID-token auth, `/proxyAI` real answers, `/streamAI` SSE
+passthrough, okhttp User-Agent accepted. `AI_PROXY_URL` is set in local.properties
+and baked into the release AAB. Smoke-test account: `sagitta-smoke-test@nexusapp.in`
+(password in the Cloudflare account file on this machine).
 
-**Firebase path (needs Blaze):**
+**Firebase path (needs Blaze, kept as the upgrade path):**
 
 ```bash
 cd backend
