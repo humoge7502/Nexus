@@ -319,7 +319,13 @@ async function callOpenRouter(
         "HTTP-Referer": "https://nexusapp.in",
         "X-Title": "Sagitta",
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        // The default model is a reasoning model: its hidden reasoning would
+        // eat the token budget and delay/dilute the visible answer, so it is
+        // excluded at the OpenRouter level for every call.
+        reasoning: { exclude: true },
+        ...body,
+      }),
       signal: controller.signal,
     });
   } finally {
@@ -439,7 +445,10 @@ function followUpCount(depth: string): number {
 }
 
 function parseJsonBlock<T>(text: string, fallback: T): T {
-  const match = text.match(/\{[\s\S]*\}/);
+  // Reasoning models sometimes wrap JSON in markdown fences; strip them and
+  // take the outermost brace block before parsing.
+  const stripped = text.replace(/```(?:json)?/gi, "");
+  const match = stripped.match(/\{[\s\S]*\}/);
   if (!match) return fallback;
   try {
     return JSON.parse(match[0]) as T;
@@ -464,8 +473,11 @@ async function callModel(
     body: JSON.stringify({
       model: DEFAULT_MODEL,
       messages,
-      max_tokens: Math.min(maxTokens, 1024),
+      // Full clamp headroom: reasoning models spend budget before the visible
+      // answer, so a smaller cap risks truncating the JSON mid-object.
+      max_tokens: 1024,
       temperature: 0.4,
+      reasoning: { exclude: true },
     }),
   });
   if (!upstream.ok) {
