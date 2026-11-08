@@ -1,4 +1,6 @@
-# NEXUS — Your Career. Engineered.
+# Sagitta — Your Career. Engineered.
+
+*Sagitta is the product name; the repository, packages and code identifiers keep their historical `Nexus` name.*
 
 <p align="center">
   <img src="https://img.shields.io/badge/Kotlin-2.1.21-purple?logo=kotlin" />
@@ -10,7 +12,7 @@
   <img src="https://img.shields.io/badge/minSdk-26-brightgreen" />
 </p>
 
-**NEXUS** is a production-grade Android career platform for CSE students. It
+**Sagitta** is a production-grade Android career platform for CSE students. It
 brings internship discovery, certification tracking, DSA practice, applications,
 interview intelligence and an on-device placement-readiness model into one
 premium, Material You experience — online or offline.
@@ -34,7 +36,7 @@ a real ART baseline profile shipped in the APK.
   an interview log.
 
 ### AI
-- **NEXUS AI coach** — quota-controlled Firebase proxy; replies stream over an
+- **Sagitta AI coach** — quota-controlled Firebase proxy; replies stream over an
   authenticated SSE bridge (`streamAI`) so tokens render as they arrive. The
   upstream provider key never ships in the app.
 - **Deep Research** — agent-search-pattern research flow with citations.
