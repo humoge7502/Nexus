@@ -242,7 +242,7 @@ class AIStreamClient @Inject constructor(
     }
 
     companion object {
-        const val DEFAULT_MODEL = "openai/gpt-4o-mini"
+        const val DEFAULT_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free"
         const val DEFAULT_MAX_TOKENS = 1024
         const val PROXY_FUNCTION = "proxyAI"
         const val STREAM_FUNCTION = "streamAI"

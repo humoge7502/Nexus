@@ -1,0 +1,10 @@
+name = "sagitta-ai"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# Secrets (set with `npx wrangler secret put <NAME>`):
+#   OPENROUTER_API_KEY   — the OpenRouter key; never committed, never shipped in the APK
+#   FIREBASE_PROJECT_ID  — "nexus-app-6acc7"; audience of accepted Firebase ID tokens
+#
+# The app points at this Worker via AI_PROXY_URL in local.properties, ending in
+# "/proxyAI" (see docs/LAUNCH_CHECKLIST.md, Step 3-alt).

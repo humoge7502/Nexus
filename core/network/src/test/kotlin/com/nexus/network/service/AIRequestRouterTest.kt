@@ -5,6 +5,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.android.gms.tasks.Task
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
+import okhttp3.OkHttpClient
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -24,7 +25,7 @@ class AIRequestRouterTest {
     firebaseAuth = mock(FirebaseAuth::class.java)
     firebaseUser = mock(FirebaseUser::class.java)
     functionsService = mock(FirebaseFunctionsAIService::class.java)
-    router = AIRequestRouter(firebaseAuth, functionsService)
+    router = AIRequestRouter(firebaseAuth, functionsService, OkHttpClient())
   }
 
   @Test

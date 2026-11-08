@@ -84,7 +84,7 @@ class AIStreamClientTest {
         assertEquals("text/event-stream", recorded.getHeader("Accept"))
         val body = recorded.body.readUtf8()
         assertTrue(body.contains("\"messages\""))
-        assertTrue(body.contains("\"model\":\"openai/gpt-4o-mini\""))
+        assertTrue(body.contains("\"model\":\"nvidia/nemotron-3-ultra-550b-a55b:free\""))
         assertTrue(body.contains("\"max_tokens\":1024"))
         assertTrue(body.contains("Hi"))
     }

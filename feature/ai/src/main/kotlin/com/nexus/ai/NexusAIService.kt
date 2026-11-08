@@ -90,7 +90,7 @@ class NexusAIService @Inject constructor(
 
         return flow {
         val jsonBody = JSONObject().apply {
-            put("model", "openai/gpt-4o-mini")
+            put("model", "nvidia/nemotron-3-ultra-550b-a55b:free")
             put("messages", JSONArray().apply {
                 messages.forEach { m ->
                     put(JSONObject().apply { put("role", m.role); put("content", m.content) })

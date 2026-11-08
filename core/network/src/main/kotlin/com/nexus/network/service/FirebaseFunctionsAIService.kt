@@ -2,7 +2,16 @@ package com.nexus.network.service
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.FirebaseFunctions
+import com.nexus.network.BuildConfig
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
+import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -10,6 +19,7 @@ import javax.inject.Singleton
 class FirebaseFunctionsAIService @Inject constructor(
     private val functions: FirebaseFunctions,
     private val firebaseAuth: FirebaseAuth,
+    private val okHttpClient: OkHttpClient,
 ) {
     // Timeout is configured server-side in Firebase Console (default 60s).
     // All public methods use runCatching to safely surface network errors,
@@ -120,6 +130,10 @@ class FirebaseFunctionsAIService @Inject constructor(
         question: String,
         depth: String = "standard",
     ): Result<ResearchResult> = runCatching {
+        val proxyBase = proxyEndpointBase()
+        if (proxyBase != null) {
+            return@runCatching deepResearchHttp(question, depth, proxyBase)
+        }
         val uid = firebaseAuth.currentUser?.uid
             ?: throw RequiresSignInException("Sign in to use Deep Research")
         val payload = mapOf("question" to question, "depth" to depth)
@@ -144,6 +158,76 @@ class FirebaseFunctionsAIService @Inject constructor(
             followUps = (data["followUps"] as? List<Any?>)?.map { str(it) } ?: emptyList(),
             usedLiveSearch = data["usedLiveSearch"] == true,
         )
+    }
+
+    /**
+     * Raw-HTTP proxy base derived from AI_PROXY_URL (which ends in "/proxyAI"),
+     * or null when unset — mirroring AIStreamClient.streamUrl()'s convention.
+     */
+    private fun proxyEndpointBase(): String? {
+        val configured = BuildConfig.AI_PROXY_URL.trim().trimEnd('/')
+        if (configured.isBlank()) return null
+        return if (configured.endsWith("/proxyAI")) {
+            configured.removeSuffix("/proxyAI")
+        } else {
+            configured
+        }
+    }
+
+    private suspend fun deepResearchHttp(
+        question: String,
+        depth: String,
+        base: String,
+    ): ResearchResult = withContext(Dispatchers.IO) {
+        val token = firebaseAuth.currentUser?.getIdToken(false)?.await()?.token
+            ?: throw RequiresSignInException("Sign in to use Deep Research")
+        val payload = JSONObject().apply {
+            put("question", question)
+            put("depth", depth)
+        }
+        val request = Request.Builder()
+            .url("$base/deepResearchFn")
+            .addHeader("Authorization", "Bearer $token")
+            .post(payload.toString().toRequestBody("application/json; charset=utf-8".toMediaType()))
+            .build()
+        okHttpClient.newCall(request).execute().use { response ->
+            val bodyText = response.body?.string().orEmpty()
+            if (!response.isSuccessful) {
+                val serverMessage = runCatching {
+                    JSONObject(bodyText).getJSONObject("error").optString("message")
+                }.getOrNull().orEmpty()
+                if (response.code == 401) {
+                    throw RequiresSignInException(serverMessage.ifBlank { "Sign in to use Deep Research" })
+                }
+                throw IllegalStateException(serverMessage.ifBlank { "Research failed. Try again." })
+            }
+            val data = JSONObject(bodyText)
+            fun str(v: Any?): String = v?.toString() ?: ""
+            val sources = mutableListOf<ResearchSource>()
+            val sourcesArray = data.optJSONArray("sources")
+            for (i in 0 until (sourcesArray?.length() ?: 0)) {
+                val obj = sourcesArray?.optJSONObject(i) ?: JSONObject()
+                sources.add(
+                    ResearchSource(
+                        title = str(obj.opt("title")),
+                        url = obj.optString("url", "").ifBlank { null },
+                        snippet = obj.optString("snippet", "").ifBlank { null },
+                    )
+                )
+            }
+            val followUps = mutableListOf<String>()
+            val followUpsArray = data.optJSONArray("followUps")
+            for (i in 0 until (followUpsArray?.length() ?: 0)) {
+                followUps.add(str(followUpsArray?.opt(i)))
+            }
+            ResearchResult(
+                question = str(data.opt("question")),
+                answer = str(data.opt("answer")),
+                sources = sources,
+                followUps = followUps,
+                usedLiveSearch = data.optBoolean("usedLiveSearch", false),
+            )
+        }
     }
 
 }

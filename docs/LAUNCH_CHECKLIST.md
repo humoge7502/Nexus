@@ -56,21 +56,34 @@ require the account owner's money and identity; no tooling can substitute for th
 2. Keys → Create Key → copy it.
 3. Keep it handy for Step 3. **Never commit it.**
 
-## Step 2 — Firebase Blaze plan (payment method required)
+## Step 2 — Firebase Blaze plan (payment method required — now optional for launch)
 
-1. <https://console.firebase.google.com/project/nexus-app-6acc7/usage/details>
-2. Upgrade to Blaze (Spark → Blaze). A payment method on the account is required.
-3. Blaze itself charges only for usage beyond the free tier; the app's AI quota
-   (10 answers/day on the free tier, `AIRateLimiter.FREE_DAILY_LIMIT`) keeps costs
-   near zero at launch.
+Blaze is only needed for the Firebase Cloud Functions path and its stronger
+per-user Firestore quota (40 req/day + `ai_proxy_logs`). **The AI coach no
+longer requires it**: Step 3-alt below deploys the same AI contracts to a free
+Cloudflare Worker. Blaze remains the upgrade path for server-side quota and
+Firestore triggers; the payment method can only be added by the account owner.
 
-## Step 3 — Deploy the AI backend (can be run for you after Step 2)
+## Step 3 — Deploy the AI backend
+
+**Step 3-alt, preferred at launch — Blaze-free Cloudflare Worker** (`sagitta-ai/`, see its README):
+~3 minutes, free, no card. `npx wrangler login` → `npx wrangler secret put OPENROUTER_API_KEY`
+→ `npx wrangler secret put FIREBASE_PROJECT_ID` (enter `nexus-app-6acc7`) → `npx wrangler deploy`,
+then set `AI_PROXY_URL=https://sagitta-ai.<subdomain>.workers.dev/proxyAI` in `local.properties`
+and rebuild the AAB. The app routes `proxyAI`, `streamAI`, `deepResearchFn` and `leetcodeStats`
+through the Worker. Free-tier reality: OpenRouter caps free models at 50 requests/day per
+account (<$10 credits); the app's `AIRateLimiter` (10/day per device) sits under that.
+
+**Firebase path (needs Blaze):**
 
 ```bash
 cd backend
 firebase functions:secrets:set OPENROUTER_API_KEY   # paste the Step-1 key
 firebase deploy --only functions
 ```
+
+Note: the OpenRouter secret was never actually set — Secret Manager access itself
+requires Blaze, so `functions:secrets:set` can only run after Step 2.
 
 ## Step 4 — Play Console (USD 25 + identity verification)
 
@@ -118,7 +131,7 @@ here stops matching the code, fix the code or this section, not the form.
 | Photos / audio / video, location, contacts, device identifiers | No | nothing collects these |
 | Is data encrypted in transit? | Yes | TLS to Firebase and to `SAGITTA_FEED_URL` |
 | Can users request data deletion? | Yes | in-app account deletion clears Firestore rows and local stores |
-| Is data shared with third parties? | Yes, for two purposes only | (1) AI prompts relayed through our own Cloud Function to a model provider under a no-training agreement; (2) Firebase Analytics events to Google |
+| Is data shared with third parties? | Yes, for two purposes only | (1) AI prompts relayed through our own backend (Cloudflare Worker or Firebase Function) to a model provider — free-tier providers may retain prompts, exactly as the published policy and in-app disclosure state; (2) Firebase Analytics events to Google |
 | Advertisements | None | no ad SDK in the dependency graph |
 | Other third-party sharing or selling | No | no analytics/attribution SDKs beyond Firebase |
 | Is this app for children? | No — target audience 13+ | Play target-audience declaration |
@@ -131,8 +144,8 @@ the privacy policy URL above is the one Play reviewers will open.
 The first screen a student sees (`AuthPrivacyNotice` in `feature/auth`) states, above
 the buttons that collect anything, that saved listings, applications and progress stay
 on the device, that signing in backs them up to the student's own account, that AI
-questions are relayed to a provider that is not allowed to train on them, and that app
-usage is logged; directly under it is the "By continuing, you agree to our / Privacy
+questions are relayed through our own server to a model provider that may retain
+free-tier prompts, and that app usage is logged; directly under it is the "By continuing, you agree to our / Privacy
 Policy" link to the URL above. The acknowledgement is the continue action itself —
 there is no separate checkbox. That is normally accepted, but if a Play reviewer asks
 for an explicit tick, add one rather than arguing the form.
