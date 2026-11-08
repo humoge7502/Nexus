@@ -4,6 +4,23 @@ Everything buildable/configurable has been done and verified. What follows is th
 exact remaining path to the Play Store. Steps 1–4 are account/payment actions that
 require the account owner's money and identity; no tooling can substitute for them.
 
+## Play Store–independent distribution (LIVE since 2026-11-08)
+
+Users can install and fully use Sagitta **without the Play Store**:
+
+- Release page: <https://github.com/humoge7502/Nexus/releases/tag/v1.0.0>
+- Always-latest APK: <https://github.com/humoge7502/Nexus/releases/latest/download/app-release.apk>
+- User-facing download + install page (GitHub Pages):
+  <https://humoge7502.github.io/Nexus/download.html>
+- The release APK is the same build as the store AAB (upload-key signed,
+  `AI_PROXY_URL` baked in, AI backend live). To publish an update: bump
+  `versionCode`/`versionName`, rebuild, `gh release create vX.Y.Z …app-release.apk`
+  — the "latest" URL then serves the new build automatically.
+- Play-migration note: Play will re-sign releases with its App Signing key, so
+  existing sideload users will uninstall/reinstall once when switching to the
+  store build. Say so on the first store release notes.
+
+
 ## Done (no action needed)
 
 - Signed release AAB: `app/build/outputs/bundle/release/app-release.aab`,
