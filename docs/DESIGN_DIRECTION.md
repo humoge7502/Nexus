@@ -125,6 +125,23 @@ under `LocalReducedMotion`).
 - **Progress wipes, never spins** where possible: MomentumChart
   progressive wipe, CalibratedRule tick fill; skeletons shimmer
   (`LoadingState`) with a static reduced-motion fallback.
+- **Commits are felt, not simulated** (added 2026-11-08, ported from the
+  animate-ui loading-then-saved pattern): `NexusButton(settled, settledText)`
+  speaks the three phases of a real async — press, spinner, check — with the
+  old state exiting quicker than the new one lands (90/220 ms). `settled`
+  must be driven by the actual operation's result; a timer is a fake.
+- **Arrival can be drafted** (added 2026-11-08, ported from GSAP DrawSVG):
+  `effect/PathInk.kt` — `inkedPath` traces a stroke along a path in step with
+  a reveal window; `InstrumentPlate(reveal = …)` inks its hairline frame and
+  stamps the four registration brackets in reading order, settling
+  pixel-identical to the standing plate. The host lifts one `revealClock` and
+  hands the same value to the content (`CareerProgressionReveal(clock = …)`) —
+  the one-clock law extends to frames.
+- **A state change is an event, not a blink** (added 2026-11-08, ported from
+  motion-primitives Text Morph): mono readouts morph on change
+  (`DeadlineIndicator`: ROLLING → CLOSES TODAY → CLOSED) — slide ±half with
+  the exit quicker than the entrance; tabular figures keep the column steady.
+  Data-triggered only; prose never morphs.
 - No infinite animation exists outside designsystem, and every infinite
   one gates on reduced motion.
 

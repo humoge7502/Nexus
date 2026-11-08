@@ -282,7 +282,10 @@ private fun NavStation(
     ) {
         Icon(
             imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
-            contentDescription = stringResource(item.labelRes),
+            // The label below is always visible and merges into this tab's
+            // semantics, so the glyph stays decorative — a contentDescription
+            // here would make TalkBack announce the destination twice.
+            contentDescription = null,
             tint = tint,
             modifier = Modifier
                 .size(21.dp)

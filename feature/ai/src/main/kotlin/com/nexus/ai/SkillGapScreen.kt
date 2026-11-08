@@ -123,10 +123,11 @@ fun SkillGapScreen(
             )
             Spacer(Modifier.height(16.dp))
             NexusButton(
-                text = stringResource(
-                    if (uiState.isLoading) R.string.ai_analyzing_button else R.string.ai_analyze_gap_button,
-                ),
+                text = stringResource(R.string.ai_analyze_gap_button),
                 onClick = { viewModel.analyze() },
+                loading = uiState.isLoading,
+                settled = uiState.analysis.isNotBlank() && !uiState.isLoading,
+                settledText = stringResource(R.string.ai_analysis_complete),
                 enabled = uiState.currentSkills.isNotBlank() &&
                     uiState.targetRole.isNotBlank() &&
                     !uiState.isLoading,

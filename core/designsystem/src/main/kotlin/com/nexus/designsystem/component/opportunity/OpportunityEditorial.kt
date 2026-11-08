@@ -1,5 +1,13 @@
 package com.nexus.designsystem.component.opportunity
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,9 +40,11 @@ import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.nexus.designsystem.component.innerLight
+import com.nexus.designsystem.theme.NexusAnimation
 import com.nexus.designsystem.theme.NexusShapes
 import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.motionMillis
 import com.nexus.designsystem.theme.nexus
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -186,6 +196,11 @@ fun FactRow(
  * "Rolling" keeps the neutral tone: an admissions process with no published
  * close date is not an urgent one, and colouring it amber would train the user
  * to ignore the amber.
+ *
+ * A change of state — ROLLING → CLOSES TODAY → CLOSED, or a day count dropping
+ * as the calendar moves — is an event, not a blink: the outgoing reading yields
+ * upward and the new one lands from below, with the exit quicker than the
+ * entrance. Tabular figures keep the column steady through the swap.
  */
 @Composable
 fun DeadlineIndicator(
@@ -202,6 +217,9 @@ fun DeadlineIndicator(
         else -> "CLOSES IN $days DAYS"
     }
     val color = if (isUrgent) MaterialTheme.nexus.attention else MaterialTheme.colorScheme.onSurfaceVariant
+    // Captured in composition so the morphs collapse to zero under reduced motion.
+    val enterMillis = motionMillis(NexusAnimation.Duration.standard)
+    val exitMillis = motionMillis(NexusAnimation.Duration.micro)
 
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         if (isUrgent) {
@@ -213,13 +231,29 @@ fun DeadlineIndicator(
             )
             Spacer(Modifier.width(NexusSpacing.xs))
         }
-        Text(
-            text = text,
-            style = NexusTypography.DataLabel,
-            color = color,
-        )
+        AnimatedContent(
+            targetState = text to isUrgent,
+            transitionSpec = {
+                (
+                    slideInVertically { it / 2 } + fadeIn(tween(enterMillis, easing = EmphasisIn))
+                        ) togetherWith (
+                        slideOutVertically { -it / 2 } + fadeOut(tween(exitMillis, easing = EmphasisOut))
+                        )
+            },
+            label = "deadlineMorph",
+        ) { (label, urgent) ->
+            Text(
+                text = label,
+                style = NexusTypography.DataLabel,
+                color = if (urgent) MaterialTheme.nexus.attention else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
+
+/** Easing pair for the readout morph: hard in, quick out. */
+private val EmphasisIn = CubicBezierEasing(0.16f, 1f, 0.3f, 1f)
+private val EmphasisOut = CubicBezierEasing(0.4f, 0f, 1f, 1f)
 
 /**
  * Skill overlap stated as counts, never as a percentage.

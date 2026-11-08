@@ -45,8 +45,11 @@ import com.nexus.designsystem.component.editorial.ProgressionReading
 import com.nexus.designsystem.component.intelligence.IntelligenceInsight
 import com.nexus.designsystem.effect.RevealOnLoad
 import com.nexus.designsystem.theme.NexusColors
+import com.nexus.designsystem.theme.NexusReveal
 import com.nexus.designsystem.theme.NexusSpacing
 import com.nexus.designsystem.theme.NexusTypography
+import com.nexus.designsystem.theme.revealClock
+import com.nexus.designsystem.theme.revealFraction
 import java.util.Locale
 
 internal data class RadarAxis(val label: String, val value: Float)
@@ -253,7 +256,14 @@ private fun ScoreLedger(
     percentile: Int?,
     readings: List<ProgressionReading>,
 ) {
-    InstrumentPlate(modifier = Modifier.fillMaxWidth()) {
+    // One clock for the whole ledger: the plate's frame is inked on and the
+    // score inside it sweeps on the same timeline, so the drawing and its
+    // contents arrive as one gesture.
+    val clock = revealClock()
+    InstrumentPlate(
+        modifier = Modifier.fillMaxWidth(),
+        reveal = revealFraction(clock, NexusReveal.Window.hero),
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -265,6 +275,7 @@ private fun ScoreLedger(
                 readings = readings,
                 weeklyChange = weeklyChange,
                 percentile = percentile,
+                clock = clock,
             )
             if (score == 0 && readings.isNotEmpty()) {
                 Spacer(Modifier.height(NexusSpacing.lg))

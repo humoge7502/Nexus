@@ -96,6 +96,7 @@
     <string name="ai_coach_reading_answer">Sagitta is reading your answer</string>
     <string name="ai_analyze_gap_button">Analyze gap</string>
     <string name="ai_analyzing_gap_loading">Comparing your skills against the role</string>
+    <string name="ai_analysis_complete">Analyzed</string>
     <string name="ai_generate_post_button">Generate post</string>
     <string name="ai_generate_roadmap_button">Generate roadmap</string>
     <string name="ai_roadmap_loading">Sagitta is laying out the phases</string>

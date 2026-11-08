@@ -23,9 +23,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.nexus.designsystem.effect.inkedBrackets
+import com.nexus.designsystem.effect.inkedPath
+import com.nexus.designsystem.effect.plateFramePath
 import com.nexus.designsystem.theme.LocalReducedMotion
 import com.nexus.designsystem.theme.NexusAnimation
 import com.nexus.designsystem.theme.NexusShapes
@@ -39,6 +44,14 @@ import com.nexus.designsystem.theme.nexus
  * Two brackets are lit in signal, two stay neutral, which is enough asymmetry to
  * read as machined rather than printed. Use it for a hero panel, an icon
  * housing, or any surface that should look bolted down.
+ *
+ * Pass [reveal] (a shared [revealClock] fraction, 0→1) and the plate arrives as
+ * a drawing is drafted: the hairline frame is inked on first, then the four
+ * brackets stamp in reading order, top-left and bottom-right speaking in signal.
+ * Null keeps the standing, always-present frame; under reduced motion a reveal
+ * clock is already 1, so the plate is simply complete on first frame.
+ * [frameRadius] must mirror the shape's corner radius so the inked frame sits
+ * exactly where the standing border would.
  */
 @Composable
 fun InstrumentPlate(
@@ -49,9 +62,15 @@ fun InstrumentPlate(
     accent: Color = MaterialTheme.nexus.signal,
     graticuleSpacing: Float = 26f,
     contentAlignment: Alignment = Alignment.TopStart,
+    reveal: Float? = null,
+    frameRadius: Dp = 18.dp,
     content: @Composable BoxScope.() -> Unit,
 ) {
     val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.035f)
+    // The reveal draws its own hairline edge in; the standing border must hold
+    // back until the pen has passed, or the frame would be drawn twice.
+    val staticBorder = reveal == null
+    val frameRadiusPx = with(LocalDensity.current) { frameRadius.toPx() }
 
     Box(
         modifier = modifier
@@ -70,27 +89,45 @@ fun InstrumentPlate(
                     x += step
                 }
             }
-            .border(1.dp, edgeColor.copy(alpha = 0.75f), shape)
+            .then(
+                if (staticBorder) {
+                    Modifier.border(1.dp, edgeColor.copy(alpha = 0.75f), shape)
+                } else {
+                    Modifier
+                },
+            )
             .drawWithContent {
                 drawContent()
-                val inset = 9.dp.toPx()
-                val len = 9.dp.toPx()
-                val stroke = 1.dp.toPx()
-                val w = size.width
-                val h = size.height
-                if (w > (inset + len) * 2 && h > (inset + len) * 2) {
-                    val lit = accent.copy(alpha = 0.7f)
-                    val idle = edgeColor
-                    drawLine(lit, Offset(inset, inset), Offset(inset + len, inset), stroke, StrokeCap.Round)
-                    drawLine(lit, Offset(inset, inset), Offset(inset, inset + len), stroke, StrokeCap.Round)
-                    drawLine(lit, Offset(w - inset, h - inset), Offset(w - inset - len, h - inset), stroke, StrokeCap.Round)
-                    drawLine(lit, Offset(w - inset, h - inset), Offset(w - inset, h - inset - len), stroke, StrokeCap.Round)
-                    drawLine(idle, Offset(w - inset, inset), Offset(w - inset - len, inset), stroke, StrokeCap.Round)
-                    drawLine(idle, Offset(w - inset, inset), Offset(w - inset, inset + len), stroke, StrokeCap.Round)
-                    drawLine(idle, Offset(inset, h - inset), Offset(inset + len, h - inset), stroke, StrokeCap.Round)
-                    drawLine(idle, Offset(inset, h - inset), Offset(inset, h - inset - len), stroke, StrokeCap.Round)
+                if (reveal == null) {
+                    // Standing registration marks, exactly as before.
+                    val inset = 9.dp.toPx()
+                    val len = 9.dp.toPx()
+                    val stroke = 1.dp.toPx()
+                    val w = size.width
+                    val h = size.height
+                    if (w > (inset + len) * 2 && h > (inset + len) * 2) {
+                        val lit = accent.copy(alpha = 0.7f)
+                        val idle = edgeColor
+                        drawLine(lit, Offset(inset, inset), Offset(inset + len, inset), stroke, StrokeCap.Round)
+                        drawLine(lit, Offset(inset, inset), Offset(inset, inset + len), stroke, StrokeCap.Round)
+                        drawLine(lit, Offset(w - inset, h - inset), Offset(w - inset - len, h - inset), stroke, StrokeCap.Round)
+                        drawLine(lit, Offset(w - inset, h - inset), Offset(w - inset, h - inset - len), stroke, StrokeCap.Round)
+                        drawLine(idle, Offset(w - inset, inset), Offset(w - inset - len, inset), stroke, StrokeCap.Round)
+                        drawLine(idle, Offset(w - inset, inset), Offset(w - inset, inset + len), stroke, StrokeCap.Round)
+                        drawLine(idle, Offset(inset, h - inset), Offset(inset + len, h - inset), stroke, StrokeCap.Round)
+                        drawLine(idle, Offset(inset, h - inset), Offset(inset, h - inset - len), stroke, StrokeCap.Round)
+                    }
                 }
-            },
+            }
+            .then(
+                if (reveal != null) {
+                    Modifier
+                        .inkedPath(reveal, accent.copy(alpha = 0.7f), plateFramePath(frameRadiusPx))
+                        .inkedBrackets(reveal, accent.copy(alpha = 0.7f), edgeColor)
+                } else {
+                    Modifier
+                },
+            ),
         contentAlignment = contentAlignment,
         content = content,
     )

@@ -64,6 +64,12 @@ private val scoreColumnLabel: String = "${Constants.APP_NAME} SCORE".uppercase(L
  *
  * Under reduced motion the clock is already settled on the first frame, so the
  * whole composition appears finished, with no sweep and no counting.
+ *
+ * Pass [clock] to share this composition's timeline with the surface that hosts
+ * it (a plate whose frame inks in beside the sweep): the host runs one
+ * [revealClock] and hands the same value here, keeping every drawn element on
+ * one clock — the law that keeps a gauge and its digits from disagreeing. Null
+ * runs the composition's own clock, as before.
  */
 @Composable
 fun CareerProgressionReveal(
@@ -75,8 +81,9 @@ fun CareerProgressionReveal(
     weeklyChange: Int? = null,
     percentile: Int? = null,
     gaugeSize: Int = 140,
+    clock: Float? = null,
 ) {
-    val clock = revealClock()
+    val sharedClock = clock ?: revealClock()
     // One flip, in the same frame the gauge starts its own sweep, so the digits and
     // the arc run the same curve from the same first frame.
     var settled by remember { mutableStateOf(false) }
@@ -84,8 +91,8 @@ fun CareerProgressionReveal(
 
     val fraction = if (maxScore <= 0) 0f else (score.toFloat() / maxScore).coerceIn(0f, 1f)
     val shown = (sweepValue(fraction, settled) * maxScore).roundToInt()
-    val heroEase = revealFraction(clock, NexusReveal.Window.hero)
-    val statementEase = revealFraction(clock, NexusReveal.Window.headline)
+    val heroEase = revealFraction(sharedClock, NexusReveal.Window.hero)
+    val statementEase = revealFraction(sharedClock, NexusReveal.Window.headline)
 
     Column(modifier = modifier.fillMaxWidth()) {
         if (headline.isNotBlank()) {
@@ -141,11 +148,11 @@ fun CareerProgressionReveal(
                 )
                 Spacer(Modifier.height(NexusSpacing.sm))
                 if (weeklyChange != null) {
-                    ChangeReading(change = weeklyChange, ease = revealFraction(clock, NexusReveal.Window.footnote))
+                    ChangeReading(change = weeklyChange, ease = revealFraction(sharedClock, NexusReveal.Window.footnote))
                 }
                 if (percentile != null) {
                     Spacer(Modifier.height(NexusSpacing.sm))
-                    RankReading(percentile = percentile, ease = revealFraction(clock, NexusReveal.Window.footnote, rank = 1))
+                    RankReading(percentile = percentile, ease = revealFraction(sharedClock, NexusReveal.Window.footnote, rank = 1))
                 }
             }
         }
@@ -159,7 +166,7 @@ fun CareerProgressionReveal(
                 readings.forEachIndexed { index, reading ->
                     ReadingRow(
                         reading = reading,
-                        ease = revealFraction(clock, NexusReveal.Window.readings, rank = index),
+                        ease = revealFraction(sharedClock, NexusReveal.Window.readings, rank = index),
                     )
                 }
             }

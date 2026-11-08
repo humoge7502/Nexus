@@ -1,7 +1,11 @@
 package com.nexus.designsystem.component
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -14,6 +18,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -23,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -42,13 +49,27 @@ import androidx.compose.ui.unit.dp
 import com.nexus.designsystem.theme.LocalReducedMotion
 import com.nexus.designsystem.theme.NexusAnimation
 import com.nexus.designsystem.theme.NexusShapes
+import com.nexus.designsystem.theme.motionMillis
 import com.nexus.designsystem.theme.onAccent
 import com.nexus.designsystem.theme.nexus
+
+/**
+ * Where a committed action stands. Derived from [NexusButton] inputs; the caller
+ * owns the truth (a real operation's lifecycle), the button only speaks it.
+ */
+private enum class CommitPhase { Idle, Running, Settled }
 
 /**
  * The primary action. A gradient button paints the gradient on its own surface
  * — no wrapper box, no double-click target — and takes its content colour from
  * the lightest stop so an acid-lime button gets ink text rather than white.
+ *
+ * A commit is spoken in three phases: [icon]/[text] until pressed, the spinner
+ * while `loading`, then — only when the caller reports [settled] with the real
+ * result in hand — the check. Settled is never simulated: it must be driven by
+ * the actual operation's outcome, never by a timer. The phase swap is a
+ * crossfade where the old state leaves faster than the new one arrives, so a
+ * save reads as an event, not a decoration.
  */
 @Composable
 fun NexusButton(
@@ -60,6 +81,10 @@ fun NexusButton(
     shape: Shape = NexusShapes.md,
     enabled: Boolean = true,
     loading: Boolean = false,
+    /** True once the real operation behind this button has succeeded. */
+    settled: Boolean = false,
+    /** The label the settled phase speaks; defaults to [text] with the check. */
+    settledText: String? = null,
     /** A primary action usually spans its row; pass false for an inline CTA
      *  that should hug its label instead of stretching. */
     expand: Boolean = true,
@@ -68,6 +93,22 @@ fun NexusButton(
     val isPressed by interactionSource.collectIsPressedAsState()
     val haptic = LocalHapticFeedback.current
     val reducedMotion = LocalReducedMotion.current
+
+    val phase = when {
+        loading -> CommitPhase.Running
+        settled -> CommitPhase.Settled
+        else -> CommitPhase.Idle
+    }
+    // Captured in composition so the phase swap collapses to zero under
+    // reduced motion — transitionSpec itself is not composable context.
+    val enterMillis = motionMillis(NexusAnimation.Duration.standard)
+    val exitMillis = motionMillis(NexusAnimation.Duration.micro)
+    // The settle lands as a felt confirmation, not only a drawn one.
+    LaunchedEffect(phase) {
+        if (phase == CommitPhase.Settled) {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        }
+    }
 
     val scale by animateFloatAsState(
         targetValue = if (isPressed && enabled && !loading) 0.97f else 1f,
@@ -118,29 +159,64 @@ fun NexusButton(
             )
         }
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            if (loading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(18.dp),
-                    strokeWidth = 2.dp,
-                    color = LocalContentColor.current,
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-            } else if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
+        AnimatedContent(
+            targetState = phase,
+            transitionSpec = {
+                // Exits quicker than entrances: the old state yields, the new
+                // one lands.
+                fadeIn(tween(enterMillis, easing = NexusAnimation.Easing.emphasizedDecelerate)) togetherWith
+                    fadeOut(tween(exitMillis, easing = NexusAnimation.Easing.exit))
+            },
+            label = "buttonCommit",
+        ) { target ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                when (target) {
+                    CommitPhase.Running -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                            color = LocalContentColor.current,
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = text,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                    CommitPhase.Settled -> {
+                        // The glyph is decorative; the settled label carries the
+                        // meaning for TalkBack, as everywhere else.
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = 8.dp),
+                        )
+                        Text(
+                            text = settledText ?: text,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                    CommitPhase.Idle -> {
+                        if (icon != null) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                modifier = Modifier.padding(end = 8.dp),
+                            )
+                        }
+                        Text(
+                            text = text,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                }
             }
-            Text(
-                text = text,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold
-            )
         }
     }
 }
