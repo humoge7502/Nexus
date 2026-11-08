@@ -87,6 +87,22 @@ firebase deploy --only functions
    is rejected after review.
 5. Content rating questionnaire, target audience (13+), release to production.
 
+## API-key restriction fingerprints (S-02, during internal testing — not day one)
+
+Compute done 2026-11-08 from `nexus-upload-key.jks` (alias `nexus-upload`):
+
+- **SHA-1:** `23:34:64:3A:BA:66:D0:20:13:C7:FD:00:D8:C3:56:FB:84:37:42:58`
+- **SHA-256:** `02:A7:C3:69:5F:1F:77:45:13:6B:69:95:59:9A:B4:48:8E:3B:88:4C:4C:B8:C1:5D:FC:4B:71:83:68:6C:EA:B9`
+
+**Do not apply Android restrictions on the Firebase API key before the first Play
+upload.** Play re-signs releases with the App Signing key, so a restriction list
+that omits that certificate breaks auth on store builds. Sequence: upload the
+AAB → copy the App Signing certificate SHA-1/SHA-256 from Play Console →
+Setup → App restrictions with the package `com.nexus.app` plus **all three**
+fingerprints (App Signing, this upload key, the debug key from
+`~/.android/debug.keystore`). Restricting early is the one move here that can
+take a working app offline.
+
 ## Play Data Safety — what to enter
 
 Derived from `docs/privacy-policy.html` and the code that actually runs. If a line
