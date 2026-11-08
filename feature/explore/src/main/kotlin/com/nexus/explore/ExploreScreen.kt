@@ -81,7 +81,8 @@ import com.nexus.domain.model.Hackathon
 import com.nexus.domain.model.Internship
 import com.nexus.domain.model.Price
 import com.nexus.domain.model.UiState
-import java.time.Duration
+import com.nexus.domain.model.VerificationPolicy
+import com.nexus.domain.model.VerificationState
 import java.time.Instant
 import java.time.LocalDate
 
@@ -421,8 +422,8 @@ private fun ExploreStatusBand(uiState: ExploreUiState) {
     if (!hasResults) return
 
     val freshest = uiState.freshestVerifiedAt
-    val ageHours = remember(freshest) {
-        freshest?.let { Duration.between(it, Instant.now()).toHours() }
+    val verification = remember(freshest) {
+        VerificationPolicy.stateOf(freshest, Instant.now())
     }
 
     val (label, detail, tone) = when {
@@ -431,19 +432,19 @@ private fun ExploreStatusBand(uiState: ExploreUiState) {
             "Showing the cached catalog. Refresh when you reconnect.",
             StatusTone.Fault,
         )
-        freshest == null -> Triple(
+        verification == VerificationState.UNVERIFIED -> Triple(
             "SOURCE CHECK",
             "Pipeline verification pending. Deadlines come from the source.",
             StatusTone.Neutral,
         )
-        ageHours != null && ageHours > SOURCE_CHECK_STALE_HOURS -> Triple(
+        verification == VerificationState.EXPIRED -> Triple(
             "SOURCE CHECK",
-            "Links last confirmed ${freshest.toString().take(10)}. Deadlines may have moved.",
+            "Links last confirmed ${freshest?.toString()?.take(10)}. Deadlines may have moved.",
             StatusTone.Fault,
         )
-        ageHours != null && ageHours > SOURCE_CHECK_QUIET_HOURS -> Triple(
+        verification == VerificationState.STALE -> Triple(
             "SOURCE CHECK",
-            "Links last confirmed ${freshest.toString().take(10)}.",
+            "Links last confirmed ${freshest?.toString()?.take(10)}.",
             StatusTone.Neutral,
         )
         else -> return
@@ -456,11 +457,6 @@ private fun ExploreStatusBand(uiState: ExploreUiState) {
         modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
     )
 }
-
-/** Freshness the band treats as current: no louder than silence. */
-private const val SOURCE_CHECK_QUIET_HOURS = 48L
-/** Past this age the band turns fault-toned: deadlines may have moved. */
-private const val SOURCE_CHECK_STALE_HOURS = 7L * 24L
 
 private fun LazyListScope.internshipCards(
     internships: List<Internship>,

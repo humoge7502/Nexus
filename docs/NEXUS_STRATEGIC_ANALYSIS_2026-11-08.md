@@ -10,7 +10,7 @@ The product is **closed-beta ready** and materially further along than its own d
 
 1. **Accessibility sweep (TalkBack + 200% font)** — the one P0-adjacent item that had never been run. Executed this session; findings below.
 2. **Console-gated security work** (App Check, Crashlytics enablement, API-key restrictions) — codeable parts are prepared; the rest is blocked on the Firebase/Play account owner.
-3. **The verification state machine** (UNVERIFIED → VERIFIED → STALE → EXPIRED) as a formal domain concept — the single highest-leverage open product item, because provenance *is* the differentiation.
+3. ~~**The verification state machine**~~ — **LANDED same day** as `VerificationState`/`VerificationPolicy` in `core/domain` (§3.4): the single highest-leverage open product item, because provenance *is* the differentiation.
 4. **Debt with measurable shape:** 28 lint baselines (not the 7 historically documented), 58 broad `catch (e: Exception)` sites, a stale detekt config with no gradle task attached.
 5. **Three new motion primitives landed this session** from the web-canon sweep (commit microinteraction, path-draw frame reveal, readout state-morph), wired to real surfaces under the one-clock law.
 
@@ -98,13 +98,13 @@ Severity/priority follow PR #26's convention. **Statuses were re-verified this s
 ### 3.3 AI surfaces
 Citation chips on AI answers are **Blaze-gated** (backend). Structured actions (create goal / save opportunity from AI) are codeable now behind explicit confirmation — recommended next AI increment.
 
-### 3.4 Verification state machine (the concrete approach)
+### 3.4 Verification state machine — **LANDED 2026-11-08**
 ```
 enum class VerificationState { UNVERIFIED, VERIFIED, STALE, EXPIRED, REPORTED }
 // domain fn: state(freshness: Duration, now, verifiedAt, reportedAt)
 // renderers map state → existing SignalTag tones (fresh = silence per direction §)
 ```
-Screens already render the bands; the domain function centralizes thresholds so tests can pin them (48 h / 7 d are currently duplicated on the client).
+Now implemented as `core/domain/model/VerificationState.kt`: the enum plus `VerificationPolicy.stateOf` (strict boundaries — exactly 48 h still reads VERIFIED, exactly 7 d still reads STALE, pinned by 8 unit tests including clock-skew tolerance). `ExploreStatusBand` and Home's day band read the policy; the duplicated `SOURCE_CHECK_*` constants are deleted. Home now also speaks the STALE neutral band it previously skipped (one vocabulary on every surface — the policy's whole point). `REPORTED` is reserved for the user-report flow; no producer writes it yet, stated in the KDoc.
 
 ### 3.5 Sweep the naming (L-01)
 One-pass inventory: README title says "NEXUS — Your Career. Engineered." while product copy says Sagitta. Decide the public name once, sweep docs/store copy; keep package names (already decided).
@@ -201,11 +201,11 @@ Unit → repository → integration (Firebase emulator) → migration (every Roo
 ## Appendix — the 10-item "top actionable now" list
 
 1. Push the 8 unpushed commits (user decision, 0 effort)
-2. Formal `VerificationState` in domain + tests (2–4 d)
+2. ~~Formal `VerificationState` in domain + tests~~ — **DONE**: `VerificationPolicy` + 8 tests; Explore + Home read it; duplicated thresholds deleted
 3. Sweep Nexus/Sagitta naming in docs/store copy (1 d)
 4. Firebase console: App Check staged → enforce, Crashlytics enable, key restrictions (user, 0.5 d)
 5. Calendar deadline reminders (3–5 d)
-6. Roll commit microinteraction to auth/onboarding/deletion buttons (0.5 d)
+6. ~~Roll commit microinteraction to auth/onboarding/deletion buttons~~ — **PARTIAL, dispositioned**: wired to the Roadmap + LinkedIn generators (results persist on screen — the phase is honest there). Auth dialog, onboarding finish and account deletion are **declined**: each navigates away on the same state that would light `settled`, so the phase would render zero visible frames — wiring it there would be decoration, and the component law forbids simulated settles.
 7. Q-02 error taxonomy + top-20 exception sites (2 d)
 8. Re-attach detekt as a real gradle task (0.5 d)
 9. Sparklines from real telemetry history (1–2 d)

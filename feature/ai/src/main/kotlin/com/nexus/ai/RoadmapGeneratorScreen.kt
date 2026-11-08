@@ -145,6 +145,9 @@ fun RoadmapGeneratorScreen(
                 ),
                 onClick = { viewModel.generate() },
                 enabled = uiState.targetRole.isNotBlank() && !uiState.isLoading,
+                // The roadmap stays on screen after generation, so the commit
+                // phase speaks the real result rather than ejecting with it.
+                settled = uiState.roadmap.isNotBlank() && !uiState.isLoading,
             )
             Spacer(Modifier.height(20.dp))
             RoadmapOutcome(uiState = uiState, onRetry = viewModel::generate, onGoPro = onGoPro)

@@ -140,6 +140,9 @@ fun LinkedInPostScreen(
                 ),
                 onClick = { viewModel.generate() },
                 enabled = uiState.achievement.isNotBlank() && !uiState.isLoading,
+                // The post stays on screen after generation, so the commit
+                // phase speaks the real result rather than ejecting with it.
+                settled = uiState.generatedPost.isNotBlank() && !uiState.isLoading,
             )
             if (uiState.generatedPost.isNotBlank()) {
                 Spacer(Modifier.height(16.dp))

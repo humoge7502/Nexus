@@ -41,6 +41,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nexus.designsystem.component.InstrumentGauge
 import com.nexus.domain.model.UserStats
+import com.nexus.domain.model.VerificationPolicy
+import com.nexus.domain.model.VerificationState
 import kotlin.math.roundToInt
 import com.nexus.designsystem.component.NexusIconButton
 import com.nexus.designsystem.component.NexusPullToRefresh
@@ -207,18 +209,21 @@ private fun HomeFeed(
                 val freshest = uiState.todayOpportunities
                     .mapNotNull { it.verifiedAt }
                     .maxOrNull()
-                val staleHours = freshest?.let {
-                    java.time.Duration.between(it, java.time.Instant.now()).toHours()
-                }
+                val verification = VerificationPolicy.stateOf(freshest, java.time.Instant.now())
                 // The band only speaks when the day's listings carry an aging
                 // source check — fresh verified links render no furniture.
-                if (staleHours != null && staleHours > SOURCE_CHECK_STALE_HOURS) {
-                    EditorialStatusBand(
-                        label = "SOURCE CHECK",
-                        detail = "Links last confirmed ${freshest.toString().take(10)}. Deadlines may have moved.",
-                        tone = StatusTone.Fault,
-                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
+                // Stale and expired mirror the Explore catalog band: one
+                // vocabulary, spoken the same way on every surface.
+                when (verification) {
+                    VerificationState.STALE -> SourceCheckBand(
+                        detail = "Links last confirmed ${freshest?.toString()?.take(10)}.",
+                        tone = StatusTone.Neutral,
                     )
+                    VerificationState.EXPIRED -> SourceCheckBand(
+                        detail = "Links last confirmed ${freshest?.toString()?.take(10)}. Deadlines may have moved.",
+                        tone = StatusTone.Fault,
+                    )
+                    else -> {}
                 }
                 when {
                     uiState.todayOpportunities.isNotEmpty() -> LazyRow(
@@ -587,5 +592,13 @@ private fun CareerReadinessCard(
     }
 }
 
-/** Past this age the day's listings get a fault-toned source-check band. */
-private const val SOURCE_CHECK_STALE_HOURS = 7L * 24L
+/** The day's source-check band: one vocabulary with the Explore catalog band. */
+@Composable
+private fun SourceCheckBand(detail: String, tone: StatusTone) {
+    EditorialStatusBand(
+        label = "SOURCE CHECK",
+        detail = detail,
+        tone = tone,
+        modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
+    )
+}
