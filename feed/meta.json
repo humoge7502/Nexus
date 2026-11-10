@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "generatedAt": "2026-11-10T01:29:10.262Z",
-  "durationMs": 30448,
+  "generatedAt": "2026-11-10T14:47:21.084Z",
+  "durationMs": 33905,
   "counts": {
-    "internships": 28,
-    "hackathons": 70,
-    "verifiedInternships": 31,
-    "verifiedHackathons": 70
+    "internships": 33,
+    "hackathons": 69,
+    "verifiedInternships": 38,
+    "verifiedHackathons": 69
   },
   "verification": {
     "enabled": true,
@@ -221,7 +221,7 @@
       "name": "Unstop",
       "ok": true,
       "status": 200,
-      "count": 10
+      "count": 18
     },
     {
       "name": "Devpost",
@@ -233,7 +233,7 @@
       "name": "Devfolio",
       "ok": true,
       "status": 200,
-      "count": 17
+      "count": 16
     },
     {
       "name": "Official programmes",
