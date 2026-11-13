@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "generatedAt": "2026-11-13T06:33:26.911Z",
-  "durationMs": 30174,
+  "generatedAt": "2026-11-13T19:37:12.491Z",
+  "durationMs": 36185,
   "counts": {
-    "internships": 32,
-    "hackathons": 76,
-    "verifiedInternships": 35,
-    "verifiedHackathons": 76
+    "internships": 30,
+    "hackathons": 77,
+    "verifiedInternships": 33,
+    "verifiedHackathons": 77
   },
   "verification": {
     "enabled": true,
@@ -17,7 +17,7 @@
       "name": "Stripe",
       "ok": true,
       "status": 200,
-      "count": 2
+      "count": 1
     },
     {
       "name": "Databricks",
@@ -221,13 +221,13 @@
       "name": "Unstop",
       "ok": true,
       "status": 200,
-      "count": 15
+      "count": 14
     },
     {
       "name": "Devpost",
       "ok": true,
       "status": 200,
-      "count": 57
+      "count": 58
     },
     {
       "name": "Devfolio",
