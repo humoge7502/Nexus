@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "generatedAt": "2026-11-14T22:18:05.721Z",
-  "durationMs": 31682,
+  "generatedAt": "2026-11-15T06:19:09.576Z",
+  "durationMs": 31713,
   "counts": {
     "internships": 28,
     "hackathons": 82,
@@ -221,7 +221,7 @@
       "name": "Unstop",
       "ok": true,
       "status": 200,
-      "count": 11
+      "count": 12
     },
     {
       "name": "Devpost",
