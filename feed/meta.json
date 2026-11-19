@@ -1,23 +1,23 @@
 {
   "version": 2,
-  "generatedAt": "2026-11-18T20:26:34.659Z",
-  "durationMs": 27403,
+  "generatedAt": "2026-11-19T07:17:06.851Z",
+  "durationMs": 47902,
   "counts": {
-    "internships": 27,
-    "hackathons": 75,
-    "verifiedInternships": 30,
-    "verifiedHackathons": 75
+    "internships": 31,
+    "hackathons": 74,
+    "verifiedInternships": 34,
+    "verifiedHackathons": 74
   },
   "verification": {
     "enabled": true,
-    "deadLinksDropped": 2
+    "deadLinksDropped": 3
   },
   "sources": [
     {
       "name": "Stripe",
       "ok": true,
       "status": 200,
-      "count": 1
+      "count": 2
     },
     {
       "name": "Databricks",
@@ -189,8 +189,8 @@
     },
     {
       "name": "Meesho",
-      "ok": true,
-      "status": 200,
+      "ok": false,
+      "status": 0,
       "count": 0
     },
     {
@@ -221,7 +221,7 @@
       "name": "Unstop",
       "ok": true,
       "status": 200,
-      "count": 10
+      "count": 13
     },
     {
       "name": "Devpost",
