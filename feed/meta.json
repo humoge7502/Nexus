@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "generatedAt": "2026-11-24T09:47:05.124Z",
-  "durationMs": 33375,
+  "generatedAt": "2026-11-24T22:21:16.046Z",
+  "durationMs": 32531,
   "counts": {
-    "internships": 36,
-    "hackathons": 79,
+    "internships": 35,
+    "hackathons": 76,
     "verifiedInternships": 39,
-    "verifiedHackathons": 79
+    "verifiedHackathons": 76
   },
   "verification": {
     "enabled": true,
@@ -185,7 +185,7 @@
       "name": "Paytm",
       "ok": true,
       "status": 200,
-      "count": 6
+      "count": 7
     },
     {
       "name": "Meesho",
@@ -221,13 +221,13 @@
       "name": "Unstop",
       "ok": true,
       "status": 200,
-      "count": 18
+      "count": 17
     },
     {
       "name": "Devpost",
       "ok": true,
       "status": 200,
-      "count": 59
+      "count": 56
     },
     {
       "name": "Devfolio",
