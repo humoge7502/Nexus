@@ -1,16 +1,16 @@
 {
   "version": 2,
-  "generatedAt": "2026-11-26T08:06:58.532Z",
-  "durationMs": 31172,
+  "generatedAt": "2026-11-26T21:26:26.153Z",
+  "durationMs": 28769,
   "counts": {
-    "internships": 32,
+    "internships": 30,
     "hackathons": 73,
-    "verifiedInternships": 37,
+    "verifiedInternships": 36,
     "verifiedHackathons": 73
   },
   "verification": {
     "enabled": true,
-    "deadLinksDropped": 2
+    "deadLinksDropped": 1
   },
   "sources": [
     {
@@ -161,7 +161,7 @@
       "name": "Groww",
       "ok": true,
       "status": 200,
-      "count": 0
+      "count": 1
     },
     {
       "name": "Slice",
@@ -185,7 +185,7 @@
       "name": "Paytm",
       "ok": true,
       "status": 200,
-      "count": 8
+      "count": 9
     },
     {
       "name": "Meesho",
@@ -221,7 +221,7 @@
       "name": "Unstop",
       "ok": true,
       "status": 200,
-      "count": 15
+      "count": 11
     },
     {
       "name": "Devpost",
